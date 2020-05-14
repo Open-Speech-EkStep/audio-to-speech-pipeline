@@ -3,7 +3,7 @@ import pytube
 import os
 from tqdm import tqdm
 
-class Download(object):
+class DownloadVideo(object):
     def __init__(self):
         pass
 
@@ -22,3 +22,8 @@ class Download(object):
 
         yt.streams.filter(only_audio=True)[0].download(output_path = output_path, filename=filename)
 
+
+
+if __name__ == "__main__":
+    dwn = DownloadVideo()
+    dwn.download_video('https://www.youtube.com/playlist?list=PL1D6nWQpbEZdtH4G1TZNrBVj1zBfTOhA7', './', '1')
