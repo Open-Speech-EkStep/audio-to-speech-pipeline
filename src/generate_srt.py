@@ -9,6 +9,10 @@ from tqdm import tqdm
 import datetime
 import pickle
 
+import os
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="credentials.json"
+
 class GenerateSRT(object):
     def __init__(self, language, sample_rate = 44100, audio_channel_count=1):
         if language == 'hi':
@@ -80,7 +84,12 @@ class GenerateSRT(object):
             "enable_word_time_offsets": True,
             "enable_automatic_punctuation":True
         }
-        audio = {"uri": input_file_path}
+
+        print(config)
+        print(input_file_path)
+        bucket_name = 'gs://ekstepspeechrecognition-dev/'+ '/'.join(input_file_path.split('/')[4:])
+        print(bucket_name)
+        audio = {"uri": bucket_name}
 
         operation = client.long_running_recognize(config, audio)
 

@@ -30,25 +30,27 @@ class DownloadVideo(object):
 
     def download_video(self, video_url, output_path, filename_prefix):
         
-        filename = self.generate_unique_filename(filename_prefix) + '.' + self.extension
+        name = self.generate_unique_filename(filename_prefix)
+        filename = name + '.' + self.extension
+
 
         try:
             yt = pytube.YouTube(video_url)
-            yt.streams.filter(only_audio=True)[0].download(output_path = output_path, filename = str(filename))
+            yt.streams.filter(only_audio=True)[0].download(output_path = output_path, filename = str(name))
             return output_path + '/' + filename
         except:
             print("Connection error at video ", video_url)
             return None
 
-    def generate_unique_filename(filename_prefix):
-        date_part = datetime.today().strftime('%d%m%Y_%H:%M:%S')
+    def generate_unique_filename(self, filename_prefix):
+        date_part = datetime.today().strftime('%d%m%Y_%H%M%S')
 
         if filename_prefix is None:
             file_name_for_saving = str(uuid.uuid4())
         else: 
             file_name_for_saving = filename_prefix
         
-        return date_part + file_name_for_saving
+        return date_part + '_' + file_name_for_saving
 
 
 
@@ -58,7 +60,7 @@ class DownloadVideo(object):
 
         output_file_paths = []
         for file in self.audio_path:
-            #print(file)
+            print(file)
             
             input_file_name = file
             
@@ -70,7 +72,7 @@ class DownloadVideo(object):
                 output_file_path = output_dir + '/' + output_file_name
 
 
-            command = f'ffmpeg -i {input_file_name} -ar 44100 -ac 1 -bits_per_raw_sample 16 {output_file_path}'
+            command = f"ffmpeg -i {input_file_name} -ar 44100 -ac 1 -bits_per_raw_sample 16 {output_file_path}"
             subprocess.call(command, shell=True)
 
             output_file_paths.append(output_file_path)
@@ -79,11 +81,13 @@ class DownloadVideo(object):
 
         
 
-    def fit(self, link, mode='video', output_dir_path, filename_prefix = None, convert_to_wav = True, output_wav_dir = None):
+    def fit(self, link,  output_dir_path, mode='video',filename_prefix = None, convert_to_wav = True, output_wav_dir = None):
         ## modes present video, playlist, videolist
 
         if mode == 'video':
             path = self.download_video(link, output_dir_path, filename_prefix)
+
+            print('path received is ', path)
             
             if convert_to_wav:
                 return self.convert_to_wav(output_dir= output_wav_dir, list_paths=[path])
