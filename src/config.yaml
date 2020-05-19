@@ -9,20 +9,20 @@ application:
 
 
 downloader: ## data loader
-  link: 'https://www.youtube.com/watch?v=OcJ6KTF7nmc&list=PLmXe0lvPfBbenQJ4qtYXsmwzGlmIiU4nk&index=6'                 # [*required](link, can be playlist, video link)
+  link: 'https://www.youtube.com/playlist?list=PLoEiobi8_gm5tP_kUE9fzCAs7aK0OIIjw'                 # [*required](link, can be playlist, video link)
   output_dir_path: '/home/harveen.chadha/gcmount/data/audiotospeech/raw/landing/hindi/audio/testing'                  # output directory path 
-  mode: 'video'                     # can be [video, playlist, videolist]
-  filename_prefix: 'testing'        # filename prefix
+  mode: 'playlist'                     # can be [video, playlist, videolist]
+  filename_prefix: 'testing_playlist'        # filename prefix
   convert_to_wav: True              # convert audio file to wav
-  output_wav_dir: None              # output directory path for converted wav
+  output_wav_dir: null              # output directory path for converted wav
 
 
 srtgenerator:
   bin_size: 10                      # Bin size for generating srt files
   input_file_path: ''               # input audio file path for generating SRT
-  output_file_path: None            # Path where subtitles will be stored
+  output_file_path: null            # Path where subtitles will be stored
   dump_response: False              # whether dump response in an external file
-  dump_response_directory: None     # response dump directory
+  dump_response_directory: null     # response dump directory
 
 clipaudio:
   srt_file_path: ''                 # input SRT File path

@@ -46,15 +46,16 @@ class GenerateSRT(object):
 
 
     def fit_dir(self, bin_size, input_file_dir, output_file_dir = None, dump_response = False, dump_response_directory = None):
-        filenames = glob.glob(input_file_dir+'/*.wav')
+        #filenames = glob.glob(input_file_dir+'/*.wav')
 
         output_file_paths = []
-        if len(filenames) == 0:
+        if len(input_file_dir) == 0:
             print('No files to process here')
 
-        for file in tqdm(filenames):
+        for file in tqdm(input_file_dir):
             if output_file_dir is None:
-                self.fit_single(bin_size, file)
+                local_path = self.fit_single(bin_size, file)
+                output_file_paths.append(local_path)
 
             else:
                 video_name = file.split('/')[-1].split('.')[0]

@@ -72,13 +72,13 @@ class ClipAudio(object):
         self.clip_audio_with_ffmeg(list_objs, audio_file_path, output_file_dir)
 
     def fit_dir(self, srt_dir, audio_dir, output_dir):
-        srt_filenames = glob.glob(srt_dir + '/*.srt')
-        audio_filenames = glob.glob(audio_dir + '/*.wav')
+        # srt_filenames = glob.glob(srt_dir + '/*.srt')
+        # audio_filenames = glob.glob(audio_dir + '/*.wav')
 
-        srt_filenames.sort()
-        audio_filenames.sort()
+        srt_dir.sort()
+        audio_dir.sort()
 
-        for audio_, srt_ in zip(audio_filenames, srt_filenames):
+        for audio_, srt_ in zip(audio_dir, srt_dir):
             self.fit_single(srt_, audio_, output_dir)
 
 

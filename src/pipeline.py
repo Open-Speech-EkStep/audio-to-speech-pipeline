@@ -4,6 +4,7 @@ from generate_srt import GenerateSRT
 import os
 import time
 import yaml
+yaml.warnings({'YAMLLoadWarning': False})
 
 
 class AudioPipeline():
@@ -32,7 +33,7 @@ class AudioPipeline():
         obj_video = DownloadVideo()
         output_file_paths = obj_video.fit(args_downloader['link'], 
                                         mode = args_downloader['mode'], 
-                                        output_dir_path = args_downloader['output_video_dir'],
+                                        output_dir_path = args_downloader['output_dir_path'],
                                         filename_prefix = args_downloader['filename_prefix'],
                                         convert_to_wav = args_downloader['convert_to_wav'],
                                         output_wav_dir = args_downloader['output_wav_dir'])
@@ -76,7 +77,7 @@ class AudioPipeline():
 
 if __name__ == "__main__":
 
-    var obj = AudioPipeline()
+    obj = AudioPipeline()
     obj.fit('./config.yaml')
     # link = 'https://www.youtube.com/watch?v=OcJ6KTF7nmc&list=PLmXe0lvPfBbenQJ4qtYXsmwzGlmIiU4nk&index=6'
     # mode = 'video'
