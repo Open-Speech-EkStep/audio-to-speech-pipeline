@@ -92,7 +92,7 @@ class DownloadVideo(object):
             if convert_to_wav:
                 return self.convert_to_wav(output_dir= output_wav_dir, list_paths=[path])
                 
-            return
+            return path
 
 
         if mode == 'playlist':
@@ -100,7 +100,7 @@ class DownloadVideo(object):
 
             if convert_to_wav:
                 return self.convert_to_wav(output_dir= output_wav_dir, list_paths=list_paths)
-            return
+            return list_paths
 
         if mode == 'videolist':
             list_paths = []
@@ -120,6 +120,7 @@ class DownloadVideo(object):
             if convert_to_wav:
                 return self.convert_to_wav(output_dir= output_wav_dir, list_paths=list_paths)
 
+            return list_paths
         print('Finished Downloading')
 
 

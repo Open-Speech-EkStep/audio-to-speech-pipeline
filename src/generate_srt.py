@@ -22,7 +22,7 @@ class GenerateSRT(object):
 
     def fit_single(self, bin_size, input_file_path, output_file_path = None, dump_response = False, dump_response_directory = None):
 
-        if input_file_path[-3:] != '.wav':
+        if input_file_path[-3:] != 'wav':
             print('Enter a valid wav file')
         
         video_name = input_file_path.split('/')[-1].split('.')[0]
