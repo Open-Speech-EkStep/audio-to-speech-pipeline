@@ -14,7 +14,7 @@ import os
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="credentials.json"
 
 class GenerateSRT(object):
-    def __init__(self, language, sample_rate = 44100, audio_channel_count=1):
+    def __init__(self, language, sample_rate = 16000, audio_channel_count=1):
         if language == 'hi':
             self.language = 'hi-IN'
         self.sample_rate = sample_rate

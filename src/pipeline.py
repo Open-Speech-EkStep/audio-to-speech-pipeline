@@ -117,7 +117,3 @@ if __name__ == "__main__":
     # obj_clip_audio = ClipAudio()
 
     # obj_clip_audio.fit_single(srt_file_path, audio_file_path, output_file_dir)
-
-
-
-

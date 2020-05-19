@@ -72,7 +72,7 @@ class DownloadVideo(object):
                 output_file_path = output_dir + '/' + output_file_name
 
 
-            command = f"ffmpeg -i {input_file_name} -ar 44100 -ac 1 -bits_per_raw_sample 16 {output_file_path}"
+            command = f"ffmpeg -i {input_file_name} -ar 16000 -ac 1 -bits_per_raw_sample 16 {output_file_path}"
             subprocess.call(command, shell=True)
 
             output_file_paths.append(output_file_path)
