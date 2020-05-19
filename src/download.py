@@ -21,7 +21,7 @@ class DownloadVideo(object):
         for index, link in tqdm(enumerate(playlist)):
             print("Downloading Video: ", index)
 
-            audio_path = self.download_video(video_url = link, output_path = output_path, filename_prefix = filename_prefix + 'pl_'+str(index) )
+            audio_path = self.download_video(video_url = link, output_path = output_path, filename_prefix = filename_prefix + '_pl_'+str(index) )
 
             videos_downloaded.append(audio_path)
 
