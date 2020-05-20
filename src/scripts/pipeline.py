@@ -1,10 +1,12 @@
 from clip_audio import ClipAudio
 from download import DownloadVideo
 from generate_srt import GenerateSRT
+from snr import SNR
 import os
 import time
 import yaml
 yaml.warnings({'YAMLLoadWarning': False})
+import glob
 
 
 class AudioPipeline():
@@ -25,6 +27,7 @@ class AudioPipeline():
         args_downloader = read_dict['downloader']
         args_srtgenerator  = read_dict['srtgenerator']
         args_clipaudio  = read_dict['clipaudio']
+        args_snr = read_dict['filtersnr']
 
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = args_application['credential_file_path']
         
@@ -41,6 +44,7 @@ class AudioPipeline():
         obj_srt = GenerateSRT(args_application['language'])
         obj_clip_audio = ClipAudio()
 
+        files_written = []
 
         if args_downloader['mode'] == 'video':
             srt_path = obj_srt.fit_single(bin_size = args_srtgenerator['bin_size'],
@@ -50,7 +54,7 @@ class AudioPipeline():
                                         dump_response_directory = args_srtgenerator['dump_response_directory'])
 
             
-            obj_clip_audio.fit_single(srt_file_path = srt_path, 
+            files_written = obj_clip_audio.fit_single(srt_file_path = srt_path, 
                                     audio_file_path = output_file_paths[0],
                                     output_file_dir = args_clipaudio['output_file_dir'])
 
@@ -62,9 +66,22 @@ class AudioPipeline():
                                         dump_response_directory = args_srtgenerator['dump_response_directory'])
 
             
-            obj_clip_audio.fit_dir(srt_dir = srt_path, 
+            files_written = obj_clip_audio.fit_dir(srt_dir = srt_path, 
                                     audio_dir = output_file_paths,
                                     output_dir = args_clipaudio['output_file_dir'])
+
+            
+        snr_obj = SNR()
+
+        if args_snr['input_file_dir'] is not None:
+            args_snr['input_file_dir'] = glob.glob( args_snr['input_file_dir'] +'/*.wav' )
+        else:
+            args_snr['input_file_dir']  = files_written
+
+        snr_obj.fit_and_move(input_file_dir = args_snr['input_file_dir'],
+                            output_file_dir = args_clipaudio['output_file_dir'],
+                            threshold = args_snr['threshold'])
+                                    
 
         pipeline_end_time = time.time()
         print("Pipeline took ", pipeline_end_time - pipeline_start_time , " seconds to run!")

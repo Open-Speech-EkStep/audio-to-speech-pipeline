@@ -30,3 +30,9 @@ clipaudio:
   output_file_dir: '/home/harveen.chadha/gcmount/data/audiotospeech/raw/landing/hindi/audio/testing/cutaudio'        # output file directory
 
 
+filtersnr:
+  input_file_dir: null
+  output_file_dir: null
+  threshold: 20
+
+

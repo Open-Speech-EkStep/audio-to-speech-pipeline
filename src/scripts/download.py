@@ -22,7 +22,7 @@ class DownloadVideo(object):
             print("Downloading Video: ", index)
 
             audio_path = self.download_video(video_url = link, output_path = output_path, filename_prefix = filename_prefix + '_pl_'+str(index) )
-
+            print(audio_path)
             videos_downloaded.append(audio_path)
 
         self.audio_path = videos_downloaded
