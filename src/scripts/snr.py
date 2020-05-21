@@ -49,18 +49,35 @@ class SNR(object):
 
         for key, value in local_dict.items():
             audio_file_name = key.split('/')[-1]
+            text_file_name_key = key[:-3] + 'txt' 
+            text_file_name = key.split('/')[-1].split('.')[0] + '.txt'
+
             print(audio_file_name)
+            command = ''
+            command_text = ''
 
             if value >= threshold:
                 ## copy to clean directory of output
                 clean_dir_local = clean_dir + '/' + audio_file_name
+                clean_dir_local_text = clean_dir + '/' + text_file_name
+
                 command = f'mv "{key}" "{clean_dir_local}"'
+                command_text = f'mv "{text_file_name_key}" "{clean_dir_local_text}"'
+                print(command)
+                print(command_text)
             else:
                 ## copy to rejected directory of output
                 rejected_dir_local = rejected_dir + '/' + audio_file_name
-                command = f'mv "{key}" "{rejected_dir_local}"'
+                rejected_dir_local_text = rejected_dir + '/' + text_file_name
 
-            os.system(command)
+                command = f'mv "{key}" "{rejected_dir_local}"'
+                command_text = f'mv "{text_file_name_key}" "{rejected_dir_local_text}"'
+                print(command)
+                print(command_text)
+
+            os.system(command + ';' + command_text)
+            #os.system(command_text)
+            #output = subprocess.check_output(command, shell=True)
 
 
 if __name__ == "__main__":
