@@ -1,5 +1,6 @@
 import unittest
 import sys
+import glob
 
 sys.path.append("../../src")
 
@@ -14,10 +15,14 @@ class TestSNR(unittest.TestCase):
 
     def test_fit_return_type(self):
         obj = SNR()
-        file_snr = obj.fit('test_resources/')
+        input_dir = 'test_resources/'
+        wav_files = glob.glob(f"{input_dir}*wav")
+        file_snr = obj.fit(wav_files)
         self.assertEqual(type(file_snr), type({}))
 
     def test_fit_return_value(self):
         obj = SNR()
-        file_snr = obj.fit('test_resources/')
+        input_dir = 'test_resources/'
+        wav_files = glob.glob(f"{input_dir}*wav")
+        file_snr = obj.fit(wav_files)
         self.assertEqual(file_snr['test_resources/test.wav'], 19.939861)
