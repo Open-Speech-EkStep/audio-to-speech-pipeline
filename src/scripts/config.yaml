@@ -10,7 +10,7 @@ application:
 
 downloader: ## data loader
   link: 'https://www.youtube.com/playlist?list=PLoEiobi8_gm5tP_kUE9fzCAs7aK0OIIjw'                 # [*required](link, can be playlist, video link)
-  output_dir_path: '/home/harveen.chadha/gcmount/data/audiotospeech/raw/landing/hindi/audio/testing'                  # output directory path 
+  output_dir_path: '/home/harveen.chadha/gcs_mount/data/audiotospeech/raw/landing/hindi/audio/testing'                  # output directory path 
   mode: 'playlist'                     # can be [video, playlist, videolist]
   filename_prefix: 'testing_playlist'        # filename prefix
   convert_to_wav: True              # convert audio file to wav
@@ -27,7 +27,7 @@ srtgenerator:
 clipaudio:
   srt_file_path: ''                 # input SRT File path
   audio_file_path: ''               # input audio file path
-  output_file_dir: '/home/harveen.chadha/gcmount/data/audiotospeech/raw/landing/hindi/audio/testing/cutaudio'        # output file directory
+  output_file_dir: '/home/harveen.chadha/gcs_mount/data/audiotospeech/raw/landing/hindi/audio/testing/cutaudio'        # output file directory
 
 
 filtersnr:

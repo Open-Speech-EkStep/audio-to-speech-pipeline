@@ -21,7 +21,9 @@ class SNR(object):
 
     def fit(self, input_file_dir):
 
-        wav_files = glob.glob(f"{input_file_dir}*wav")
+        #wav_files = glob.glob(f"{input_file_dir}*wav")
+        wav_files = input_file_dir
+        print(wav_files)
         file_snrs = {}
 
         for file in tqdm(wav_files):
@@ -33,8 +35,9 @@ class SNR(object):
         return file_snrs
 
     def fit_and_move(self, input_file_dir, threshold, output_file_dir):
+        print(input_file_dir)
         local_dict = self.fit(input_file_dir)
-
+        print(local_dict)
         clean_dir = output_file_dir + '/clean'
         rejected_dir = output_file_dir + '/rejected'
 

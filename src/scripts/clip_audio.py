@@ -55,6 +55,8 @@ class ClipAudio(object):
         new_file_path = '/'.join( audio_file_path.split('/')[:-1] )
 
         clip = AudioFileClip(filename = audio_file_path)
+
+        files_written = []
         
         for index, obj in enumerate(list_obj):
             new_file_name = output_file_dir + '/' + str(index) + '_' + audio_file_path.split('/')[-1].split('.')[0]
@@ -62,14 +64,15 @@ class ClipAudio(object):
             newclip = clip.subclip(obj.start_time,obj.end_time)
 
             newclip.write_audiofile( new_file_name + '.wav' )
-
+            files_written.append(new_file_name + '.wav')
 
             with open(new_file_name + '.txt', 'w', encoding='utf8') as file:
                 file.write(obj.text)
+        return files_written
 
     def fit_single(self, srt_file_path, audio_file_path, output_file_dir):
         list_objs = self.preprocess_srt(srt_file_path)
-        self.clip_audio_with_ffmeg(list_objs, audio_file_path, output_file_dir)
+        return self.clip_audio_with_ffmeg(list_objs, audio_file_path, output_file_dir)
 
     def fit_dir(self, srt_dir, audio_dir, output_dir):
         # srt_filenames = glob.glob(srt_dir + '/*.srt')
@@ -77,9 +80,12 @@ class ClipAudio(object):
 
         srt_dir.sort()
         audio_dir.sort()
+        files_written = []
 
         for audio_, srt_ in zip(audio_dir, srt_dir):
-            self.fit_single(srt_, audio_, output_dir)
+            local_written = self.fit_single(srt_, audio_, output_dir)
+            files_written.extend(local_written)
+        return files_written
 
 
 
