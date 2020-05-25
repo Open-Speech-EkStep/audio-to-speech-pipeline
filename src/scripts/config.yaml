@@ -15,6 +15,30 @@ downloader: ## data loader
   filename_prefix: 'testing_playlist'        # filename prefix
   convert_to_wav: True                       # convert audio file to wav
   output_wav_dir: null                       # output directory path for converted wav
+  raw_file_name: null
+  duration: null
+  title: null
+  speaker_name: null
+  audio_id: null
+  cleaned_duration: null
+  num_of_speakers: 1
+  language: Hindi
+  has_other_audio_signature: False
+  type: 'video'
+  source: 'YouTube'
+  experiment_use: False
+  utterances_file_list: null
+  source_url: 'null'
+  speaker_gender: 'Male'
+  source_website: null
+  experiment_name: 'test'
+  mother_tongue: null
+  age_group: null
+  recorded_state: null
+  recorded_district: null
+  recorded_place: null
+  recorded_date: null
+  purpose: null
 
 
 srtgenerator:
@@ -34,5 +58,3 @@ filtersnr:
   input_file_dir: null
   output_file_dir: null
   threshold: 20
-
-

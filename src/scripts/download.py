@@ -4,8 +4,13 @@ from tqdm import tqdm
 import subprocess
 import glob
 from datetime import datetime
-
+import yaml
 import uuid
+import csv
+
+yaml.warnings({'YAMLLoadWarning': False})
+
+YAML_FILE_PATH = 'config.yaml'
 
 
 class DownloadVideo(object):
@@ -13,31 +18,77 @@ class DownloadVideo(object):
         self.audio_path = []
         self.extension = extension
 
+    def __load_yaml_file(self, path):
+        read_dict = {}
+        with open(path, 'r') as file:
+            read_dict = yaml.load(file)
+        return read_dict
+
+    def create_metadata(self, yaml_file_path=YAML_FILE_PATH):
+        read_dict = self.__load_yaml_file(yaml_file_path)
+        args_downloader = read_dict['downloader']
+        metadata = {'raw_file_name': args_downloader['raw_file_name'],
+                    'duration': args_downloader['duration'],
+                    'title': args_downloader['title'],
+                    'speaker_name': args_downloader['speaker_name'],
+                    'audio_id': args_downloader['audio_id'],
+                    'cleaned_duration': args_downloader['cleaned_duration'],
+                    'num_of_speakers': args_downloader['num_of_speakers'],
+                    'language': args_downloader['language'],
+                    'has_other_audio_signature': args_downloader['has_other_audio_signature'],
+                    'type': args_downloader['type'],
+                    'source': args_downloader['source'],
+                    'experiment_use': args_downloader['experiment_use'],
+                    'utterances_file_list': args_downloader['utterances_file_list'],
+                    'source_url': args_downloader['source_url'],
+                    'speaker_gender': args_downloader['speaker_gender'],
+                    'source_website': args_downloader['source_website'],
+                    'experiment_name': args_downloader['experiment_name'],
+                    'mother_tongue': args_downloader['mother_tongue'],
+                    'age_group': args_downloader['age_group'],
+                    'recorded_state': args_downloader['recorded_state'],
+                    'recorded_district': args_downloader['recorded_district'],
+                    'recorded_place': args_downloader['recorded_place'],
+                    'recorded_date': args_downloader['recorded_date'],
+                    'purpose': args_downloader['purpose']}
+        return metadata
+
     def download_playlist(self, playlist_url, output_path, filename_prefix):
         playlist = Playlist(playlist_url)
 
         videos_downloaded = []
+        videos_metadata = []
 
         for index, link in tqdm(enumerate(playlist)):
             print("Downloading Video: ", index)
 
-            audio_path = self.download_video(video_url=link, output_path=output_path,
-                                             filename_prefix=filename_prefix + '_pl_' + str(index))
-            print(audio_path)
+            audio_path, audio_metadata = self.download_video(video_url=link, output_path=output_path,
+                                                             filename_prefix=filename_prefix + '_pl_' + str(index))
             videos_downloaded.append(audio_path)
+            videos_metadata.append(audio_metadata)
 
         self.audio_path = videos_downloaded
-        return videos_downloaded
+        return videos_downloaded, videos_metadata
 
     def download_video(self, video_url, output_path, filename_prefix):
 
         name = self.generate_unique_filename(filename_prefix)
         filename = name + '.' + self.extension
+        metadata_file_name = name + '.' + "csv"
+        metadata = self.create_metadata(yaml_file_path=YAML_FILE_PATH)
 
         try:
             yt = pytube.YouTube(video_url)
+            metadata['duration'] = yt.length / 60
+            metadata['raw_file_name'] = yt.title
             yt.streams.filter(only_audio=True)[0].download(output_path=output_path, filename=str(name))
-            return output_path + '/' + filename
+            file_path = output_path + '/' + filename
+            metadata_file_path = output_path + '/' + metadata_file_name
+            with open(metadata_file_path, 'w') as f:
+                w = csv.DictWriter(f, metadata.keys())
+                w.writeheader()
+                w.writerow(metadata)
+            return file_path, metadata
         except:
             print("Connection error at video ", video_url)
             return None
@@ -119,8 +170,13 @@ class DownloadVideo(object):
 if __name__ == "__main__":
     dwn = DownloadVideo()
     # dwn.download_playlist('https://www.youtube.com/playlist?list=PL1D6nWQpbEZdtH4G1TZNrBVj1zBfTOhA7', './')
-    dwn.download_video('https://www.youtube.com/watch?v=TMoCrV3D1kU&feature=youtu.be', './data_demo', '1')
-
+    #f, m = dwn.download_video('https://www.youtube.com/watch?v=ZV202pMGkTo', '/home/anirudh/Desktop/youtube-videos', '1')
+    f, m = dwn.download_playlist('https://www.youtube.com/watch?v=o4RIZllaRd0&list=PLoEiobi8_gm5tP_kUE9fzCAs7aK0OIIjw', '/home/anirudh/Desktop/youtube-videos','3')
+    # yt = pytube.YouTube('https://www.youtube.com/watch?v=TMoCrV3D1kU&feature=youtu.be')
+    # t = dwn.create_base_metadata(yt)
+    # t = dwn.create_base_metadata('config.yaml')
+    #print(f)
+    #print(m)
     # list_dir = glob.glob(r'..//data/*.mp4')
     # print(list_dir)
-    dwn.convert_to_wav(list_paths=['./data_demo/1.mp4'])
+    # dwn.convert_to_wav(list_paths=['./data_demo/1.mp4'])
