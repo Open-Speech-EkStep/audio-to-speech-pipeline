@@ -50,9 +50,6 @@ jobs:
           name: Setup Testing Environment
           command: |
             pyenv global 3.7.0
-            apt-get install ffmpeg
-            apt-get install sox
-            apt-get install gcc-multilib g++-multilib
             pip install --upgrade pip
             pip install -r requirements.txt
             python --version ; pip --version ; pwd ; ls
