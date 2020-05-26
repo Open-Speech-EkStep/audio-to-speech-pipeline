@@ -6,4 +6,4 @@ tqdm==4.46.0
 typing-extensions==3.7.4.2
 urllib3==1.25.9
 uuid~=1.30
-yaml~=0.1.7
+
