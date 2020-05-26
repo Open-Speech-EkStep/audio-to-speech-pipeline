@@ -1,9 +1,9 @@
 FROM python:3.7
 
-RUN apt-get update
-RUN apt-get install ffmpeg
-RUN apt-get install sox
-RUN apt-get install gcc-multilib g++-multilib
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y ffmpeg
+RUN apt-get install -y sox
+RUN apt-get install -y gcc-multilib g++-multilib
 
 RUN mkdir /opt/dataprocessor/
 WORKDIR /opt/dataprocessor/
