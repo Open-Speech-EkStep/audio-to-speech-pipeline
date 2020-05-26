@@ -2,9 +2,9 @@ import unittest
 import sys
 import glob
 
-sys.path.append("../../src")
+#sys.path.append("../../../dataprocessor")
 
-from scripts.snr import SNR
+from src.scripts.snr import SNR
 
 
 class TestSNR(unittest.TestCase):
@@ -25,4 +25,5 @@ class TestSNR(unittest.TestCase):
         input_dir = 'test_resources/'
         wav_files = glob.glob(f"{input_dir}*wav")
         file_snr = obj.fit(wav_files)
+        self.assertEqual(file_snr['test_resources/test.wav'], 19.939861)
         self.assertEqual(file_snr['test_resources/test.wav'], 19.939861)

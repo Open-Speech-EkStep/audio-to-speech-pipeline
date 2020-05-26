@@ -2,8 +2,8 @@ import unittest
 import sys
 
 sys.path.append("../../src")
+from scripts.gcs_operations import CloudStorageOperations
 from scripts.download import DownloadVideo
-#from scripts.gcs_operations import CloudStorageOperations
 
 
 class DownloadVideoTest(unittest.TestCase):

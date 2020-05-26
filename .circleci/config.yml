@@ -9,10 +9,10 @@ parameters:
   # A parameter per package
   datacollector-youtube:
     type: boolean
-    default: true
+    default: false
   dataprocessor:
     type: boolean
-    default: false
+    default: true
 
 
 executors:
