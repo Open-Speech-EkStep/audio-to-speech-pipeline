@@ -1,0 +1,39 @@
+application:
+  verbose: 0
+  logging: 0
+  language: 'hi'
+
+
+downloader: ## data loader
+  link: 'https://www.youtube.com/playlist?list=PLoEiobi8_gm5tP_kUE9fzCAs7aK0OIIjw' # [*required](link, can be playlist, video link)
+  output_dir_path: 'data/audiotospeech/raw/landing/hindi/audio'                  # output directory path
+  mode: 'playlist'                           # can be [video, playlist, videolist]
+  filename_prefix: 'joshtalks'        # filename prefix
+  convert_to_wav: True                       # convert audio file to wav
+  output_wav_dir: null                       # output directory path for converted wav
+  raw_file_name: null
+  duration: null
+  title: null
+  speaker_name: null
+  audio_id: null
+  cleaned_duration: null
+  num_of_speakers: 1
+  language: Hindi
+  has_other_audio_signature: False
+  type: 'audio'
+  source: 'joshtalks2'
+  experiment_use: False
+  utterances_file_list: null
+  source_url: null
+  speaker_gender: 'Male'
+  source_website: null
+  experiment_name: null
+  mother_tongue: null
+  age_group: null
+  recorded_state: null
+  recorded_district: null
+  recorded_place: null
+  recorded_date: null
+  purpose: null
+
+

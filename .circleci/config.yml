@@ -1,13 +1,149 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
-# Use a package of configuration called an orb.
-orbs:
-  # Declare a dependency on the welcome-orb
-  welcome: circleci/welcome-orb@0.4.1
-# Orchestrate or schedule a set of jobs
+
+parameters:
+  # This parameter is used to trigger the main workflow
+  trigger:
+    type: boolean
+    default: false
+
+  # A parameter per package
+  datacollector-youtube:
+    type: boolean
+    default: true
+  dataprocessor:
+    type: boolean
+    default: false
+
+
+executors:
+  node:
+    docker:
+      - image: circleci/python:3.7-node-browsers-legacy
+
+jobs:
+  trigger-workflows:
+    executor: node
+    steps:
+      - checkout
+      - run:
+          name: Trigger workflows
+          command: chmod +x .circleci/circle_trigger.sh && .circleci/circle_trigger.sh
+
+  build:
+    parameters:
+      package_name:
+        type: string
+
+#    executor: node
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/project/packages/<< parameters.package_name >>
+
+    steps:
+      - checkout:
+          path: ~/project
+      # This step is added only to show that we are in the package directory
+      - run:
+          name: Sanity check to confirm correct package directory
+          command: echo "Current package directory is << parameters.package_name >> ..."
+      - run:
+          name: Setup Testing Environment
+          command: |
+            pyenv global 3.7.0
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            python --version ; pip --version ; pwd ; ls
+      - run:
+          name: Run Tests
+          command: |
+            cd src/tests
+            coverage run -m unittest
+            coverage report
+            coverage html  # open htmlcov/index.html in a browser
+      - store_artifacts:
+          path: htmlcov
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - packages/<< parameters.package_name >>
+
+  deploy:
+    parameters:
+      package_name:
+        type: string
+      package_version:
+        type: string
+
+#    executor: node
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/project/packages/<< parameters.package_name >>
+
+    steps:
+      - attach_workspace:
+          at: ~/project
+      # This step is added to show that files are available from the build job.
+      - run:
+          name: Content to deploy
+          command: ls
+      - deploy:
+          name: Build and Deploy Image
+          command: |
+            echo "Build << parameters.package_name >> ..."
+            docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >> .
+            echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
+            gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+            gcloud --quiet config set project ${GCP_PROJECT}
+            gcloud docker -- push us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >>
+      - run:
+          name: Remove account details
+          command: rm ${HOME}/gcp-key.json ; ls
+
 workflows:
-  # Name the workflow "welcome"
-  welcome:
-    # Run the welcome/run job in its own container
+  version: 2
+
+  # The main workflow responsible for triggering all other workflows
+  # in which changes are detected.
+  ci:
+    when: << pipeline.parameters.trigger >>
     jobs:
-      - welcome/run
+      - trigger-workflows
+
+
+  # Workflows defined for each package.
+  datacollector-youtube:
+    when: << pipeline.parameters.preprocess >>
+    jobs:
+      - build:
+          name: datacollector-youtube-build
+          package_name: datacollector-youtube
+      - deploy:
+          name: datacollector-youtube-deploy
+          package_name: datacollector-youtube
+          package_version: 1.0.0
+          requires:
+            - datacollector-youtube-build
+#          filters:
+#            branches:
+#              only:
+#                - dev
+
+  dataprocessor:
+    when: << pipeline.parameters.api >>
+    jobs:
+      - build:
+          name: dataprocessor-build
+          package_name: dataprocessor
+      - deploy:
+          name: dataprocessor-deploy
+          package_name: dataprocessor
+          package_version: 1.0.0
+          requires:
+            - dataprocessor-build
+#          filters:
+#            branches:
+#              only:
+#                - dev
+
+
+
