@@ -7,7 +7,7 @@ parameters:
     default: false
 
   # A parameter per package
-  datacollector-youtube:
+  datacollector_youtube:
     type: boolean
     default: false
   dataprocessor:
@@ -111,18 +111,18 @@ workflows:
 
 
   # Workflows defined for each package.
-  datacollector-youtube:
-    when: << pipeline.parameters.datacollector-youtube >>
+  datacollector_youtube:
+    when: << pipeline.parameters.datacollector_youtube >>
     jobs:
       - build:
-          name: datacollector-youtube-build
-          package_name: datacollector-youtube
+          name: datacollector_youtube-build
+          package_name: datacollector_youtube
       - deploy:
-          name: datacollector-youtube-deploy
-          package_name: datacollector-youtube
+          name: datacollector_youtube-deploy
+          package_name: datacollector_youtube
           package_version: 1.0.0
           requires:
-            - datacollector-youtube-build
+            - datacollector_youtube-build
 #          filters:
 #            branches:
 #              only:

@@ -1,10 +1,9 @@
 import unittest
 import sys
 
-sys.path.append("../../src")
-from scripts.gcs_operations import CloudStorageOperations
-from scripts.download import DownloadVideo
-
+# sys.path.append("../../src")
+sys.path.append("packages/datacollector_youtube/src")
+from packages.datacollector_youtube.src.scripts.download import DownloadVideo
 
 class DownloadVideoTest(unittest.TestCase):
 

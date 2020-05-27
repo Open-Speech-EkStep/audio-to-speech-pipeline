@@ -143,6 +143,14 @@ if __name__ == "__main__":
     audio_id = sys.argv[5] # unique identifier for each audio file
     audio_extn = sys.argv[6] # audio file exten: can be .mp4 or .mp3
 
+    print("Arguments Received...")
+    print("Arg 1 : job_mode : {}".format(job_mode))
+    print("Arg 2 : gcs_bucket_name: {}".format(gcs_bucket_name))
+    print("Arg 3 : config_path: {}".format(config_path))
+    print("Arg 4 : data_source: {}".format(data_source))
+    print("Arg 5 : audio_id: {}".format(audio_id))
+    print("Arg 6 : audio_extn: {}".format(audio_extn))
+
     current_working_directory = os.getcwd()
     config_local_path = os.path.join(current_working_directory, "src/resources/" + job_mode + "/config.yaml")
 

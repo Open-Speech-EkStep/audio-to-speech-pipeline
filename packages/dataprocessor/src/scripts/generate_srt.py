@@ -36,11 +36,13 @@ class GenerateSRT(object):
                 output_file_path = output_dir + '/' + output_file_name
 
             print("Output path for converted wav file is: {}".format(os.path.join(output_file_path,output_file_name)))
+            if(os.path.exists(output_file_path) and os.path.isfile(output_file_path)):
+                print("Wav file already exists...")
+            else:
+                command = f"ffmpeg -i {input_file_name} -ar 16000 -ac 1 -bits_per_raw_sample 16 -vn {output_file_path}"
+                subprocess.call(command, shell=True)
 
-            command = f"ffmpeg -i {input_file_name} -ar 16000 -ac 1 -bits_per_raw_sample 16 -vn {output_file_path}"
-            subprocess.call(command, shell=True)
-
-            print("File converted to wav format successfully...")
+                print("File converted to wav format successfully...")
             output_file_paths.append(output_file_path)
 
         return output_file_paths
@@ -92,7 +94,7 @@ class GenerateSRT(object):
 
             # Generate subtitles
             print("Generating subtitle file...")
-            subtitles = self.subtitle_generation_new(response, bin_size)
+            subtitles = self.subtitle_generation(response, bin_size)
             print("Subtitle file generated successfully...")
 
             # Save subtitle file
