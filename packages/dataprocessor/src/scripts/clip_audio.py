@@ -7,6 +7,7 @@ import os
 from pydub import AudioSegment
 from datetime import datetime
 import time
+import pandas as pd 
 
 
 class Data:
@@ -81,6 +82,8 @@ class ClipAudio(object):
     def clip_audio_with_ffmeg(self, list_obj, audio_file_path, output_file_dir):
         
         new_file_path = '/'.join( audio_file_path.split('/')[:-1] )
+        metadata_file_path = new_file_path + "/" + audio_file_path.split('/')[-1].split('.')[0] + ".csv"
+        metadata = pd.read_csv(metadata_file_path)
 
 
         sound = AudioSegment.from_wav(audio_file_path)
@@ -111,7 +114,12 @@ class ClipAudio(object):
 
             with open(new_file_name + '.txt', 'w', encoding='utf8') as file:
                 file.write(obj.text.strip())
-        return files_written
+
+        metadata['utterances_file_list'] = str(files_written)                                                                                         
+ 82     metadata_file_name = os.path.join(output_file_dir, audio_file_path.split('/')[-1].split('.')[0] + ".csv")                                     
+ 83     metadata.to_csv(metadata_file_name) 
+
+        return files_written, metadata_file_name
 
 
     def fit_single(self, srt_file_path, audio_file_path, output_file_dir):

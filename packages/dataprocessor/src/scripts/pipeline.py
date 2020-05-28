@@ -65,7 +65,7 @@ class AudioPipeline():
                                         dump_response_directory = args_srtgenerator['dump_response_directory'],
                                         )
             print("Initiating clipping of audio and srt file process...")
-            clipped_files_dir = obj_clip_audio.fit_single(srt_file_path = os.path.join(current_working_directory,
+            clipped_files_dir, metadata_file_name = obj_clip_audio.fit_single(srt_file_path = os.path.join(current_working_directory,
                                                                                    srt_path),
                                     audio_file_path = os.path.join(current_working_directory,
                                                                    srt_path.split(".")[0] + ".wav"),
@@ -93,6 +93,7 @@ class AudioPipeline():
             args_snr['input_file_dir']  = clipped_files_dir
 
         snr_obj.fit_and_move(input_file_dir = args_snr['input_file_dir'],
+                            metadata_file_name = metadata_file_name,
                             output_file_dir = os.path.join(current_working_directory,
                                                                    args_clipaudio['output_file_dir'],
                                                                    data_source,
