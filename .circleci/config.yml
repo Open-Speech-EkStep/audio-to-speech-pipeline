@@ -114,14 +114,14 @@ workflows:
     when: << pipeline.parameters.datacollector_youtube >>
     jobs:
       - build:
-          name: datacollector_youtube-build
+          name: datacollector_youtube_build
           package_name: datacollector_youtube
       - deploy:
-          name: datacollector_youtube-deploy
+          name: datacollector_youtube_deploy
           package_name: datacollector_youtube
           package_version: 1.0.0
           requires:
-            - datacollector_youtube-build
+            - datacollector_youtube_build
 #          filters:
 #            branches:
 #              only:
@@ -131,14 +131,14 @@ workflows:
     when: << pipeline.parameters.dataprocessor >>
     jobs:
       - build:
-          name: dataprocessor-build
+          name: dataprocessor_build
           package_name: dataprocessor
       - deploy:
-          name: dataprocessor-deploy
+          name: dataprocessor_deploy
           package_name: dataprocessor
           package_version: 1.0.0
           requires:
-            - dataprocessor-build
+            - dataprocessor_build
 #          filters:
 #            branches:
 #              only:
