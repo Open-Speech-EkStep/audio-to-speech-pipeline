@@ -4,7 +4,7 @@ parameters:
   # This parameter is used to trigger the main workflow
   trigger:
     type: boolean
-    default: false
+    default: true
 
   # A parameter per package
   datacollector_youtube:
@@ -12,7 +12,7 @@ parameters:
     default: false
   dataprocessor:
     type: boolean
-    default: true
+    default: false
 
 
 executors:
