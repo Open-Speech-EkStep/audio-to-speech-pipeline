@@ -11,7 +11,7 @@ import pickle
 import numpy as np
 import os
 import subprocess
-from gcs_operations import CloudStorageOperations
+from .gcs_operations import CloudStorageOperations
 
 
 class GenerateSRT(object):

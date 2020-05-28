@@ -9,7 +9,7 @@ import uuid
 import csv
 import sys
 import os
-from gcs_operations import CloudStorageOperations
+from .gcs_operations import CloudStorageOperations
 
 yaml.warnings({'YAMLLoadWarning': False})
 

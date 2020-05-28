@@ -2,8 +2,7 @@ import unittest
 import sys
 
 # sys.path.append("../../src")
-sys.path.append("packages/datacollector_youtube/src")
-from packages.datacollector_youtube.src.scripts.download import DownloadVideo
+from src.scripts.download import DownloadVideo
 
 class DownloadVideoTest(unittest.TestCase):
 

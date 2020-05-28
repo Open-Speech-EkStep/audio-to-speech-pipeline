@@ -6,7 +6,7 @@ import time
 import yaml
 yaml.warnings({'YAMLLoadWarning': False})
 import glob,sys
-from gcs_operations import CloudStorageOperations
+from .gcs_operations import CloudStorageOperations
 
 
 class AudioPipeline():
