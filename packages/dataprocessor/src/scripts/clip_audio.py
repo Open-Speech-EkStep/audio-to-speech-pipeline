@@ -92,17 +92,14 @@ class ClipAudio(object):
 
         files_written = []
 
-        
-        
+
+
         for index, obj in enumerate(list_obj):
-            file_name = audio_file_path.split('/')[-1].split('.')[0]
 
-            new_dir = output_file_dir + '/' + file_name
-            
-            if not os.path.exists(new_dir):
-                os.mkdir(new_dir)
+            if not os.path.exists(output_file_dir):
+                self.make_directories(output_file_dir)
 
-            new_file_name = new_dir + '/' + str(index) + '_' + audio_file_path.split('/')[-1].split('.')[0]
+            new_file_name = output_file_dir + '/' + str(index) + '_' + audio_file_path.split('/')[-1].split('.')[0]
 
             #newclip = clip.subclip(obj.start_time*1000 ,obj.end_time*1000)
             newclip =sound[ obj.start_time: obj.end_time]
@@ -116,8 +113,8 @@ class ClipAudio(object):
                 file.write(obj.text.strip())
 
         metadata['utterances_file_list'] = str(files_written)                                                                                         
- 82     metadata_file_name = os.path.join(output_file_dir, audio_file_path.split('/')[-1].split('.')[0] + ".csv")                                     
- 83     metadata.to_csv(metadata_file_name) 
+        metadata_file_name = os.path.join(output_file_dir, audio_file_path.split('/')[-1].split('.')[0] + ".csv")
+        metadata.to_csv(metadata_file_name)
 
         return files_written, metadata_file_name
 

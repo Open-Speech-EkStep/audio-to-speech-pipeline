@@ -5,6 +5,7 @@ import soundfile as sf
 from tqdm import tqdm
 import pandas as pd
 import librosa
+import math
 
 CURRENT_PATH = os.getcwd()
 
@@ -39,12 +40,12 @@ class SNR(object):
         return file_snrs
 
     def fit_and_move(self, input_file_dir, metadata_file_name, threshold, output_file_dir):
-        print(input_file_dir)
+
         local_dict = self.fit(input_file_dir)
-        print(local_dict)
         clean_dir = output_file_dir + '/clean'
         rejected_dir = output_file_dir + '/rejected'
         metadata = pd.read_csv(metadata_file_name)
+        clean_audio_duration=[]
 
         if not os.path.exists(clean_dir):
             os.mkdir(clean_dir)
@@ -84,13 +85,4 @@ class SNR(object):
             metadata["cleaned_duration"] = math.floor(sum(clean_audio_duration) / 60)
             metadata.to_csv(metadata_file_name)
             os.system(command + ';' + command_text)
-            #os.system(command_text)
-            #output = subprocess.check_output(command, shell=True)
 
-
-if __name__ == "__main__":
-    snr_obj = SNR()
-    input_file_dir = '/home/anirudh/Projects/AudioSpeech/vad/'
-    # input_file_dir = '/home/harveen.chadha/gcmount/data/audiotospeech/raw/landing/hindi/audio/testing/cutaudio'
-    threshold = 16
-    snr_obj.fit_and_move(input_file_dir, threshold, '/home/anirudh/Projects/AudioSpeech/vad/output')

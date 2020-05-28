@@ -1,6 +1,6 @@
-from clip_audio import ClipAudio
-from generate_srt import GenerateSRT
-from snr import SNR
+from .clip_audio import ClipAudio
+from .generate_srt import GenerateSRT
+from .snr import SNR
 import os
 import time
 import yaml
@@ -99,7 +99,7 @@ class AudioPipeline():
                                                                    data_source,
                                                                    audio_id),
                             threshold = args_snr['threshold'])
-                                    
+
         # Upload files to GCS
         # Upload cleaned files
         print("Uploading the cleaned files to cloud storage...")
@@ -128,6 +128,17 @@ class AudioPipeline():
                                            audio_id,
                                            "rejected"),
                               is_directory=True)
+
+        # Upload metadata file
+        print("Metadata file name {}".format(metadata_file_name))
+        print("Uploading the metadata file to cloud storage...")
+        obj_gcsops.upload_to_gcs(bucket_name,
+                                 metadata_file_name,
+                                 os.path.join(args_clipaudio['output_file_dir'],
+                                              "metadata",
+                                              data_source,
+                                              metadata_file_name.split('/')[-1].split('.')[0]+".csv"),
+                                 is_directory=False)
 
         pipeline_end_time = time.time()
         print("Pipeline took ", pipeline_end_time - pipeline_start_time , " seconds to run!")
