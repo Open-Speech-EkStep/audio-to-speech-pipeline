@@ -36,7 +36,7 @@ jobs:
 
 #    executor: node
     machine:
-      image: ubuntu-1604:201903-01
+      image: ubuntu-1604:202004-01
     working_directory: ~/project/packages/<< parameters.package_name >>
 
     steps:
