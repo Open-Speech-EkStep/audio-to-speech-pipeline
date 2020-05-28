@@ -3,6 +3,8 @@ import os
 import subprocess
 import soundfile as sf
 from tqdm import tqdm
+import pandas as pd
+import librosa
 
 CURRENT_PATH = os.getcwd()
 
@@ -36,12 +38,13 @@ class SNR(object):
             print(f"File {key} has an snr value of {value}")
         return file_snrs
 
-    def fit_and_move(self, input_file_dir, threshold, output_file_dir):
+    def fit_and_move(self, input_file_dir, metadata_file_name, threshold, output_file_dir):
         print(input_file_dir)
         local_dict = self.fit(input_file_dir)
         print(local_dict)
         clean_dir = output_file_dir + '/clean'
         rejected_dir = output_file_dir + '/rejected'
+        metadata = pd.read_csv(metadata_file_name)
 
         if not os.path.exists(clean_dir):
             os.mkdir(clean_dir)
@@ -62,7 +65,8 @@ class SNR(object):
                 ## copy to clean directory of output
                 clean_dir_local = clean_dir + '/' + audio_file_name
                 clean_dir_local_text = clean_dir + '/' + text_file_name
-
+                y, sr = librosa.load(key)
+                clean_audio_duration.append(librosa.get_duration(y))
                 command = f'mv "{key}" "{clean_dir_local}"'
                 command_text = f'mv "{text_file_name_key}" "{clean_dir_local_text}"'
                 print(command)
@@ -77,6 +81,8 @@ class SNR(object):
                 print(command)
                 print(command_text)
 
+            metadata["cleaned_duration"] = math.floor(sum(clean_audio_duration) / 60)
+            metadata.to_csv(metadata_file_name)
             os.system(command + ';' + command_text)
             #os.system(command_text)
             #output = subprocess.check_output(command, shell=True)
