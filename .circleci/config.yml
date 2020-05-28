@@ -9,7 +9,7 @@ parameters:
   # A parameter per package
   datacollector_youtube:
     type: boolean
-    default: true
+    default: false
   dataprocessor:
     type: boolean
     default: true

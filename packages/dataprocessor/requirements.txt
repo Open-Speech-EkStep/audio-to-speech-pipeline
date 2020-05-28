@@ -38,6 +38,5 @@ uuid~=1.30
 librosa
 pydub
 pandas
-numpy
 coverage
 flake8
