@@ -4,6 +4,9 @@ from scipy.io import wavfile
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 import glob
 import os
+from pydub import AudioSegment
+from datetime import datetime
+import time
 
 
 class Data:
@@ -35,14 +38,32 @@ class ClipAudio(object):
             lines = file.readlines()
         
         lines_mapping = []
+
+
         l = len(lines)
         for index, line in enumerate(lines):
 
             if '-->' in line:
                 arr = line.split(' ')
                 obj = Data()
-                obj.start_time = arr[0]
-                obj.end_time = arr[2]
+                
+                #print(arr[0])
+                start = datetime.strptime(arr[0], '%H:%M:%S,%f')
+                timedelta = start - datetime(1900,1,1)
+
+                obj.start_time = timedelta.total_seconds() * 1000 
+                
+                #print(obj.start_time)
+                
+                if(arr[2]) != "":
+                    #print(arr[2])
+                    end = datetime.strptime(arr[2].strip(), '%H:%M:%S,%f')
+                    timedelta = end - datetime(1900,1,1)
+
+                    obj.end_time =  timedelta.total_seconds() * 1000
+                else:
+                    obj.end_time = 0
+                #print(obj.end_time)
                 if index < (l-1):
                     next_ = lines[index + 1]
                     obj.text = next_
@@ -55,27 +76,43 @@ class ClipAudio(object):
 
         return lines_mapping
 
+
     
     def clip_audio_with_ffmeg(self, list_obj, audio_file_path, output_file_dir):
-
-        # Create output dir if not exists
-        self.make_directories(output_file_dir)
         
         new_file_path = '/'.join( audio_file_path.split('/')[:-1] )
-        clip = AudioFileClip(filename = audio_file_path)
+
+
+        sound = AudioSegment.from_wav(audio_file_path)
+        
+        #        clip = AudioFileClip(filename = audio_file_path, fps = 16000, nbytes=1)
+
         files_written = []
+
+        
         
         for index, obj in enumerate(list_obj):
-            new_file_name = output_file_dir + '/' + str(index) + '_' + audio_file_path.split('/')[-1].split('.')[0]
+            file_name = audio_file_path.split('/')[-1].split('.')[0]
 
-            newclip = clip.subclip(obj.start_time,obj.end_time)
+            new_dir = output_file_dir + '/' + file_name
+            
+            if not os.path.exists(new_dir):
+                os.mkdir(new_dir)
 
-            newclip.write_audiofile( new_file_name + '.wav' )
+            new_file_name = new_dir + '/' + str(index) + '_' + audio_file_path.split('/')[-1].split('.')[0]
+
+            #newclip = clip.subclip(obj.start_time*1000 ,obj.end_time*1000)
+            newclip =sound[ obj.start_time: obj.end_time]
+
+            #newclip.write_audiofile( new_file_name + '.wav' )
+            newclip.export(new_file_name + '.wav', format='wav')
+            
             files_written.append(new_file_name + '.wav')
 
             with open(new_file_name + '.txt', 'w', encoding='utf8') as file:
-                file.write(obj.text)
+                file.write(obj.text.strip())
         return files_written
+
 
     def fit_single(self, srt_file_path, audio_file_path, output_file_dir):
         list_objs = self.preprocess_srt(srt_file_path)
