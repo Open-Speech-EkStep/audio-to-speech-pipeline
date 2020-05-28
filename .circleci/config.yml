@@ -36,7 +36,7 @@ jobs:
 
 #    executor: node
     machine:
-      image: ubuntu-1604:202004-01
+      image: ubuntu-1604:201903-01
     working_directory: ~/project/packages/<< parameters.package_name >>
 
     steps:
@@ -50,21 +50,21 @@ jobs:
           name: Setup Testing Environment
           command: |
             pyenv global 3.7.0
-            sudo apt-get update && apt-get upgrade -y
-            sudo apt-get install -y ffmpeg
-            sudo apt-get install -y sox
-            sudo apt-get install -y gcc-multilib g++-multilib
+#            sudo apt-get update && apt-get upgrade -y
+#            sudo apt-get install -y ffmpeg
+#            sudo apt-get install -y sox
+#            sudo apt-get install -y gcc-multilib g++-multilib
             pip install --upgrade pip
             pip install -r requirements.txt
             python --version ; pip --version ; pwd ; ls
-      - run:
-          name: Run Tests
-          command: |
-            coverage run -m unittest discover src/tests
-            coverage report
-            coverage html  # open htmlcov/index.html in a browser
-      - store_artifacts:
-          path: htmlcov
+#      - run:
+#          name: Run Tests
+#          command: |
+#            coverage run -m unittest discover src/tests
+#            coverage report
+#            coverage html  # open htmlcov/index.html in a browser
+#      - store_artifacts:
+#          path: htmlcov
       - persist_to_workspace:
           root: ~/project
           paths:

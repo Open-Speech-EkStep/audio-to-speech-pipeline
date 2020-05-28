@@ -15,7 +15,7 @@ class TestSNR(unittest.TestCase):
 
     def test_fit_return_type(self):
         obj = SNR()
-        input_dir = 'test_resources/'
+        input_dir = 'src/tests/test_resources/'
         wav_files = glob.glob(f"{input_dir}*wav")
         file_snr = obj.fit(wav_files)
         self.assertEqual(type(file_snr), type({}))
