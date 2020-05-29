@@ -22,7 +22,7 @@ class Data:
         print("*"*30)
 
 
-class ClipAudio(object):
+class AudioClipper(object):
     def __init__(self):
         pass
 
