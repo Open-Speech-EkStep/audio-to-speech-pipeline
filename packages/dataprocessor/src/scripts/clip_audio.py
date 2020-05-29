@@ -30,8 +30,10 @@ class ClipAudio(object):
         if not os.path.exists(path):
             os.makedirs(path)
             print("Directory {} created successfully".format(path))
+            return 0
         else:
             print("Directory {} already exists".format(path))
+            return 1
 
     def preprocess_srt(self, srt_file_path):
         lines = []
@@ -39,7 +41,6 @@ class ClipAudio(object):
             lines = file.readlines()
         
         lines_mapping = []
-
 
         l = len(lines)
         for index, line in enumerate(lines):
