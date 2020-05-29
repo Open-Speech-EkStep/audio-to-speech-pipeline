@@ -9,6 +9,7 @@ from src.scripts.srt_generator import SRTGenerator
 class TestSRTGenerator(unittest.TestCase):
 
     INPUT_FILE_EXTENSION = 'mp4'
+    OUTPUT_FILE_EXTENSION = '.wav'
 
     def setUp(self):
         super(TestSRTGenerator, self).setUp()
@@ -26,7 +27,7 @@ class TestSRTGenerator(unittest.TestCase):
     def test_convert_to_wav_return_object_length(self):
         shutil.rmtree(self.output_file_dir)
         os.mkdir(self.output_file_dir)
-        input_file_list = glob.glob(self.input_file_dir + '/*.' + 'mp4')
+        input_file_list = glob.glob(self.input_file_dir + '/*.' + self.INPUT_FILE_EXTENSION)
         self.assertEqual(len(self.srt.convert_to_wav(self.input_file_dir, self.output_file_dir)), len(input_file_list))
 
     def test_convert_to_wav_output_file_format(self):
@@ -34,7 +35,7 @@ class TestSRTGenerator(unittest.TestCase):
         os.mkdir(self.output_file_dir)
         input_file_list = glob.glob(self.input_file_dir + '/*.' + self.INPUT_FILE_EXTENSION)
         if len(input_file_list) > 1:
-            self.assertTrue(self.srt.convert_to_wav(self.input_file_dir, self.output_file_dir)[0].endswith(".wav"))
+            self.assertTrue(self.srt.convert_to_wav(self.input_file_dir, self.output_file_dir)[0].endswith(self.OUTPUT_FILE_EXTENSION))
 
 
 if __name__ == '__main__':
