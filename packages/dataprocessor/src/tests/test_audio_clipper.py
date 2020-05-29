@@ -13,6 +13,7 @@ from src.scripts.audio_clipper import AudioClipper, Data
 
 
 class TestAudioClipper(unittest.TestCase):
+    OUTPUT_FILE_EXTENSION = '.wav'
     METADATA_COLUMN = 'utterances_file_list'
     SRT_TEXT_VALUE = 'क्या मुझे मालूम है जिस तरह किसी कुत्ते को खींचा जाता है इसी तरह मेरे को भी जीने से खींचते वक्त पर डाल दिया\n'
 
@@ -69,7 +70,7 @@ class TestAudioClipper(unittest.TestCase):
         files_written, metadata_file_name = self.ca.clip_audio_with_ffmeg(list_objs, self.audio_file_path,
                                                                           self.output_file_dir)
         for file in files_written:
-            list_utterances_files.append(file.split('/')[-1].split('.')[0] + '.wav')
+            list_utterances_files.append(file.split('/')[-1].split('.')[0] + self.OUTPUT_FILE_EXTENSION)
 
         metadata_file_content = pd.read_csv(metadata_file_name)[self.METADATA_COLUMN].to_list()[0]
         self.assertEqual(str(list_utterances_files), metadata_file_content)

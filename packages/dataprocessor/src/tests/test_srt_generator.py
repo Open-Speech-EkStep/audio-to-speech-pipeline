@@ -7,7 +7,6 @@ from src.scripts.srt_generator import SRTGenerator
 
 
 class TestSRTGenerator(unittest.TestCase):
-
     INPUT_FILE_EXTENSION = 'mp4'
     OUTPUT_FILE_EXTENSION = '.wav'
 
@@ -35,7 +34,8 @@ class TestSRTGenerator(unittest.TestCase):
         os.mkdir(self.output_file_dir)
         input_file_list = glob.glob(self.input_file_dir + '/*.' + self.INPUT_FILE_EXTENSION)
         if len(input_file_list) > 1:
-            self.assertTrue(self.srt.convert_to_wav(self.input_file_dir, self.output_file_dir)[0].endswith(self.OUTPUT_FILE_EXTENSION))
+            self.assertTrue(self.srt.convert_to_wav(self.input_file_dir, self.output_file_dir)[0].endswith(
+                self.OUTPUT_FILE_EXTENSION))
 
 
 if __name__ == '__main__':
