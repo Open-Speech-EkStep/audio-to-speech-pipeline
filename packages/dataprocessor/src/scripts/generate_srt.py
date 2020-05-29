@@ -146,7 +146,7 @@ class GenerateSRT(object):
             "encoding": enums.RecognitionConfig.AudioEncoding.LINEAR16,
             "audio_channel_count": self.channels,
             "enable_word_time_offsets": True,
-            "enable_automatic_punctuation":True
+            "enable_automatic_punctuation":False
         }
 
         print("Speech to Text API config to be used: {}".format(config))
