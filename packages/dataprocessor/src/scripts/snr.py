@@ -39,7 +39,7 @@ class SNR(object):
             print(f"File {key} has an snr value of {value}")
         return file_snrs
 
-    def fit_and_move(self, input_file_dir, metadata_file_name, threshold, output_file_dir):
+    def fit_and_move(self, input_file_dir, metadata_file_name, threshold, output_file_dir,audio_id):
 
         local_dict = self.fit(input_file_dir)
         clean_dir = output_file_dir + '/clean'
@@ -83,6 +83,7 @@ class SNR(object):
                 print(command_text)
 
             metadata["cleaned_duration"] = math.floor(sum(clean_audio_duration) / 60)
-            metadata.to_csv(metadata_file_name)
+            metadata["audio_id"] = audio_id
+            metadata.to_csv(metadata_file_name,index=False)
             os.system(command + ';' + command_text)
 

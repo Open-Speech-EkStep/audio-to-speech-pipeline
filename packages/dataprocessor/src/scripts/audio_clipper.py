@@ -86,14 +86,10 @@ class AudioClipper(object):
         metadata_file_path = new_file_path + "/" + audio_file_path.split('/')[-1].split('.')[0] + ".csv"
         metadata = pd.read_csv(metadata_file_path)
 
-
         sound = AudioSegment.from_wav(audio_file_path)
-        
-        #        clip = AudioFileClip(filename = audio_file_path, fps = 16000, nbytes=1)
 
         files_written = []
-
-
+        list_audio_utterances = []
 
         for index, obj in enumerate(list_obj):
 
@@ -101,21 +97,20 @@ class AudioClipper(object):
                 self.make_directories(output_file_dir)
 
             new_file_name = output_file_dir + '/' + str(index) + '_' + audio_file_path.split('/')[-1].split('.')[0]
-
-            #newclip = clip.subclip(obj.start_time*1000 ,obj.end_time*1000)
             newclip =sound[ obj.start_time: obj.end_time]
-
-            #newclip.write_audiofile( new_file_name + '.wav' )
             newclip.export(new_file_name + '.wav', format='wav')
             
             files_written.append(new_file_name + '.wav')
 
+            #Generate list of utterances to be updated in metadata file
+            list_audio_utterances.append(str(index) + '_' + audio_file_path.split('/')[-1].split('.')[0] + '.wav')
+
             with open(new_file_name + '.txt', 'w', encoding='utf8') as file:
                 file.write(obj.text.strip())
 
-        metadata['utterances_file_list'] = str(files_written)                                                                                         
+        metadata['utterances_file_list'] = str(list_audio_utterances)
         metadata_file_name = os.path.join(output_file_dir, audio_file_path.split('/')[-1].split('.')[0] + ".csv")
-        metadata.to_csv(metadata_file_name)
+        metadata.to_csv(metadata_file_name,index=False)
 
         return files_written, metadata_file_name
 
@@ -125,8 +120,6 @@ class AudioClipper(object):
         return self.clip_audio_with_ffmeg(list_objs, audio_file_path, output_file_dir)
 
     def fit_dir(self, srt_dir, audio_dir, output_dir):
-        # srt_filenames = glob.glob(srt_dir + '/*.srt')
-        # audio_filenames = glob.glob(audio_dir + '/*.wav')
 
         srt_dir.sort()
         audio_dir.sort()
@@ -137,11 +130,5 @@ class AudioClipper(object):
             files_written.extend(local_written)
         return files_written
 
-
-
-# list_objs = clip_audio_preprocess(r'./data_demo/subtitles_new.srt', 
-#             r'./data_demo/1.wav')
-
-# clip_audio_with_ffmeg(list_objs, './data_demo/1.wav')
 
 

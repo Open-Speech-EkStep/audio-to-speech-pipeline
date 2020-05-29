@@ -1,5 +1,5 @@
-from .audio_clipper import AudioClipper
-from .srt_generator import SRTGenerator
+from .clip_audio import AudioClipper
+from .generate_srt import SRTGenerator
 from .snr import SNR
 import os
 import time
@@ -98,7 +98,8 @@ class AudioPipeline():
                                                                    args_clipaudio['output_file_dir'],
                                                                    data_source,
                                                                    audio_id),
-                            threshold = args_snr['threshold'])
+                            threshold = args_snr['threshold'],
+                            audio_id=audio_id )
 
         # Upload files to GCS
         # Upload cleaned files
