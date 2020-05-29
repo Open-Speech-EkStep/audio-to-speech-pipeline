@@ -62,11 +62,15 @@ class TestAudioClipper(unittest.TestCase):
     def test_clip_audio_with_ffmeg_files_written_metadata_contents(self):
         shutil.rmtree(self.output_file_dir)
         os.mkdir(self.output_file_dir)
+        list_utterances_files = []
         list_objs = self.ca.preprocess_srt(self.srt_file_path)
         files_written, metadata_file_name = self.ca.clip_audio_with_ffmeg(list_objs, self.audio_file_path,
                                                                           self.output_file_dir)
+        for file in files_written:
+            list_utterances_files.append(file.split('/')[-1].split('.')[0] + '.wav')
+
         metadata_file_content = pd.read_csv(metadata_file_name)[self.METADATA_COLUMN].to_list()[0]
-        self.assertEqual(str(files_written), metadata_file_content)
+        self.assertEqual(str(list_utterances_files), metadata_file_content)
 
 
 if __name__ == '__main__':

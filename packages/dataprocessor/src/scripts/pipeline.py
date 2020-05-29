@@ -1,5 +1,5 @@
 from .clip_audio import AudioClipper
-from .generate_srt import GenerateSRT
+from .generate_srt import SRTGenerator
 from .snr import SNR
 import os
 import time
@@ -31,7 +31,7 @@ class AudioPipeline():
         args_snr = read_dict['filtersnr']
 
         # Create required objects
-        obj_srt = GenerateSRT(args_application['language'])
+        obj_srt = SRTGenerator(args_application['language'])
         obj_clip_audio = AudioClipper()
         clipped_files_dir = []
 
