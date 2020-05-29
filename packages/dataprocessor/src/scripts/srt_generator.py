@@ -14,7 +14,7 @@ import subprocess
 from .gcs_operations import CloudStorageOperations
 
 
-class GenerateSRT(object):
+class SRTGenerator(object):
     def __init__(self, language, sample_rate = 16000, audio_channel_count=1):
         if language == 'hi':
             self.language = 'hi-IN'
@@ -35,7 +35,7 @@ class GenerateSRT(object):
             else:
                 output_file_path = output_dir + '/' + output_file_name
 
-            print("Output path for converted wav file is: {}".format(os.path.join(output_file_path,output_file_name)))
+            print("Output path for converted wav file is: {}".format((output_file_name)))
             if(os.path.exists(output_file_path) and os.path.isfile(output_file_path)):
                 print("Wav file already exists...")
             else:
@@ -94,7 +94,7 @@ class GenerateSRT(object):
 
             # Generate subtitles
             print("Generating subtitle file...")
-            subtitles = self.subtitle_generation(response, bin_size)
+            subtitles = self.generate_subtitle(response, bin_size)
             print("Subtitle file generated successfully...")
 
             # Save subtitle file
@@ -163,7 +163,7 @@ class GenerateSRT(object):
         return response
 
 
-    def subtitle_generation_new(self, response, bin_size=10):
+    def generate_subtitle_new(self, response, bin_size=10):
         
         def get_time(sec, nano_sec):
             return sec + nano_sec * 1e-9
@@ -320,7 +320,7 @@ class GenerateSRT(object):
         
         return subtitles
                         
-    def subtitle_generation(self, response, bin_size=10):
+    def generate_subtitle(self, response, bin_size=10):
         """We define a bin of time period to display the words in sync with audio. 
         Here, bin_size = 3 means each bin is of 3 secs. 
         All the words in the interval of 3 secs in result will be grouped togather."""

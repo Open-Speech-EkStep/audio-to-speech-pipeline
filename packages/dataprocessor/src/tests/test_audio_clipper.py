@@ -6,7 +6,7 @@ import pandas as pd
 # sys.path.append("../../src")
 from unittest import TestCase
 
-from src.scripts.clip_audio import AudioClipper, Data
+from src.scripts.audio_clipper import AudioClipper, Data
 
 
 class TestAudioClipper(unittest.TestCase):
