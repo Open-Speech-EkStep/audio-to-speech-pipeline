@@ -1,5 +1,5 @@
-from .clip_audio import AudioClipper
-from .generate_srt import SRTGenerator
+from .audio_clipper import AudioClipper
+from .srt_generator import SRTGenerator
 from .snr import SNR
 import os
 import time
