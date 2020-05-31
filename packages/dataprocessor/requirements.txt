@@ -40,3 +40,7 @@ pydub
 pandas
 coverage
 flake8
+SQLAlchemy==1.3.17
+pg8000==1.13.2
+python-dotenv==0.13.0
+psycopg2
