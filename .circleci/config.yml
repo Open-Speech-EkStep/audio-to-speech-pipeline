@@ -144,10 +144,10 @@ workflows:
           package_version: 1.0.1
           requires:
             - dataprocessor_build
-          filters:
-            branches:
-              only:
-                - dev
+#          filters:
+#            branches:
+#              only:
+#                - dev
 
 
 

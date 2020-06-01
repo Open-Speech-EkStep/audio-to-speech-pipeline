@@ -72,7 +72,7 @@ class SNR(object):
                 clean_audio_duration.append(clip_duration)
                 command = f'mv "{key}" "{clean_dir_local}"'
                 command_text = f'mv "{text_file_name_key}" "{clean_dir_local_text}"'
-                list_file_utterances_with_duration.append(audio_file_name + ":" + clip_duration)
+                list_file_utterances_with_duration.append(audio_file_name + ":" + str(clip_duration))
                 print(command)
                 print(command_text)
             else:
