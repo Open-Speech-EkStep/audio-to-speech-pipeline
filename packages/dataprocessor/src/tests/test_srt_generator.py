@@ -18,18 +18,18 @@ class TestSRTGenerator(unittest.TestCase):
         self.input_file_dir = 'src/tests/test_resources/input'
         self.output_file_dir = 'src/tests/test_resources/output'
 
-    def test_convert_to_wav_return_type(self):
+    def test_convert_to_wav_should_return_list_as_output(self):
         shutil.rmtree(self.output_file_dir)
         os.mkdir(self.output_file_dir)
         self.assertEqual(type(self.srt.convert_to_wav(self.input_file_dir, self.output_file_dir)), type([]))
 
-    def test_convert_to_wav_return_object_length(self):
+    def test_convert_to_wav_return_should_return_same_number_of_items_as_many_input_mp4_files(self):
         shutil.rmtree(self.output_file_dir)
         os.mkdir(self.output_file_dir)
         input_file_list = glob.glob(self.input_file_dir + '/*.' + self.INPUT_FILE_EXTENSION)
         self.assertEqual(len(self.srt.convert_to_wav(self.input_file_dir, self.output_file_dir)), len(input_file_list))
 
-    def test_convert_to_wav_output_file_format(self):
+    def test_convert_to_wav_should_return_output_file_with_wav_extension(self):
         shutil.rmtree(self.output_file_dir)
         os.mkdir(self.output_file_dir)
         input_file_list = glob.glob(self.input_file_dir + '/*.' + self.INPUT_FILE_EXTENSION)

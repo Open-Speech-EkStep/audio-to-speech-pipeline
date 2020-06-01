@@ -55,7 +55,7 @@ class TestAudioClipper(unittest.TestCase):
         files_written = self.ca.clip_audio_with_ffmeg(list_objs, self.audio_file_path, self.output_file_dir)[0]
         self.assertEqual(len(files_written), len(list_objs))
 
-    def test_clip_audio_with_ffmeg_files_should_retrun_true_when_metadata_file_is_generated(self):
+    def test_clip_audio_with_ffmeg_files_should_return_true_when_metadata_file_is_generated(self):
         shutil.rmtree(self.output_file_dir)
         os.mkdir(self.output_file_dir)
         list_objs = self.ca.preprocess_srt(self.srt_file_path)
