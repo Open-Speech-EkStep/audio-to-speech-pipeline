@@ -24,6 +24,14 @@ class TestAudioClipper(unittest.TestCase):
         self.srt_file_path = 'src/tests/test_resources/input/test.srt'
         self.audio_file_path = 'src/tests/test_resources/input/test.wav'
         self.output_file_dir = 'src/tests/test_resources/output'
+        self.make_directories(self.output_file_dir)
+
+    def make_directories(self,path):
+        if not os.path.exists(path):
+            os.makedirs(path)
+            print("Directory {} created successfully".format(path))
+        else:
+            print("Directory {} already exists".format(path))
 
     def test_preprocess_srt_should_return_expected_value(self):
         obj = self.ca.preprocess_srt(self.srt_file_path)
