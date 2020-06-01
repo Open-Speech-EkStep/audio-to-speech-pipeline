@@ -108,7 +108,7 @@ class AudioClipper(object):
             with open(new_file_name + '.txt', 'w', encoding='utf8') as file:
                 file.write(obj.text.strip())
 
-        metadata['utterances_file_list'] = str(list_audio_utterances)
+        # metadata['utterances_file_list'] = str(list_audio_utterances)
         metadata_file_name = os.path.join(output_file_dir, audio_file_path.split('/')[-1].split('.')[0] + ".csv")
         metadata.to_csv(metadata_file_name,index=False)
 

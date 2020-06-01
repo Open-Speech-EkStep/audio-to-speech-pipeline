@@ -46,6 +46,7 @@ class SNR(object):
         rejected_dir = output_file_dir + '/rejected'
         metadata = pd.read_csv(metadata_file_name)
         clean_audio_duration=[]
+        list_file_utterances_with_duration=[]
 
         if not os.path.exists(clean_dir):
             os.mkdir(clean_dir)
@@ -67,9 +68,11 @@ class SNR(object):
                 clean_dir_local = clean_dir + '/' + audio_file_name
                 clean_dir_local_text = clean_dir + '/' + text_file_name
                 y, sr = librosa.load(key)
-                clean_audio_duration.append(librosa.get_duration(y))
+                clip_duration = librosa.get_duration(y)
+                clean_audio_duration.append(clip_duration)
                 command = f'mv "{key}" "{clean_dir_local}"'
                 command_text = f'mv "{text_file_name_key}" "{clean_dir_local_text}"'
+                list_file_utterances_with_duration.append(audio_file_name + ":" + clip_duration)
                 print(command)
                 print(command_text)
             else:
@@ -84,6 +87,7 @@ class SNR(object):
 
             metadata["cleaned_duration"] = math.floor(sum(clean_audio_duration) / 60)
             metadata["audio_id"] = audio_id
+            metadata['utterances_file_list'] = str(list_file_utterances_with_duration)
             metadata.to_csv(metadata_file_name,index=False)
             os.system(command + ';' + command_text)
 

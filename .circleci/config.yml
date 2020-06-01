@@ -127,10 +127,10 @@ workflows:
           package_version: 1.0.0
           requires:
             - datacollector_youtube_build
-#          filters:
-#            branches:
-#              only:
-#                - dev
+          filters:
+            branches:
+              only:
+                - dev
 
   dataprocessor:
     when: << pipeline.parameters.dataprocessor >>
@@ -144,10 +144,10 @@ workflows:
           package_version: 1.0.1
           requires:
             - dataprocessor_build
-#          filters:
-#            branches:
-#              only:
-#                - dev
+          filters:
+            branches:
+              only:
+                - dev
 
 
 

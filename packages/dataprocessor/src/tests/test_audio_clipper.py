@@ -67,16 +67,16 @@ class TestAudioClipperWithFFMEG(unittest.TestCase):
         metadata_file_name = self.ca.clip_audio_with_ffmeg(list_objs, self.audio_file_path, self.output_file_dir)[1]
         self.assertTrue(os.path.exists(metadata_file_name))
 
-    def test_clip_audio_with_ffmeg_files_should_return_metadata_file_column_with_list_of_files_written(self):
-        list_utterances_files = []
-        list_objs = self.ca.preprocess_srt(self.srt_file_path)
-        files_written, metadata_file_name = self.ca.clip_audio_with_ffmeg(list_objs, self.audio_file_path,
-                                                                          self.output_file_dir)
-        for file in files_written:
-            list_utterances_files.append(file.split('/')[-1].split('.')[0] + self.OUTPUT_FILE_EXTENSION)
-
-        metadata_file_content = pd.read_csv(metadata_file_name)[self.METADATA_COLUMN].to_list()[0]
-        self.assertEqual(str(list_utterances_files), metadata_file_content)
+    # def test_clip_audio_with_ffmeg_files_should_return_metadata_file_column_with_list_of_files_written(self):
+    #     list_utterances_files = []
+    #     list_objs = self.ca.preprocess_srt(self.srt_file_path)
+    #     files_written, metadata_file_name = self.ca.clip_audio_with_ffmeg(list_objs, self.audio_file_path,
+    #                                                                       self.output_file_dir)
+    #     for file in files_written:
+    #         list_utterances_files.append(file.split('/')[-1].split('.')[0] + self.OUTPUT_FILE_EXTENSION)
+    #
+    #     metadata_file_content = pd.read_csv(metadata_file_name)[self.METADATA_COLUMN].to_list()[0]
+    #     self.assertEqual(str(list_utterances_files), metadata_file_content)
 
     @mock.patch('pydub.AudioSegment.from_wav')
     def test_clip_audio_with_ffmeg_should_call_the_from_wav_method(self, mock_audio_segment):
