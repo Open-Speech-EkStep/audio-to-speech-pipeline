@@ -141,7 +141,7 @@ workflows:
       - deploy:
           name: dataprocessor_deploy
           package_name: dataprocessor
-          package_version: 1.0.0
+          package_version: 1.0.1
           requires:
             - dataprocessor_build
 #          filters:

@@ -136,28 +136,28 @@ class AudioPipeline():
                               is_directory=True)
 
         # Upload metadata file first to CloudSQL DB and then to GCS
-        print("Metadata file name {}".format(metadata_file_name))
-        print("Uploading the metadata file to Cloud SQL DB...")
-
-        db_user=args_metadatadb['db_user']
-        db_password=args_metadatadb['db_password']
-        db_name = args_metadatadb['db_name']
-        cloud_sql_connection_name = args_metadatadb['cloud_sql_conn']
-
-        db = create_engine(f'postgresql://{db_user}:{db_password}@{cloud_sql_connection_name}/{db_name}')
-
-        obj_cloudsql = CloudSQLUploader()
-        obj_cloudsql.upload_file(metadata_file_name,db)
-        print("Metadata file uploaded to Cloud SQL DB successfully")
-
-        print("Uploading the metadata file to cloud storage...")
-        obj_gcsops.upload_to_gcs(bucket_name,
-                                 metadata_file_name,
-                                 os.path.join(args_clipaudio['output_file_dir'],
-                                              "metadata",
-                                              data_source,
-                                              metadata_file_name.split('/')[-1].split('.')[0]+".csv"),
-                                 is_directory=False)
+        # print("Metadata file name {}".format(metadata_file_name))
+        # print("Uploading the metadata file to Cloud SQL DB...")
+        # 
+        # db_user=args_metadatadb['db_user']
+        # db_password=args_metadatadb['db_password']
+        # db_name = args_metadatadb['db_name']
+        # cloud_sql_connection_name = args_metadatadb['cloud_sql_conn']
+        # 
+        # db = create_engine(f'postgresql://{db_user}:{db_password}@{cloud_sql_connection_name}/{db_name}')
+        # 
+        # obj_cloudsql = CloudSQLUploader()
+        # obj_cloudsql.upload_file(metadata_file_name,db)
+        # print("Metadata file uploaded to Cloud SQL DB successfully")
+        # 
+        # print("Uploading the metadata file to cloud storage...")
+        # obj_gcsops.upload_to_gcs(bucket_name,
+        #                          metadata_file_name,
+        #                          os.path.join(args_clipaudio['output_file_dir'],
+        #                                       "metadata",
+        #                                       data_source,
+        #                                       metadata_file_name.split('/')[-1].split('.')[0]+".csv"),
+        #                          is_directory=False)
 
         pipeline_end_time = time.time()
         print("Pipeline took ", pipeline_end_time - pipeline_start_time , " seconds to run!")
