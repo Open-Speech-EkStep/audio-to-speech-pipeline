@@ -150,14 +150,14 @@ class AudioPipeline():
         # obj_cloudsql.upload_file(metadata_file_name,db)
         # print("Metadata file uploaded to Cloud SQL DB successfully")
         # 
-        # print("Uploading the metadata file to cloud storage...")
-        # obj_gcsops.upload_to_gcs(bucket_name,
-        #                          metadata_file_name,
-        #                          os.path.join(args_clipaudio['output_file_dir'],
-        #                                       "metadata",
-        #                                       data_source,
-        #                                       metadata_file_name.split('/')[-1].split('.')[0]+".csv"),
-        #                          is_directory=False)
+        print("Uploading the metadata file to cloud storage...")
+        obj_gcsops.upload_to_gcs(bucket_name,
+                                 metadata_file_name,
+                                 os.path.join(args_clipaudio['output_file_dir'],
+                                              "metadata",
+                                              data_source,
+                                              metadata_file_name.split('/')[-1].split('.')[0]+".csv"),
+                                 is_directory=False)
 
         pipeline_end_time = time.time()
         print("Pipeline took ", pipeline_end_time - pipeline_start_time , " seconds to run!")
