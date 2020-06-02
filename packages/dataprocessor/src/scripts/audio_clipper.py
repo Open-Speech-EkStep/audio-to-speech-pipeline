@@ -89,7 +89,6 @@ class AudioClipper(object):
         sound = AudioSegment.from_wav(audio_file_path)
 
         files_written = []
-        list_audio_utterances = []
 
         for index, obj in enumerate(list_obj):
 
@@ -102,13 +101,10 @@ class AudioClipper(object):
             
             files_written.append(new_file_name + '.wav')
 
-            #Generate list of utterances to be updated in metadata file
-            list_audio_utterances.append(str(index) + '_' + audio_file_path.split('/')[-1].split('.')[0] + '.wav')
-
             with open(new_file_name + '.txt', 'w', encoding='utf8') as file:
                 file.write(obj.text.strip())
 
-        # metadata['utterances_file_list'] = str(list_audio_utterances)
+
         metadata_file_name = os.path.join(output_file_dir, audio_file_path.split('/')[-1].split('.')[0] + ".csv")
         metadata.to_csv(metadata_file_name,index=False)
 
