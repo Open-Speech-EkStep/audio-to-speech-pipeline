@@ -79,7 +79,7 @@ class DownloadVideo(object):
                     'type': args_downloader['type'],
                     'source': args_downloader['source'],
                     'experiment_use': args_downloader['experiment_use'],
-                    'utterances_file_list': args_downloader['utterances_file_list'],
+                    'utterances_files_list': args_downloader['utterances_files_list'],
                     'source_url': args_downloader['source_url'],
                     'speaker_gender': args_downloader['speaker_gender'],
                     'source_website': args_downloader['source_website'],
@@ -171,7 +171,7 @@ class DownloadVideo(object):
 
                 path = ''
                 if filename_prefix is not None:
-                    new_prefix = filename_prefix + '_' + index
+                    new_prefix = filename_prefix + '_' + str(index)
                     path = self.download_video(link, output_dir_path, new_prefix,yaml_file_path)
 
                 path = self.download_video(link, output_dir_path, filename_prefix,yaml_file_path)

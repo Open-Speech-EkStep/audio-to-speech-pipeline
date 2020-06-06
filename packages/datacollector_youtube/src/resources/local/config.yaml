@@ -23,7 +23,7 @@ downloader: ## data loader
   type: 'audio'
   source: 'joshtalks2'
   experiment_use: False
-  utterances_file_list: null
+  utterances_files_list: null
   source_url: null
   speaker_gender: 'Male'
   source_website: null

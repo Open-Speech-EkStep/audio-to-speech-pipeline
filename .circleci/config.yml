@@ -9,10 +9,13 @@ parameters:
   # A parameter per package
   datacollector_youtube:
     type: boolean
-    default: false
+    default: true
   dataprocessor:
     type: boolean
-    default: true
+    default: false
+  pipeline_workflows:
+    type: boolean
+    default: false
 
 
 executors:
@@ -28,6 +31,39 @@ jobs:
       - run:
           name: Trigger workflows
           command: chmod +x .circleci/circle_trigger.sh && .circleci/circle_trigger.sh
+
+  build-dags:
+    parameters:
+      package_name:
+        type: string
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/project/packages/<< parameters.package_name >>
+    steps:
+      - checkout:
+          path: ~/project
+      - run:
+          name: Build Image
+          command: |
+            ls -ltr . ; pwd
+      #            export DOCKER_BUILDKIT=1
+      #            docker build --rm=false -t img-pipeline_workflows:latest .
+      #            - run:
+      #                name: Save Docker image
+      #                command: |
+      #                  docker save -o img-pipeline_workflows
+      #      - run:
+      #          name: Test Pipeline Workflow DAG
+      #          command: |
+      #            docker run -ti -v ~/project/packages/<< parameters.package_name >>:/opt/pipeline_workflows --entrypoint /mnt/entrypoint.sh img-pipeline_workflows run_unit_tests
+      - run:
+          name: Deploy Pipeline Workflow DAG
+          command: |
+            echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
+            gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+            gcloud --quiet config set project ${GCP_PROJECT}
+            sh ~/project/packages/<< parameters.package_name >>/deployDAG.sh
+            rm ${HOME}/gcp-key.json
 
   build:
     parameters:
@@ -124,13 +160,13 @@ workflows:
       - deploy:
           name: datacollector_youtube_deploy
           package_name: datacollector_youtube
-          package_version: 1.0.0
+          package_version: 2.0.0
           requires:
             - datacollector_youtube_build
-          filters:
-            branches:
-              only:
-                - dev
+#          filters:
+#            branches:
+#              only:
+#                - dev
 
   dataprocessor:
     when: << pipeline.parameters.dataprocessor >>
@@ -149,5 +185,10 @@ workflows:
 #              only:
 #                - dev
 
-
+  pipeline_workflows:
+    when: << pipeline.parameters.pipeline_workflows >>
+    jobs:
+      - build-dags:
+          name: pipeline-dag-build
+          package_name: pipeline_workflows
 
