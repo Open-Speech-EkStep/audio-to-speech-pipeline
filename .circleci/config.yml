@@ -9,10 +9,10 @@ parameters:
   # A parameter per package
   datacollector_youtube:
     type: boolean
-    default: true
+    default: false
   dataprocessor:
     type: boolean
-    default: false
+    default: true
   pipeline_workflows:
     type: boolean
     default: false
@@ -72,7 +72,7 @@ jobs:
 
 #    executor: node
     machine:
-      image: ubuntu-1604:201903-01  #ubuntu-1604:202004-01
+      image: ubuntu-1604:201903-01
     working_directory: ~/project/packages/<< parameters.package_name >>
 
     steps:
@@ -177,7 +177,7 @@ workflows:
       - deploy:
           name: dataprocessor_deploy
           package_name: dataprocessor
-          package_version: 1.0.1
+          package_version: 1.0.0
           requires:
             - dataprocessor_build
 #          filters:

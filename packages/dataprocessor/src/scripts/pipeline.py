@@ -137,18 +137,18 @@ class AudioPipeline():
 
         # Upload metadata file first to CloudSQL DB and then to GCS
         print("Metadata file name {}".format(metadata_file_name))
-        # print("Uploading the metadata file to Cloud SQL DB...")
-        #
-        # db_user=args_metadatadb['db_user']
-        # db_password=args_metadatadb['db_password']
-        # db_name = args_metadatadb['db_name']
-        # cloud_sql_connection_name = args_metadatadb['cloud_sql_conn']
-        #
-        # db = create_engine(f'postgresql://{db_user}:{db_password}@{cloud_sql_connection_name}/{db_name}')
-        #
-        # obj_cloudsql = CloudSQLUploader()
-        # obj_cloudsql.upload_file(metadata_file_name,db)
-        # print("Metadata file uploaded to Cloud SQL DB successfully")
+        print("Uploading the metadata file to Cloud SQL DB...")
+
+        db_user=args_metadatadb['db_user']
+        db_password=args_metadatadb['db_password']
+        db_name = args_metadatadb['db_name']
+        cloud_sql_connection_name = args_metadatadb['cloud_sql_conn']
+
+        db = create_engine(f'postgresql://{db_user}:{db_password}@{cloud_sql_connection_name}/{db_name}')
+
+        obj_cloudsql = CloudSQLUploader()
+        obj_cloudsql.upload_file(metadata_file_name,db)
+        print("Metadata file uploaded to Cloud SQL DB successfully")
 
         print("Uploading the metadata file to cloud storage...")
         obj_gcsops.upload_to_gcs(bucket_name,

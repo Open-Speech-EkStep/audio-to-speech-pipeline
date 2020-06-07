@@ -27,9 +27,3 @@ filtersnr:
   input_file_dir: null
   output_file_dir: null
   threshold: 20
-
-metadatadb:
-  db_user: 'pipelineuser'
-  db_password: 'ekStep@Pipeline!'
-  db_name: 'speech_recognition_data_catalog'
-  cloud_sql_conn: '104.154.231.200'
