@@ -111,7 +111,7 @@ class AudioPipeline():
 
             print("Initiating clipping of audio and srt file process...")
             clipped_files_dir, metadata_file_name = self.clip_audio_single(obj_clip_audio, current_working_directory,
-                                                                           srt_paths,
+                                                                           srt_path,
                                                                            args_clipaudio,
                                                                            data_source, audio_id)
             srt_paths.append(srt_path)
