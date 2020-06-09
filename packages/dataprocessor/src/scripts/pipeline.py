@@ -97,6 +97,8 @@ class AudioPipeline():
 
         obj_gcsops = CloudStorageOperations()
         if (job_mode == "cluster"):
+            srt_paths=[]
+            wav_paths=[]
             local_download_path = os.path.join(args_downloader['tobeprocessed_input_basepath'],
                                                data_source,
                                                audio_id)
@@ -104,7 +106,7 @@ class AudioPipeline():
             self.download_input_blob(obj_gcsops, bucket_name, args_downloader, local_download_path)
 
             print("Initiating srt file generation process...")
-            srt_paths, wav_paths = self.generate_srt_file_single(obj_srt, args_srtgenerator, local_download_path,
+            srt_path, wav_path = self.generate_srt_file_single(obj_srt, args_srtgenerator, local_download_path,
                                                                  bucket_name, audio_extn)
 
             print("Initiating clipping of audio and srt file process...")
@@ -112,6 +114,8 @@ class AudioPipeline():
                                                                            srt_paths,
                                                                            args_clipaudio,
                                                                            data_source, audio_id)
+            srt_paths.append(srt_path)
+            wav_paths.append(wav_path)
             print("********srt_paths******", srt_paths)
             print("********wav_paths******", wav_paths)
 
