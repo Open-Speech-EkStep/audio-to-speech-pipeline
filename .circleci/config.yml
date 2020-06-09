@@ -12,7 +12,7 @@ parameters:
     default: false
   dataprocessor:
     type: boolean
-    default: true
+    default: false
   pipeline_workflows:
     type: boolean
     default: false
@@ -163,10 +163,10 @@ workflows:
           package_version: 2.0.0
           requires:
             - datacollector_youtube_build
-#          filters:
-#            branches:
-#              only:
-#                - dev
+          filters:
+            branches:
+              only:
+                - master
 
   dataprocessor:
     when: << pipeline.parameters.dataprocessor >>
@@ -177,13 +177,13 @@ workflows:
       - deploy:
           name: dataprocessor_deploy
           package_name: dataprocessor
-          package_version: 1.0.0
+          package_version: 1.0.2
           requires:
             - dataprocessor_build
-#          filters:
-#            branches:
-#              only:
-#                - dev
+          filters:
+            branches:
+              only:
+                - master
 
   pipeline_workflows:
     when: << pipeline.parameters.pipeline_workflows >>
