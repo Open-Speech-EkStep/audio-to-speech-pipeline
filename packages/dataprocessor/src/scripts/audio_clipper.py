@@ -120,11 +120,13 @@ class AudioClipper(object):
         srt_dir.sort()
         audio_dir.sort()
         files_written = []
+        meta_files_written = []
 
         for audio_, srt_ in zip(audio_dir, srt_dir):
-            local_written = self.fit_single(srt_, audio_, output_dir)
+            local_written,metadata_written = self.fit_single(srt_, audio_, output_dir)
             files_written.extend(local_written)
-        return files_written
+            meta_files_written.append(metadata_written)
+        return files_written,meta_files_written
 
 
 

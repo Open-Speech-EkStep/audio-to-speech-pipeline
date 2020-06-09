@@ -12,7 +12,7 @@ parameters:
     default: false
   dataprocessor:
     type: boolean
-    default: false
+    default: true
   pipeline_workflows:
     type: boolean
     default: false
@@ -180,10 +180,10 @@ workflows:
           package_version: 1.0.2
           requires:
             - dataprocessor_build
-          filters:
-            branches:
-              only:
-                - master
+#          filters:
+#            branches:
+#              only:
+#                - master
 
   pipeline_workflows:
     when: << pipeline.parameters.pipeline_workflows >>

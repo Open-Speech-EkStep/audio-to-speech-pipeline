@@ -6,7 +6,8 @@ application:
 
 downloader: ## data loader
   mode: 'video'
-  tobeprocessed_input_basepath: 'data/audiotospeech/raw/tobeprocessed/hindi/audio'
+  tobeprocessed_input_basepath: 'data/audiotospeech/raw/tobeprocessed/hindi/audio/'
+  local_data_path: ''
   convert_to_wav: True                       # convert audio file to wav
   output_wav_dir: null                       # output directory path for converted wav
 
