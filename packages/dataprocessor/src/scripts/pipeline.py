@@ -23,7 +23,7 @@ class AudioPipeline():
             read_dict = yaml.load(file)
         return read_dict
 
-    def download_input_blob(self, bucket_name, args_downloader, local_download_path):
+    def download_input_blob(self, obj_gcsops,bucket_name, args_downloader, local_download_path):
         current_working_directory = os.getcwd()
         obj_gcsops.download_to_local(bucket_name=bucket_name,
                                      source_blob_name=os.path.join(args_downloader['tobeprocessed_input_basepath'],
@@ -100,7 +100,7 @@ class AudioPipeline():
                                                data_source,
                                                audio_id)
             print("Initiating raw file download from cloud storage on to local...")
-            self.download_input_blob(bucket_name, args_downloader, local_download_path)
+            self.download_input_blob(obj_gcsops,bucket_name, args_downloader, local_download_path)
 
             print("Initiating srt file generation process...")
             srt_paths, wav_paths = self.generate_srt_file_single(obj_srt, args_srtgenerator, local_download_path,
