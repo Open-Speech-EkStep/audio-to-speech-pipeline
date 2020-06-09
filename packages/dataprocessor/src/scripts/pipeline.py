@@ -112,7 +112,7 @@ class AudioPipeline():
                                                                            srt_paths,
                                                                            args_clipaudio,
                                                                            data_source, audio_id)
-            print("********srt_path******", srt_paths)
+            print("********srt_paths******", srt_paths)
             print("********wav_paths******", wav_paths)
 
         else:
@@ -128,6 +128,8 @@ class AudioPipeline():
             print("********wav_paths******", wav_paths)
 
         for str_path, wav_path in zip(srt_paths, wav_paths):
+            print("***str_path is ****",str_path)
+            print("***wav_path is ****", wav_path)
             if (job_mode != "cluster"):
                 # output_dir = args_clipaudio['output_file_dir'] + '/' + data_source
                 # files_written, meta_files_written = obj_clip_audio.fit_dir(srt_dir=srt_paths,
