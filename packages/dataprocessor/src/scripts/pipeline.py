@@ -4,6 +4,7 @@ from .snr import SNR
 import os
 import time
 import yaml
+
 yaml.warnings({'YAMLLoadWarning': False})
 import glob, sys
 from .gcs_operations import CloudStorageOperations
@@ -23,7 +24,7 @@ class AudioPipeline():
             read_dict = yaml.load(file)
         return read_dict
 
-    def download_input_blob(self, obj_gcsops,bucket_name, args_downloader, local_download_path):
+    def download_input_blob(self, obj_gcsops, bucket_name, args_downloader, local_download_path):
         current_working_directory = os.getcwd()
         obj_gcsops.download_to_local(bucket_name=bucket_name,
                                      source_blob_name=os.path.join(args_downloader['tobeprocessed_input_basepath'],
@@ -66,10 +67,10 @@ class AudioPipeline():
                                    dump_response_directory=srtgenerator_dict['dump_response_directory'])
         return srt_path
 
-    def fetch_local_data(self, obj_gcsops, args_downloader, local_destination_path,audio_extn):
+    def fetch_local_data(self, obj_gcsops, args_downloader, local_destination_path, audio_extn):
         # obj_gcsops.make_directories(local_destination_path)
         local_src_path = args_downloader['local_data_path']
-        obj_gcsops.copy_all_files(local_src_path, local_destination_path,audio_extn)
+        obj_gcsops.copy_all_files(local_src_path, local_destination_path, audio_extn)
 
     def fit(self, yaml_file_path, bucket_name, data_source, audio_id, audio_extn, job_mode):
         pipeline_start_time = time.time()
@@ -100,7 +101,7 @@ class AudioPipeline():
                                                data_source,
                                                audio_id)
             print("Initiating raw file download from cloud storage on to local...")
-            self.download_input_blob(obj_gcsops,bucket_name, args_downloader, local_download_path)
+            self.download_input_blob(obj_gcsops, bucket_name, args_downloader, local_download_path)
 
             print("Initiating srt file generation process...")
             srt_paths, wav_paths = self.generate_srt_file_single(obj_srt, args_srtgenerator, local_download_path,
@@ -111,11 +112,13 @@ class AudioPipeline():
                                                                            srt_paths,
                                                                            args_clipaudio,
                                                                            data_source, audio_id)
+            print("********srt_path******", srt_paths)
+            print("********wav_paths******", wav_paths)
 
         else:
             local_download_path = os.path.join(args_downloader['tobeprocessed_input_basepath'],
                                                data_source)
-            self.fetch_local_data(obj_gcsops, args_downloader, local_download_path,audio_extn)
+            self.fetch_local_data(obj_gcsops, args_downloader, local_download_path, audio_extn)
 
             srt_paths, wav_paths = self.generate_srt_file_dir(obj_srt, bucket_name, args_srtgenerator,
                                                               local_download_path, audio_extn)
@@ -124,32 +127,32 @@ class AudioPipeline():
             print("********srt_path******", srt_paths)
             print("********wav_paths******", wav_paths)
 
-        for str_path,wav_path in zip(srt_paths,wav_paths):
+        for str_path, wav_path in zip(srt_paths, wav_paths):
             if (job_mode != "cluster"):
                 # output_dir = args_clipaudio['output_file_dir'] + '/' + data_source
                 # files_written, meta_files_written = obj_clip_audio.fit_dir(srt_dir=srt_paths,
                 #                                                            audio_dir=wav_paths,
                 #                                                            output_dir=output_dir)
 
-                audio_id=str_path.split('/')[-2]
+                audio_id = str_path.split('/')[-2]
 
                 print("Initiating clipping of audio and srt file process...")
-                clipped_files_dir, metadata_file_name = self.clip_audio_single(obj_clip_audio, current_working_directory,
-                                                                               str_path,
-                                                                               args_clipaudio,
-                                                                               data_source, audio_id)
+                self.single = self.clip_audio_single(obj_clip_audio, current_working_directory, str_path,
+                                                     args_clipaudio, data_source, audio_id)
+                clipped_files_dir, metadata_file_name = self.single
 
                 print("****clipped_files_dir****", clipped_files_dir)
                 print("****metadata_file_name****", metadata_file_name)
 
-
             print("Initiating snr process...")
             snr_obj = SNR()
+            print("*****before snr*******", args_snr['input_file_dir'])
             if args_snr['input_file_dir'] is not None:
+                print("**glob print***", glob.glob(args_snr['input_file_dir'] + '/*.wav'))
                 args_snr['input_file_dir'] = glob.glob(args_snr['input_file_dir'] + '/*.wav')
             else:
                 args_snr['input_file_dir'] = clipped_files_dir
-
+            print("*****after snr*******", args_snr['input_file_dir'])
             snr_obj.fit_and_move(input_file_dir=args_snr['input_file_dir'],
                                  metadata_file_name=metadata_file_name,
                                  output_file_dir=os.path.join(current_working_directory,
@@ -214,7 +217,6 @@ class AudioPipeline():
                                                       metadata_file_name.split('/')[-1].split('.')[0] + ".csv"),
                                          is_directory=False)
 
-
         pipeline_end_time = time.time()
         print("Pipeline took ", pipeline_end_time - pipeline_start_time, " seconds to run!")
 
@@ -246,7 +248,6 @@ if __name__ == "__main__":
     current_working_directory = os.getcwd()
     config_local_path = os.path.join(current_working_directory, "src/resources/" + job_mode + "/config.yaml")
     if (job_mode == "cluster"):
-
         # Download config file from GCS
         print("Downloading config file from cloud storage to local")
         obj_gcs = CloudStorageOperations()
