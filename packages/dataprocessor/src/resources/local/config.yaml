@@ -27,4 +27,4 @@ clipaudio:
 filtersnr:
   input_file_dir: null
   output_file_dir: null
-  threshold: 20
+  threshold: 15
