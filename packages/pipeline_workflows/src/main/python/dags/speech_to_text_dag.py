@@ -7,11 +7,11 @@ from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
-from moveFilesRawToprocessed_sttapi import get_audio_ids, get_files_from_landing_zone, move_raw_to_processed
+from speech_to_text_dag_processor import get_audio_ids, get_files_from_landing_zone, move_raw_to_processed
 
 source_batch_count = json.loads(Variable.get("sourcebatchcount"))
 tobe_processed_path = Variable.get("tobeprocessedpath")
-processed_path = Variable.get("processedpath")
+processed_path = Variable.get("rawprocessedpath")
 bucket_name = Variable.get("bucket")
 stt_config_path = Variable.get("sttconfigpath")
 source_audio_format = json.loads(Variable.get("sourceaudioformat"))
@@ -61,7 +61,7 @@ def create_dag(dag_id,
                 namespace='composer-1-10-4-airflow-1-10-6-6928624a',
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image='us.gcr.io/ekstepspeechrecognition/dataprocessor:1.0.1',
+                image='us.gcr.io/ekstepspeechrecognition/dataprocessor:1.0.2',
                 image_pull_policy='Always')
 
             move_to_processed = PythonOperator(

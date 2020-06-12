@@ -5,7 +5,6 @@ import os
 from os import listdir
 from os.path import isfile, join
 import gswrap
-# os.system("export GOOGLE_APPLICATION_CREDENTIALS=~/ekstepspeechrecognition-532504f2d2c1-composer.json")
 # [START storage_upload_file]
 from google.cloud import storage
 
@@ -165,61 +164,4 @@ def move_directory(bucket_name, source_path, destination_path):
 
 
 if __name__ == "__main__":
-    client = gswrap.Client()
-    client.cp(
-        src="gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/tobeprocessed/hindi/audio/joshtalks2/20200526134108684454",
-        dst="gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/processed/hindi/audio/joshtalks2/20200526134108684454",
-        recursive=True)
-
-    # blob_string=read_blob("ekstepspeechrecognition-dev","data/audiotospeech/raw/tobeprocessed/hindi/audio/joshtalks/audio_id/20200520225542180482/joshtalks_audio_id.txt")
-    # print(blob_string.splitlines())
-
-    # copy_blob("ekstepspeechrecognition-dev","data/audiotospeech/raw/tobeprocessed/hindi/audio/joshtalks2/20200526131714455493/*.mp4","ekstepspeechrecognition-dev",
-    #                                           "data/audiotospeech/raw/processed/hindi/audio/joshtalks2/20200526131714455493/")
-    #
-
-    # rename_blob(
-    #     bucket_name="sample-project-274716-bucket",
-    #     blob_name="data2/testfile1.txt",
-    #     new_name="data2/testfile2.txt"
-    # )
-
-    # copy_blob(
-    #     bucket_name="sample-project-274716-bucket",
-    #     blob_name="data2/testfile2.txt",
-    #     destination_bucket_name="sample-project-274716-bucket",
-    #     destination_blob_name="data/testfile2.txt",
-    # )
-    # check_blob("ekstepspeechrecognition-dev","data/audiotospeech/raw/landing/hindi/audio/joshtalks/0.txt")
-    # list_blobs_in_a_path("ekstepspeechrecognition-dev","data/audiotospeech/raw/landing/hindi/audio/joshtalks/",delimiter="/")
-    # print("only files")
-    # list_blobs("ekstepspeechrecognition-dev")
-
-    # upload_blob(
-    #     bucket_name="ekstepspeechrecognition-dev",   #"sample-project-274716-bucket",
-    #     source_file_name="/Users/gauravgupta/Documents/Gaurav/Projects/python-dev/data/data2/f20.txt",
-    #     destination_blob_name="test/f20.txt"
-    # )
-
-    # upload_files(
-    #     bucket_name="ekstepspeechrecognition-dev",
-    #     srcFolderPath="/Users/gauravgupta/Documents/Gaurav/Projects/python-dev/data/data2/",
-    #     bucketFolder="test/"
-    # )
-
-    # download_blob(
-    #     bucket_name="sample-project-274716-bucket",
-    #     source_blob_name="data2/placeholder.txt",
-    #     destination_file_name="/Users/gauravgupta/Documents/Gaurav/Projects/placeholder.txt"
-    # )
-
-    # from fsplit.filesplit import FileSplit
-    #
-    # fs = FileSplit(file='/Users/gauravgupta/Documents/Gaurav/Projects/python-dev/data/IITB_10000.txt', splitsize=30, output_dir='/Users/gauravgupta/Documents/Gaurav/Projects/python-dev/data/')
-
-    # df = pd.read_csv('/Users/gauravgupta/Documents/Gaurav/Projects/python-dev/data/IITB_20.txt',nrows=10,header=None,delimiter="\n")
-    # df.to_csv("/Users/gauravgupta/Documents/Gaurav/Projects/python-dev/data/test.txt")
-    # chunksize = 10
-    # TextFileReader
-    # for chunk in pd.read_csv("/Users/gauravgupta/Documents/Gaurav/Projects/python-dev/data/IITB_20.txt",delimiter="\n", chunksize=chunksize):
-    #     chunk.to_csv("/Users/gauravgupta/Documents/Gaurav/Projects/python-dev/data/test.txt")
+    pass

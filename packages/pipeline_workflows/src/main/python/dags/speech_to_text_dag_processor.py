@@ -3,7 +3,7 @@ import json
 import re
 import os
 
-from common import list_blobs_in_a_path, copy_blob, check_blob, \
+from gcs_utils import list_blobs_in_a_path, copy_blob, check_blob, \
     move_blob, upload_blob, read_blob, move_directory
 from airflow.models import Variable
 
@@ -22,7 +22,7 @@ def get_variables():
     source_landing_path = Variable.get("sourcelandingpath")
     error_landing_path = Variable.get("errorlandingpath")
     tobe_processed_path = Variable.get("tobeprocessedpath")
-    processed_path = Variable.get("processedpath")
+    processed_path = Variable.get("rawprocessedpath")
     bucket_name = Variable.get("bucket")
     source_batch_count = json.loads(Variable.get("sourcebatchcount"))
     meta_file_extention = Variable.get("metafileextension")
@@ -190,5 +190,3 @@ def move_raw_to_processed(source, audio_id, **kwargs):
 if __name__ == "__main__":
     pass
 
-    # for source, batch_count in source_batch_count.items():
-    #     get_files_from_landing_zone(source)
