@@ -12,16 +12,16 @@ parameters:
     default: false
   dataprocessor:
     type: boolean
-    default: true
+    default: false
   pipeline_workflows:
     type: boolean
     default: false
   data_cataloguer:
     type: boolean
-    default: true
+    default: false
   data_prep_cataloguer:
     type: boolean
-    default: true
+    default: false
 
 executors:
   node:
