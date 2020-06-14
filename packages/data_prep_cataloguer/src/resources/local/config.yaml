@@ -1,0 +1,5 @@
+db_configuration:
+    db_name: ''
+    db_pass: ''
+    db_user: ''
+    cloud_sql_connection_name: ''

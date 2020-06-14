@@ -1,0 +1,17 @@
+configuration:
+    num_speakers: 3
+    duration_per_speaker: 100
+    experiment_name: "exp30_test4_yaml1245"
+    experiment_description: "speaker diversity with thirty speakers"
+    source: "sourceName"
+    use_existing_experiment_data: False
+    existing_experiment_name: "test_exp"
+    number_of_speaker_from_existing_experiment: 0
+    metadata_output_path: 'data/experiments/input'
+    
+    
+db_configuration:
+    db_name: ''
+    db_pass: ''
+    db_user: ''
+    cloud_sql_connection_name: ''
