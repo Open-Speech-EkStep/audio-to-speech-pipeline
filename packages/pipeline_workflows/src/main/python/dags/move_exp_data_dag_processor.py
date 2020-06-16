@@ -51,33 +51,31 @@ def move_utterance_chunk(bucket_name, source_file_name, experiment_name):
 
 def copy_utterances(src_file_name, **kwargs):
     get_variables()
-    try:
-        extn_list = ['wav', 'txt']
-        local_file_name = bucket_name.split('/')[-1]
-        download_blob(bucket_name, src_file_name, local_file_name)
-        df = pd.read_csv(local_file_name)
-        for i, row in df.iterrows():
-            audio_id = row["audio_id"]
-            source = row["source"]
-            experiment_name = row["experiment_name"]
-            file_name = row["clipped_utterance_file_name"]
-            utterance_file_name = str(file_name).split(".")[0]
-            print(file_name, utterance_file_name, audio_id)
-            for extn in extn_list:
-                source_blob_name = integration_processed_path + source.lower() + "/" + str(
-                    audio_id) + "/clean/" + utterance_file_name + "." + extn
-                destination_blob_name = experiment_output + experiment_name + "/" + str(
-                    audio_id) + "/" + utterance_file_name + "." + extn
-                copy_blob(
-                    bucket_name=bucket_name,
-                    blob_name=source_blob_name,
-                    destination_bucket_name=bucket_name,
-                    destination_blob_name=destination_blob_name,
-                )
-        move_utterance_chunk(bucket_name, src_file_name, experiment_name)
+    extn_list = ['wav', 'txt']
+    local_file_name = bucket_name.split('/')[-1]
+    download_blob(bucket_name, src_file_name, local_file_name)
+    df = pd.read_csv(local_file_name)
+    for i, row in df.iterrows():
+        audio_id = row["audio_id"]
+        source = row["source"]
+        experiment_name = row["experiment_name"]
+        file_name = row["clipped_utterance_file_name"]
+        utterance_file_name = str(file_name).split(".")[0]
+        print(file_name, utterance_file_name, audio_id)
+        for extn in extn_list:
+            source_blob_name = integration_processed_path + source.lower() + "/" + str(
+                audio_id) + "/clean/" + utterance_file_name + "." + extn
+            destination_blob_name = experiment_output + experiment_name + "/" + str(
+                audio_id) + "/" + utterance_file_name + "." + extn
+            copy_blob(
+                bucket_name=bucket_name,
+                blob_name=source_blob_name,
+                destination_bucket_name=bucket_name,
+                destination_blob_name=destination_blob_name,
+            )
+    move_utterance_chunk(bucket_name, src_file_name, experiment_name)
 
-    finally:
-        print("All files have been copied")
+
 
 
 if __name__ == "__main__":

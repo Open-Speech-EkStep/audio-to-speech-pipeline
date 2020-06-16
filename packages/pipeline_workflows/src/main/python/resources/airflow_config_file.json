@@ -15,6 +15,7 @@
   "metafileextension" : ".csv",
   "utteranceschunkslist" : {"utteranceschunkslist":[]},
   "utteranceschunkpath" : "data/experiments/input/",
+  "utterancesconcurrentbatchcount" : 12,
   "archiveutterancespath" : "data/experiments/archive/",
   "sttconfigpath" : "data/audiotospeech/config/speechtotext/config.yaml",
   "sourceaudioformat" : {"brahmakumaris2":"mp3","joshtalks2":"mp4","youtube":"mp4","iitspokentutorial2":"mp4"},
