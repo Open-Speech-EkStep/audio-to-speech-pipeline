@@ -37,11 +37,11 @@ with dag:
     count_utterances_chunks_list
 
     utterances_chunks_list = json.loads(Variable.get("utteranceschunkslist"))
-
+    utterances_batch_count = Variable.get("utterancesconcurrentbatchcount")
     # print(utterances_chunks_list,type(utterances_chunks_list))
 
     for index, utterances_chunk in enumerate(utterances_chunks_list['utteranceschunkslist']):
-        if index > 11:
+        if index > (int(utterances_batch_count)-1):
             break
 
         else:
