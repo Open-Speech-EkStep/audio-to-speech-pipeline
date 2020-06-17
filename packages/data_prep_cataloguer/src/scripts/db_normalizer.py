@@ -8,7 +8,6 @@ from .db_query import MAX_LOAD_DATE_FOR_MEDIA_QUERY, INSERT_INTO_MEDIA_TABLE_QUE
 
 from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
-from dotenv import load_dotenv
 from .gcs_operations import CloudStorageOperations
 
 
@@ -37,14 +36,14 @@ class Db_normalizer():
             raise
 
 
-    def copy_data_from_media_metadata_staging_to_speaker(self,db):
-        connection = db.connect()
-        trans = connection.begin()
+    def copy_data_from_media_metadata_staging_to_speaker(self,connection):
+        # connection = db.connect()
+        # trans = connection.begin()
         try:
             connection.execute(INSERT_UNIQUE_SPEAKER_QUERY)
-            trans.commit()
+            # trans.commit()
         except:
-            trans.rollback()
+            # trans.rollback()
             raise
         # connection.commit()
 
@@ -59,8 +58,8 @@ class Db_normalizer():
         return speaker_id
 
 
-    def insert_file(self,connection):
-        with open("full_query.txt", 'r') as myfile:
+    def insert_file(self,connection,file_name):
+        with open(file_name, 'r') as myfile:
             content = myfile.read()
             clear_content = content[:-1]
             # connection = db.connect()
@@ -119,7 +118,7 @@ class Db_normalizer():
             for utterance_name_diration in utterance_list:
                 self.create_insert_query(utterance_name_diration, speaker_id,
                                     audio_id, get_load_datetime_for_audio, connection)
-            self.insert_file(connection)
+            self.insert_file(connection,"./full_query.txt")
         print(audio_ids)
 
 
@@ -165,13 +164,14 @@ if __name__ == "__main__":
 
     
     db = create_db_engine(config_local_path)
+    connection = db.connect()
 
     normalizer = Db_normalizer()
     print("moving data from staging to media......")
     normalizer.copy_data_from_media_metadata_staging_to_media(db)
     print("moving data from staging to media done")
     print("moving data from staging to speaker......")
-    normalizer.copy_data_from_media_metadata_staging_to_speaker(db)
+    normalizer.copy_data_from_media_metadata_staging_to_speaker(connection)
     print("moving data from staging to speaker done")
     print("moving data from staging to media_speaker_mapping ....")
     normalizer.copy_data_media_speaker_mapping(db)    

@@ -50,7 +50,7 @@ with models.DAG(
         # the recommended solution is to increase the amount of nodes in order
         # to satisfy the computing requirements. Alternatively, launching pods
         # into a custom namespace will stop fighting over resources.
-        namespace='composer-1-10-4-airflow-1-10-6-6928624a',
+        namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
         startup_timeout_seconds=300,
         secrets=[secret_file],
         image='us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:1.0.0',

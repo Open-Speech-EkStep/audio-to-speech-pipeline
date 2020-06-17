@@ -62,7 +62,7 @@ class ExperimentDataTagger():
 
     def insert_into_media_speaker_mapping(self, connection, insert_query):
         clear_content = insert_query[:-1]
-        connection = db.connect()
+        # connection = db.connect()
         connection.execute(clear_content)
         # trans.commit()
         print("insertion done")
@@ -107,7 +107,8 @@ class ExperimentDataTagger():
     def update_table(self, connection, query):
         remove_last_comma = query[:-1]
         clear_content = remove_last_comma + ")"
-        connection = db.connect()
+        # connection = db.connect()
+        print(clear_content)
         connection.execute(clear_content)
         print("update done")
 

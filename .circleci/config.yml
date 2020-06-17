@@ -15,13 +15,13 @@ parameters:
     default: false
   pipeline_workflows:
     type: boolean
-    default: false
+    default: true
   data_cataloguer:
     type: boolean
-    default: false
+    default: true
   data_prep_cataloguer:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:
