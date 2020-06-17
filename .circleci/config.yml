@@ -15,7 +15,7 @@ parameters:
     default: false
   pipeline_workflows:
     type: boolean
-    default: true
+    default: false
   data_cataloguer:
     type: boolean
     default: true
