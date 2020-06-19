@@ -24,3 +24,7 @@ class TestExperimentDataTagger(unittest.TestCase):
         self.tagger.insert_into_media_speaker_mapping(self.conn,"insert into media_speaker_mapping(audio_id, speaker_id, clipped_utterance_file_name, clipped_utterance_duration,\
         load_datetime,experiment_id,experiment_use_status,speaker_exp_use_status) values (234,32,'abc.wav',3,2342,111,'true','true'),(234,32,'abc.wav',3,2342,111,'true','true'),")
         self.assertEqual(find_count(self.c,'media_speaker_mapping'),4)
+
+    def test_clean_duration_threshold_should_return_right_query(self):
+        result = self.tagger.clean_duration_threshold([(123,'file_name',1),(123,'file_name1',2),(123,'file_name2',1)],3,3)
+        self.assertEqual(result,"update media_speaker_mapping_test_with_yaml set experiment_use_status = true,experiment_id= 3 WHERE clipped_utterance_file_name IN ( 'file_name','file_name1',")

@@ -94,14 +94,16 @@ class ExperimentDataTagger():
             query, speaker_id=speaker_id).fetchall()
         return results
 
-    def clean_duration_threshold(self, get_all_utterances, current_exp_id, clean_duration=0):
+    def clean_duration_threshold(self, get_all_utterances, current_exp_id,duration_per_speaker_in_second, clean_duration=0):
         update_utterances_query = f"update media_speaker_mapping_test_with_yaml set experiment_use_status = true,experiment_id= {current_exp_id} WHERE clipped_utterance_file_name IN ( "
         for utterance in get_all_utterances:
             clean_duration += utterance[2]
-            if clean_duration >= duration_per_speaker_in_second:
-                return update_utterances_query
             update_utterances_query = update_utterances_query + \
                 f"'{utterance[1]}',"
+            if clean_duration >= duration_per_speaker_in_second:
+                return update_utterances_query
+            # update_utterances_query = update_utterances_query + \
+            #     f"'{utterance[1]}',"
         return update_utterances_query
 
     def update_table(self, connection, query):
@@ -120,7 +122,7 @@ class ExperimentDataTagger():
                 f"{speaker_id[0]},"
             get_all_utterances = self.get_utterances(connection, speaker_id[0])
             update_query = self.clean_duration_threshold(
-                get_all_utterances, current_exp_id)
+                get_all_utterances, current_exp_id,duration_per_speaker_in_second)
             self.update_table(connection, update_query)
         self.update_table(connection, update_query_for_all_speaker)
 
