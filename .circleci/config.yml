@@ -12,16 +12,16 @@ parameters:
     default: false
   dataprocessor:
     type: boolean
-    default: true
+    default: false
   pipeline_workflows:
     type: boolean
     default: true
-  data_cataloguer:
+  data_tagger:
     type: boolean
-    default: false
+    default: true
   data_prep_cataloguer:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:
@@ -190,18 +190,18 @@ workflows:
         #      only:
         #        - master
 
-  data_cataloguer:
-    when: << pipeline.parameters.data_cataloguer >>
+  data_tagger:
+    when: << pipeline.parameters.data_tagger >>
     jobs:
       - build:
-          name: data_cataloguer_build
-          package_name: data_cataloguer
+          name: data_tagger_build
+          package_name: data_tagger
       - deploy:
-          name: data_cataloguer_deploy
-          package_name: data_cataloguer
+          name: data_tagger_deploy
+          package_name: data_tagger
           package_version: 1.0.0
           requires:
-            - data_cataloguer_build
+            - data_tagger_build
           # filters:
           #   branches:
           #     only:

@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #Fetch current Composer environment details
-COMPOSER_ENV=""
+COMPOSER_ENV="composer"
 PROJECT_NAME="ekstepspeechrecognition"
-LOCATION="us-central1"
+LOCATION="us-east1"
 for env in  $(gcloud composer environments list --project=$PROJECT_NAME --locations=$LOCATION --format="value(NAME)")
 do
   if [ -z "$env" ]; then 
