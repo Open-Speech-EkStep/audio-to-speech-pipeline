@@ -12,7 +12,7 @@ parameters:
     default: false
   dataprocessor:
     type: boolean
-    default: false
+    default: True
   pipeline_workflows:
     type: boolean
     default: true
@@ -99,14 +99,14 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
             python --version ; pip --version ; pwd ; ls
-      # - run:
-      #     name: Run Tests
-      #     command: |
-      #       coverage run -m unittest discover src/tests
-      #       coverage report
-      #       coverage html  # open htmlcov/index.html in a browser
-      # - store_artifacts:
-      #     path: htmlcov
+       - run:
+           name: Run Tests
+           command: |
+             coverage run -m unittest discover src/tests
+             coverage report
+             coverage html  # open htmlcov/index.html in a browser
+       - store_artifacts:
+           path: htmlcov
       - persist_to_workspace:
           root: ~/project
           paths:
@@ -114,7 +114,7 @@ jobs:
 
   deploy:
     parameters:
-      package_name:
+      package_name: dataprocessor
         type: string
       package_version:
         type: string
