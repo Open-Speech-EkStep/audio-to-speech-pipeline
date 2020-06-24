@@ -99,7 +99,7 @@ class TestSRTGenerator(unittest.TestCase):
             {'language_code': 'hi-IN', 'sample_rate_hertz': 16000,  # check for config file passed in speech
              'encoding': enums.RecognitionConfig.AudioEncoding.LINEAR16,
              'audio_channel_count': 1, 'enable_word_time_offsets': True,
-             'enable_automatic_punctuation': False}, {'uri': 'test_resources/input/test.wav'})
+             'enable_automatic_punctuation': False}, {'uri': 'src/tests/test_resources/input/test.wav'})
 
     @mock.patch("google.cloud.speech_v1.SpeechClient")
     def test_call_speech_text_check_api_response(self, mock_speech):

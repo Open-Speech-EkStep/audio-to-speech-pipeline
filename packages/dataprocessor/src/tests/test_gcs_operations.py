@@ -37,24 +37,24 @@ class TestGCSOperation(unittest.TestCase):
     @mock.patch("google.cloud.storage.Client")
     def test_upload_to_gcs_with_directory_mode(self, mock_client):
         ob = CloudStorageOperations()
-        ob.upload_to_gcs("Bucket", "src/tests/test_resources/input", "destination_blob_name", True)
+        ob.upload_to_gcs("Bucket", "src/tests/test_resources/res", "destination_blob_name", True)
         bucket = mock_client().bucket
         bucket.assert_called_with("Bucket")
         destination_blob = mock_client().bucket().blob
-        destination_blob.assert_called_with('destination_blob_name/test.wav')
+        destination_blob.assert_called_with('destination_blob_name/20052020_075124_1.mp4')
         blob_upload = destination_blob().upload_from_filename
-        blob_upload.assert_called_with('src/tests/test_resources/input/test.wav')
+        blob_upload.assert_called_with('src/tests/test_resources/res/20052020_075124_1.mp4')
 
     @mock.patch("google.cloud.storage.Client")
     def test_upload_to_gcs_with_file_mode(self, mock_client):
         ob = CloudStorageOperations()
-        ob.upload_to_gcs("Bucket", "src/tests/test_resources/input/test.wav", "destination_blob_name", False)
+        ob.upload_to_gcs("Bucket", "src/tests/test_resources/res/20052020_075124_1.mp4", "destination_blob_name", False)
         bucket = mock_client().bucket
         bucket.assert_called_with("Bucket")
         destination_blob = mock_client().bucket().blob
         destination_blob.assert_called_with('destination_blob_name')
         blob_upload = destination_blob().upload_from_filename
-        blob_upload.assert_called_with('src/tests/test_resources/input/test.wav')
+        blob_upload.assert_called_with('src/tests/test_resources/res/20052020_075124_1.mp4')
 
 
 if __name__ == '__main__':
