@@ -1,7 +1,7 @@
 import unittest
 import sqlite3
 from unittest import mock
-from src.scripts.data_tagger import ExperimentDataTagger, validate_input
+from src.scripts.data_tagger import ExperimentDataTagger, validate_input,validate_existing_exp_input
 
 from src.tests.tests_resources.initialize_db import create_db, find_used_speaker_count, find_count
 
@@ -33,26 +33,36 @@ class TestExperimentDataTagger(unittest.TestCase):
         self.assertEqual(
             result, "update media_speaker_mapping_test_with_yaml set experiment_use_status = true,experiment_id= 3 WHERE clipped_utterance_file_name IN ( 'file_name','file_name1',")
 
-    def test_validate_input_should_not_raised_exception(self):
+    def test_validate_input_should_not_raised_exception_for_valid_input(self):
         raised = False
         try:
-            validate_input(4,5)
+            validate_input(4,5,'exp10')
         except:
             raised = True
-        self.assertFalse(raised, 'Exception raised')
+        self.assertFalse(raised, 'Exception not raised')
 
     def test_validate_input_should_throw_exception_if_input_value_is_zero(self):
-        self.assertRaises(ValueError,validate_input,0,0)
+        self.assertRaises(ValueError,validate_input,0,0,'exp10')
 
     def test_validate_input_should_throw_exception_if_num_speaker_is_zero(self):
-        self.assertRaises(ValueError,validate_input,0,5)
+        self.assertRaises(ValueError,validate_input,0,5,'exp10')
 
-    def test_validate_input_should_throw_exception_if_we_not_give_any_input(self):
-            self.assertRaises(ValueError,validate_input,'','')
+    def test_validate_input_should_throw_exception_input_type_is_not_int(self):
+            self.assertRaises(ValueError,validate_input,' ',' ','exp10')
 
-    # def test(self):
-    #     # with self.assertRaises(Exception) as context:
-    #     validate_input(0,1)
+    def test_validate_input_should_raised_exception_if_exp_name_is_null(self):
+        self.assertRaises(ValueError,validate_input,2,3,'   ')
 
-    #     with self.assertRaises(ValueError):
-    #         "value should be greater than or equal to one"
+    def test_validate_existing_exp_input_should_not_raised_exception_for_existing_exp_is_False(self):
+        raised = False
+        try:
+            validate_existing_exp_input(False,0,'  ')
+        except:
+            raised = True
+        self.assertFalse(raised, 'Exception not raised')
+
+    def test_validate_existing_exp_input_should_throw_exception_if_num_speaker_is_zero_and_existing_exp_is_true(self):
+        self.assertRaises(ValueError,validate_existing_exp_input,True,0,'exp10')
+
+    def test_validate_existing_exp_input_should_throw_exception_if_exp_name_is_empty_and_existing_exp_is_true(self):
+            self.assertRaises(ValueError,validate_existing_exp_input,True,6,'   ')

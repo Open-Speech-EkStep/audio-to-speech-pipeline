@@ -170,12 +170,21 @@ def get_variables(config_file_path):
         'number_of_speaker_from_existing_experiment']
     duration_per_speaker_in_second = duration_per_speaker_in_minute*60
     require_new_speaker = num_speakers-number_of_speaker_from_existing_experiment
-    validate_input(num_speakers, duration_per_speaker_in_second)
+    validate_input(num_speakers, duration_per_speaker_in_second,experiment_name)
+    validate_existing_exp_input(use_existing_experiment_data,number_of_speaker_from_existing_experiment,existing_experiment_name)
 
 
-def validate_input(num_speakers, duration_per_speaker_in_second):
-    if(not num_speakers or num_speakers <= 0 or not duration_per_speaker_in_second or duration_per_speaker_in_second <= 0):
-        raise ValueError("value should be greater than or equal to one")
+def validate_input(num_speakers, duration_per_speaker_in_second,experiment_name):
+    if(not isinstance(num_speakers, int) or not isinstance(duration_per_speaker_in_second, int) or
+       not num_speakers or num_speakers <= 0 or not duration_per_speaker_in_second or
+       duration_per_speaker_in_second <= 0 or len(experiment_name.strip()) <= 0):
+        raise ValueError("value of num_speakers, duration should be greater than or equal to one and type is int and exp_name should more than one char")
+
+def validate_existing_exp_input(use_existing_experiment_data,number_of_speaker_from_existing_experiment,existing_experiment_name):
+    if(use_existing_experiment_data==True):
+        if(len(existing_experiment_name.strip()) <= 0 or not isinstance(number_of_speaker_from_existing_experiment,int) or
+        not number_of_speaker_from_existing_experiment or number_of_speaker_from_existing_experiment <=0):
+            raise ValueError("value  of number_of_speaker_from_existing_experiment should be greater than or equal to one and int and exp_name should be valid")
 
 
 def __load_yaml_file(path):
