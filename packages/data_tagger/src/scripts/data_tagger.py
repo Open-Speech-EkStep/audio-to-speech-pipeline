@@ -94,7 +94,7 @@ class ExperimentDataTagger():
             query, speaker_id=speaker_id).fetchall()
         return results
 
-    def clean_duration_threshold(self, get_all_utterances, current_exp_id,duration_per_speaker_in_second, clean_duration=0):
+    def clean_duration_threshold(self, get_all_utterances, current_exp_id, duration_per_speaker_in_second, clean_duration=0):
         update_utterances_query = f"update media_speaker_mapping_test_with_yaml set experiment_use_status = true,experiment_id= {current_exp_id} WHERE clipped_utterance_file_name IN ( "
         for utterance in get_all_utterances:
             clean_duration += utterance[2]
@@ -122,7 +122,7 @@ class ExperimentDataTagger():
                 f"{speaker_id[0]},"
             get_all_utterances = self.get_utterances(connection, speaker_id[0])
             update_query = self.clean_duration_threshold(
-                get_all_utterances, current_exp_id,duration_per_speaker_in_second)
+                get_all_utterances, current_exp_id, duration_per_speaker_in_second)
             self.update_table(connection, update_query)
         self.update_table(connection, update_query_for_all_speaker)
 
@@ -170,6 +170,12 @@ def get_variables(config_file_path):
         'number_of_speaker_from_existing_experiment']
     duration_per_speaker_in_second = duration_per_speaker_in_minute*60
     require_new_speaker = num_speakers-number_of_speaker_from_existing_experiment
+    validate_input(num_speakers, duration_per_speaker_in_second)
+
+
+def validate_input(num_speakers, duration_per_speaker_in_second):
+    if(not num_speakers or num_speakers <= 0 or not duration_per_speaker_in_second or duration_per_speaker_in_second <= 0):
+        raise ValueError("value should be greater than or equal to one")
 
 
 def __load_yaml_file(path):
@@ -210,22 +216,25 @@ if __name__ == "__main__":
                                   source_blob_name=config_path,
                                   destination=config_local_path,
                                   is_directory=False)
-
-    get_variables(config_local_path)
-
-    db = create_db_engine(config_local_path)
-
-    tagging_data = ExperimentDataTagger()
-    print("tagging data started.......")
-    current_exp_id = tagging_data.create_new_experiment(db)
-    print("tagging is done")
-    print("genration of csv is started")
-    obj_gcs.make_directories(os.path.join(current_working_directory,metadata_output_path))
-    get_all_tegged_data_csv(current_exp_id)
-    print("genration csv is done")
-    print("uploading csv to gcs...")
-    if (job_mode == "cluster"):
-        obj_gcs.upload_to_gcs(bucket_name=gcs_bucket_name,
-                                    source=os.path.join(current_working_directory,metadata_output_path),
-                                    destination_blob_name=metadata_output_path,
-                                    is_directory=True)
+    try:
+        get_variables(config_local_path)
+    except ValueError as e:
+        print(e)
+    else:
+        db = create_db_engine(config_local_path)
+        tagging_data = ExperimentDataTagger()
+        print("tagging data started.......")
+        current_exp_id = tagging_data.create_new_experiment(db)
+        print("tagging is done")
+        print("genration of csv is started")
+        obj_gcs.make_directories(os.path.join(
+            current_working_directory, metadata_output_path))
+        get_all_tegged_data_csv(current_exp_id)
+        print("genration csv is done")
+        print("uploading csv to gcs...")
+        if (job_mode == "cluster"):
+            obj_gcs.upload_to_gcs(bucket_name=gcs_bucket_name,
+                                  source=os.path.join(
+                                      current_working_directory, metadata_output_path),
+                                  destination_blob_name=metadata_output_path,
+                                  is_directory=True)

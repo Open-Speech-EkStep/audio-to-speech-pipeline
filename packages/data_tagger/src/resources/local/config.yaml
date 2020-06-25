@@ -1,5 +1,5 @@
 configuration:
-    num_speakers: 
+    num_speakers: 0
     duration_per_speaker: 100
     experiment_name: "exp30_test4_yaml12451"
     experiment_description: "speaker diversity with thirty speakers"

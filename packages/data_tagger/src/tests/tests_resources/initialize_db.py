@@ -41,10 +41,8 @@ def create_db(c,conn):
 
 def find_count(c,table_name):
     count = c.execute(f'select count(*) from {table_name}').fetchall()
-    print(count)
     return count[0][0]
 
 def find_used_speaker_count(c):
-    count = c.execute('select count(*) from media_speaker_mapping where speaker_exp_use_status = true').fetchall()
-    print(count)
+    count = c.execute("select count(*) from media_speaker_mapping where speaker_exp_use_status = 'true'").fetchall()
     return count[0][0]
