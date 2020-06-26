@@ -3,7 +3,9 @@ import json
 import csv
 import yaml
 import sys
-from .db_query import GET_NEW_SPEAKER, GET_EXPERIMENT_ID, GET_ALL_SPEAKER_ID_FROM_GIVEN_EXP, INSERT_NEW_EXPERIMENT, INITIAL_TEXT_OF_INSERT_QUERY, GET_NEW_SPEAKER, GET_UTTERANCES_OF_GIVEN_EXP, GET_UTTERANCES_OF_NEW_USER, INITIAL_TEXT_OF_UPDATE_QUERY, GET_ALL_DATA_OF_CURRENT_EXP
+from .db_query import GET_NEW_SPEAKER, GET_EXPERIMENT_ID, GET_ALL_SPEAKER_ID_FROM_GIVEN_EXP,\
+     INSERT_NEW_EXPERIMENT, INITIAL_TEXT_OF_INSERT_QUERY, GET_NEW_SPEAKER, GET_UTTERANCES_OF_GIVEN_EXP,\
+        GET_UTTERANCES_OF_NEW_USER, INITIAL_TEXT_OF_UPDATE_QUERY, GET_ALL_DATA_OF_CURRENT_EXP,GET_NEW_SPEAKER_WITH_SOURCE
 from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
 from sqlalchemy.orm import Session
@@ -134,7 +136,7 @@ def get_all_tegged_data_csv(exp_id):
     with open(metadata_output_path+'/all_tagged_data.csv', 'w') as f:
         out = csv.writer(f)
         out.writerow(['audio_id', 'clipped_utterance_file_name',
-                      'source', 'experiment_name'])
+                      'source', 'experiment_name','clipped_utterance_duration'])
         for index, item in enumerate(result):
             if index % 5000 == 0 and index != 0:
                 f.close()
@@ -142,7 +144,7 @@ def get_all_tegged_data_csv(exp_id):
                     f'{metadata_output_path}/all_tagged_data{index}.csv', 'w')
                 out = csv.writer(f)
                 out.writerow(
-                    ['audio_id', 'clipped_utterance_file_name', 'source', 'experiment_name'])
+                    ['audio_id', 'clipped_utterance_file_name', 'source', 'experiment_name','clipped_utterance_duration'])
             out.writerow(item)
 
 
@@ -158,6 +160,7 @@ def get_variables(config_file_path):
     global existing_experiment_name
     global number_of_speaker_from_existing_experiment
     global metadata_output_path
+    global source
 
     experiment_name = configuration['experiment_name']
     num_speakers = configuration['num_speakers']
@@ -168,6 +171,7 @@ def get_variables(config_file_path):
     metadata_output_path = configuration['metadata_output_path']
     number_of_speaker_from_existing_experiment = configuration[
         'number_of_speaker_from_existing_experiment']
+    source = configuration['source']
     duration_per_speaker_in_second = duration_per_speaker_in_minute*60
     require_new_speaker = num_speakers-number_of_speaker_from_existing_experiment
     validate_input(num_speakers, duration_per_speaker_in_second,experiment_name)

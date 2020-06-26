@@ -6,11 +6,13 @@ INITIAL_TEXT_OF_INSERT_QUERY = "insert into media_speaker_mapping_test_with_yaml
         load_datetime,experiment_id,experiment_use_status,speaker_exp_use_status) values "
 GET_NEW_SPEAKER = "SELECT speaker_id \
         FROM media_speaker_mapping_test_with_yaml where speaker_exp_use_status = false group by speaker_id HAVING SUM(clipped_utterance_duration) >= :time limit :require_speaker;"
+GET_NEW_SPEAKER_WITH_SOURCE = "SELECT speaker_id FROM media_speaker_mapping_test_with_yaml msm LEFT JOIN media ON media.audio_id = msm.audio_id \
+         where speaker_exp_use_status = false and media.source = :source_name group by speaker_id HAVING SUM(clipped_utterance_duration) >= :time limit :require_speaker;"        
 GET_UTTERANCES_OF_GIVEN_EXP = "select * from media_speaker_mapping_test_with_yaml where speaker_id = :speaker_id and experiment_use_status = true and experiment_id = :exp_id;"
 GET_UTTERANCES_OF_NEW_USER = "select * from media_speaker_mapping_test_with_yaml where speaker_id = :speaker_id and experiment_use_status = false;"
 INITIAL_TEXT_OF_UPDATE_QUERY = "update media_speaker_mapping_test_with_yaml set speaker_exp_use_status = true WHERE speaker_id IN ( "
 
-GET_ALL_DATA_OF_CURRENT_EXP = "SELECT msm.audio_id, msm.clipped_utterance_file_name, media.source,experiment.experiment_name \
+GET_ALL_DATA_OF_CURRENT_EXP = "SELECT msm.audio_id, msm.clipped_utterance_file_name, media.source,experiment.experiment_name, msm.clipped_utterance_duration \
         FROM media_speaker_mapping_test_with_yaml msm \
         LEFT JOIN media ON media.audio_id = msm.audio_id \
         LEFT JOIN experiment ON msm.experiment_id = experiment.experiment_id \
