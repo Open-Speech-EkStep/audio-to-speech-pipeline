@@ -3,6 +3,9 @@ import datetime
 from airflow import models
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
+from airflow.models import Variable
+
+composer_namespace = Variable.get("composer_namespace")
 
 default_args = {
     'email': ['gaurav.gupta@thoughtworks.com']
@@ -51,7 +54,9 @@ with models.DAG(
         # the recommended solution is to increase the amount of nodes in order
         # to satisfy the computing requirements. Alternatively, launching pods
         # into a custom namespace will stop fighting over resources.
-        namespace='composer-1-10-4-airflow-1-10-6-6928624a',
+
+        # namespace='composer-1-10-4-airflow-1-10-6-6928624a',
+        namespace=composer_namespace,
         startup_timeout_seconds=300,
         secrets=[secret_file],
         image='us.gcr.io/ekstepspeechrecognition/datacollector_youtube:2.0.0',

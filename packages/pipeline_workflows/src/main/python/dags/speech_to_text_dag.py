@@ -15,7 +15,7 @@ processed_path = Variable.get("rawprocessedpath")
 bucket_name = Variable.get("bucket")
 stt_config_path = Variable.get("sttconfigpath")
 source_audio_format = json.loads(Variable.get("sourceaudioformat"))
-
+composer_namespace = Variable.get("composer_namespace")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
 secret_file = secret.Secret(
@@ -54,8 +54,10 @@ def create_dag(dag_id,
         data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
             task_id='data-prep-cataloguer',
             name='data-prep-cataloguer',
-            cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", "ekstepspeechrecognition-dev", "data/audiotospeech/config/datacataloguer-prep/config.yaml"],
-            namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
+            cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", "ekstepspeechrecognition-dev",
+                  "data/audiotospeech/config/datacataloguer-prep/config.yaml"],
+            # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
+            namespace=composer_namespace,
             startup_timeout_seconds=300,
             secrets=[secret_file],
             image='us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:1.0.0',
@@ -66,9 +68,10 @@ def create_dag(dag_id,
             data_prep_task = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id=dag_id + "_data_prep_" + audio_file_id,
                 name='data-prep-stt',
-                cmds=["python","-m" ,"src.scripts.pipeline", "cluster", bucket_name, stt_config_path, dag_id,
+                cmds=["python", "-m", "src.scripts.pipeline", "cluster", bucket_name, stt_config_path, dag_id,
                       audio_file_id, source_audio_format[dag_id]],
-                namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
+                # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
+                namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
                 image='us.gcr.io/ekstepspeechrecognition/dataprocessor:1.0.0',
