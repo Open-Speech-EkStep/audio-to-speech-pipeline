@@ -4,8 +4,8 @@ import csv
 import yaml
 import sys
 from .db_query import GET_NEW_SPEAKER, GET_EXPERIMENT_ID, GET_ALL_SPEAKER_ID_FROM_GIVEN_EXP,\
-     INSERT_NEW_EXPERIMENT, INITIAL_TEXT_OF_INSERT_QUERY, GET_NEW_SPEAKER, GET_UTTERANCES_OF_GIVEN_EXP,\
-        GET_UTTERANCES_OF_NEW_USER, INITIAL_TEXT_OF_UPDATE_QUERY, GET_ALL_DATA_OF_CURRENT_EXP,GET_NEW_SPEAKER_WITH_SOURCE
+    INSERT_NEW_EXPERIMENT, INITIAL_TEXT_OF_INSERT_QUERY, GET_NEW_SPEAKER, GET_UTTERANCES_OF_GIVEN_EXP,\
+    GET_UTTERANCES_OF_NEW_USER, INITIAL_TEXT_OF_UPDATE_QUERY, GET_ALL_DATA_OF_CURRENT_EXP, GET_NEW_SPEAKER_WITH_SOURCE
 from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
 from sqlalchemy.orm import Session
@@ -79,10 +79,17 @@ class ExperimentDataTagger():
             f"({utterance[6]},{speaker_id},'{utterance[1]}',{utterance[2]},'{utterance[4]}',{current_exp_id},true,true),"
 
     def find_all_speaker(self, connection):
-        query = text(GET_NEW_SPEAKER)
-        results = connection.execute(
-            query, time=duration_per_speaker_in_second, require_speaker=require_new_speaker).fetchall()
-        return results
+        if(len(source) > 1 and not isinstance(source, int)):
+            query = text(GET_NEW_SPEAKER_WITH_SOURCE)
+            results = connection.execute(
+                query, time=duration_per_speaker_in_second, require_speaker=require_new_speaker, source_name=source).fetchall()
+            print(results)
+            return results
+        else:
+            query = text(GET_NEW_SPEAKER)
+            results = connection.execute(
+                query, time=duration_per_speaker_in_second, require_speaker=require_new_speaker).fetchall()
+            return results
 
     def get_utterances_for_existing_experiment_data(self, connection, speaker_id, exp_id):
         query = text(GET_UTTERANCES_OF_GIVEN_EXP)
@@ -136,7 +143,7 @@ def get_all_tegged_data_csv(exp_id):
     with open(metadata_output_path+'/all_tagged_data.csv', 'w') as f:
         out = csv.writer(f)
         out.writerow(['audio_id', 'clipped_utterance_file_name',
-                      'source', 'experiment_name','clipped_utterance_duration'])
+                      'source', 'experiment_name', 'clipped_utterance_duration'])
         for index, item in enumerate(result):
             if index % 5000 == 0 and index != 0:
                 f.close()
@@ -144,7 +151,7 @@ def get_all_tegged_data_csv(exp_id):
                     f'{metadata_output_path}/all_tagged_data{index}.csv', 'w')
                 out = csv.writer(f)
                 out.writerow(
-                    ['audio_id', 'clipped_utterance_file_name', 'source', 'experiment_name','clipped_utterance_duration'])
+                    ['audio_id', 'clipped_utterance_file_name', 'source', 'experiment_name', 'clipped_utterance_duration'])
             out.writerow(item)
 
 
@@ -174,21 +181,26 @@ def get_variables(config_file_path):
     source = configuration['source']
     duration_per_speaker_in_second = duration_per_speaker_in_minute*60
     require_new_speaker = num_speakers-number_of_speaker_from_existing_experiment
-    validate_input(num_speakers, duration_per_speaker_in_second,experiment_name)
-    validate_existing_exp_input(use_existing_experiment_data,number_of_speaker_from_existing_experiment,existing_experiment_name)
+    validate_input(num_speakers, duration_per_speaker_in_second,
+                   experiment_name)
+    validate_existing_exp_input(use_existing_experiment_data,
+                                number_of_speaker_from_existing_experiment, existing_experiment_name)
 
 
-def validate_input(num_speakers, duration_per_speaker_in_second,experiment_name):
+def validate_input(num_speakers, duration_per_speaker_in_second, experiment_name):
     if(not isinstance(num_speakers, int) or not isinstance(duration_per_speaker_in_second, int) or
        not num_speakers or num_speakers <= 0 or not duration_per_speaker_in_second or
        duration_per_speaker_in_second <= 0 or len(experiment_name.strip()) <= 0):
-        raise ValueError("value of num_speakers, duration should be greater than or equal to one and type is int and exp_name should more than one char")
+        raise ValueError(
+            "value of num_speakers, duration should be greater than or equal to one and type is int and exp_name should more than one char")
 
-def validate_existing_exp_input(use_existing_experiment_data,number_of_speaker_from_existing_experiment,existing_experiment_name):
-    if(use_existing_experiment_data==True):
-        if(len(existing_experiment_name.strip()) <= 0 or not isinstance(number_of_speaker_from_existing_experiment,int) or
-        not number_of_speaker_from_existing_experiment or number_of_speaker_from_existing_experiment <=0):
-            raise ValueError("value  of number_of_speaker_from_existing_experiment should be greater than or equal to one and int and exp_name should be valid")
+
+def validate_existing_exp_input(use_existing_experiment_data, number_of_speaker_from_existing_experiment, existing_experiment_name):
+    if(use_existing_experiment_data == True):
+        if(len(existing_experiment_name.strip()) <= 0 or not isinstance(number_of_speaker_from_existing_experiment, int) or
+           not number_of_speaker_from_existing_experiment or number_of_speaker_from_existing_experiment <= 0):
+            raise ValueError(
+                "value  of number_of_speaker_from_existing_experiment should be greater than or equal to one and int and exp_name should be valid")
 
 
 def __load_yaml_file(path):
