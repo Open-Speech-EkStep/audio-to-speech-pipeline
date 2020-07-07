@@ -244,7 +244,7 @@ if __name__ == "__main__":
     try:
         get_variables(config_local_path)
     except ValueError as e:
-        print(e)
+        raise e
     else:
         db = create_db_engine(config_local_path)
         tagging_data = ExperimentDataTagger()
