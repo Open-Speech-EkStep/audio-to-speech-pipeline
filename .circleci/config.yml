@@ -64,10 +64,10 @@ jobs:
       - run:
           name: Deploy Pipeline Workflow DAG
           command: |
+            gcloud components update
             echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GCP_PROJECT}
-            gcloud components install kubectl
             sh ~/project/packages/<< parameters.package_name >>/deployDAG.sh
             rm ${HOME}/gcp-key.json
 
