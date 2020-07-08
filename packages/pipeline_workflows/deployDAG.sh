@@ -17,6 +17,7 @@ done
 variables_json="./src/main/python/resources/airflow_config_file.json"
 echo "$variables_json file"
 echo "$PATH path "
+echo "$(python -V)"
 alias python3='python'
 sudo -E env "PATH=$PATH" gcloud --quiet components update
 sudo -E env "PATH=$PATH" gcloud --quiet components update kubectl
