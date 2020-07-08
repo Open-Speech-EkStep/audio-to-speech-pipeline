@@ -14,7 +14,8 @@ do
   echo "Composer environment name: $COMPOSER_ENV" 
 done
 #Upload env variables
-variables_json = ./src/main/python/resources/airflow_config_file.json
+variables_json = "./src/main/python/resources/airflow_config_file.json"
+echo "$variables_json file"
 
 gcloud composer environments storage data import --environment $COMPOSER_ENV --location $LOCATION --source $variables_json
 gcloud composer environments run $COMPOSER_ENV --location $LOCATION variables -- --import /home/airflow/gcs/data/airflow_config_file.json
