@@ -18,6 +18,7 @@ variables_json="./src/main/python/resources/airflow_config_file.json"
 echo "$variables_json file"
 echo "$PATH path "
 sudo -E env "PATH=$PATH" gcloud --quiet components update
+sudo -E env "PATH=$PATH" gcloud --quiet components update kubectl
 sudo chmod 757 /home/ubuntu/.config/gcloud/logs -R
 composer=$(gcloud composer environments describe $COMPOSER_ENV --location $LOCATION | grep  "gkeCluster" | cut -d '/' -f 6-)
 gcloud container clusters get-credentials $composer --zone us-east1-b --project $PROJECT_NAME
