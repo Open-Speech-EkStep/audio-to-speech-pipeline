@@ -17,7 +17,7 @@ done
 variables_json="./src/main/python/resources/airflow_config_file.json"
 echo "$variables_json file"
 echo "$PATH path "
-sudo -E env "PATH=$PATH" gcloud --quiet components update kubectl
+sudo -E env "PATH=$PATH" gcloud --quiet components update
 sudo chmod 757 /home/ubuntu/.config/gcloud/logs -R
 composer=$(gcloud composer environments describe $COMPOSER_ENV --location $LOCATION | grep  "gkeCluster" | cut -d '/' -f 6-)
 gcloud container clusters get-credentials $composer --zone us-east1-b --project $PROJECT_NAME
@@ -25,7 +25,7 @@ gcloud container clusters get-credentials $composer --zone us-east1-b --project 
 # sudo gcloud components install kubectl
 
 gcloud composer environments storage data import --environment $COMPOSER_ENV --location $LOCATION --source ./src/main/python/resources/airflow_config_file.json
-gcloud composer environments run composer --location $LOCATION variables -- --import /home/airflow/gcs/data/airflow_config_file.json
+gcloud composer environments run $COMPOSER_ENV --location $LOCATION variables -- --import /home/airflow/gcs/data/airflow_config_file.json
 
 # Upload DAG files to Composer bucket
 for file in ./src/main/python/dags/*.py
