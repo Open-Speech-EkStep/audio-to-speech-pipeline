@@ -24,7 +24,7 @@ RUN  pyb install_dependencies
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 RUN pip install apache-airflow[kubernetes]==1.10.6
-
+RUN gcloud components install kubectl
 # COPY src/unittest/python/resources/variables.json /usr/local/airflow/variables.json
 # COPY src/unittest/python/resources/connections.sh /usr/local/airflow/connections.sh
 
