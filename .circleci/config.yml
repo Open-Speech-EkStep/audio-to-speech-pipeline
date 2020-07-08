@@ -12,7 +12,7 @@ parameters:
     default: false
   dataprocessor:
     type: boolean
-    default: True
+    default: true
   pipeline_workflows:
     type: boolean
     default: true
