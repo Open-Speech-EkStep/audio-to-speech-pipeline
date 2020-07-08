@@ -23,8 +23,8 @@ sudo chmod 757 /home/ubuntu/.config/gcloud/logs -R
 # sudo gcloud components install kubectl
 
 gcloud composer environments storage data import --environment $COMPOSER_ENV --location $LOCATION --source ./src/main/python/resources/airflow_config_file.json
-gcloud composer environments run $COMPOSER_ENV --location $LOCATION variables -- --import /home/airflow/gcs/data/airflow_config_file.json
-
+gcloud composer environments run composer --location $LOCATION variables -- --import /home/airflow/gcs/data/airflow_config_file.json
+	
 # Upload DAG files to Composer bucket
 for file in ./src/main/python/dags/*.py
 do
