@@ -64,7 +64,7 @@ jobs:
       - run:
           name: Deploy Pipeline Workflow DAG
           command: |
-            pyenv global 3.7.0
+            pyenv install 3.7.0
             echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GCP_PROJECT}
