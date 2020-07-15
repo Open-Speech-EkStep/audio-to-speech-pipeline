@@ -68,7 +68,7 @@ def create_dag(dag_id,
             data_prep_task = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id=dag_id + "_data_prep_" + audio_file_id,
                 name='data-prep-stt',
-                cmds=["python", "-m", "src.scripts.pipeline", "cluster", bucket_name, stt_config_path, dag_id,
+                cmds=["python", "-m", "src.scripts.pipeline_v2", "cluster", bucket_name, stt_config_path, dag_id,
                       audio_file_id, source_audio_format[dag_id]],
                 # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,

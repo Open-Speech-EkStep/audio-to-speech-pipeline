@@ -45,3 +45,5 @@ pg8000==1.13.2
 python-dotenv==0.13.0
 psycopg2
 numba<=0.48
+webrtcvad
+sox
