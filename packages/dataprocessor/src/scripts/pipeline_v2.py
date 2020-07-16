@@ -45,4 +45,4 @@ if __name__ == "__main__":
         print("download successful")
         obj = RemoteAudioPipeline()
         print("running pipeline")
-        obj.fit(config_local_path, gcs_bucket_name, data_source, audio_id, audio_extn, job_mode=job_mode)
+        obj.fit(config_local_path, gcs_bucket_name, data_source, audio_id, audio_extn)
