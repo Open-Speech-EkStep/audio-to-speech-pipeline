@@ -18,10 +18,10 @@ parameters:
     default: true
   data_tagger:
     type: boolean
-    default: false
+    default: true
   data_prep_cataloguer:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:
@@ -77,7 +77,7 @@ jobs:
 
 #    executor: node
     machine:
-      image:
+      image: ubuntu-1604:201903-01
     working_directory: ~/project/packages/<< parameters.package_name >>
 
     steps:
@@ -90,7 +90,6 @@ jobs:
       - run:
           name: Setup Testing Environment
           command: |
-            pyenv install 3.7.0
             pyenv global 3.7.0
             sudo apt-get update
             sudo apt-get install -y ffmpeg
@@ -231,4 +230,3 @@ workflows:
       - build-dags:
           name: pipeline-dag-build
           package_name: pipeline_workflows
-
