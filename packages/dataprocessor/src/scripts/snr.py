@@ -49,10 +49,10 @@ class SNR(object):
         list_file_utterances_with_duration=[]
 
         if not os.path.exists(clean_dir):
-            os.mkdir(clean_dir)
+            os.mkdirs(clean_dir)
 
         if not os.path.exists(rejected_dir):
-            os.mkdir(rejected_dir)
+            os.mkdirs(rejected_dir)
 
         for key, value in local_dict.items():
             audio_file_name = key.split('/')[-1]
