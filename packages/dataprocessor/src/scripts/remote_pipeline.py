@@ -85,11 +85,12 @@ class RemoteAudioPipeline():
         print("******** merging chunks in :", chunks_dir)
         voice_separator_audio = './src/resources/chunk_separator/hoppi.wav'
         merged_file_name = merge_chunks(chunks_dir, voice_separator_audio, 'chunk', 'merged.wav')
-        remote_wav_file_path = os.path.join(local_download_path, merged_file_name)
+        wav_file_path = os.path.join(local_download_path, merged_file_name)
 
-        print(f'******** uploading merged file:{merged_file_name} --> {remote_wav_file_path}')
+        print(f'******** uploading merged file:{merged_file_name} --> {wav_file_path}')
 
-        obj_gcsops.upload_to_gcs(bucket_name, merged_file_name, remote_wav_file_path, False)
+        obj_gcsops.upload_to_gcs(bucket_name, merged_file_name, wav_file_path, False)
+        remote_wav_file_path = os.path.join("gs://", bucket_name, wav_file_path)
 
         rejected_chunks = create_transcription(google_speec_client, remote_wav_file_path, chunks_dir, 'merged-api-response.txt')
         print('chunks rejected due to <<NO TRANSCRIPTIONS>>' + str(rejected_chunks))
