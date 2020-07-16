@@ -64,6 +64,7 @@ jobs:
       - run:
           name: Deploy Pipeline Workflow DAG
           command: |
+            pyenv global 3.7.0
             echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GCP_PROJECT}
@@ -77,7 +78,7 @@ jobs:
 
 #    executor: node
     machine:
-      image: ubuntu-1604:201903-01
+      image:
     working_directory: ~/project/packages/<< parameters.package_name >>
 
     steps:
@@ -90,6 +91,7 @@ jobs:
       - run:
           name: Setup Testing Environment
           command: |
+            pyenv global 3.7.0
             sudo apt-get update
             sudo apt-get install -y ffmpeg
             sudo apt-get install -y sox
