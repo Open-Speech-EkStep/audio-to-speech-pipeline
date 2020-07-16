@@ -19,12 +19,14 @@ class RemoteAudioPipeline():
         pass
 
     def __load_yaml_file(self, path):
+        print('loading config file...')
         read_dict = {}
         with open(path, 'r') as file:
             read_dict = yaml.load(file)
+        print('loading config file done...')
         return read_dict
 
-    def download_input_blob(self, obj_gcsops, bucket_name, args_downloader, local_download_path):
+    def download_input_blob(self, obj_gcsops, bucket_name, args_downloader, local_download_path, data_source, audio_id):
         current_working_directory = os.getcwd()
         obj_gcsops.download_to_local(bucket_name=bucket_name,
                                      source_blob_name=os.path.join(args_downloader['tobeprocessed_input_basepath'],
@@ -58,7 +60,7 @@ class RemoteAudioPipeline():
                                            data_source,
                                            audio_id)
         print("Initiating raw file download from cloud storage on to local...")
-        self.download_input_blob(obj_gcsops, bucket_name, args_downloader, local_download_path)
+        self.download_input_blob(obj_gcsops, bucket_name, args_downloader, local_download_path, data_source, audio_id)
         output_file_path = args_srtgenerator['output_file_path'],
         current_working_directory = os.getcwd()
         if output_file_path is None:
