@@ -1,8 +1,11 @@
+import glob
 import os
 import time
 
 import yaml
 
+from snr import SNR
+from transcription_generator import create_transcription
 from .vad_audio_clipper import create_audio_clips
 from .google_speech_client import GoogleSpeechClient
 from .merge_chunks import merge_chunks
@@ -88,57 +91,53 @@ class RemoteAudioPipeline():
 
         obj_gcsops.upload_to_gcs(bucket_name, merged_file_name, remote_wav_file_path, False)
 
-        # rejected_chunks = create_transcription(google_speec_client, remote_wav_file_path, local_download_path)
-        # metadata_file_name = converted_wav_file_path.replace('.wav', '.csv')
-        #
-        # print("Initiating snr process...")
-        # snr_obj = SNR()
-        # print("*****before snr*******", args_snr['input_file_dir'])
-        # if args_snr['input_file_dir'] is not None:
-        #     print("**glob print***", glob.glob(args_snr['input_file_dir'] + '/*.wav'))
-        #     args_snr['input_file_dir'] = glob.glob(args_snr['input_file_dir'] + '/*.wav')
-        # else:
-        #     args_snr['input_file_dir'] = chunks_dir
-        # print("*****after snr*******", args_snr['input_file_dir'])
-        # snr_obj.fit_and_move(input_file_dir=args_snr['input_file_dir'],
-        #                      metadata_file_name=metadata_file_name,
-        #                      output_file_dir=os.path.join(current_working_directory,
-        #                                                   args_clipaudio['output_file_dir'],
-        #                                                   data_source,
-        #                                                   audio_id),
-        #                      threshold=args_snr['threshold'],
-        #                      audio_id=audio_id)
-        #
-        # # Upload files to GCS
-        # # Upload cleaned files
-        # print("Uploading the cleaned files to cloud storage...")
-        # obj_gcsops.upload_to_gcs(bucket_name,
-        #                          os.path.join(current_working_directory,
-        #                                       args_clipaudio['output_file_dir'],
-        #                                       data_source,
-        #                                       audio_id,
-        #                                       "clean"),
-        #                          os.path.join(args_clipaudio['output_file_dir'],
-        #                                       data_source,
-        #                                       audio_id,
-        #                                       "clean"),
-        #                          is_directory=True)
-        #
-        # # # Upload rejected files
-        # print("Uploading the rejected files to cloud storage...")
-        # obj_gcsops.upload_to_gcs(bucket_name,
-        #                          os.path.join(current_working_directory,
-        #                                       args_clipaudio['output_file_dir'],
-        #                                       data_source,
-        #                                       audio_id,
-        #                                       "rejected"),
-        #                          os.path.join(args_clipaudio['output_file_dir'],
-        #                                       data_source,
-        #                                       audio_id,
-        #                                       "rejected"),
-        #                          is_directory=True)
-        #
-        # self.upload_metadata(args_clipaudio, args_metadatadb, bucket_name, data_source, metadata_file_name, obj_gcsops)
+        rejected_chunks = create_transcription(google_speec_client, remote_wav_file_path, chunks_dir)
+        print('chunks rejected due to <<NO TRANSCRIPTIONS>>' + str(rejected_chunks))
+        metadata_file_name = converted_wav_file_path.replace('.wav', '.csv')
+
+        print("Initiating snr process...")
+        snr_obj = SNR()
+        args_snr['input_file_dir'] = glob.glob(chunks_dir + '/*.wav')
+        print("*****SNR input dir*******", args_snr['input_file_dir'])
+        snr_obj.fit_and_move(input_file_dir=args_snr['input_file_dir'],
+                             metadata_file_name=metadata_file_name,
+                             output_file_dir=os.path.join(current_working_directory,
+                                                          args_clipaudio['output_file_dir'],
+                                                          data_source,
+                                                          audio_id),
+                             threshold=args_snr['threshold'],
+                             audio_id=audio_id)
+
+        # Upload files to GCS
+        # Upload cleaned files
+        print("Uploading the cleaned files to cloud storage...")
+        obj_gcsops.upload_to_gcs(bucket_name,
+                                 os.path.join(current_working_directory,
+                                              args_clipaudio['output_file_dir'],
+                                              data_source,
+                                              audio_id,
+                                              "clean"),
+                                 os.path.join(args_clipaudio['output_file_dir'],
+                                              data_source,
+                                              audio_id,
+                                              "clean"),
+                                 is_directory=True)
+
+        # # Upload rejected files
+        print("Uploading the rejected files to cloud storage...")
+        obj_gcsops.upload_to_gcs(bucket_name,
+                                 os.path.join(current_working_directory,
+                                              args_clipaudio['output_file_dir'],
+                                              data_source,
+                                              audio_id,
+                                              "rejected"),
+                                 os.path.join(args_clipaudio['output_file_dir'],
+                                              data_source,
+                                              audio_id,
+                                              "rejected"),
+                                 is_directory=True)
+
+        self.upload_metadata(args_clipaudio, args_metadatadb, bucket_name, data_source, metadata_file_name, obj_gcsops)
 
         pipeline_end_time = time.time()
         print("Pipeline took ", pipeline_end_time - pipeline_start_time, " seconds to run!")
