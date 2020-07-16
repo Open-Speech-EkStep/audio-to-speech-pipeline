@@ -5,7 +5,7 @@ import sox
 COMMA = ','
 
 
-def merge_chunks(input_dir, output_dir, voice_separator_audio, file_prefix, merged_file_name='merged.wav'):
+def merge_chunks(input_dir, voice_separator_audio, file_prefix, merged_file_name='merged.wav'):
     files = glob.glob(input_dir + '/*.wav')
     chunk_files = list(map(lambda i:
                            f'{input_dir}/{file_prefix}-{i}.wav',

@@ -81,8 +81,8 @@ class RemoteAudioPipeline():
 
         print("******** merging chunks in :", chunks_dir)
         voice_separator_audio = './src/resources/chunk_separator/hoppi.wav'
-        merged_file_name = merge_chunks(chunks_dir, voice_separator_audio, 'chunk')
-        remote_wav_file_path = os.path.join(local_download_path, 'merged.wav')
+        merged_file_name = merge_chunks(chunks_dir, voice_separator_audio, 'chunk', 'merged.wav')
+        remote_wav_file_path = os.path.join(local_download_path, merged_file_name)
 
         print(f'******** uploading merged file:{merged_file_name} --> {remote_wav_file_path}')
 
