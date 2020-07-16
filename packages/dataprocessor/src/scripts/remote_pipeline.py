@@ -4,8 +4,8 @@ import time
 
 import yaml
 
-from snr import SNR
-from transcription_generator import create_transcription
+from .snr import SNR
+from .transcription_generator import create_transcription
 from .vad_audio_clipper import create_audio_clips
 from .google_speech_client import GoogleSpeechClient
 from .merge_chunks import merge_chunks
