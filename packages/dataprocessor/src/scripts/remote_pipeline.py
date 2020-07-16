@@ -59,9 +59,9 @@ class RemoteAudioPipeline():
         local_download_path = os.path.join(args_downloader['tobeprocessed_input_basepath'],
                                            data_source,
                                            audio_id)
-        print("Initiating raw file download from cloud storage on to local...")
+        print(f'Initiating raw file download from cloud storage on to local folder:{local_download_path}')
         self.download_input_blob(obj_gcsops, bucket_name, args_downloader, local_download_path, data_source, audio_id)
-        output_file_path = args_srtgenerator['output_file_path'],
+        output_file_path = args_srtgenerator['output_file_path']
         current_working_directory = os.getcwd()
         if output_file_path is None:
             converted_wav_file_path = convert_to_wav(os.path.join(current_working_directory, local_download_path),
