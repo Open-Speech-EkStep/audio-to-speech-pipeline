@@ -91,7 +91,7 @@ class RemoteAudioPipeline():
 
         obj_gcsops.upload_to_gcs(bucket_name, merged_file_name, remote_wav_file_path, False)
 
-        rejected_chunks = create_transcription(google_speec_client, remote_wav_file_path, chunks_dir)
+        rejected_chunks = create_transcription(google_speec_client, remote_wav_file_path, chunks_dir, 'merged-api-response.txt')
         print('chunks rejected due to <<NO TRANSCRIPTIONS>>' + str(rejected_chunks))
         metadata_file_name = converted_wav_file_path.replace('.wav', '.csv')
 
