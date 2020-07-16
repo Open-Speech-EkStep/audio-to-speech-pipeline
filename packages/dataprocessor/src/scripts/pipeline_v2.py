@@ -42,5 +42,6 @@ if __name__ == "__main__":
                                   source_blob_name=config_path,
                                   destination=config_local_path,
                                   is_directory=False)
+        print("download successful")
         obj = RemoteAudioPipeline()
         obj.fit(config_local_path, gcs_bucket_name, data_source, audio_id, audio_extn, job_mode=job_mode)

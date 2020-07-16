@@ -39,6 +39,7 @@ class RemoteAudioPipeline():
         obj_gcsops.copy_all_files(local_src_path, local_destination_path, audio_extn)
 
     def fit(self, yaml_file_path, bucket_name, data_source, audio_id, audio_extn):
+        print("starting RemoteAudioPipeline.........")
         pipeline_start_time = time.time()
         read_dict = self.__load_yaml_file(yaml_file_path)
         args_application = read_dict['application']
@@ -73,6 +74,7 @@ class RemoteAudioPipeline():
         vad_output_path = local_download_path + 'vad_output.txt'
         obj_gcsops.make_directories(chunks_dir)
 
+        print(f'******** creating chunks using vad for file:{converted_wav_file_path} to folder {chunks_dir}')
         create_audio_clips(2, converted_wav_file_path, chunks_dir, vad_output_path)
 
         print("******** merging chunks in :", chunks_dir)
