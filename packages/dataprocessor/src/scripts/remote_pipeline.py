@@ -3,9 +3,9 @@ import time
 
 import yaml
 
-from .clip.vad_audio_clipper import create_audio_clips
+from .vad_audio_clipper import create_audio_clips
 from .google_speech_client import GoogleSpeechClient
-from .transcript.merge_chunks import merge_chunks
+from .merge_chunks import merge_chunks
 from .wav_convertor import convert_to_wav
 
 yaml.warnings({'YAMLLoadWarning': False})
