@@ -1,13 +1,8 @@
-import subprocess
-from moviepy.audio.AudioClip import AudioClip
-from scipy.io import wavfile
-from moviepy.audio.io.AudioFileClip import AudioFileClip
-import glob
 import os
-from pydub import AudioSegment
 from datetime import datetime
-import time
-import pandas as pd 
+
+import pandas as pd
+from pydub import AudioSegment
 
 
 class Data:
