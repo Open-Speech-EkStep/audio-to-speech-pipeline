@@ -5,8 +5,8 @@ WORD_SEPERATOR = 'हॉपिपोला '
 WORD_SEPERATOR_REGEX = 'हैप्पी पोला|हॉपिपोला|हॉपीपोला|फिर बोला'
 
 
-def extract_transcription(content, vad_output_path):
-    vad_chunks = chunks_objects_list_from_vad_output(vad_output_path)
+def extract_transcription(content):
+    # vad_chunks = chunks_objects_list_from_vad_output(vad_output_path)
     original_transcription = list(map(lambda c: c.alternatives[0].transcript, content.results))
     print(' '.join(original_transcription))
     transcriptions = list(map(to_transcriptions, content.results))

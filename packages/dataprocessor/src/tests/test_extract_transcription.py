@@ -1,7 +1,9 @@
+import os
 import pickle
+import shutil
 import unittest
 
-from src.scripts.extract_transcription import extract_transcription, save_transcriptions
+from packages.dataprocessor.src.scripts.extract_transcription import extract_transcription, save_transcriptions
 
 
 class ExtractTranscription(unittest.TestCase):
@@ -11,9 +13,9 @@ class ExtractTranscription(unittest.TestCase):
             content = pickle.load(file)
         transcriptions = extract_transcription(content)
         print(transcriptions)
-        rejected = save_transcriptions('./src/tests/test_resources/output', transcriptions, 'chunk')
-        print(len(rejected))
-        self.assertEqual(len(transcriptions), 3)
+        print(len(transcriptions))
+        save_transcriptions('../src/tests/test_resources/output/SampleHindi/', transcriptions, 'chunk')
+        self.assertEqual(3, len(transcriptions))
         self.assertEqual('', transcriptions[0])
         self.assertEqual('मेरे प्यारे देशवासियों नमस्कार', transcriptions[1])
         self.assertEqual('कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है', transcriptions[2])
@@ -21,8 +23,14 @@ class ExtractTranscription(unittest.TestCase):
 
     def test_save_transcriptions(self):
         transcriptions = ['', 'मेरे प्यारे देशवासियों', 'नमस्कार', '', 'कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है', 'जब मैंने पिछली बार आपसे']
-        rejected = save_transcriptions('./src/tests/test_resources/output', transcriptions, 'chunk')
-        self.assertEqual(len(rejected), 2)
+        output_file_dir = './test_resources/output/transcriptions'
+        os.mkdir(output_file_dir)
+        save_transcriptions(output_file_dir, transcriptions, 'chunk')
+        files = os.listdir(output_file_dir)
+        if os.path.exists(output_file_dir):
+            shutil.rmtree(output_file_dir)
+        self.assertEqual(len(files), 6)
+        self.assertEqual(files[0], 'chunk-0.txt')
 
 if __name__ == '__main__':
     unittest.main()
