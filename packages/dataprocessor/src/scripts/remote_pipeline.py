@@ -38,11 +38,6 @@ class RemoteAudioPipeline():
                                      destination=os.path.join(current_working_directory, local_download_path),
                                      is_directory=True)
 
-    def fetch_local_data(self, obj_gcsops, args_downloader, local_destination_path, audio_extn):
-        # obj_gcsops.make_directories(local_destination_path)
-        local_src_path = args_downloader['local_data_path']
-        obj_gcsops.copy_all_files(local_src_path, local_destination_path, audio_extn)
-
     def fit(self, yaml_file_path, bucket_name, data_source, audio_id, audio_extn):
         print("starting RemoteAudioPipeline.........")
         pipeline_start_time = time.time()
@@ -83,7 +78,7 @@ class RemoteAudioPipeline():
         create_audio_clips(2, converted_wav_file_path, chunks_dir, vad_output_path)
 
         print("******** merging chunks in :", chunks_dir)
-        voice_separator_audio = './src/resources/chunk_separator/hoppi.wav'
+        voice_separator_audio = './src/resources/chunk_separator/hoppipola_gtts_10-10.wav'
         merged_file_name = merge_chunks(chunks_dir, voice_separator_audio, 'chunk', 'merged.wav')
         wav_file_path = os.path.join(local_download_path, merged_file_name)
 
@@ -92,8 +87,11 @@ class RemoteAudioPipeline():
         obj_gcsops.upload_to_gcs(bucket_name, merged_file_name, wav_file_path, False)
         remote_wav_file_path = os.path.join("gs://", bucket_name, wav_file_path)
 
-        rejected_chunks = create_transcription(google_speec_client, remote_wav_file_path, chunks_dir, 'merged-api-response.txt')
-        print('chunks rejected due to <<NO TRANSCRIPTIONS>>' + str(rejected_chunks))
+        transcripts = create_transcription(google_speec_client, remote_wav_file_path, chunks_dir, 'merged-api-response.txt')
+        chunks = os.listdir(chunks_dir)
+        if(len(transcripts) != len(chunks)):
+            raise RuntimeError(f'incorrect number of transcripts created. transcriptions: {len(transcripts)}, chunks: {len(chunks)}')
+
         metadata_file_name = converted_wav_file_path.replace('.wav', '.csv')
 
         print("Initiating snr process...")
