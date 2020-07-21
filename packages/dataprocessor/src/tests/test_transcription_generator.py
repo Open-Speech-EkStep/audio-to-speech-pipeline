@@ -1,6 +1,5 @@
 import unittest
 from unittest import mock
-from packages.dataprocessor.src.scripts.transcription_generator import create_transcription
 
 
 class TestTrancriptionGenerator(unittest.TestCase):
