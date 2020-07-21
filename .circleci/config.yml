@@ -15,13 +15,17 @@ parameters:
     default: true
   pipeline_workflows:
     type: boolean
-    default: false
+    default: true
   data_tagger:
     type: boolean
     default: false
   data_prep_cataloguer:
     type: boolean
     default: false
+  downloaded_data_cataloguer:
+    type: boolean
+    default: true
+
 
 executors:
   node:
@@ -223,7 +227,19 @@ workflows:
           #   branches:
           #     only:
           #       - master
-
+  downloaded_data_cataloguer:
+    when: << pipeline.parameters.downloaded_data_cataloguer >>
+    jobs:
+      - build:
+          name: downloaded_data_cataloguer_build
+          package_name: downloaded_data_cataloguer
+      - deploy:
+          name: downloaded_data_cataloguer_deploy
+          package_name: downloaded_data_cataloguer
+          package_version: 1.0.0
+          requires:
+            - downloaded_data_cataloguer_build
+     
   pipeline_workflows:
     when: << pipeline.parameters.pipeline_workflows >>
     jobs:
