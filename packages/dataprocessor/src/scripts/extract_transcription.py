@@ -1,45 +1,34 @@
 import re
 
+WORD_SEPERATOR = 'हॉपिपोला '
 
-def extract_transcription(content):
+WORD_SEPERATOR_REGEX = 'हैप्पी पोला|हॉपिपोला|हॉपीपोला|फिर बोला'
+
+
+def extract_transcription(content, vad_output_path):
+    vad_chunks = chunks_objects_list_from_vad_output(vad_output_path)
     original_transcription = list(map(lambda c: c.alternatives[0].transcript, content.results))
     print(' '.join(original_transcription))
-
     transcriptions = list(map(to_transcriptions, content.results))
     joined = ' '.join(transcriptions)
-    corrected = re.sub('((हैप्पी पोला|हॉपिपोला|हॉपीपोला)(\s)(2,)){2,}', 'हॉपिपोला ', joined)
+    corrected = re.sub(f'(({WORD_SEPERATOR_REGEX})(\s)(2,)){2,}', f'{WORD_SEPERATOR} ', joined)
     print(corrected)
-    splitted = re.split('हैप्पी पोला|हॉपिपोला|हॉपीपोला', corrected)
+    splitted = re.split(WORD_SEPERATOR_REGEX, corrected)
     trimmed = list(map(lambda s: s.strip(),
                        splitted))
     return trimmed
 
 
 def to_transcriptions(chunk):
-
-    matched = re.findall('(हैप्पी पोला|हॉपिपोला|हॉपीपोला)', chunk.alternatives[0].transcript)
-    if (len(matched) <= 0):
-        return 'हॉपिपोला ' + chunk.alternatives[0].transcript
-
-    transcript = re.sub('((हैप्पी पोला|हॉपिपोला|हॉपीपोला)(\s)){2,}', 'हॉपीपोला',
+    transcript = re.sub(f'(({WORD_SEPERATOR_REGEX})(\s)){2,}', WORD_SEPERATOR,
                         chunk.alternatives[0].transcript)
-
-    if (len(chunk.alternatives[0].words) == 1):
-        return re.sub('(हैप्पी पोला|हॉपिपोला|हॉपीपोला)', 'हॉपीपोला <<NO TRANSCRIPTON>>', transcript)
-
-    if (len(chunk.alternatives[0].words) > 1):
-        return chunk.alternatives[0].transcript
+    return transcript
 
 
 def save_transcriptions(output_dir, transcriptions, file_name):
-    rejected_wavs = []
     for index, transcription in enumerate(transcriptions):
-        if transcription:
-            transcription_file = '{0}/{1}-{2}.txt'.format(output_dir, file_name, index)
-            save_file(transcription, transcription_file)
-        else:
-            rejected_wavs.append('{0}/{1}-{2}.wav'.format(output_dir, file_name, index))
-    return rejected_wavs
+        transcription_file = '{0}/{1}-{2}.txt'.format(output_dir, file_name, index)
+        save_file(transcription, transcription_file)
 
 
 def save_file(transcription, output_file_path):
