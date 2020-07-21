@@ -1,7 +1,7 @@
 import unittest
 # import sqlite3
-from ..scripts.data_cataloguer import CatalogueDownloadedData, get_file_extension, get_files_path_with_no_prefix
-from ..scripts.gcs_operations import CloudStorageOperations
+from src.scripts.data_cataloguer import CatalogueDownloadedData, get_file_extension, get_files_path_with_no_prefix
+from src.scripts.gcs_operations import CloudStorageOperations
 
 
 from unittest import mock
