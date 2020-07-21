@@ -3,7 +3,7 @@ import pickle
 import shutil
 import unittest
 
-from packages.dataprocessor.src.scripts.extract_transcription import extract_transcription, save_transcriptions
+from src.scripts.extract_transcription import extract_transcription, save_transcriptions
 
 
 class ExtractTranscription(unittest.TestCase):
