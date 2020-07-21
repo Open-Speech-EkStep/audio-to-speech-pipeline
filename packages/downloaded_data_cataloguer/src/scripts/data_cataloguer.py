@@ -25,10 +25,6 @@ def get_files_path_with_no_prefix(file_path, file_name):
     return file_path + '/' + file_name
 
 
-def get_files_path_with_prefix(file_path, file_prefix, file_name):
-    return file_path + '/' + str(file_prefix) + '/' + file_name
-
-
 class CatalogueDownloadedData:
     def __init__(self):
         self.meta_file_extension = ".csv"
@@ -47,7 +43,7 @@ class CatalogueDownloadedData:
         file_name_split = file_name_cleansed.split('.')
         return '_'.join(file_name_split[:-1]) + '.' + file_name_split[-1]
 
-    def move_and_catalogue_from_download(self, downloaded_source, batch_count, db_conn, obj_gcs_ops,
+    def move_and_catalogue_from_download(self, downloaded_source, batch_count, db_conn,
                                          error_landing_path):
         delimiter = "/"
         print("****The source is *****" + downloaded_source)
@@ -76,10 +72,10 @@ class CatalogueDownloadedData:
                                                                                        metadata_file_name))
                         if check_if_meta_data_present(source_landing_path + downloaded_source, metadata_file_name):
                             self.move_and_upload_to_db(db_conn, destination_file_name, destination_meta_file_name,
-                                                       metadata_file_name, obj_gcs_ops, source_file_name,
+                                                       metadata_file_name, source_file_name,
                                                        source_meta_file_name)
                         else:
-                            self.move_to_error(error_landing_path, file_name, metadata_file_name, obj_gcs_ops,
+                            self.move_to_error(error_landing_path, file_name, metadata_file_name,
                                                downloaded_source,
                                                source_file_name)
                     else:
@@ -89,7 +85,7 @@ class CatalogueDownloadedData:
         finally:
             print(downloaded_source)
 
-    def move_to_error(self, error_landing_path, file_name, metadata_file_name, obj_gcs_ops, source, source_file_name):
+    def move_to_error(self, error_landing_path, file_name, metadata_file_name, source, source_file_name):
         print("Meta file {} is not present,Moving to error....".format(
             metadata_file_name))
         error_destination_file_name = get_files_path_with_no_prefix(
@@ -97,8 +93,8 @@ class CatalogueDownloadedData:
             file_name)
         obj_gcs_ops.move_blob(bucket_name, source_file_name, bucket_name, error_destination_file_name)
 
-    def move_and_upload_to_db(self, db_conn, destination_file_name, destination_meta_file_name, metadata_file_name,
-                              obj_gcs_ops, source_file_name, source_meta_file_name):
+    def move_and_upload_to_db(self, db_conn, destination_file_name, destination_meta_file_name, metadata_file_name
+                            , source_file_name, source_meta_file_name):
         print("Meta file {} is present".format(
             metadata_file_name))
         local_file_name = os.path.join(
@@ -173,4 +169,4 @@ if __name__ == "__main__":
     connection = db.connect()
 
     cataloguer = CatalogueDownloadedData()
-    cataloguer.move_and_catalogue_from_download(downloaded_source, batch_count, db, obj_gcs_ops, error_landing_path)
+    cataloguer.move_and_catalogue_from_download(downloaded_source, batch_count, db, error_landing_path)
