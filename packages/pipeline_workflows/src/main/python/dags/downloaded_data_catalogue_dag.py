@@ -7,6 +7,7 @@ from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 
 source_batch_count = json.loads(Variable.get("sourcebatchcountforcataloguing"))
+downloaded_source_audio_format = json.loads(Variable.get("downloadedsourceaudioformat"))
 composer_namespace = Variable.get("composer_namespace")
 
 default_args = {
@@ -38,7 +39,7 @@ def create_dag(dag_id,
             task_id='data-cataloguer',
             name='data-cataloguer',
             cmds=["python", "-m", "src.scripts.data_cataloguer", "cluster", "ekstepspeechrecognition-dev",
-                  "data/audiotospeech/config/downloaded_data_cataloguer/config.yaml", source, batch_count],
+                  "data/audiotospeech/config/downloaded_data_cataloguer/config.yaml", source, batch_count, downloaded_source_audio_format[source]],
 
             namespace=composer_namespace,
             startup_timeout_seconds=300,

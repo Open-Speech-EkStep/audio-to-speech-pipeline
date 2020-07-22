@@ -7,6 +7,7 @@
   "apibatchratio":{"google":3,"azure":2,"gtts":1},
   "sourcebatchcount" : {"brahmakumaris2":30,"joshtalks2":2,"youtube":1,"iitspokentutorial2":7},
   "sourcebatchcountforcataloguing" : {"brahmakumaris2":30},
+  "downloadedsourceaudioformat" : {"mahatmagandhi":"mp3", "yourquote":"mp4"},
   "sourcelandingpath" : "data/audiotospeech/raw/landing/hindi/audio/",
   "errorlandingpath" : "data/audiotospeech/raw/landing/hindi/audio/error/",
   "tobeprocessedpath" : "data/audiotospeech/raw/tobeprocessed/hindi/audio/",
