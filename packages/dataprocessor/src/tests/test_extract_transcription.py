@@ -34,7 +34,6 @@ class ExtractTranscription(unittest.TestCase):
         if os.path.exists(output_file_dir):
             shutil.rmtree(output_file_dir)
         self.assertEqual(len(files), 6)
-        self.assertEqual(files[0], 'chunk-0.txt')
 
 if __name__ == '__main__':
     unittest.main()
