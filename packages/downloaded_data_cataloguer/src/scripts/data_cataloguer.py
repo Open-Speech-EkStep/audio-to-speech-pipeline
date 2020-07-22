@@ -49,11 +49,11 @@ class CatalogueDownloadedData:
         print("****The source is *****" + downloaded_source)
         all_blobs = obj_gcs_ops.list_blobs_in_a_path(
             bucket_name, source_landing_path + downloaded_source + delimiter)
-        is_path_not_valid = True
+        is_source_not_valid = True
 
         try:
             for blob in all_blobs:
-                is_path_not_valid = False
+                is_source_not_valid = False
                 print("*********The file name is ********* " + blob.name)
                 file_name = self.get_file_name(blob.name, delimiter)
                 file_extension = get_file_extension(file_name)
@@ -80,9 +80,9 @@ class CatalogueDownloadedData:
                                            source_file_name)
 
         finally:
-            if(is_path_not_valid):
-                raise Exception("******file not found******")
-            print("moving file is done...",downloaded_source)
+            if(is_source_not_valid):
+                raise Exception("******file or source not found******")
+            print("moving file is done...", downloaded_source)
 
     def move_to_error(self, error_landing_path, file_name, metadata_file_name, source, source_file_name):
         print("Meta file {} is not present,Moving to error....".format(
