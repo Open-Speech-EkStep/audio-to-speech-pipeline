@@ -15,7 +15,7 @@ class VadAudioClipper(unittest.TestCase):
         create_audio_clips(aggressiveness, input_file_path, output_dir, vad_output_file_path)
         clips = os.listdir(output_dir)  # dir is your directory path
         self.assertEqual(37, len(clips))
-        # self.delete_files(output_dir)
+        self.delete_files(output_dir)
 
     def delete_files(self, output_dir):
         files = os.listdir(output_dir)  # dir is your directory path
