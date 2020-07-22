@@ -51,7 +51,7 @@ def create_dag(dag_id,
     return dag
 
 
-for source in downloaded_catalog_config[source]:
+for source in downloaded_catalog_config['source']:
     dag_id = f"cataloguing_{source}"
 
     default_args = {

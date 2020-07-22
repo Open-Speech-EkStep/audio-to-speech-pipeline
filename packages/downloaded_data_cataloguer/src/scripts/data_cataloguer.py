@@ -38,7 +38,8 @@ class CatalogueDownloadedData:
 
     @staticmethod
     def condition_file_name(file_name):
-        file_name_cleansed = file_name.translate({ord(i): None for i in "()&'"})
+        file_name_cleansed = file_name.translate(
+            {ord(i): None for i in "()&'"})
         file_name_split = file_name_cleansed.split('.')
         return '_'.join(file_name_split[:-1]) + '.' + file_name_split[-1]
 
@@ -50,9 +51,6 @@ class CatalogueDownloadedData:
         all_blobs = obj_gcs_ops.list_blobs_in_a_path(
             bucket_name, source_landing_path + downloaded_source + delimiter)
 
-        if(len(list(all_blobs)) <= 0):
-            raise Exception("*********file not found********")
-
         try:
             for blob in all_blobs:
                 print("*********The file name is ********* " + blob.name)
@@ -60,25 +58,25 @@ class CatalogueDownloadedData:
                 file_extension = get_file_extension(file_name)
                 expected_file_extension = source_audio_format
                 if self.has_mp3_extension(expected_file_extension, file_extension):
-                        metadata_file_name = self.get_metadata_file_name(file_name)
-                        print("File is {}".format(file_name))
-                        source_file_name = get_files_path_with_no_prefix(
-                            source_landing_path + downloaded_source, file_name)
-                        source_meta_file_name = get_files_path_with_no_prefix(source_landing_path + downloaded_source,
-                                                                              metadata_file_name)
-                        destination_file_name = get_files_path_with_no_prefix(landing_path + downloaded_source,
-                                                                              self.condition_file_name(file_name))
-                        destination_meta_file_name = get_files_path_with_no_prefix(landing_path + downloaded_source,
-                                                                                   self.condition_file_name(
-                                                                                       metadata_file_name))
-                        if check_if_meta_data_present(source_landing_path + downloaded_source, metadata_file_name):
-                            self.move_and_upload_to_db(db_conn, destination_file_name, destination_meta_file_name,
-                                                       metadata_file_name, source_file_name,
-                                                       source_meta_file_name)
-                        else:
-                            self.move_to_error(error_landing_path, file_name, metadata_file_name,
-                                               downloaded_source,
-                                               source_file_name)
+                    metadata_file_name = self.get_metadata_file_name(file_name)
+                    print("File is {}".format(file_name))
+                    source_file_name = get_files_path_with_no_prefix(
+                        source_landing_path + downloaded_source, file_name)
+                    source_meta_file_name = get_files_path_with_no_prefix(source_landing_path + downloaded_source,
+                                                                          metadata_file_name)
+                    destination_file_name = get_files_path_with_no_prefix(landing_path + downloaded_source,
+                                                                          self.condition_file_name(file_name))
+                    destination_meta_file_name = get_files_path_with_no_prefix(landing_path + downloaded_source,
+                                                                               self.condition_file_name(
+                                                                                   metadata_file_name))
+                    if check_if_meta_data_present(source_landing_path + downloaded_source, metadata_file_name):
+                        self.move_and_upload_to_db(db_conn, destination_file_name, destination_meta_file_name,
+                                                   metadata_file_name, source_file_name,
+                                                   source_meta_file_name)
+                    else:
+                        self.move_to_error(error_landing_path, file_name, metadata_file_name,
+                                           downloaded_source,
+                                           source_file_name)
 
         finally:
             print(downloaded_source)
@@ -89,10 +87,10 @@ class CatalogueDownloadedData:
         error_destination_file_name = get_files_path_with_no_prefix(
             error_landing_path + source,
             file_name)
-        obj_gcs_ops.move_blob(bucket_name, source_file_name, bucket_name, error_destination_file_name)
+        obj_gcs_ops.move_blob(bucket_name, source_file_name,
+                              bucket_name, error_destination_file_name)
 
-    def move_and_upload_to_db(self, db_conn, destination_file_name, destination_meta_file_name, metadata_file_name
-                            , source_file_name, source_meta_file_name):
+    def move_and_upload_to_db(self, db_conn, destination_file_name, destination_meta_file_name, metadata_file_name, source_file_name, source_meta_file_name):
         print("Meta file {} is present".format(
             metadata_file_name))
         local_file_name = os.path.join(
@@ -100,8 +98,10 @@ class CatalogueDownloadedData:
         obj_gcs_ops.download_blob(
             bucket_name, source_meta_file_name, local_file_name)
         upload_file(self, local_file_name, db_conn)
-        obj_gcs_ops.move_blob(bucket_name, source_file_name, bucket_name, destination_file_name)
-        obj_gcs_ops.move_blob(bucket_name, source_meta_file_name, bucket_name, destination_meta_file_name)
+        obj_gcs_ops.move_blob(bucket_name, source_file_name,
+                              bucket_name, destination_file_name)
+        obj_gcs_ops.move_blob(bucket_name, source_meta_file_name,
+                              bucket_name, destination_meta_file_name)
 
     def has_mp3_extension(self, expected_file_extension, file_extension):
         return file_extension in [expected_file_extension, expected_file_extension.swapcase()]
@@ -167,4 +167,5 @@ if __name__ == "__main__":
     connection = db.connect()
 
     cataloguer = CatalogueDownloadedData()
-    cataloguer.move_and_catalogue_from_download(downloaded_source, db, error_landing_path)
+    cataloguer.move_and_catalogue_from_download(
+        downloaded_source, db, error_landing_path)
