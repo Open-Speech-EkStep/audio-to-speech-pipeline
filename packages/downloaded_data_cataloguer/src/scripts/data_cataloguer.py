@@ -47,9 +47,11 @@ class CatalogueDownloadedData:
                                          error_landing_path):
         delimiter = "/"
         print("****The source is *****" + downloaded_source)
-
         all_blobs = obj_gcs_ops.list_blobs_in_a_path(
             bucket_name, source_landing_path + downloaded_source + delimiter)
+        
+        if(len(list(all_blobs)) <= 0):
+            raise Exception("*****source or file not found******")
 
         try:
             for blob in all_blobs:
