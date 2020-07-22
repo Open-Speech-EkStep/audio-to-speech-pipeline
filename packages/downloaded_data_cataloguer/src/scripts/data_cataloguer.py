@@ -28,7 +28,6 @@ def get_files_path_with_no_prefix(file_path, file_name):
 class CatalogueDownloadedData:
     def __init__(self):
         self.meta_file_extension = ".csv"
-        self.source_audio_format = downloaded_source_audio_format
 
     @staticmethod
     def get_file_name(file_prefix_name, delimiter):
@@ -56,7 +55,7 @@ class CatalogueDownloadedData:
                 print("*********The file name is ********* " + blob.name)
                 file_name = self.get_file_name(blob.name, delimiter)
                 file_extension = get_file_extension(file_name)
-                expected_file_extension = self.source_audio_format
+                expected_file_extension = source_audio_format
                 if self.has_mp3_extension(expected_file_extension, file_extension):
                     if batch_count > 0:
                         metadata_file_name = self.get_metadata_file_name(file_name)
@@ -149,7 +148,7 @@ if __name__ == "__main__":
     config_path = sys.argv[3]
     downloaded_source = sys.argv[4]
     batch_count = int(sys.argv[5])
-    downloaded_source_audio_format = sys.argv[6]
+    source_audio_format = sys.argv[6]
 
     current_working_directory = os.getcwd()
     config_local_path = os.path.join(

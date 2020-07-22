@@ -58,7 +58,6 @@ class TestDataCataloguer(unittest.TestCase):
     def test_condition_file_name(self):
         assert_expected = self.cataloguer.condition_file_name(file_name="audio_file(1).csv")
         self.assertEqual("audio_file1.csv", assert_expected)
-
     # def test_move_blob(self):
     #     with mock.patch.object(CloudStorageOperations, 'move_blob', new=mock_move_blob):
     #         obj_gcs_ops = CloudStorageOperations()
