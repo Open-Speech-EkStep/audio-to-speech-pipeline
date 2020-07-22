@@ -14,7 +14,9 @@ class ExtractTranscription(unittest.TestCase):
         transcriptions = extract_transcription(content)
         print(transcriptions)
         print(len(transcriptions))
-        save_transcriptions('./src/tests/test_resources/output/SampleHindi/', transcriptions, 'chunk')
+        output_path = './src/tests/test_resources/output/SampleHindi/'
+        os.makedirs(output_path)
+        save_transcriptions(output_path, transcriptions, 'chunk')
         self.assertEqual(3, len(transcriptions))
         self.assertEqual('', transcriptions[0])
         self.assertEqual('मेरे प्यारे देशवासियों नमस्कार', transcriptions[1])
