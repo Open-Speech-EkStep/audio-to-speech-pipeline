@@ -18,8 +18,11 @@
   "utteranceschunkslist" : {"utteranceschunkslist":[]},
   "utteranceschunkpath" : "data/experiments/input/",
   "utterancesconcurrentbatchcount" : 12,
+  "downloadcatalogconfig": {"audioformat": {"mahatmagandhi":"mp3", "yourquote":"mp4"}, "source":["mahatmagandhi"]},
   "archiveutterancespath" : "data/experiments/archive/",
   "sttconfigpath" : "data/audiotospeech/config/speechtotext/config.yaml",
   "sourceaudioformat" : {"brahmakumaris2":"mp3","joshtalks2":"mp4","youtube":"mp4","iitspokentutorial2":"mp4"},
   "audiofileids" : {"brahmakumaris2": [], "joshtalks2": [], "youtube": [],"iitspokentutorial2": []},
   "apivoice":{"google":["voice1","voice2","voice3"],"azure":["voice1","voice2"],"gtts":["voice1"]}}
+
+  

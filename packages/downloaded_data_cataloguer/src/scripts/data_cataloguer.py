@@ -42,13 +42,16 @@ class CatalogueDownloadedData:
         file_name_split = file_name_cleansed.split('.')
         return '_'.join(file_name_split[:-1]) + '.' + file_name_split[-1]
 
-    def move_and_catalogue_from_download(self, downloaded_source, batch_count, db_conn,
+    def move_and_catalogue_from_download(self, downloaded_source, db_conn,
                                          error_landing_path):
         delimiter = "/"
         print("****The source is *****" + downloaded_source)
 
         all_blobs = obj_gcs_ops.list_blobs_in_a_path(
             bucket_name, source_landing_path + downloaded_source + delimiter)
+
+        if(len(list(all_blobs)) <= 0):
+            raise Exception("*********file not found********")
 
         try:
             for blob in all_blobs:
@@ -57,7 +60,6 @@ class CatalogueDownloadedData:
                 file_extension = get_file_extension(file_name)
                 expected_file_extension = source_audio_format
                 if self.has_mp3_extension(expected_file_extension, file_extension):
-                    if batch_count > 0:
                         metadata_file_name = self.get_metadata_file_name(file_name)
                         print("File is {}".format(file_name))
                         source_file_name = get_files_path_with_no_prefix(
@@ -77,9 +79,6 @@ class CatalogueDownloadedData:
                             self.move_to_error(error_landing_path, file_name, metadata_file_name,
                                                downloaded_source,
                                                source_file_name)
-                    else:
-                        break
-                    batch_count -= 1
 
         finally:
             print(downloaded_source)
@@ -147,8 +146,7 @@ if __name__ == "__main__":
     # remote gcs path, for local it will be src/resources/local/config.yaml
     config_path = sys.argv[3]
     downloaded_source = sys.argv[4]
-    batch_count = int(sys.argv[5])
-    source_audio_format = sys.argv[6]
+    source_audio_format = sys.argv[5]
 
     current_working_directory = os.getcwd()
     config_local_path = os.path.join(
@@ -169,4 +167,4 @@ if __name__ == "__main__":
     connection = db.connect()
 
     cataloguer = CatalogueDownloadedData()
-    cataloguer.move_and_catalogue_from_download(downloaded_source, batch_count, db, error_landing_path)
+    cataloguer.move_and_catalogue_from_download(downloaded_source, db, error_landing_path)

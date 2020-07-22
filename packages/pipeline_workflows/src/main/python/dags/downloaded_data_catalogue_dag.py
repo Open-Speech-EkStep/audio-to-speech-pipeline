@@ -6,9 +6,10 @@ from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 
-source_batch_count = json.loads(Variable.get("sourcebatchcountforcataloguing"))
-downloaded_source_audio_format = json.loads(Variable.get("downloadedsourceaudioformat"))
+downloaded_catalog_config = json.loads(Variable.get("downloadcatalogconfig"))
+# downloaded_source_audio_format = json.loads(Variable.get("downloadedsourceaudioformat"))
 composer_namespace = Variable.get("composer_namespace")
+source_audio_format = downloaded_catalog_config["audioformat"]
 
 default_args = {
     'email': ['gaurav.gupta@thoughtworks.com']
@@ -25,8 +26,7 @@ secret_file = secret.Secret(
 
 def create_dag(dag_id,
                default_args,
-               source,
-               batch_count):
+               source):
 
     dag = models.DAG(
         dag_id,
@@ -39,7 +39,7 @@ def create_dag(dag_id,
             task_id='data-cataloguer',
             name='data-cataloguer',
             cmds=["python", "-m", "src.scripts.data_cataloguer", "cluster", "ekstepspeechrecognition-dev",
-                  "data/audiotospeech/config/downloaded_data_cataloguer/config.yaml", source, batch_count, downloaded_source_audio_format[source]],
+                  "data/audiotospeech/config/downloaded_data_cataloguer/config.yaml", source, source_audio_format[source]],
 
             namespace=composer_namespace,
             startup_timeout_seconds=300,
@@ -51,7 +51,7 @@ def create_dag(dag_id,
     return dag
 
 
-for source, batch_count in source_batch_count.items():
+for source in downloaded_catalog_config[source]:
     dag_id = f"cataloguing_{source}"
 
     default_args = {
@@ -64,5 +64,4 @@ for source, batch_count in source_batch_count.items():
 
     globals()[dag_id] = create_dag(dag_id,
                                    default_args,
-                                   source,
-                                   batch_count)
+                                   source)
