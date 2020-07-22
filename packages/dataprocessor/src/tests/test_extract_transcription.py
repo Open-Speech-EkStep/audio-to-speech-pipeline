@@ -17,6 +17,8 @@ class ExtractTranscription(unittest.TestCase):
         output_path = './src/tests/test_resources/output/SampleHindi/'
         os.makedirs(output_path)
         save_transcriptions(output_path, transcriptions, 'chunk')
+        if os.path.exists(output_path):
+            shutil.rmtree(output_path)
         self.assertEqual(3, len(transcriptions))
         self.assertEqual('', transcriptions[0])
         self.assertEqual('मेरे प्यारे देशवासियों नमस्कार', transcriptions[1])
@@ -25,7 +27,7 @@ class ExtractTranscription(unittest.TestCase):
 
     def test_save_transcriptions(self):
         transcriptions = ['', 'मेरे प्यारे देशवासियों', 'नमस्कार', '', 'कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है', 'जब मैंने पिछली बार आपसे']
-        output_file_dir = './test_resources/output/transcriptions'
+        output_file_dir = './src/tests/test_resources/output/transcriptions'
         os.mkdir(output_file_dir)
         save_transcriptions(output_file_dir, transcriptions, 'chunk')
         files = os.listdir(output_file_dir)
