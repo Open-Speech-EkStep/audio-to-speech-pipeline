@@ -75,29 +75,26 @@ class RemoteAudioPipeline():
         base_chunk_name = converted_wav_file_path.split('/')[-1]
         create_audio_clips(2, converted_wav_file_path, chunks_dir, vad_output_path, base_chunk_name)
 
-        print(f'******** creating transcriptions for folder {chunks_dir}')
-
-        speech_key = args_azure['speech_key']
-        region = args_azure['region']
-        azure_client = AzureSpeechClient(speech_key, region)
-        chunks = os.listdir(chunks_dir)
-        for chunk in chunks:
-            create_transcription(azure_client, args_application['language'], os.path.join(chunks_dir, chunk))
-
         metadata_file_name = converted_wav_file_path.replace('.wav', '.csv')
 
         print("Initiating snr process...")
         snr_obj = SNR()
         args_snr['input_file_dir'] = glob.glob(chunks_dir + '/*.wav')
         print("*****SNR input dir*******", args_snr['input_file_dir'])
+        snr_output_base_dir = os.path.join(current_working_directory, args_clipaudio['output_file_dir'], data_source,
+                                       audio_id)
         snr_obj.fit_and_move(input_file_dir=args_snr['input_file_dir'],
                              metadata_file_name=metadata_file_name,
-                             output_file_dir=os.path.join(current_working_directory,
-                                                          args_clipaudio['output_file_dir'],
-                                                          data_source,
-                                                          audio_id),
+                             output_file_dir=snr_output_base_dir,
                              threshold=args_snr['threshold'],
                              audio_id=audio_id)
+
+        transcription_input_dir = os.path.join(snr_output_base_dir, 'clean')
+        print(f'******** creating transcriptions for folder {transcription_input_dir}')
+        chunks = os.listdir(transcription_input_dir)
+        for chunk in chunks:
+            create_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
+                                 , args_application['language'], os.path.join(transcription_input_dir, chunk))
 
         # Upload files to GCS
         # Upload cleaned files
