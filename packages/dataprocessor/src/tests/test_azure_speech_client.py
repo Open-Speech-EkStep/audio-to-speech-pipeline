@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from azure.cognitiveservices.speech import speech
-from packages.dataprocessor.src.scripts.azure_speech_client import AzureSpeechClient
+from src.scripts.azure_speech_client import AzureSpeechClient
 
 
 class TestAzureSpeechClient(unittest.TestCase):
