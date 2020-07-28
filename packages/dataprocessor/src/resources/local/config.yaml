@@ -1,7 +1,7 @@
 application:
   verbose: 0
   logging: 0
-  language: 'hi'
+  language: 'hi-IN'
 
 
 downloader: ## data loader
@@ -28,3 +28,13 @@ filtersnr:
   input_file_dir: null
   output_file_dir: null
   threshold: 15
+
+metadatadb:
+  db_user: 'pipelineuser'
+  db_password: '*****'
+  db_name: 'speech_recognition_data_catalog'
+  cloud_sql_conn: '*****'
+
+azure:
+  speech_key: '******'
+  region: 'centralindia'

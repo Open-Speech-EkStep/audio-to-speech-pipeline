@@ -4,10 +4,11 @@ import time
 
 import yaml
 
-from .azure_speech_client import AzureSpeechClient
 from .snr import SNR
-from .transcription_generator import create_transcription
+from .transcription_generator import create_transcriptions
 from .vad_audio_clipper import create_audio_clips
+from .google_speech_client import GoogleSpeechClient
+from .merge_chunks import merge_chunks
 from .wav_convertor import convert_to_wav
 
 yaml.warnings({'YAMLLoadWarning': False})
@@ -47,7 +48,9 @@ class RemoteAudioPipeline():
         args_clipaudio = read_dict['clipaudio']
         args_snr = read_dict['filtersnr']
         args_metadatadb = read_dict['metadatadb']
-        args_azure = read_dict['azure']
+
+        # Create required objects
+        google_speec_client = GoogleSpeechClient(args_application['language'])
 
         obj_gcsops = CloudStorageOperations()
 
@@ -74,14 +77,20 @@ class RemoteAudioPipeline():
         print(f'******** creating chunks using vad for file:{converted_wav_file_path} to folder {chunks_dir}')
         create_audio_clips(2, converted_wav_file_path, chunks_dir, vad_output_path)
 
-        print(f'******** creating transcriptions for folder {chunks_dir}')
+        print("******** merging chunks in :", chunks_dir)
+        voice_separator_audio = './src/resources/chunk_separator/hoppipola_gtts_10-10.wav'
+        merged_file_name = merge_chunks(chunks_dir, voice_separator_audio, 'chunk', 'merged.wav')
+        wav_file_path = os.path.join(local_download_path, merged_file_name)
 
-        speech_key = args_azure['speech_key']
-        region = args_azure['region']
-        azure_client = AzureSpeechClient(speech_key, region)
-        chunk_paths = os.listdir(chunks_dir)
-        for chunk_path in chunk_paths:
-            create_transcription(azure_client, args_application['language'], chunk_path)
+        print(f'******** uploading merged file:{merged_file_name} --> {wav_file_path}')
+
+        obj_gcsops.upload_to_gcs(bucket_name, merged_file_name, wav_file_path, False)
+        remote_wav_file_path = os.path.join("gs://", bucket_name, wav_file_path)
+
+        transcripts = create_transcriptions(google_speec_client, remote_wav_file_path, chunks_dir, 'merged-api-response.txt')
+        chunks = os.listdir(chunks_dir)
+        if(len(transcripts) != len(chunks)):
+            raise RuntimeError(f'incorrect number of transcripts created. transcriptions: {len(transcripts)}, chunks: {len(chunks)}')
 
         metadata_file_name = converted_wav_file_path.replace('.wav', '.csv')
 

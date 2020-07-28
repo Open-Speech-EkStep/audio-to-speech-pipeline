@@ -47,3 +47,4 @@ psycopg2
 numba<=0.48
 webrtcvad
 sox
+azure-cognitiveservices-speech

@@ -6,7 +6,6 @@ WORD_SEPERATOR_REGEX = 'हैप्पी पोला|हॉपिपोला
 
 
 def extract_transcription(content):
-    # vad_chunks = chunks_objects_list_from_vad_output(vad_output_path)
     original_transcription = list(map(lambda c: c.alternatives[0].transcript, content.results))
     print(' '.join(original_transcription))
     transcriptions = list(map(to_transcriptions, content.results))
@@ -23,17 +22,6 @@ def to_transcriptions(chunk):
     transcript = re.sub(f'(({WORD_SEPERATOR_REGEX})(\s)){2,}', WORD_SEPERATOR,
                         chunk.alternatives[0].transcript)
     return transcript
-
-
-def save_transcriptions(output_dir, transcriptions, file_name):
-    for index, transcription in enumerate(transcriptions):
-        transcription_file = '{0}/{1}-{2}.txt'.format(output_dir, file_name, index)
-        save_file(transcription, transcription_file)
-
-
-def save_file(transcription, output_file_path):
-    with open(output_file_path, "w") as f:
-        f.write(transcription)
 
 
 def chunks_objects_list_from_vad_output(path_vad_stdout):
