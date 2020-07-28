@@ -12,4 +12,5 @@ def create_transcriptions(google_speech_client, wav_file_path, output_path, api_
 def create_transcription(azure_client, language, wav_file_path):
     result = azure_client.speech_to_text(wav_file_path, language)
     transcription_file_path = wav_file_path.replace('.wav', '.txt')
+    # TODO handle API failures
     save_transcription(result.text, transcription_file_path)
