@@ -141,7 +141,7 @@ def vad_collector(sample_rate, frame_duration_ms,
         yield b''.join([f.bytes for f in voiced_frames])
 
 
-def create_audio_clips(aggressiveness, wav_file_path, dir_to_save_chunks, vad_output_file_path):
+def create_audio_clips(aggressiveness, wav_file_path, dir_to_save_chunks, vad_output_file_path, base_chunk_name):
     audio, sample_rate = read_wave(wav_file_path)
     vad = webrtcvad.Vad(int(aggressiveness))
     frames = frame_generator(30, audio, sample_rate)
@@ -150,7 +150,7 @@ def create_audio_clips(aggressiveness, wav_file_path, dir_to_save_chunks, vad_ou
 
     segments = vad_collector(sample_rate, 30, 300, vad, frames, vad_output_file_path, file)
     for i, segment in enumerate(segments):
-        path = dir_to_save_chunks + '/chunk-%001d.wav' % (i,)
+        path = f'{dir_to_save_chunks}/{i}_{base_chunk_name}'
         # print('\nWriting %s' % (path,))
         file.write('\nWriting %s' % (path,))
         file.write('\n')

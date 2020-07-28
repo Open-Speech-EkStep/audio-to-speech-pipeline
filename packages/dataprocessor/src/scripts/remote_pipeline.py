@@ -72,7 +72,8 @@ class RemoteAudioPipeline():
         obj_gcsops.make_directories(chunks_dir)
 
         print(f'******** creating chunks using vad for file:{converted_wav_file_path} to folder {chunks_dir}')
-        create_audio_clips(2, converted_wav_file_path, chunks_dir, vad_output_path)
+        base_chunk_name = converted_wav_file_path.split('/')[-1]
+        create_audio_clips(2, converted_wav_file_path, chunks_dir, vad_output_path, base_chunk_name)
 
         print(f'******** creating transcriptions for folder {chunks_dir}')
 

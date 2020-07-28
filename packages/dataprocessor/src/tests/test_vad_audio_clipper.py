@@ -12,9 +12,14 @@ class VadAudioClipper(unittest.TestCase):
         file_name = 'test.wav'
         input_file_path = input_dir + '/' + file_name
         vad_output_file_path = input_dir + '/' + file_name.replace('.wav', '_vad_output.txt')
-        create_audio_clips(aggressiveness, input_file_path, output_dir, vad_output_file_path)
-        clips = os.listdir(output_dir)  # dir is your directory path
-        self.assertEqual(37, len(clips))
+        base_chunk_name = 'test.wav'
+        create_audio_clips(aggressiveness, input_file_path, output_dir, vad_output_file_path, base_chunk_name)
+        actual_chunk_names = os.listdir(output_dir)  # dir is your directory path
+        self.assertEqual(37, len(actual_chunk_names))
+
+        expected_chunk_names = [f'{i}_test.wav' for i in range(37)]
+        print('list:' + str(expected_chunk_names))
+        self.assertEqual(set(actual_chunk_names), set(expected_chunk_names))
         self.delete_files(output_dir)
 
     def delete_files(self, output_dir):
