@@ -15,7 +15,7 @@ parameters:
     default: true
   pipeline_workflows:
     type: boolean
-    default: true
+    default: false
   data_tagger:
     type: boolean
     default: false
@@ -24,7 +24,7 @@ parameters:
     default: false
   downloaded_data_cataloguer:
     type: boolean
-    default: true
+    default: false
 
 
 executors:
