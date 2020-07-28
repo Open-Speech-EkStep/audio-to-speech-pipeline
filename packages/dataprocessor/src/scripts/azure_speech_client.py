@@ -2,9 +2,9 @@ from azure.cognitiveservices import speech
 
 class AzureSpeechClient(object):
 
-    def __init__(self, *args, **kwargs):
-        self.speech_key = kwargs.get('speech_key')
-        self.service_region = kwargs.get('service_region')
+    def __init__(self, speech_key, service_region):
+        self.speech_key = speech_key
+        self.service_region = service_region
 
     def speech_to_text(self, audio_file_path, language):
         speech_config = speech.SpeechConfig(subscription=self.speech_key, region=self.service_region)

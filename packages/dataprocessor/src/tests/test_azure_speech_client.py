@@ -20,7 +20,7 @@ class TestAzureSpeechClient(unittest.TestCase):
         result.text = 'कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है।'
         result.reason = speech.ResultReason.RecognizedSpeech
         mock_speechrecongnizer.return_value.recognize_once.return_value = result
-        azure_client = AzureSpeechClient(speech_key='dummy_key', service_region='centralindia')
+        azure_client = AzureSpeechClient('dummy_key', 'centralindia')
         audio_file_path = 'chunk-2.wav'
         result = azure_client.speech_to_text(audio_file_path, 'hi-IN')
         self.assertEqual('कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है।', result.text)
@@ -31,7 +31,7 @@ class TestAzureSpeechClient(unittest.TestCase):
         result.text = None
         result.reason = speech.ResultReason.NoMatch
         mock_speechrecongnizer.return_value.recognize_once.return_value = result
-        azure_client = AzureSpeechClient(speech_key='dummy_key', service_region='centralindia')
+        azure_client = AzureSpeechClient('dummy_key', 'centralindia')
         audio_file_path = 'chunk-2.wav'
         result = azure_client.speech_to_text(audio_file_path, 'hi-IN')
         self.assertEqual(None, result)
@@ -42,7 +42,7 @@ class TestAzureSpeechClient(unittest.TestCase):
         result.text = None
         result.reason = speech.ResultReason.Canceled
         mock_speechrecongnizer.return_value.recognize_once.return_value = result
-        azure_client = AzureSpeechClient(speech_key='dummy_key', service_region='centralindia')
+        azure_client = AzureSpeechClient('dummy_key', 'centralindia')
         audio_file_path = 'chunk-2.wav'
         result = azure_client.speech_to_text(audio_file_path, 'hi-IN')
         self.assertEqual(None, result)
