@@ -79,9 +79,9 @@ class RemoteAudioPipeline():
         speech_key = args_azure['speech_key']
         region = args_azure['region']
         azure_client = AzureSpeechClient(speech_key, region)
-        chunk_paths = os.listdir(chunks_dir)
-        for chunk_path in chunk_paths:
-            create_transcription(azure_client, args_application['language'], chunk_path)
+        chunks = os.listdir(chunks_dir)
+        for chunk in chunks:
+            create_transcription(azure_client, args_application['language'], os.path.join(chunks_dir, chunk))
 
         metadata_file_name = converted_wav_file_path.replace('.wav', '.csv')
 

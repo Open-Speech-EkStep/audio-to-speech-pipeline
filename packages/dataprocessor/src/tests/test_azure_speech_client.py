@@ -2,17 +2,16 @@ import unittest
 from unittest import mock
 
 from azure.cognitiveservices.speech import speech
-from src.scripts.azure_speech_client import AzureSpeechClient
+from packages.dataprocessor.src.scripts.azure_speech_client import AzureSpeechClient
 
 
 class TestAzureSpeechClient(unittest.TestCase):
 
     # def test_real_call(self):
-    #     azureClient = AzureSpeechClient('dummy', 'centralindia')
-    #     audio_file_path = 'chunk-2.wav'
-    #     with_punctuation = False
-    #     text = azureClient.speech_to_text(audio_file_path, with_punctuation)
-    #     self.assertEquals('कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है', text)
+    #     azureClient = AzureSpeechClient('e3160461990a42e2abe91405b7321de4', 'centralindia')
+    #     audio_file_path = '/Users/rajats/projects/ekstep/audio-to-speech-pipeline/packages/dataprocessor/src/tests/test_resources/input/chunks/chunk-2.wav'
+    #     result = azureClient.speech_to_text(audio_file_path, 'hi-IN')
+    #     self.assertEquals('कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है।', result.text)
 
     @mock.patch("azure.cognitiveservices.speech.SpeechRecognizer")
     def test_speech_to_text_success(self, mock_speechrecongnizer):

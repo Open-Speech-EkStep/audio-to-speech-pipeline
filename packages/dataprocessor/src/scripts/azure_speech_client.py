@@ -10,6 +10,7 @@ class AzureSpeechClient(object):
         speech_config = speech.SpeechConfig(subscription=self.speech_key, region=self.service_region)
         audio_input = speech.audio.AudioConfig(filename=audio_file_path)
 
+        print(f'calling azure stt API for file: {audio_file_path}')
         speech_recognizer = speech.SpeechRecognizer(speech_config=speech_config, language=language,
                                                        audio_config=audio_input)
         print("Recognizing first result...")
