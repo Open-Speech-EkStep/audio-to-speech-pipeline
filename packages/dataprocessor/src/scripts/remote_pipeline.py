@@ -91,10 +91,10 @@ class RemoteAudioPipeline():
 
         transcription_input_dir = os.path.join(snr_output_base_dir, 'clean')
         print(f'******** creating transcriptions for folder {transcription_input_dir}')
-        chunks = os.listdir(transcription_input_dir)
-        for chunk in chunks:
+        chunk_files = os.listdir(transcription_input_dir)
+        for chunk_file_name in chunk_files:
             create_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
-                                 , args_application['language'], os.path.join(transcription_input_dir, chunk))
+                                 , args_application['language'], os.path.join(transcription_input_dir, chunk_file_name))
 
         # Upload files to GCS
         # Upload cleaned files
