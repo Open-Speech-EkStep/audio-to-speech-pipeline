@@ -6,7 +6,7 @@ import yaml
 
 from .azure_speech_client import AzureSpeechClient
 from .snr import SNR
-from .transcription_generator import create_transcription
+from .transcription_generator import create_azure_transcription
 from .vad_audio_clipper import create_audio_clips
 from .wav_convertor import convert_to_wav
 
@@ -93,8 +93,8 @@ class RemoteAudioPipeline():
         print(f'******** creating transcriptions for folder {transcription_input_dir}')
         chunk_files = os.listdir(transcription_input_dir)
         for chunk_file_name in chunk_files:
-            create_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
-                                 , args_application['language'], os.path.join(transcription_input_dir, chunk_file_name))
+            create_azure_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
+                                       , args_application['language'], os.path.join(transcription_input_dir, chunk_file_name))
 
         # Upload files to GCS
         # Upload cleaned files

@@ -1,9 +1,11 @@
 import os
+import pickle
 import shutil
 import unittest
 from unittest import mock
 
-from src.scripts.transcription_generator import save_transcriptions, create_transcriptions, create_transcription
+from src.scripts.transcription_generator import save_transcriptions, create_transcriptions, create_azure_transcription, \
+    create_google_transcription
 
 
 class TestTrancriptionGenerator(unittest.TestCase):
@@ -28,14 +30,14 @@ class TestTrancriptionGenerator(unittest.TestCase):
         self.assertEqual(len(files), 6)
 
     @mock.patch("src.scripts.azure_speech_client.AzureSpeechClient")
-    def test_create_transcription_wo_punctuation(self, mock_client):
+    def test_create_azure_transcription_wo_punctuation(self, mock_client):
         mocked_result = mock.Mock()
         mocked_result.text = 'कोरोना के प्रभाव से: हमारी मन की बात भी अछूती नहीं रही है।'
         mock_client.speech_to_text.return_value = mocked_result
         output_file_dir = "./src/tests/test_resources/output/transcriptions/2"
         wave_file_path = output_file_dir + '/chunk.wav'
         os.makedirs(output_file_dir)
-        transcription = create_transcription(mock_client, 'hi-IN', wave_file_path)
+        transcription = create_azure_transcription(mock_client, 'hi-IN', wave_file_path)
         files = os.listdir(output_file_dir)
         if os.path.exists(output_file_dir):
             shutil.rmtree(output_file_dir)
@@ -43,19 +45,34 @@ class TestTrancriptionGenerator(unittest.TestCase):
         self.assertEquals(transcription, 'कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है')
 
     @mock.patch("src.scripts.azure_speech_client.AzureSpeechClient")
-    def test_create_transcription_with_punctuation(self, mock_client):
+    def test_create_azure_transcription_with_punctuation(self, mock_client):
         mocked_result = mock.Mock()
         mocked_result.text = 'कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है।'
         mock_client.speech_to_text.return_value = mocked_result
         output_file_dir = "./src/tests/test_resources/output/transcriptions/3"
         wave_file_path = output_file_dir + '/chunk.wav'
         os.makedirs(output_file_dir)
-        transcription = create_transcription(mock_client, 'hi-IN', wave_file_path, True)
+        transcription = create_azure_transcription(mock_client, 'hi-IN', wave_file_path, True)
         files = os.listdir(output_file_dir)
         if os.path.exists(output_file_dir):
             shutil.rmtree(output_file_dir)
         self.assertEquals(len(files), 1)
         self.assertEquals(transcription, 'कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है।')
 
+    @mock.patch("src.scripts.google_speech_client.GoogleSpeechClient")
+    def test_create_google_transcription(self, mock_client):
+        path_srt_file = './src/tests/test_resources/input/merged.txt'
+        with open(path_srt_file, 'rb') as file:
+            content = pickle.load(file)
+        mock_client.call_speech_to_text.return_value = content
+        output_file_dir = "./src/tests/test_resources/output/transcriptions/4"
+        wave_file_path = output_file_dir + '/chunk.wav'
+        os.makedirs(output_file_dir)
+        transcription = create_google_transcription(mock_client, wave_file_path)
+        files = os.listdir(output_file_dir)
+        if os.path.exists(output_file_dir):
+            shutil.rmtree(output_file_dir)
+        self.assertEquals(len(files), 1)
+        self.assertEquals(transcription, 'हॉपिपोला मेरे प्यारे देशवासियों नमस्कार  हॉपिपोला कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है')
 if __name__ == '__main__':
     unittest.main()
