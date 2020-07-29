@@ -20,6 +20,7 @@ if __name__ == "__main__":
         data_source = sys.argv[4]  # audio source: joshtalks, brahmakumari
         audio_id = sys.argv[5]  # unique identifier for each audio file
         audio_extn = sys.argv[6]  # audio file exten: can be .mp4 or .mp3
+        api = sys.argv[7]  # flag for specifying api for translation
     else:
         print("Required Arguements are not passed correctly.Please retry.")
         exit()

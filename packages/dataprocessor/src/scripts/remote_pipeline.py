@@ -37,7 +37,7 @@ class RemoteAudioPipeline():
                                      destination=os.path.join(current_working_directory, local_download_path),
                                      is_directory=True)
 
-    def fit(self, yaml_file_path, bucket_name, data_source, audio_id, audio_extn):
+    def fit(self, yaml_file_path, bucket_name, data_source, audio_id, audio_extn, cloud_api):
         print("starting RemoteAudioPipeline.........")
         pipeline_start_time = time.time()
         read_dict = self.__load_yaml_file(yaml_file_path)
@@ -93,8 +93,15 @@ class RemoteAudioPipeline():
         print(f'******** creating transcriptions for folder {transcription_input_dir}')
         chunk_files = os.listdir(transcription_input_dir)
         for chunk_file_name in chunk_files:
-            create_azure_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
-                                       , args_application['language'], os.path.join(transcription_input_dir, chunk_file_name))
+
+            if cloud_api == 'azure':
+                create_azure_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
+                                           , args_application['language'], os.path.join(transcription_input_dir, chunk_file_name))
+            elif cloud_api == 'google':
+                # add the google call.
+
+            else:
+                # raise IncompatibleClient(f'{cloud_api} not configured')
 
         # Upload files to GCS
         # Upload cleaned files

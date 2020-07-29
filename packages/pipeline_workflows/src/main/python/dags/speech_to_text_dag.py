@@ -8,6 +8,7 @@ from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
 from speech_to_text_dag_processor import get_audio_ids, get_files_from_landing_zone, move_raw_to_processed
+from constants import DEFAULT_TRANSLATION_API
 
 source_batch_count = json.loads(Variable.get("sourcebatchcount"))
 tobe_processed_path = Variable.get("tobeprocessedpath")
@@ -69,7 +70,7 @@ def create_dag(dag_id,
                 task_id=dag_id + "_data_prep_" + audio_file_id,
                 name='data-prep-stt',
                 cmds=["python", "-m", "src.scripts.pipeline_v2", "cluster", bucket_name, stt_config_path, dag_id,
-                      audio_file_id, source_audio_format[dag_id]],
+                      audio_file_id, source_audio_format[dag_id], default_args.get('translation_source')],
                 # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
@@ -88,11 +89,20 @@ def create_dag(dag_id,
     return dag
 
 
-for source, batch_count in source_batch_count.items():
+for source in source_batch_count.keys():
+
+    source_info = source_batch_count.get(source)
+
+    batch_count = source_info.get('count')
+    file_format = source_info.get('format')
+    translation_source = source_info.get('api', DEFAULT_TRANSLATION_API)
+
     dag_id = source
 
     default_args = {
-        'email': ['gaurav.gupta@thoughtworks.com']
+        'email': ['gaurav.gupta@thoughtworks.com'],
+        'file_format': file_format,
+        'translation_source': translation_source
     }
 
     # schedule = '@daily'
