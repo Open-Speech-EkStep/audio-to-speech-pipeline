@@ -20,7 +20,7 @@ if __name__ == "__main__":
         data_source = sys.argv[4]  # audio source: joshtalks, brahmakumari
         audio_id = sys.argv[5]  # unique identifier for each audio file
         audio_extn = sys.argv[6]  # audio file exten: can be .mp4 or .mp3
-        api = sys.argv[7]  # flag for specifying api for translation
+        stt_api = sys.argv[7]  # flag for specifying api for translation
     else:
         print("Required Arguements are not passed correctly.Please retry.")
         exit()
@@ -32,6 +32,7 @@ if __name__ == "__main__":
     print("Arg 4 : data_source: {}".format(data_source))
     print("Arg 5 : audio_id: {}".format(audio_id))
     print("Arg 6 : audio_extn: {}".format(audio_extn))
+    print("Arg 7 : api: {}".format(stt_api))
 
     current_working_directory = os.getcwd()
     config_local_path = os.path.join(current_working_directory, "src/resources/" + job_mode + "/config.yaml")
@@ -46,4 +47,4 @@ if __name__ == "__main__":
         print("download successful")
         obj = RemoteAudioPipeline()
         print("running pipeline")
-        obj.fit(config_local_path, gcs_bucket_name, data_source, audio_id, audio_extn)
+        obj.fit(config_local_path, gcs_bucket_name, data_source, audio_id, audio_extn, stt_api)

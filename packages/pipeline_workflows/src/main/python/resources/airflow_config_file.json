@@ -5,7 +5,7 @@
   "inputtobeprocesspath":"/data/integration/ttsapi/tobeprocessed/hindi/",
   "batchsize":"10800",
   "apibatchratio":{"google":3,"azure":2,"gtts":1},
-  "sourcebatchcount" : {"brahmakumaris2":30,"joshtalks2":2,"youtube":1,"iitspokentutorial2":7},
+  "sourceinfo" : {"brahmakumaris2": {"count":30, "format": "mp3"},"joshtalks2":{"count":2, "format": "mp4"},"youtube":{"count":1, "format": "mp4"},"iitspokentutorial2": {"count":7, "format": "mp4"}},
   "sourcelandingpath" : "data/audiotospeech/raw/landing/hindi/audio/",
   "errorlandingpath" : "data/audiotospeech/raw/landing/hindi/audio/error/",
   "tobeprocessedpath" : "data/audiotospeech/raw/tobeprocessed/hindi/audio/",
@@ -19,7 +19,6 @@
   "downloadcatalogconfig": {"audioformat": {"mahatmagandhi":"mp3", "yourquote":"mp4", "testdag":"mp3"}, "source":["mahatmagandhi","testdag"]},
   "archiveutterancespath" : "data/experiments/archive/",
   "sttconfigpath" : "data/audiotospeech/config/speechtotext/config.yaml",
-  "sourceaudioformat" : {"brahmakumaris2":"mp3","joshtalks2":"mp4","youtube":"mp4","iitspokentutorial2":"mp4"},
   "audiofileids" : {"brahmakumaris2": [], "joshtalks2": [], "youtube": [],"iitspokentutorial2": []},
   "apivoice":{"google":["voice1","voice2","voice3"],"azure":["voice1","voice2"],"gtts":["voice1"]}}
 

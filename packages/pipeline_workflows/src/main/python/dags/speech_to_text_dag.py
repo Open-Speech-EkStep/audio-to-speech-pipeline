@@ -10,12 +10,11 @@ from airflow.operators.python_operator import PythonOperator
 from speech_to_text_dag_processor import get_audio_ids, get_files_from_landing_zone, move_raw_to_processed
 from constants import DEFAULT_TRANSLATION_API
 
-source_batch_count = json.loads(Variable.get("sourcebatchcount"))
+sourceinfo = json.loads(Variable.get("sourceinfo"))
 tobe_processed_path = Variable.get("tobeprocessedpath")
 processed_path = Variable.get("rawprocessedpath")
 bucket_name = Variable.get("bucket")
 stt_config_path = Variable.get("sttconfigpath")
-source_audio_format = json.loads(Variable.get("sourceaudioformat"))
 composer_namespace = Variable.get("composer_namespace")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
@@ -29,6 +28,7 @@ secret_file = secret.Secret(
 def create_dag(dag_id,
                dag_number,
                default_args,
+               args,
                batch_count):
     dag = DAG(dag_id,
               schedule_interval=datetime.timedelta(days=1),
@@ -70,7 +70,7 @@ def create_dag(dag_id,
                 task_id=dag_id + "_data_prep_" + audio_file_id,
                 name='data-prep-stt',
                 cmds=["python", "-m", "src.scripts.pipeline_v2", "cluster", bucket_name, stt_config_path, dag_id,
-                      audio_file_id, source_audio_format[dag_id], default_args.get('translation_source')],
+                      audio_file_id, args.get('file_format'), args.get('translation_source')],
                 # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
@@ -89,9 +89,9 @@ def create_dag(dag_id,
     return dag
 
 
-for source in source_batch_count.keys():
+for source in sourceinfo.keys():
 
-    source_info = source_batch_count.get(source)
+    source_info = sourceinfo.get(source)
 
     batch_count = source_info.get('count')
     file_format = source_info.get('format')
@@ -99,8 +99,11 @@ for source in source_batch_count.keys():
 
     dag_id = source
 
-    default_args = {
+    dag_args = {
         'email': ['gaurav.gupta@thoughtworks.com'],
+     }
+
+    args = {
         'file_format': file_format,
         'translation_source': translation_source
     }
@@ -111,5 +114,6 @@ for source in source_batch_count.keys():
 
     globals()[dag_id] = create_dag(dag_id,
                                    dag_number,
-                                   default_args,
+                                   dag_args,
+                                   args,
                                    batch_count)

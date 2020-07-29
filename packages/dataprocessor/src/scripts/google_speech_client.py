@@ -11,8 +11,7 @@ from .gcs_operations import CloudStorageOperations
 
 class GoogleSpeechClient(object):
     def __init__(self, language, sample_rate=16000, audio_channel_count=1):
-        if language == 'hi':
-            self.language = 'hi-IN'
+        self.language = language
         self.sample_rate = sample_rate
         self.channels = audio_channel_count
         self.obj_gcs = CloudStorageOperations()
