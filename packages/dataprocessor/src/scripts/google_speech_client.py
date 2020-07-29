@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append('./transcription')
 
 import pickle
@@ -16,9 +17,8 @@ class GoogleSpeechClient(object):
         self.channels = audio_channel_count
         self.obj_gcs = CloudStorageOperations()
 
-
-
-    def call_speech_to_text(self, input_file_path, save_response, dump_response_directory, response_file_name):
+    def call_speech_to_text(self, input_file_path, save_response, dump_response_directory=None,
+                            response_file_name=None):
         client = speech_v1.SpeechClient()
 
         config = {

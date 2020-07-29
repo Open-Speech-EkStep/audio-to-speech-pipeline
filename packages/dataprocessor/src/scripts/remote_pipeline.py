@@ -94,13 +94,16 @@ class RemoteAudioPipeline():
         print(f'******** creating transcriptions for folder {transcription_input_dir}')
         chunk_files = os.listdir(transcription_input_dir)
         for chunk_file_name in chunk_files:
+            local_wave_file_path = os.path.join(transcription_input_dir, chunk_file_name)
             if stt_api == 'azure':
                 create_azure_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
                                            , args_application['language'],
-                                           os.path.join(transcription_input_dir, chunk_file_name))
+                                           local_wave_file_path)
             elif stt_api == 'google':
-                create_google_transcription(GoogleSpeechClient(args_application['language'])
-                                            , os.path.join(transcription_input_dir, chunk_file_name))
+                print(f'******** uploading merged file:{local_wave_file_path} --> {local_wave_file_path}')
+                remote_wav_file_path = os.path.join("gs://", bucket_name, local_wave_file_path)
+                obj_gcsops.upload_to_gcs(bucket_name, local_wave_file_path, local_wave_file_path, False)
+                create_google_transcription(GoogleSpeechClient(args_application['language']), remote_wav_file_path)
             else:
                 raise RuntimeError(f'{stt_api} not configured')
 
