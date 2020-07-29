@@ -4,7 +4,8 @@ import ast
 import sys
 import yaml
 
-from .db_query import MAX_LOAD_DATE_FOR_MEDIA_QUERY, INSERT_INTO_MEDIA_TABLE_QUERY, GET_SPEAKER_ID_QUERY, GET_LOAD_TIME_FOR_AUDIO_QUERY, FIND_MAX_LOAD_DATE_QUERY, GET_AUDIO_ID_QUERY, INSERT_UNIQUE_SPEAKER_QUERY
+from .db_query import MAX_LOAD_DATE_FOR_MEDIA_QUERY, INSERT_INTO_MEDIA_TABLE_QUERY, GET_SPEAKER_ID_QUERY, GET_LOAD_TIME_FOR_AUDIO_QUERY,\
+     FIND_MAX_LOAD_DATE_QUERY, GET_AUDIO_ID_QUERY, INSERT_UNIQUE_SPEAKER_QUERY,GET_NEW_SOURCE_DATA_QUERY,UPDATE_SOURCE_METADATA_QUERY,INSERT_INTO_SOURCE_METADATA_QUERY
 
 from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
@@ -99,6 +100,22 @@ class Db_normalizer():
         utterance_in_array = ast.literal_eval(utterance[0][0])
         return utterance_in_array
 
+    def get_new_source_data(self,connection):
+        results = connection.execute(GET_NEW_SOURCE_DATA_QUERY).fetchall()
+        max_date = results
+        return max_date
+
+
+    def update_source_metadata_table(self,connection):
+        self.insert_into_source_metadata(connection)
+        source_info = self.get_new_source_data(connection)
+        for source in source_info:
+            update_query = text(UPDATE_SOURCE_METADATA_QUERY)
+            connection.execute(update_query,cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
+
+    def insert_into_source_metadata(self,connection):
+        insert_query = text(INSERT_INTO_SOURCE_METADATA_QUERY)
+        connection.execute(insert_query)
 
     def copy_data_media_speaker_mapping(self,db):
         connection = db.connect()
@@ -167,6 +184,8 @@ if __name__ == "__main__":
     connection = db.connect()
 
     normalizer = Db_normalizer()
+
+    normalizer.update_source_metadata_table(connection)
     print("moving data from staging to media......")
     normalizer.copy_data_from_media_metadata_staging_to_media(db)
     print("moving data from staging to media done")

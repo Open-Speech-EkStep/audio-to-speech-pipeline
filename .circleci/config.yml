@@ -15,13 +15,13 @@ parameters:
     default: true
   pipeline_workflows:
     type: boolean
-    default: false
+    default: true
   data_tagger:
     type: boolean
     default: false
   data_prep_cataloguer:
     type: boolean
-    default: false
+    default: true
   downloaded_data_cataloguer:
     type: boolean
     default: false
