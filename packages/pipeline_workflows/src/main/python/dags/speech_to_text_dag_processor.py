@@ -14,17 +14,15 @@ def get_variables():
     global error_landing_path
     global tobe_processed_path
     global bucket_name
-    global source_batch_count
     global meta_file_extention
-    global source_audio_format
     global processed_path
-    source_audio_format = json.loads(Variable.get("sourceaudioformat"))
+    global source_info
+    source_info = json.loads(Variable.get("sourceinfo"))
     source_landing_path = Variable.get("sourcelandingpath")
     error_landing_path = Variable.get("errorlandingpath")
     tobe_processed_path = Variable.get("tobeprocessedpath")
     processed_path = Variable.get("rawprocessedpath")
     bucket_name = Variable.get("bucket")
-    source_batch_count = json.loads(Variable.get("sourcebatchcount"))
     meta_file_extention = Variable.get("metafileextension")
 
 
@@ -92,7 +90,7 @@ def condition_file_name(file_name):
 
 def get_files_from_landing_zone(source):
     get_variables()
-    batch_count = source_batch_count[source]
+    batch_count = source_info[source]['count']
     delimiter = "/"
     print("****The source is *****" + source)
     # meta_data_flag = False
@@ -102,7 +100,7 @@ def get_files_from_landing_zone(source):
             print("*********The file name is ********* " + blob.name)
             file_name = get_file_name(blob.name, delimiter)
             file_extension = get_file_extension(file_name)
-            expected_file_extension = source_audio_format[source]
+            expected_file_extension = source_info[source]["format"]
             if file_extension in [expected_file_extension, expected_file_extension.swapcase()]:
 
                 if batch_count > 0:
