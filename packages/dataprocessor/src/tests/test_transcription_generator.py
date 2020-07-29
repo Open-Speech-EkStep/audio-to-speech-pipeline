@@ -67,8 +67,9 @@ class TestTrancriptionGenerator(unittest.TestCase):
         mock_client.call_speech_to_text.return_value = content
         output_file_dir = "./src/tests/test_resources/output/transcriptions/4"
         wave_file_path = output_file_dir + '/chunk.wav'
+        remote_wav_file_path = os.path.join('gs://', wave_file_path)
         os.makedirs(output_file_dir)
-        transcription = create_google_transcription(mock_client, wave_file_path)
+        transcription = create_google_transcription(mock_client, remote_wav_file_path, wave_file_path)
         files = os.listdir(output_file_dir)
         if os.path.exists(output_file_dir):
             shutil.rmtree(output_file_dir)

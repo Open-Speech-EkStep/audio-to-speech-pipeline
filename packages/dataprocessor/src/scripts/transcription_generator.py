@@ -18,9 +18,9 @@ def create_azure_transcription(azure_client, language, wav_file_path, punctuatio
     return transcription
 
 
-def create_google_transcription(google_client, wav_file_path):
-    content = google_client.call_speech_to_text(wav_file_path, False)
-    transcription_file_path = wav_file_path.replace('.wav', '.txt')
+def create_google_transcription(google_client, remote_wav_file_path, local_wav_file_path):
+    content = google_client.call_speech_to_text(remote_wav_file_path, False)
+    transcription_file_path = local_wav_file_path.replace('.wav', '.txt')
     transcriptions = list(map(lambda c: c.alternatives[0].transcript, content.results))
     complete_transcription = ' '.join(transcriptions)
     save_transcription(complete_transcription, transcription_file_path)
