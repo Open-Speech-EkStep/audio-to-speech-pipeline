@@ -100,11 +100,13 @@ class RemoteAudioPipeline():
                                            , args_application['language'],
                                            local_wave_file_path)
             elif stt_api == 'google':
-                remote_wav_file_path = os.path.join(local_download_path, chunk_file_name)
-                remote_wav_file_path = os.path.join("gs://", bucket_name, remote_wav_file_path)
-                print(f'******** uploading merged file:{local_wave_file_path} --> {remote_wav_file_path}')
+                remote_wav_file_path = os.path.join(local_download_path, 'stt_chunks', chunk_file_name)
+                print(f'******** uploading wav file:{local_wave_file_path} --> {remote_wav_file_path}')
                 obj_gcsops.upload_to_gcs(bucket_name, local_wave_file_path, remote_wav_file_path, False)
-                create_google_transcription(GoogleSpeechClient(args_application['language']), remote_wav_file_path, local_wave_file_path)
+
+                remote_wav_file_path_for_api = os.path.join("gs://", bucket_name, remote_wav_file_path)
+                print(f'******** using wav file:{remote_wav_file_path_for_api} for google API')
+                create_google_transcription(GoogleSpeechClient(args_application['language']), remote_wav_file_path_for_api, local_wave_file_path)
             else:
                 raise RuntimeError(f'{stt_api} not configured')
 
