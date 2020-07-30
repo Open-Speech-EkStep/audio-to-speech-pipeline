@@ -17,3 +17,5 @@ GET_ALL_DATA_OF_CURRENT_EXP = "SELECT msm.audio_id, msm.clipped_utterance_file_n
         LEFT JOIN media ON media.audio_id = msm.audio_id \
         LEFT JOIN experiment ON msm.experiment_id = experiment.experiment_id \
         WHERE msm.experiment_use_status = true and msm.experiment_id = :exp_id;"
+
+UPDATE_SOURCE_TABLE_WITH_DURATION = "update source_metadata_processed set experiment_use_status = True , experiment_id = :exp_id where source = :source_name"

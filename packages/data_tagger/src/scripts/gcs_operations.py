@@ -180,3 +180,13 @@ class CloudStorageOperations():
                 destination_bucket.name,
             )
         )
+
+    def list_blobs_in_a_path(self,bucket_name, file_prefix, delimiter=None):
+        """Lists all the blobs in the bucket."""
+        # bucket_name = "your-bucket-name"
+        print("*****File prefix is ***** " + file_prefix)
+        storage_client = storage.Client()
+
+        # Note: Client.list_blobs requires at least package version 1.17.0.
+        blobs = storage_client.list_blobs(bucket_name, prefix=file_prefix, delimiter=delimiter)
+        return blobs

@@ -5,11 +5,12 @@ import yaml
 import sys
 from .db_query import GET_NEW_SPEAKER, GET_EXPERIMENT_ID, GET_ALL_SPEAKER_ID_FROM_GIVEN_EXP,\
     INSERT_NEW_EXPERIMENT, INITIAL_TEXT_OF_INSERT_QUERY, GET_NEW_SPEAKER, GET_UTTERANCES_OF_GIVEN_EXP,\
-    GET_UTTERANCES_OF_NEW_USER, INITIAL_TEXT_OF_UPDATE_QUERY, GET_ALL_DATA_OF_CURRENT_EXP, GET_NEW_SPEAKER_WITH_SOURCE
+    GET_UTTERANCES_OF_NEW_USER, INITIAL_TEXT_OF_UPDATE_QUERY, GET_ALL_DATA_OF_CURRENT_EXP, GET_NEW_SPEAKER_WITH_SOURCE, UPDATE_SOURCE_TABLE_WITH_DURATION
 from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
 from sqlalchemy.orm import Session
 from .gcs_operations import CloudStorageOperations
+from concurrent.futures import ThreadPoolExecutor
 
 
 class ExperimentDataTagger():
@@ -38,17 +39,53 @@ class ExperimentDataTagger():
         trans = connection.begin()
         try:
             current_exp_id = self.insert_and_get_exp_id(connection)
+            if using_source:
+                self.tag_source_table(connection, current_exp_id)
             if use_existing_experiment_data:
                 self.for_new_experiment_with_using_existing_exp(
                     connection, current_exp_id, trans)
-            self.create_qurey_and_update_table_for_new_speaker(
-                connection, current_exp_id)
-            trans.commit()
+            if num_speakers > 0:
+                self.create_qurey_and_update_table_for_new_speaker(
+                    connection, current_exp_id)
+                trans.commit()
             # get_all_tegged_data_csv(current_exp_id)
             return current_exp_id
         except:
             trans.rollback()
             raise
+
+    def tag_source_table(self, connection, exp_id):
+        currs = ThreadPoolExecutor(max_workers=5)
+        for source in sources:
+            query = text(UPDATE_SOURCE_TABLE_WITH_DURATION)
+            connection.execute(query, exp_id=exp_id, source_name=source)
+            all_path = obj_gcs.list_blobs_in_a_path(
+                bucket_name, integration_path + source + "/")
+            for path in all_path:
+                full_path = path.name
+                audio_id = full_path.split('/')[-3]
+                self.copy_files(audio_id, source, currs)
+            print("updated into db")
+        currs.shutdown(wait=True)
+
+    def find_unique_ids(self,id_list):
+        ids = [i.name.split('/')[-3] for i in id_list]
+        id_set = set(ids)
+        return id_set
+
+    def copy_files(self, audio_id, source, currs):
+        all_files = obj_gcs.list_blobs_in_a_path(
+            bucket_name, integration_path + source + "/" + str(
+                audio_id) + "/clean/")
+
+        for file_path in all_files:
+            source_blob_name = file_path.name
+            destination_blob_name = exp_output_path + experiment_name + "/" + str(
+                audio_id) + "/" + file_path.name.split("/")[-1]
+            currs.submit(obj_gcs.copy_blob, bucket_name, source_blob_name,
+                         bucket_name, destination_blob_name)
+            # obj_gcs.copy_blob(bucket_name, source_blob_name,
+            #               bucket_name, destination_blob_name)
 
     def for_new_experiment_with_using_existing_exp(self, connection, current_exp_id, trans):
         existing_experiment_id = self.get_existing_experiment_id(connection)
@@ -158,6 +195,8 @@ def get_all_tegged_data_csv(exp_id):
 def get_variables(config_file_path):
     config_file = __load_yaml_file(config_file_path)
     configuration = config_file['configuration']
+    source_config = config_file['source_data_config']
+    bucket_config = config_file['bucket_configuration']
     global experiment_name
     global num_speakers
     global experiment_description
@@ -168,7 +207,18 @@ def get_variables(config_file_path):
     global number_of_speaker_from_existing_experiment
     global metadata_output_path
     global source
+    global using_source
+    global sources
+    global bucket_name
+    global integration_path
+    global exp_output_path
 
+    bucket_name = bucket_config['bucket_name']
+    integration_path = bucket_config['integration_path']
+    exp_output_path = bucket_config['exp_output_path']
+
+    sources = source_config['sources']
+    using_source = source_config['using_source']
     experiment_name = configuration['experiment_name']
     num_speakers = configuration['num_speakers']
     experiment_description = configuration['experiment_description']
@@ -191,16 +241,18 @@ def validate_input(num_speakers, duration_per_speaker_in_second, experiment_name
     if(not isinstance(num_speakers, int) or not isinstance(duration_per_speaker_in_second, int) or
        not num_speakers or num_speakers <= 0 or not duration_per_speaker_in_second or
        duration_per_speaker_in_second <= 0 or len(experiment_name.strip()) <= 0):
-        raise ValueError(
-            "value of num_speakers, duration should be greater than or equal to one and type is int and exp_name should more than one char")
+        if not using_source:
+            raise ValueError(
+                "value of num_speakers, duration should be greater than or equal to one and type is int and exp_name should more than one char")
 
 
 def validate_existing_exp_input(use_existing_experiment_data, number_of_speaker_from_existing_experiment, existing_experiment_name):
     if(use_existing_experiment_data == True):
         if(len(existing_experiment_name.strip()) <= 0 or not isinstance(number_of_speaker_from_existing_experiment, int) or
            not number_of_speaker_from_existing_experiment or number_of_speaker_from_existing_experiment <= 0):
-            raise ValueError(
-                "value  of number_of_speaker_from_existing_experiment should be greater than or equal to one and int and exp_name should be valid")
+            if not using_source:
+                raise ValueError(
+                    "value  of number_of_speaker_from_existing_experiment should be greater than or equal to one and int and exp_name should be valid")
 
 
 def __load_yaml_file(path):

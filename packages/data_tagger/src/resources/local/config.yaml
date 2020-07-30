@@ -9,7 +9,15 @@ configuration:
     number_of_speaker_from_existing_experiment: 0
     metadata_output_path: 'data/experiments/input'
     
+source_data_config:
+    using_source: True
+    sources: ["iitestdevbox"]
     
+bucket_configuration:
+    bucket_name: "ekstepspeechrecognition-dev"
+    integration_path: "data/audiotospeech/integration/processed/hindi/audio/"
+    exp_output_path: "data/experiments/output/"
+
 db_configuration:
     db_name: ''
     db_pass: ''
