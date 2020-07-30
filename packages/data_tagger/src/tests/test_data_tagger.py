@@ -36,33 +36,33 @@ class TestExperimentDataTagger(unittest.TestCase):
     def test_validate_input_should_not_raised_exception_for_valid_input(self):
         raised = False
         try:
-            validate_input(4,5,'exp10')
+            validate_input(4,5,'exp10',False)
         except:
             raised = True
         self.assertFalse(raised, 'Exception not raised')
 
     def test_validate_input_should_throw_exception_if_input_value_is_zero(self):
-        self.assertRaises(ValueError,validate_input,0,0,'exp10')
+        self.assertRaises(ValueError,validate_input,0,0,'exp10',False)
 
     def test_validate_input_should_throw_exception_if_num_speaker_is_zero(self):
-        self.assertRaises(ValueError,validate_input,0,5,'exp10')
+        self.assertRaises(ValueError,validate_input,0,5,'exp10',False)
 
     def test_validate_input_should_throw_exception_input_type_is_not_int(self):
-            self.assertRaises(ValueError,validate_input,' ',' ','exp10')
+            self.assertRaises(ValueError,validate_input,' ',' ','exp10',False)
 
     def test_validate_input_should_raised_exception_if_exp_name_is_null(self):
-        self.assertRaises(ValueError,validate_input,2,3,'   ')
+        self.assertRaises(ValueError,validate_input,2,3,'   ',False)
 
     def test_validate_existing_exp_input_should_not_raised_exception_for_existing_exp_is_False(self):
         raised = False
         try:
-            validate_existing_exp_input(False,0,'  ')
+            validate_existing_exp_input(False,0,'  ',False)
         except:
             raised = True
         self.assertFalse(raised, 'Exception not raised')
 
     def test_validate_existing_exp_input_should_throw_exception_if_num_speaker_is_zero_and_existing_exp_is_true(self):
-        self.assertRaises(ValueError,validate_existing_exp_input,True,0,'exp10')
+        self.assertRaises(ValueError,validate_existing_exp_input,True,0,'exp10',False)
 
     def test_validate_existing_exp_input_should_throw_exception_if_exp_name_is_empty_and_existing_exp_is_true(self):
-            self.assertRaises(ValueError,validate_existing_exp_input,True,6,'   ')
+            self.assertRaises(ValueError,validate_existing_exp_input,True,6,'   ',False)

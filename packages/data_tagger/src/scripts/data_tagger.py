@@ -63,29 +63,18 @@ class ExperimentDataTagger():
                 bucket_name, integration_path + source + "/")
             for path in all_path:
                 full_path = path.name
-                audio_id = full_path.split('/')[-3]
-                self.copy_files(audio_id, source, currs)
-            print("updated into db")
+                if "clean" in full_path:
+                    print("file copying to experiment bucket")
+                    self.copy_files(full_path, source,currs)
         currs.shutdown(wait=True)
 
-    def find_unique_ids(self,id_list):
-        ids = [i.name.split('/')[-3] for i in id_list]
-        id_set = set(ids)
-        return id_set
-
-    def copy_files(self, audio_id, source, currs):
-        all_files = obj_gcs.list_blobs_in_a_path(
-            bucket_name, integration_path + source + "/" + str(
-                audio_id) + "/clean/")
-
-        for file_path in all_files:
-            source_blob_name = file_path.name
+    def copy_files(self, source_file_path, source,currs):
+            audio_id = source_file_path.split('/')[-3]
             destination_blob_name = exp_output_path + experiment_name + "/" + str(
-                audio_id) + "/" + file_path.name.split("/")[-1]
-            currs.submit(obj_gcs.copy_blob, bucket_name, source_blob_name,
+                audio_id) + "/" + source_file_path.split("/")[-1]
+            currs.submit(obj_gcs.copy_blob, bucket_name, source_file_path,
                          bucket_name, destination_blob_name)
-            # obj_gcs.copy_blob(bucket_name, source_blob_name,
-            #               bucket_name, destination_blob_name)
+
 
     def for_new_experiment_with_using_existing_exp(self, connection, current_exp_id, trans):
         existing_experiment_id = self.get_existing_experiment_id(connection)
@@ -232,12 +221,12 @@ def get_variables(config_file_path):
     duration_per_speaker_in_second = duration_per_speaker_in_minute*60
     require_new_speaker = num_speakers-number_of_speaker_from_existing_experiment
     validate_input(num_speakers, duration_per_speaker_in_second,
-                   experiment_name)
+                   experiment_name,using_source)
     validate_existing_exp_input(use_existing_experiment_data,
-                                number_of_speaker_from_existing_experiment, existing_experiment_name)
+                                number_of_speaker_from_existing_experiment, existing_experiment_name,using_source)
 
 
-def validate_input(num_speakers, duration_per_speaker_in_second, experiment_name):
+def validate_input(num_speakers, duration_per_speaker_in_second, experiment_name,using_source):
     if(not isinstance(num_speakers, int) or not isinstance(duration_per_speaker_in_second, int) or
        not num_speakers or num_speakers <= 0 or not duration_per_speaker_in_second or
        duration_per_speaker_in_second <= 0 or len(experiment_name.strip()) <= 0):
@@ -246,7 +235,7 @@ def validate_input(num_speakers, duration_per_speaker_in_second, experiment_name
                 "value of num_speakers, duration should be greater than or equal to one and type is int and exp_name should more than one char")
 
 
-def validate_existing_exp_input(use_existing_experiment_data, number_of_speaker_from_existing_experiment, existing_experiment_name):
+def validate_existing_exp_input(use_existing_experiment_data, number_of_speaker_from_existing_experiment, existing_experiment_name,using_source):
     if(use_existing_experiment_data == True):
         if(len(existing_experiment_name.strip()) <= 0 or not isinstance(number_of_speaker_from_existing_experiment, int) or
            not number_of_speaker_from_existing_experiment or number_of_speaker_from_existing_experiment <= 0):
