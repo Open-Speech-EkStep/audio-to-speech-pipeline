@@ -95,28 +95,8 @@ class RemoteAudioPipeline():
         chunk_files = os.listdir(transcription_input_dir)
         for chunk_file_name in chunk_files:
             local_wave_file_path = os.path.join(transcription_input_dir, chunk_file_name)
-            if stt_api == 'azure':
-                try:
-                    create_azure_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
-                                               , args_application['language'],
-                                               local_wave_file_path)
-                except RuntimeError as error:
-                    print('Azure API call failed..', error)
-                    rejected = snr_output_base_dir + '/rejected'
-                    command = f'mv {local_wave_file_path} {rejected}'
-                    print(f'moving bad wav file: {local_wave_file_path} to rejected folder: {rejected}')
-                    os.system(command)
-
-            elif stt_api == 'google':
-                remote_wav_file_path = os.path.join(local_download_path, 'stt_chunks', chunk_file_name)
-                print(f'******** uploading wav file:{local_wave_file_path} --> {remote_wav_file_path}')
-                obj_gcsops.upload_to_gcs(bucket_name, local_wave_file_path, remote_wav_file_path, False)
-
-                remote_wav_file_path_for_api = os.path.join("gs://", bucket_name, remote_wav_file_path)
-                print(f'******** using wav file:{remote_wav_file_path_for_api} for google API')
-                create_google_transcription(GoogleSpeechClient(args_application['language']), remote_wav_file_path_for_api, local_wave_file_path)
-            else:
-                raise RuntimeError(f'{stt_api} not configured')
+            self.generate_transcription(args_application, args_azure, bucket_name, chunk_file_name, local_download_path,
+                                        local_wave_file_path, obj_gcsops, snr_output_base_dir, stt_api)
 
         # Upload files to GCS
         # Upload cleaned files
@@ -151,6 +131,32 @@ class RemoteAudioPipeline():
 
         pipeline_end_time = time.time()
         print("Pipeline took ", pipeline_end_time - pipeline_start_time, " seconds to run!")
+
+    def generate_transcription(self, args_application, args_azure, bucket_name, chunk_file_name, local_download_path,
+                               local_wave_file_path, obj_gcsops, snr_output_base_dir, stt_api):
+        if stt_api == 'azure':
+            try:
+                create_azure_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
+                                           , args_application['language'],
+                                           local_wave_file_path)
+            except RuntimeError as error:
+                print('Azure API call failed..', error)
+                rejected = snr_output_base_dir + '/rejected'
+                command = f'mv {local_wave_file_path} {rejected}'
+                print(f'moving bad wav file: {local_wave_file_path} to rejected folder: {rejected}')
+                os.system(command)
+
+        elif stt_api == 'google':
+            remote_wav_file_path = os.path.join(local_download_path, 'stt_chunks', chunk_file_name)
+            print(f'******** uploading wav file:{local_wave_file_path} --> {remote_wav_file_path}')
+            obj_gcsops.upload_to_gcs(bucket_name, local_wave_file_path, remote_wav_file_path, False)
+
+            remote_wav_file_path_for_api = os.path.join("gs://", bucket_name, remote_wav_file_path)
+            print(f'******** using wav file:{remote_wav_file_path_for_api} for google API')
+            create_google_transcription(GoogleSpeechClient(args_application['language']), remote_wav_file_path_for_api,
+                                        local_wave_file_path)
+        else:
+            raise RuntimeError(f'{stt_api} not configured')
 
     def upload_metadata(self, args_clipaudio, args_metadatadb, bucket_name, data_source, metadata_file_name,
                         obj_gcsops):
