@@ -141,9 +141,11 @@ class RemoteAudioPipeline():
                                            local_wave_file_path)
             except RuntimeError as error:
                 print('Azure API call failed..', error)
-                rejected = snr_output_base_dir + '/rejected'
-                command = f'mv {local_wave_file_path} {rejected}'
-                print(f'moving bad wav file: {local_wave_file_path} to rejected folder: {rejected}')
+                rejected_dir = snr_output_base_dir + '/rejected'
+                if not os.path.exists(rejected_dir):
+                    os.makedirs(rejected_dir)
+                command = f'mv {local_wave_file_path} {rejected_dir}'
+                print(f'moving bad wav file: {local_wave_file_path} to rejected folder: {rejected_dir}')
                 os.system(command)
 
         elif stt_api == 'google':
