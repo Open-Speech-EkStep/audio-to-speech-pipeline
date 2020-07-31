@@ -21,8 +21,10 @@ class AzureSpeechClient(object):
             print("Recognized: {}".format(result.text))
             return result
         elif result.reason == speech.ResultReason.NoMatch:
-            print("No speech could be recognized: {}".format(result.no_match_details))
+            msg = "No speech could be recognized: {}".format(result.no_match_details)
+            raise RuntimeError(msg)
         elif result.reason == speech.ResultReason.Canceled:
             cancellation_details = result.cancellation_details
-            print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+            msg = "Speech Recognition canceled: {}".format(cancellation_details.reason)
+            raise RuntimeError(msg)
         print('done..')

@@ -32,8 +32,8 @@ class TestAzureSpeechClient(unittest.TestCase):
         mock_speechrecongnizer.return_value.recognize_once.return_value = result
         azure_client = AzureSpeechClient('dummy_key', 'centralindia')
         audio_file_path = 'chunk-2.wav'
-        result = azure_client.speech_to_text(audio_file_path, 'hi-IN')
-        self.assertEqual(None, result)
+        # azure_client.speech_to_text(audio_file_path, 'hi-IN')
+        self.assertRaises(RuntimeError, azure_client.speech_to_text, audio_file_path, 'hi-IN')
 
     @mock.patch("azure.cognitiveservices.speech.SpeechRecognizer")
     def test_speech_to_text_cancelled(self, mock_speechrecongnizer):
@@ -43,5 +43,5 @@ class TestAzureSpeechClient(unittest.TestCase):
         mock_speechrecongnizer.return_value.recognize_once.return_value = result
         azure_client = AzureSpeechClient('dummy_key', 'centralindia')
         audio_file_path = 'chunk-2.wav'
-        result = azure_client.speech_to_text(audio_file_path, 'hi-IN')
-        self.assertEqual(None, result)
+        # azure_client.speech_to_text(audio_file_path, 'hi-IN')
+        self.assertRaises(RuntimeError, azure_client.speech_to_text, audio_file_path, 'hi-IN')
