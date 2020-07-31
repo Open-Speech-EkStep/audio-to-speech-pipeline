@@ -139,8 +139,8 @@ class RemoteAudioPipeline():
                 create_azure_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
                                            , args_application['language'],
                                            local_wave_file_path)
-            except RuntimeError:
-                print('Azure API call failed..')
+            except RuntimeError as e:
+                print('Azure API call failed: ' + str(e))
                 rejected_dir = snr_output_base_dir + '/rejected'
                 if not os.path.exists(rejected_dir):
                     os.makedirs(rejected_dir)
