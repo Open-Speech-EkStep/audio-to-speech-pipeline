@@ -1,8 +1,8 @@
 configuration:
     num_speakers: 0
     duration_per_speaker: 100
-    experiment_name: "exp30_test4_yaml12451"
-    experiment_description: "speaker diversity with thirty speakers"
+    experiment_name: "test_with_multiple_speakers"
+    experiment_description: "speaker diversity"
     source: "sourceName"
     use_existing_experiment_data: False
     existing_experiment_name: "test_exp"
@@ -11,7 +11,7 @@ configuration:
     
 source_data_config:
     using_source: True
-    sources: ["iitestdevbox"]
+    sources: ["testpipeline"]
     
 bucket_configuration:
     bucket_name: "ekstepspeechrecognition-dev"

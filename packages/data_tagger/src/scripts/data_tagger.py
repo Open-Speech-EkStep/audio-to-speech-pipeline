@@ -65,16 +65,15 @@ class ExperimentDataTagger():
                 full_path = path.name
                 if "clean" in full_path:
                     print("file copying to experiment bucket")
-                    self.copy_files(full_path, source,currs)
+                    self.copy_files(full_path, source, currs)
         currs.shutdown(wait=True)
 
-    def copy_files(self, source_file_path, source,currs):
-            audio_id = source_file_path.split('/')[-3]
-            destination_blob_name = exp_output_path + experiment_name + "/" + str(
-                audio_id) + "/" + source_file_path.split("/")[-1]
-            currs.submit(obj_gcs.copy_blob, bucket_name, source_file_path,
-                         bucket_name, destination_blob_name)
-
+    def copy_files(self, source_file_path, source, currs):
+        audio_id = source_file_path.split('/')[-3]
+        destination_blob_name = exp_output_path + experiment_name + "/" + str(
+            audio_id) + "/" + source_file_path.split("/")[-1]
+        currs.submit(obj_gcs.copy_blob, bucket_name, source_file_path,
+                     bucket_name, destination_blob_name)
 
     def for_new_experiment_with_using_existing_exp(self, connection, current_exp_id, trans):
         existing_experiment_id = self.get_existing_experiment_id(connection)
@@ -221,24 +220,26 @@ def get_variables(config_file_path):
     duration_per_speaker_in_second = duration_per_speaker_in_minute*60
     require_new_speaker = num_speakers-number_of_speaker_from_existing_experiment
     validate_input(num_speakers, duration_per_speaker_in_second,
-                   experiment_name,using_source)
+                   experiment_name, using_source)
     validate_existing_exp_input(use_existing_experiment_data,
-                                number_of_speaker_from_existing_experiment, existing_experiment_name,using_source)
+                                number_of_speaker_from_existing_experiment, existing_experiment_name, using_source)
 
 
-def validate_input(num_speakers, duration_per_speaker_in_second, experiment_name,using_source):
+def validate_input(num_speakers, duration_per_speaker_in_second, experiment_name, using_source):
     if(not isinstance(num_speakers, int) or not isinstance(duration_per_speaker_in_second, int) or
        not num_speakers or num_speakers <= 0 or not duration_per_speaker_in_second or
        duration_per_speaker_in_second <= 0 or len(experiment_name.strip()) <= 0):
+        print("using_source is ", using_source)
         if not using_source:
             raise ValueError(
                 "value of num_speakers, duration should be greater than or equal to one and type is int and exp_name should more than one char")
 
 
-def validate_existing_exp_input(use_existing_experiment_data, number_of_speaker_from_existing_experiment, existing_experiment_name,using_source):
+def validate_existing_exp_input(use_existing_experiment_data, number_of_speaker_from_existing_experiment, existing_experiment_name, using_source):
     if(use_existing_experiment_data == True):
         if(len(existing_experiment_name.strip()) <= 0 or not isinstance(number_of_speaker_from_existing_experiment, int) or
            not number_of_speaker_from_existing_experiment or number_of_speaker_from_existing_experiment <= 0):
+            print("using_source is ", using_source)
             if not using_source:
                 raise ValueError(
                     "value  of number_of_speaker_from_existing_experiment should be greater than or equal to one and int and exp_name should be valid")
