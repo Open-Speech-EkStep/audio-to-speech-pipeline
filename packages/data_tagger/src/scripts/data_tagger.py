@@ -32,6 +32,7 @@ class ExperimentDataTagger():
             query, name=experiment_name, desc=experiment_description).fetchall()
         current_exp_id = get_experiment_id[0][0]
         print("insert new experiment")
+        print(current_exp_id)
         return current_exp_id
 
     def create_new_experiment(self, db):
@@ -47,7 +48,7 @@ class ExperimentDataTagger():
             if num_speakers > 0:
                 self.create_qurey_and_update_table_for_new_speaker(
                     connection, current_exp_id)
-                trans.commit()
+            trans.commit()
             # get_all_tegged_data_csv(current_exp_id)
             return current_exp_id
         except:
@@ -296,12 +297,13 @@ if __name__ == "__main__":
         print("genration of csv is started")
         obj_gcs.make_directories(os.path.join(
             current_working_directory, metadata_output_path))
-        get_all_tegged_data_csv(current_exp_id)
-        print("genration csv is done")
-        print("uploading csv to gcs...")
-        if (job_mode == "cluster"):
-            obj_gcs.upload_to_gcs(bucket_name=gcs_bucket_name,
-                                  source=os.path.join(
-                                      current_working_directory, metadata_output_path),
-                                  destination_blob_name=metadata_output_path,
-                                  is_directory=True)
+        if num_speakers > 0:
+            get_all_tegged_data_csv(current_exp_id)
+            print("genration csv is done")
+            print("uploading csv to gcs...")
+            if (job_mode == "cluster"):
+                obj_gcs.upload_to_gcs(bucket_name=gcs_bucket_name,
+                                      source=os.path.join(
+                                          current_working_directory, metadata_output_path),
+                                      destination_blob_name=metadata_output_path,
+                                      is_directory=True)
