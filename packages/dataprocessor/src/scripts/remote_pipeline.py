@@ -96,9 +96,17 @@ class RemoteAudioPipeline():
         for chunk_file_name in chunk_files:
             local_wave_file_path = os.path.join(transcription_input_dir, chunk_file_name)
             if stt_api == 'azure':
-                create_azure_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
-                                           , args_application['language'],
-                                           local_wave_file_path)
+                try:
+                    create_azure_transcription(AzureSpeechClient(args_azure['speech_key'], args_azure['region'])
+                                               , args_application['language'],
+                                               local_wave_file_path)
+                except RuntimeError as error:
+                    print('Azure API call failed..', error)
+                    rejected = snr_output_base_dir + '/rejected'
+                    command = f'mv {local_wave_file_path} {rejected}'
+                    print(f'moving bad wav file: {local_wave_file_path} to rejected folder: {rejected}')
+                    os.system(command)
+
             elif stt_api == 'google':
                 remote_wav_file_path = os.path.join(local_download_path, 'stt_chunks', chunk_file_name)
                 print(f'******** uploading wav file:{local_wave_file_path} --> {remote_wav_file_path}')

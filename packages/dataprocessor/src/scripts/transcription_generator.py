@@ -13,7 +13,6 @@ def create_azure_transcription(azure_client, language, wav_file_path, punctuatio
     result = azure_client.speech_to_text(wav_file_path, language)
     transcription_file_path = wav_file_path.replace('.wav', '.txt')
     transcription = result.text if punctuation else remove_punctation(result.text)
-    # TODO handle API failures
     save_transcription(transcription, transcription_file_path)
     return transcription
 
