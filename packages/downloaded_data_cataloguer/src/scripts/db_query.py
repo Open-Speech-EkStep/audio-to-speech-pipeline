@@ -9,6 +9,7 @@ def upload_file(self, file_path, db_conn):
 
 
 def upload_file_to_downloaded_source(self, file_path, db_conn):
+    print("uploading data to source_metadata")
     with open(file_path, 'r') as f:
         conn = db_conn.raw_connection()
         cursor = conn.cursor()

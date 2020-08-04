@@ -5,7 +5,8 @@ import yaml
 import sys
 from .db_query import GET_NEW_SPEAKER, GET_EXPERIMENT_ID, GET_ALL_SPEAKER_ID_FROM_GIVEN_EXP,\
     INSERT_NEW_EXPERIMENT, INITIAL_TEXT_OF_INSERT_QUERY, GET_NEW_SPEAKER, GET_UTTERANCES_OF_GIVEN_EXP,\
-    GET_UTTERANCES_OF_NEW_USER, INITIAL_TEXT_OF_UPDATE_QUERY, GET_ALL_DATA_OF_CURRENT_EXP, GET_NEW_SPEAKER_WITH_SOURCE, UPDATE_SOURCE_TABLE_WITH_DURATION
+    GET_UTTERANCES_OF_NEW_USER, INITIAL_TEXT_OF_UPDATE_QUERY, GET_ALL_DATA_OF_CURRENT_EXP, GET_NEW_SPEAKER_WITH_SOURCE, UPDATE_SOURCE_TABLE_WITH_DURATION,\
+    INSERT_NEW_ROW_FOR_EXISTING_SOURCE,GET_EXISTING_SOURCE
 from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
 from sqlalchemy.orm import Session
@@ -114,13 +115,12 @@ class ExperimentDataTagger():
         currs.shutdown(wait=True)
 
     def get_all_source_data(self, connection, source):
-        query = text(
-            "select * from source_metadata_processed where source = :source")
+        query = text(GET_EXISTING_SOURCE)
         source_row = connection.execute(query, source=source).fetchall()
         return source_row[0]
 
     def insert_new_row(self, connection, source_data, exp_id):
-        query = text("insert into source_metadata_processed(source ,num_speaker ,total_duration,cleaned_duration ,num_of_audio,experiment_use_status,experiment_id) values (:source_name,:num_of_speaker,:total_duration,:cleaned_duration,:num_of_audio,True,:exp_id)")
+        query = text(INSERT_NEW_ROW_FOR_EXISTING_SOURCE)
         connection.execute(query, source_name=source_data[0], num_of_speaker=source_data[1],
                            total_duration=source_data[2], cleaned_duration=source_data[3], num_of_audio=source_data[4], exp_id=exp_id)
 
