@@ -4,7 +4,7 @@ import sys
 import yaml
 
 from sqlalchemy import create_engine
-from .db_query import upload_file
+from .db_query import upload_file, upload_file_to_downloaded_source
 from .gcs_operations import CloudStorageOperations
 
 
@@ -50,6 +50,10 @@ class CatalogueDownloadedData:
         all_blobs = obj_gcs_ops.list_blobs_in_a_path(
             bucket_name, source_landing_path + downloaded_source + delimiter)
         is_source_not_valid = True
+        is_source_label_data = False
+        if check_if_meta_data_present(source_landing_path + downloaded_source, downloaded_source + "_master.csv"):
+            self.update_source_metadata(downloaded_source, db_conn)
+            is_source_label_data = True
 
         try:
             for blob in all_blobs:
@@ -73,7 +77,7 @@ class CatalogueDownloadedData:
                     if check_if_meta_data_present(source_landing_path + downloaded_source, metadata_file_name):
                         self.move_and_upload_to_db(db_conn, destination_file_name, destination_meta_file_name,
                                                    metadata_file_name, source_file_name,
-                                                   source_meta_file_name)
+                                                   source_meta_file_name, is_source_label_data)
                     else:
                         self.move_to_error(error_landing_path, file_name, metadata_file_name,
                                            downloaded_source,
@@ -84,6 +88,15 @@ class CatalogueDownloadedData:
                 raise Exception("******file or source not found******")
             print("moving file is done...", downloaded_source)
 
+    def update_source_metadata(self, downloaded_source, db_conn):
+        local_file_name = os.path.join(
+            os.getcwd(), "mastercsv")
+        source_master_csv_filename = get_files_path_with_no_prefix(source_landing_path + downloaded_source,
+                                                                   downloaded_source + "_master.csv")
+        obj_gcs_ops.download_blob(
+            bucket_name, source_master_csv_filename, local_file_name)
+        upload_file_to_downloaded_source(self, local_file_name, db_conn)
+
     def move_to_error(self, error_landing_path, file_name, metadata_file_name, source, source_file_name):
         print("Meta file {} is not present,Moving to error....".format(
             metadata_file_name))
@@ -93,7 +106,16 @@ class CatalogueDownloadedData:
         obj_gcs_ops.move_blob(bucket_name, source_file_name,
                               bucket_name, error_destination_file_name)
 
-    def move_and_upload_to_db(self, db_conn, destination_file_name, destination_meta_file_name, metadata_file_name, source_file_name, source_meta_file_name):
+    def move_and_upload_to_db(self, db_conn, destination_file_name, destination_meta_file_name, metadata_file_name, source_file_name, source_meta_file_name, is_source_label_data):
+        if not is_source_label_data:
+            self.upload_to_db(metadata_file_name,
+                              source_meta_file_name, db_conn)
+        obj_gcs_ops.move_blob(bucket_name, source_file_name,
+                              bucket_name, destination_file_name)
+        obj_gcs_ops.move_blob(bucket_name, source_meta_file_name,
+                              bucket_name, destination_meta_file_name)
+
+    def upload_to_db(self, metadata_file_name, source_meta_file_name, db_conn):
         print("Meta file {} is present".format(
             metadata_file_name))
         local_file_name = os.path.join(
@@ -101,10 +123,6 @@ class CatalogueDownloadedData:
         obj_gcs_ops.download_blob(
             bucket_name, source_meta_file_name, local_file_name)
         upload_file(self, local_file_name, db_conn)
-        obj_gcs_ops.move_blob(bucket_name, source_file_name,
-                              bucket_name, destination_file_name)
-        obj_gcs_ops.move_blob(bucket_name, source_meta_file_name,
-                              bucket_name, destination_meta_file_name)
 
     def has_mp3_extension(self, expected_file_extension, file_extension):
         return file_extension in [expected_file_extension, expected_file_extension.swapcase()]

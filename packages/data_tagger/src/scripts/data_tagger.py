@@ -41,15 +41,24 @@ class ExperimentDataTagger():
         try:
             current_exp_id = self.insert_and_get_exp_id(connection)
             if using_source:
+                print("1")
                 self.tag_source_table(connection, current_exp_id)
+                print("2")
+            if use_existing_source_data:
+                print("3")
+
+                self.tag_existing_source(connection, current_exp_id)
             if use_existing_experiment_data:
+                print("4")
+
                 self.for_new_experiment_with_using_existing_exp(
                     connection, current_exp_id, trans)
             if num_speakers > 0:
+                print("5")
+
                 self.create_qurey_and_update_table_for_new_speaker(
                     connection, current_exp_id)
             trans.commit()
-            # get_all_tegged_data_csv(current_exp_id)
             return current_exp_id
         except:
             trans.rollback()
@@ -87,6 +96,33 @@ class ExperimentDataTagger():
             insert_query = self.create_insert_query(
                 get_all_utterances, speaker_id[0], current_exp_id)
             self.insert_into_media_speaker_mapping(connection, insert_query)
+
+    def tag_existing_source(self, connection, exp_id):
+        currs = ThreadPoolExecutor(max_workers=5)
+        for source in existing_source_name:
+            all_data_of_existing_source = self.get_all_source_data(
+                connection, source)
+            self.insert_new_row(
+                connection, all_data_of_existing_source, exp_id)
+            all_path = obj_gcs.list_blobs_in_a_path(
+                bucket_name, integration_path + source + "/")
+            for path in all_path:
+                full_path = path.name
+                if "clean" in full_path:
+                    print("file copying to experiment bucket")
+                    self.copy_files(full_path, source, currs)
+        currs.shutdown(wait=True)
+
+    def get_all_source_data(self, connection, source):
+        query = text(
+            "select * from source_metadata_processed where source = :source")
+        source_row = connection.execute(query, source=source).fetchall()
+        return source_row[0]
+
+    def insert_new_row(self, connection, source_data, exp_id):
+        query = text("insert into source_metadata_processed(source ,num_speaker ,total_duration,cleaned_duration ,num_of_audio,experiment_use_status,experiment_id) values (:source_name,:num_of_speaker,:total_duration,:cleaned_duration,:num_of_audio,True,:exp_id)")
+        connection.execute(query, source_name=source_data[0], num_of_speaker=source_data[1],
+                           total_duration=source_data[2], cleaned_duration=source_data[3], num_of_audio=source_data[4], exp_id=exp_id)
 
     def insert_into_media_speaker_mapping(self, connection, insert_query):
         clear_content = insert_query[:-1]
@@ -201,10 +237,14 @@ def get_variables(config_file_path):
     global bucket_name
     global integration_path
     global exp_output_path
+    global use_existing_source_data
+    global existing_source_name
 
     bucket_name = bucket_config['bucket_name']
     integration_path = bucket_config['integration_path']
     exp_output_path = bucket_config['exp_output_path']
+    use_existing_source_data = source_config['use_existing_source_data']
+    existing_source_name = source_config['existing_source_name']
 
     sources = source_config['sources']
     using_source = source_config['using_source']
@@ -294,10 +334,10 @@ if __name__ == "__main__":
         print("tagging data started.......")
         current_exp_id = tagging_data.create_new_experiment(db)
         print("tagging is done")
-        print("genration of csv is started")
         obj_gcs.make_directories(os.path.join(
             current_working_directory, metadata_output_path))
         if num_speakers > 0:
+            print("genration of csv is started")
             get_all_tegged_data_csv(current_exp_id)
             print("genration csv is done")
             print("uploading csv to gcs...")

@@ -1,7 +1,7 @@
 configuration:
     num_speakers: 0
     duration_per_speaker: 100
-    experiment_name: "test_with_multiple_speakers"
+    experiment_name: "test_with_multiple_speakers11"
     experiment_description: "speaker diversity"
     source: "sourceName"
     use_existing_experiment_data: False
@@ -11,7 +11,9 @@ configuration:
     
 source_data_config:
     using_source: True
-    sources: ["testpipeline"]
+    sources: []
+    use_existing_source_data: True
+    existing_source_name: ["testpipeline"]
     
 bucket_configuration:
     bucket_name: "ekstepspeechrecognition-dev"

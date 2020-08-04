@@ -21,4 +21,9 @@ INSERT_UNIQUE_SPEAKER_QUERY = "INSERT INTO speaker(speaker_name,source,gender,mo
 GET_NEW_SOURCE_DATA_QUERY = "select sum(cleaned_duration) as duration,source,count(1) from media_metadata_staging where speaker_name is null group by source;"
 UPDATE_SOURCE_METADATA_QUERY = "update source_metadata_processed set cleaned_duration = :cleaned_duration, num_of_audio = :num_audio where source = :source_name"
 
-INSERT_INTO_SOURCE_METADATA_QUERY = "INSERT INTO source_metadata_processed(source,num_of_audio,num_speaker,total_duration) select source,num_of_audio,num_speaker,total_duration from source_metadata_downloaded ON CONFLICT (source) DO nothing"
+INSERT_INTO_SOURCE_METADATA_QUERY = "INSERT INTO source_metadata_processed (source, num_speaker, total_duration) \
+ SELECT source_metadata_downloaded.source,min(source_metadata_downloaded.num_speaker),min(source_metadata_downloaded.total_duration) \
+ FROM source_metadata_downloaded \
+ WHERE not exists \
+  (select source_metadata_processed.source from source_metadata_processed where source_metadata_downloaded.source=source_metadata_processed.source) \
+  group by source_metadata_downloaded.source"
