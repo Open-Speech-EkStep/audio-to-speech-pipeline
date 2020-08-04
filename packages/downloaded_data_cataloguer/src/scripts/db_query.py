@@ -12,6 +12,6 @@ def upload_file_to_downloaded_source(self, file_path, db_conn):
     with open(file_path, 'r') as f:
         conn = db_conn.raw_connection()
         cursor = conn.cursor()
-        cmd = 'COPY source_metadata_downloaded(source,num_speaker,total_duration,cleaned_duration,num_of_audio,experiment_use_status,experiment_id) FROM STDIN WITH (FORMAT CSV, HEADER)'
+        cmd = 'COPY source_metadata_downloaded(source,num_speaker,total_duration,num_of_audio) FROM STDIN WITH (FORMAT CSV, HEADER)'
         cursor.copy_expert(cmd, f)
         conn.commit()
