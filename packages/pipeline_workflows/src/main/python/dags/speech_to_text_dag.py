@@ -51,8 +51,8 @@ def create_dag(dag_id,
         copy_files_in_buckets >> fetch_audio_ids
 
         audio_file_ids = json.loads(Variable.get("audiofileids"))
-
-        data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
+        if len(audio_file_ids[dag_id]) > 0:
+            data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
             task_id='data-prep-cataloguer',
             name='data-prep-cataloguer',
             cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", "ekstepspeechrecognition-dev",
