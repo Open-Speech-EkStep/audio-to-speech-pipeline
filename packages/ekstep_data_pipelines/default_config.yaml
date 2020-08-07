@@ -1,0 +1,28 @@
+# sample configeration
+config:
+  common:
+    db_configuration:
+        db_name: ''
+        db_pass: ''
+        db_user: ''
+        cloud_sql_connection_name: ''
+
+    gcs_config:
+      # master data bucket for ekstep
+      master_bucket: ''
+
+  data_tagger_config:
+    # path of to the folder in the master bucket where the data tagger will move the data to
+    landing_directory_path: ''
+
+    # path of to the foler in the master bucket from where the data tagger will pick up the data that needs to be moved
+    source_directory_path: ''
+
+    filter_criteria:
+
+      filter_by_speaker_meta_data:
+        number_of_speakers: 1
+        number_of_minutes_per_speaker: 1
+
+      filter_by_source:
+        source: []
