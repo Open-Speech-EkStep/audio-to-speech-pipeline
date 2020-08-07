@@ -97,8 +97,8 @@ def create_dag(dag_id,
 for source in sourceinfo.keys():
     source_info = sourceinfo.get(source)
 
-    parallelism = source_info.get('parallelism')
     batch_count = source_info.get('count')
+    parallelism = source_info.get('parallelism', batch_count)
     file_format = source_info.get('format')
     translation_source = source_info.get('api', DEFAULT_TRANSLATION_API)
 
