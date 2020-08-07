@@ -18,7 +18,7 @@ if __name__ == "__main__":
         gcs_bucket_name = sys.argv[2]  # remote_gcs bucket name
         config_path = sys.argv[3]  # remote gcs path, for local it will be src/resources/local/config_local.yaml
         data_source = sys.argv[4]  # audio source: joshtalks, brahmakumari
-        audio_id = sys.argv[5]  # unique identifier for each audio file
+        audio_ids = sys.argv[5]  # unique identifier for each audio file
         audio_extn = sys.argv[6]  # audio file exten: can be .mp4 or .mp3
         stt_api = sys.argv[7]  # flag for specifying api for translation
     else:
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     print("Arg 2 : gcs_bucket_name: {}".format(gcs_bucket_name))
     print("Arg 3 : config_path: {}".format(config_path))
     print("Arg 4 : data_source: {}".format(data_source))
-    print("Arg 5 : audio_id: {}".format(audio_id))
+    print("Arg 5 : audio_ids: {}".format(audio_ids))
     print("Arg 6 : audio_extn: {}".format(audio_extn))
     print("Arg 7 : api: {}".format(stt_api))
 
@@ -47,4 +47,5 @@ if __name__ == "__main__":
         print("download successful")
         obj = RemoteAudioPipeline()
         print("running pipeline")
-        obj.fit(config_local_path, gcs_bucket_name, data_source, audio_id, audio_extn, stt_api)
+        for audio_id in audio_ids:
+            obj.fit(config_local_path, gcs_bucket_name, data_source, audio_id, audio_extn, stt_api)

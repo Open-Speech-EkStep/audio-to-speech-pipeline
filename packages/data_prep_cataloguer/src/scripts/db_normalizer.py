@@ -139,7 +139,6 @@ class Db_normalizer():
         print(audio_ids)
 
 
-
 def __load_yaml_file(path):
     read_dict = {}
     with open(path, 'r') as file:

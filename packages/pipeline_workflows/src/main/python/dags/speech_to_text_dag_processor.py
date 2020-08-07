@@ -178,12 +178,12 @@ def get_audio_ids(source, **kwargs):
         Variable.set("audiofileids", audio_file_ids)
 
 
-def move_raw_to_processed(source, audio_id, **kwargs):
+def move_raw_to_processed(source, batch_audio_file_ids, **kwargs):
     get_variables()
-    source_path = tobe_processed_path + source + '/' + audio_id
-    destination_path = processed_path + source + '/' + audio_id
-    move_directory(bucket_name, source_path, destination_path)
-
+    for audio_id in batch_audio_file_ids:
+        source_path = tobe_processed_path + source + '/' + audio_id
+        destination_path = processed_path + source + '/' + audio_id
+        move_directory(bucket_name, source_path, destination_path)
 
 if __name__ == "__main__":
     pass
