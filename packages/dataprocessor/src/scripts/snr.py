@@ -17,12 +17,14 @@ class SNR(object):
         print("Current work dir")
         os.getcwd()
         command = f'"{CURRENT_PATH}/WadaSNR/Exe/WADASNR" -i "{file_path}" -t "{CURRENT_PATH}/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
-        output = subprocess.check_output(command, shell=True)
         try:
-            output = float(output.split()[-3].decode("utf-8"))
-        except:
+            process_output = subprocess.check_output(command, shell=True)
+            return float(process_output.split()[-3].decode("utf-8"))
+        except subprocess.CalledProcessError as e:
+            print('Called process error:' + str(e))
+            return float(-1)
+        else:
             raise RuntimeError(" ".join(command))
-        return output
 
     def fit(self, input_file_dir):
 
