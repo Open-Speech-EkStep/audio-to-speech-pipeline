@@ -3,7 +3,10 @@ INSERT_INTO_MEDIA_TABLE_QUERY = "INSERT INTO media(audio_id,raw_file_name,total_
         language,has_other_audio_signature,type,source,source_url,source_website,utterances_files_list,recorded_state,\
             recorded_district,recorded_place,recorded_date,purpose,load_datetime) SELECT audio_id,raw_file_name,duration,\
                 title,cleaned_duration,num_of_speakers,language,has_other_audio_signature,type,source,source_url,source_website,\
-                utterances_files_list,recorded_state,recorded_district,recorded_place,recorded_date,purpose,load_datetime FROM media_metadata_staging where load_datetime > :max_datetime AND media_metadata_staging.speaker_name is not null;"
+                utterances_files_list,recorded_state,recorded_district,recorded_place,recorded_date,purpose,load_datetime \
+                FROM media_metadata_staging as o where load_datetime > :max_datetime AND o.speaker_name is not null\
+            AND load_datetime = (select max(load_datetime) from media_metadata_staging s where s.audio_id = o.audio_id )\
+        ;"
 
 GET_SPEAKER_ID_QUERY = "select speaker_id from speaker s JOIN media_metadata_staging b on s.speaker_name = b.speaker_name \
             where b.audio_id = :audio_id;"
