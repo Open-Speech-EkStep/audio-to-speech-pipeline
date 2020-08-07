@@ -51,7 +51,7 @@ def create_dag(dag_id,
 
         copy_files_in_buckets >> fetch_audio_ids
 
-        parallelism = json.loads(Variable.get("parallelism"))
+        parallelism = args.get("parallelism")
 
         audio_file_ids = json.loads(Variable.get("audiofileids"))[dag_id]
         chunk_size = math.ceil(len(audio_file_ids) / parallelism)
