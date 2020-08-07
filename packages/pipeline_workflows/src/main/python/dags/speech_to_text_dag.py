@@ -54,8 +54,11 @@ def create_dag(dag_id,
         parallelism = args.get("parallelism")
 
         audio_file_ids = json.loads(Variable.get("audiofileids"))[dag_id]
-        chunk_size = math.ceil(len(audio_file_ids) / parallelism)
-        batches = [audio_file_ids[i:i + chunk_size] for i in range(0, len(audio_file_ids), chunk_size)]
+        if len(audio_file_ids) > 0:
+            chunk_size = math.ceil(len(audio_file_ids) / parallelism)
+            batches = [audio_file_ids[i:i + chunk_size] for i in range(0, len(audio_file_ids), chunk_size)]
+        else:
+            batches = []
 
         if len(audio_file_ids) > 0:
             data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
