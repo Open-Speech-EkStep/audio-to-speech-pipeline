@@ -54,13 +54,10 @@ def create_dag(dag_id,
         parallelism = args.get("parallelism")
 
         audio_file_ids = json.loads(Variable.get("audiofileids"))[dag_id]
+
         if len(audio_file_ids) > 0:
             chunk_size = math.ceil(len(audio_file_ids) / parallelism)
             batches = [audio_file_ids[i:i + chunk_size] for i in range(0, len(audio_file_ids), chunk_size)]
-        else:
-            batches = []
-
-        if len(audio_file_ids) > 0:
             data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id='data-prep-cataloguer',
                 name='data-prep-cataloguer',
@@ -72,13 +69,15 @@ def create_dag(dag_id,
                 secrets=[secret_file],
                 image='us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:1.0.0',
                 image_pull_policy='Always')
+        else:
+            batches = []
 
         for batch_audio_file_ids in batches:
             data_prep_task = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id=dag_id + "_data_prep_" + batch_audio_file_ids[0],
                 name='data-prep-stt',
                 cmds=["python", "-m", "src.scripts.pipeline_v2", "cluster", bucket_name, stt_config_path, dag_id,
-                      batch_audio_file_ids, args.get('file_format'), args.get('translation_source')],
+                      ','.join(batch_audio_file_ids), args.get('file_format'), args.get('translation_source')],
                 # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,

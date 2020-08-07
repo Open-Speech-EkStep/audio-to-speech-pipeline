@@ -47,5 +47,6 @@ if __name__ == "__main__":
         print("download successful")
         obj = RemoteAudioPipeline()
         print("running pipeline")
-        for audio_id in audio_ids:
+        for audio_id in audio_ids.split(','):
+            print("Running audio to text pipeline for audio id:" + audio_id)
             obj.fit(config_local_path, gcs_bucket_name, data_source, audio_id, audio_extn, stt_api)
