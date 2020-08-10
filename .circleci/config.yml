@@ -25,7 +25,9 @@ parameters:
   downloaded_data_cataloguer:
     type: boolean
     default: false
-
+  ekstep_data_pipelines:
+    type: boolean
+    default: true
 
 executors:
   node:
@@ -239,6 +241,19 @@ workflows:
           package_version: 1.0.0
           requires:
             - downloaded_data_cataloguer_build
+
+  ekstep_data_pipelines:
+    when: << pipeline.parameters.ekstep_data_pipelines >>
+    jobs:
+      - build:
+          name: ekstep_data_pipelines_build
+          package_name: ekstep_data_pipelines
+      - deploy:
+          name: ekstep_data_pipelines_deploy
+          package_name: ekstep_data_pipelines
+          package_version: 1.0.0
+          requires:
+            - ekstep_data_pipelines_build
      
   pipeline_workflows:
     when: << pipeline.parameters.pipeline_workflows >>

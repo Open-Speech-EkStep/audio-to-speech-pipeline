@@ -1,9 +1,9 @@
 FROM python:3.7
 
-RUN mkdir /opt/data_marker/
-WORKDIR /opt/data_marker/
+RUN mkdir /opt/ekstep_data_pipelines/
+WORKDIR /opt/ekstep_data_pipelines/
 
 
-COPY requirements.txt
-RUN pip install -r requirements.txt
-COPY . /opt/data_marker/
+COPY ekstep_requirements.txt .
+RUN pip install -r ekstep_requirements.txt
+COPY . /opt/ekstep_data_pipelines/
