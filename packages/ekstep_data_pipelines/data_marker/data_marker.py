@@ -109,7 +109,7 @@ class DataMarker:
             pass
 
         speaker_name_list = [
-            f"'{speaker_name[0]}'" for speaker_name in speakers]
+            f"'{self.escape_sql_special_char(speaker_name[0])}'" for speaker_name in speakers]
         formatted_name_list = ','.join(speaker_name_list)
         return f'({formatted_name_list})'
 
@@ -167,6 +167,9 @@ class DataMarker:
         source_info['source_file_path'] = f'{source_name}/{file_name}'
 
         return source_info
+
+    def escape_sql_special_char(self, param):
+        return param.replace("'", "''")
 
     def _deduplicate_file_info(self, file_info_list, duration):
         speaker_name_dict = {}
