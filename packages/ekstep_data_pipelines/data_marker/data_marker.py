@@ -1,12 +1,16 @@
+from common.utils import get_logger
+from data_marker.contstants import CONFIG_NAME, SPEAKER_CRITERIA, SOURCE_CRITERIA, \
+    FILTER_CRITERIA, NUMBER_OF_SPEAKERS, DURATION, SOURCE, \
+    FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, \
+    SELECT_SPEAKER_QUERY, FILE_INFO_QUERY, SOURCE_UPDATE_QUERY
+from concurrent.futures import ThreadPoolExecutor
+from sqlalchemy import text
 import sys
 sys.path.insert(0, '..')
 
-from sqlalchemy import text
-from concurrent.futures import ThreadPoolExecutor
-from data_marker.contstants import CONFIG_NAME, SPEAKER_CRITERIA, SOURCE_CRITERIA, \
-                        FILTER_CRITERIA, NUMBER_OF_SPEAKERS, DURATION, SOURCE, \
-                        FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, \
-                        SELECT_SPEAKER_QUERY, FILE_INFO_QUERY, SOURCE_UPDATE_QUERY
+
+Logger = get_logger("Data marker")
+
 
 class DataMarker:
     """
@@ -24,13 +28,13 @@ class DataMarker:
         self.gcs_instance = gcs_instance
         self.data_tagger_config = None
 
-
     def process(self):
         """
         Main function for running all processing that takes places in the data marker
         """
 
-        self.data_tagger_config = self.data_processor.config_dict.get(CONFIG_NAME)
+        self.data_tagger_config = self.data_processor.config_dict.get(
+            CONFIG_NAME)
 
         filter_criteria = self.data_tagger_config.get(FILTER_CRITERIA)
         landing_path = self.data_tagger_config.get(LANDING_PATH)
@@ -41,12 +45,17 @@ class DataMarker:
             return
 
         if filter_criteria.get(SPEAKER_CRITERIA):
-            speaker_dict = self.get_speakers_with_source_duration(filter_criteria.get(SPEAKER_CRITERIA))
-            file_move_info_list = self.process_file_info_update_query(speaker_dict)
+            speaker_dict = self.get_speakers_with_source_duration(
+                filter_criteria.get(SPEAKER_CRITERIA))
+            Logger.info(
+                f"All speaker list in given criteria is {speaker_dict}")
+            file_move_info_list = self.process_file_info_update_query(
+                speaker_dict)
             self._move_files(landing_path, source_path, file_move_info_list)
 
         if filter_criteria.get(SOURCE_CRITERIA):
-            self.process_source_update_query(filter_criteria.get(SOURCE_CRITERIA))
+            self.process_source_update_query(
+                filter_criteria.get(SOURCE_CRITERIA))
 
     def _move_files(self, landing_path, source_path, file_move_info_list):
         worker_pool = ThreadPoolExecutor(max_workers=3)
@@ -60,14 +69,18 @@ class DataMarker:
 
             source_meta_file_path = f'{source_path}/{meta_file_path}'
             dest_meta_file_path = f'{landing_path}/{meta_file_path}'
+            Logger.info(f"Moving file {source_file_path} to {dest_file_path}")
 
-            worker_pool.submit(self.gcs_instance.move_blob, source_file_path, dest_file_path)
-            worker_pool.submit(self.gcs_instance.move_blob, source_meta_file_path, dest_meta_file_path)
+            worker_pool.submit(self.gcs_instance.move_blob,
+                               source_file_path, dest_file_path)
+            worker_pool.submit(self.gcs_instance.move_blob,
+                               source_meta_file_path, dest_meta_file_path)
 
         worker_pool.shutdown(wait=True)
 
     def process_source_update_query(self, source_filter_critieria):
-        source_list = ",".join([f"'{i}'" for i in source_filter_critieria.get(SOURCE)])
+        source_list = ",".join(
+            [f"'{i}'" for i in source_filter_critieria.get(SOURCE)])
         final_query = f'{SOURCE_UPDATE_QUERY} ({source_list});'
         query = text(final_query)
         self.data_processor.connection.execute(query)
@@ -78,13 +91,15 @@ class DataMarker:
 
         # get all the speakers
         get_speaker_query = text(SELECT_SPEAKER_QUERY)
-        speakers = self.data_processor.connection.execute(get_speaker_query, duration=duration, speaker_count=speaker_count).fetchall()
+        speakers = self.data_processor.connection.execute(
+            get_speaker_query, duration=duration, speaker_count=speaker_count).fetchall()
 
         if len(speakers) < 1:
             # TODO: Raise appropriate exception
             pass
 
-        speaker_name_list = [f"'{speaker_name[0]}'" for speaker_name in speakers]
+        speaker_name_list = [
+            f"'{speaker_name[0]}'" for speaker_name in speakers]
         formatted_name_list = ','.join(speaker_name_list)
         return f'({formatted_name_list})'
 
@@ -96,9 +111,12 @@ class DataMarker:
             return None
 
         speaker_names = self._get_speaker_name_list(speaker_criteria)
+        Logger.info(f"speaker name list is {speaker_names}")
         file_info_query_complete = f'{FILE_INFO_QUERY} {speaker_names};'
+        Logger.info(f"find info query is {file_info_query_complete}")
         file_info_query = text(file_info_query_complete)
-        file_info = self.data_processor.connection.execute(file_info_query).fetchall()
+        file_info = self.data_processor.connection.execute(
+            file_info_query).fetchall()
 
         return self._deduplicate_file_info(file_info, duration)
 
@@ -108,13 +126,14 @@ class DataMarker:
 
         for speaker in speaker_dict.keys():
             file_list = file_list + [i[1] for i in speaker_dict.get(speaker)]
-            source_file_list = source_file_list + [[i[0],i[1]] for i in speaker_dict.get(speaker)]
+            source_file_list = source_file_list + \
+                [[i[0], i[1]] for i in speaker_dict.get(speaker)]
 
         file_list_with_single_quotes = [f"'{i}'" for i in file_list]
         source_list_name_query_param = f'({",".join(file_list_with_single_quotes)})'
 
         final_file_update_query = f'{FILE_INFO_UPDATE_QUERY} {source_list_name_query_param}'
-
+        Logger.info(f"Updated query for all files {final_file_update_query}")
         query = text(final_file_update_query)
         self.data_processor.connection.execute(query)
 
