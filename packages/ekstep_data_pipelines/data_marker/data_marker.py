@@ -2,7 +2,7 @@ from common.utils import get_logger
 from data_marker.contstants import CONFIG_NAME, SPEAKER_CRITERIA, SOURCE_CRITERIA, \
     FILTER_CRITERIA, NUMBER_OF_SPEAKERS, DURATION, SOURCE, \
     FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, \
-    SELECT_SPEAKER_QUERY, FILE_INFO_QUERY, SOURCE_UPDATE_QUERY
+    SELECT_SPEAKER_QUERY, FILE_INFO_QUERY, SOURCE_UPDATE_QUERY,SOURCE_NAME,SELECT_SPEAKER_QUERY_WITH_SOURCE
 from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy import text
 import sys
@@ -88,11 +88,21 @@ class DataMarker:
     def _get_speaker_name_list(self, speaker_criteria):
         duration = speaker_criteria.get(DURATION)
         speaker_count = speaker_criteria.get(NUMBER_OF_SPEAKERS)
+        source_name = speaker_criteria.get(SOURCE_NAME)
+
+        parm_dict = {}
+
+        get_speaker_query = text(SELECT_SPEAKER_QUERY)
+
+        if source_name:
+            get_speaker_query = text(SELECT_SPEAKER_QUERY_WITH_SOURCE)
+            parm_dict["source_name"] = source_name
 
         # get all the speakers
-        get_speaker_query = text(SELECT_SPEAKER_QUERY)
+        parm_dict["duration"] = duration
+        parm_dict["speaker_count"] = speaker_count
         speakers = self.data_processor.connection.execute(
-            get_speaker_query, duration=duration, speaker_count=speaker_count).fetchall()
+            get_speaker_query, **parm_dict).fetchall()
 
         if len(speakers) < 1:
             # TODO: Raise appropriate exception

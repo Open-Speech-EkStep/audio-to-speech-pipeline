@@ -23,6 +23,7 @@ config:
       filter_by_speaker_meta_data:
         number_of_speakers: 1
         number_of_minutes_per_speaker: 1
+        source_name: ''
 
       filter_by_source:
         source: []
