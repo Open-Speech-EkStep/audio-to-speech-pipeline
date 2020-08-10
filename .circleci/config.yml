@@ -105,12 +105,12 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
             python --version ; pip --version ; pwd ; ls
-      - run:
-          name: Run Tests
-          command: |
-            coverage run -m unittest discover src/tests
-            coverage report --fail-under 20  src/scripts/*.py
-            coverage html  # open htmlcov/index.html in a browser
+      # - run:
+      #     name: Run Tests
+      #     command: |
+      #       coverage run -m unittest discover src/tests
+      #       coverage report --fail-under 20  src/scripts/*.py
+      #       coverage html  # open htmlcov/index.html in a browser
       - store_artifacts:
           path: htmlcov
       - persist_to_workspace:
