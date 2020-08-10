@@ -3,7 +3,7 @@ from common.gcs_operations import CloudStorageOperations
 
 def get_periperhals(intialization_dict):
     data_processor = DataProcessorUtil.get_instance(intialization_dict)
-    gcs_instance = CloudStorageOperations.get_instance()
+    gcs_instance = CloudStorageOperations.get_instance(intialization_dict)
 
     peripheral_dict ={
         "data_processor": data_processor,

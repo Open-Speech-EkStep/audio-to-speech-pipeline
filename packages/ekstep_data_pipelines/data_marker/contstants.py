@@ -15,3 +15,5 @@ FILE_INFO_QUERY = "select source,raw_file_name,duration,speaker_name from downlo
 
 # Source critieria query
 SOURCE_UPDATE_QUERY = "update source_metadata_downloaded set staged_for_snr = true where source in"
+#SOURCE_FILE_PATH = "data/audiotospeech/raw/download/catalogued/hindi/audio"
+#DESTINATION_FILE_PATH = "data/audiotospeech/raw/landing/hindi/audio"

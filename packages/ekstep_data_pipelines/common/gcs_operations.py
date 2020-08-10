@@ -1,4 +1,5 @@
 import os
+import yaml
 import shutil, glob
 from os import listdir
 from os.path import isfile, join
@@ -9,11 +10,59 @@ import datetime
 class CloudStorageOperations():
 
     @staticmethod
-    def get_instance():
-        return CloudStorageOperations()
+    def get_instance(intialization_dict):
+        gcs_instance = CloudStorageOperations(**intialization_dict)
+        gcs_instance.setup_peripherals()
+        return gcs_instance
 
-    def __init__(self):
-        pass
+    def __init__(self, **kwargs):
+        self.config_file_path = kwargs.get('config_file_path')
+        self.config_dict = None
+        self._bucket = None
+        self._client = None
+
+    def setup_peripherals(self):
+        # get yaml config
+        self.load_configeration()
+
+    def load_configeration(self):
+        """
+        Load up configeration
+        """
+
+        if not self.config_file_path:
+            # TODO: ideally raise exception here
+            pass
+
+        with open(self.config_file_path, 'r') as file:
+            parent_config_dict = yaml.load(file)
+            self.config_dict = parent_config_dict.get('config')
+
+    @property
+    def client(self):
+        if self._client:
+            return self._client
+
+        self._client = storage.Client()
+        return self._client
+
+    @property
+    def bucket(self):
+        if self._bucket:
+            return self._bucket
+
+        if not self.config_dict:
+            self.setup_peripherals()
+
+
+        self._bucket = self.config_dict.get('common', {}).get('gcs_config', {}).get('master_bucket')
+        return self._bucket
+
+
+    def check_path_exists(self, path):
+        bucket = self.client.bucket(self.bucket)
+        stats = storage.Blob(bucket=bucket, name=path).exists(self.client)
+        return stats
 
     def copy_all_files(self, src, dest, audio_extn):
         src_files = glob.glob(src + '/*.' + audio_extn)
@@ -195,10 +244,12 @@ class CloudStorageOperations():
         blobs = storage_client.list_blobs(bucket_name, prefix=file_prefix, delimiter=delimiter)
         return blobs
 
-    def move_blob(
-            self, bucket_name, blob_name, destination_bucket_name, destination_blob_name
-    ):
-        source_blob = self.copy_blob_for_move(bucket_name, blob_name, destination_bucket_name, destination_blob_name)
+    def move_blob(self, blob_name, destination_blob_name,destination_bucket_name=None):
+
+        if not destination_bucket_name:
+            destination_bucket_name = self.bucket
+
+        source_blob = self.copy_blob_for_move(self.bucket, blob_name, destination_bucket_name, destination_blob_name)
         source_blob.delete()
         print("Blob {} deleted.".format(source_blob))
 

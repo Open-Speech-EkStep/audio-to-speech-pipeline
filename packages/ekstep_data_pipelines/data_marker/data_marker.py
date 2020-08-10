@@ -1,14 +1,12 @@
 import sys
-sys.path.insert(0,'..')
+sys.path.insert(0, '..')
 
-import yaml
+from sqlalchemy import text
+from concurrent.futures import ThreadPoolExecutor
 from data_marker.contstants import CONFIG_NAME, SPEAKER_CRITERIA, SOURCE_CRITERIA, \
                         FILTER_CRITERIA, NUMBER_OF_SPEAKERS, DURATION, SOURCE, \
                         FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, \
                         SELECT_SPEAKER_QUERY, FILE_INFO_QUERY, SOURCE_UPDATE_QUERY
-from sqlalchemy import create_engine, select, MetaData, Table, text
-
-
 
 class DataMarker:
     """
@@ -21,11 +19,11 @@ class DataMarker:
     def get_instance(data_processor_instance, gcs_instance):
         return DataMarker(data_processor_instance, gcs_instance)
 
-
     def __init__(self, data_processor_instance, gcs_instance):
         self.data_processor = data_processor_instance
         self.gcs_instance = gcs_instance
         self.data_tagger_config = None
+
 
     def process(self):
         """
@@ -42,26 +40,37 @@ class DataMarker:
             # TODO: Raise exception of misconfigeration
             return
 
-
         if filter_criteria.get(SPEAKER_CRITERIA):
             speaker_dict = self.get_speakers_with_source_duration(filter_criteria.get(SPEAKER_CRITERIA))
-            self.process_file_info_update_query(speaker_dict)
-            self._move_files(landing_path, source_path)
-
+            file_move_info_list = self.process_file_info_update_query(speaker_dict)
+            self._move_files(landing_path, source_path, file_move_info_list)
 
         if filter_criteria.get(SOURCE_CRITERIA):
             self.process_source_update_query(filter_criteria.get(SOURCE_CRITERIA))
 
-    def _move_files(self, landing_path, source_path):
-        pass
+    def _move_files(self, landing_path, source_path, file_move_info_list):
+        worker_pool = ThreadPoolExecutor(max_workers=3)
+
+        for file_info in file_move_info_list:
+            file_path = file_info.get('source_file_path')
+            meta_file_path = file_info.get('meta_data_source_file_path')
+
+            source_file_path = f'{source_path}/{file_path}'
+            dest_file_path = f'{landing_path}/{file_path}'
+
+            source_meta_file_path = f'{source_path}/{meta_file_path}'
+            dest_meta_file_path = f'{landing_path}/{meta_file_path}'
+
+            worker_pool.submit(self.gcs_instance.move_blob, source_file_path, dest_file_path)
+            worker_pool.submit(self.gcs_instance.move_blob, source_meta_file_path, dest_meta_file_path)
+
+        worker_pool.shutdown(wait=True)
 
     def process_source_update_query(self, source_filter_critieria):
         source_list = ",".join([f"'{i}'" for i in source_filter_critieria.get(SOURCE)])
         final_query = f'{SOURCE_UPDATE_QUERY} ({source_list});'
         query = text(final_query)
         self.data_processor.connection.execute(query)
-
-
 
     def _get_speaker_name_list(self, speaker_criteria):
         duration = speaker_criteria.get(DURATION)
@@ -93,19 +102,42 @@ class DataMarker:
 
         return self._deduplicate_file_info(file_info, duration)
 
-
     def process_file_info_update_query(self, speaker_dict):
         file_list = []
+        source_file_list = []
 
         for speaker in speaker_dict.keys():
             file_list = file_list + [i[1] for i in speaker_dict.get(speaker)]
+            source_file_list = source_file_list + [[i[0],i[1]] for i in speaker_dict.get(speaker)]
 
         file_list_with_single_quotes = [f"'{i}'" for i in file_list]
         source_list_name_query_param = f'({",".join(file_list_with_single_quotes)})'
 
         final_file_update_query = f'{FILE_INFO_UPDATE_QUERY} {source_list_name_query_param}'
+
         query = text(final_file_update_query)
-        return self.data_processor.connection.execute(query)
+        self.data_processor.connection.execute(query)
+
+        return [self._get_file_path(i[0], i[1]) for i in source_file_list]
+
+    def _get_file_path(self, source_name, file_name):
+        source_info = {}
+
+        meta_data_file_name = file_name.split('.')[0] + '.csv'
+        source_info['meta_data_source_file_path'] = f'{source_name}/{meta_data_file_name}'
+
+        if '.' not in file_name:
+            file_path = f'{source_name}/{file_name}.mp4'
+            exists = self.gcs_instance.check_path_exists(file_path)
+
+            if not exists:
+                file_name = f'{file_name}.mp3'
+            else:
+                file_name = f'{file_name}.mp4'
+
+        source_info['source_file_path'] = f'{source_name}/{file_name}'
+
+        return source_info
 
     def _deduplicate_file_info(self, file_info_list, duration):
         speaker_name_dict = {}
