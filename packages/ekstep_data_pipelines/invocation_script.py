@@ -7,21 +7,24 @@ from data_marker.data_marker import DataMarker
 from common.utils import get_logger
 from common import get_periperhals
 
+
 class ACTIONS:
     DATA_MARKING = 'data_marking'
+
 
 LOGGER = get_logger('EKSTEP_PROCESSOR')
 ACTIONS_LIST = [ACTIONS.DATA_MARKING]
 CONFIG_BUCKET = 'ekstepspeechrecognition-dev'
 
-parser = argparse.ArgumentParser(description='Util for data processing for EkStep')
+parser = argparse.ArgumentParser(
+    description='Util for data processing for EkStep')
 
 
-parser.add_argument('-a', '--action', dest='action',default=None, choices=ACTIONS_LIST, required=True,
+parser.add_argument('-a', '--action', dest='action', default=None, choices=ACTIONS_LIST, required=True,
                     help='Action for the processor to perform')
 
 parser.add_argument('-c', '--config-path', dest='local_config', default=None,
-                     help='path to local config, use this when running on local')
+                    help='path to local config, use this when running on local')
 
 parser.add_argument('-rc', '--remote-config-path', dest='remote_config', default=None,
                     help='path to remote gcs config file. Use this when running on cluster mode')
@@ -29,11 +32,12 @@ parser.add_argument('-rc', '--remote-config-path', dest='remote_config', default
 
 processor_args = parser.parse_args()
 
+
 def download_config_file(config_file_path):
     LOGGER.info(f'Downloading config file from Google Cloud Storage')
 
-    download_file_path = f'tmp/{str(uuid.uuid4())}'
-    gcs_storage_client = storage.client()
+    download_file_path = f'/tmp/{str(uuid.uuid4())}'
+    gcs_storage_client = storage.Client()
     bucket = gcs_storage_client.bucket(CONFIG_BUCKET)
 
     LOGGER.info(f'Getting config file from config bucket {CONFIG_BUCKET}')
@@ -46,7 +50,6 @@ def download_config_file(config_file_path):
     return download_file_path
 
 
-
 def process_config_input(arguments):
     LOGGER.info('validating config file path')
 
@@ -57,7 +60,8 @@ def process_config_input(arguments):
         raise argparse.ArgumentTypeError(f'No config specified')
 
     if arguments.local_config != None and arguments.remote_config != None:
-        raise argparse.ArgumentTypeError(f'mulitple configs specified, specify only local_config or remote_config but not both')
+        raise argparse.ArgumentTypeError(
+            f'mulitple configs specified, specify only local_config or remote_config but not both')
 
     if arguments.local_config:
         LOGGER.info('Checking the file path on local machine')
@@ -65,13 +69,16 @@ def process_config_input(arguments):
         exists = os.path.exists(config_file_path)
 
         if not exists:
-            raise argparse.ArgumentTypeError(f'Cannot find config file on path {config_file_path}')
+            raise argparse.ArgumentTypeError(
+                f'Cannot find config file on path {config_file_path}')
 
     if arguments.remote_config:
-        LOGGER.info(f'http/https file path f{arguments.remote_config} found for config file. Downloading config file')
+        LOGGER.info(
+            f'http/https file path f{arguments.remote_config} found for config file. Downloading config file')
         config_file_path = download_config_file(arguments.remote_config)
 
     return config_file_path
+
 
 def perform_action(arguments, **kwargs):
     current_action = arguments.action
@@ -89,7 +96,6 @@ def perform_action(arguments, **kwargs):
         gcs_instance = object_dict.get('gsc_instance')
 
         curr_processor = DataMarker.get_instance(data_processor, gcs_instance)
-
 
     LOGGER.info(f'Starting processing for {current_action}')
     curr_processor.process()
