@@ -20,14 +20,18 @@ parser = argparse.ArgumentParser(description='Util for data processing for EkSte
 parser.add_argument('-a', '--action', dest='action',default=None, choices=ACTIONS_LIST, required=True,
                     help='Action for the processor to perform')
 
-parser.add_argument('-c', '--config-path', dest='config', default=None, required=True,
-                    help='URL Path to the config yaml for the processor, this can be an http endpoint from where the config file can be downloaded or a local file path')
+parser.add_argument('-c', '--config-path', dest='local_config', default=None,
+                     help='path to local config, use this when running on local')
+
+parser.add_argument('-rc', '--remote-config-path', dest='remote_config', default=None,
+                    help='path to remote gcs config file. Use this when running on cluster mode')
 
 
 processor_args = parser.parse_args()
 
 def download_config_file(config_file_path):
     LOGGER.info(f'Downloading config file from Google Cloud Storage')
+
     download_file_path = f'tmp/{str(uuid.uuid4())}'
     gcs_storage_client = storage.client()
     bucket = gcs_storage_client.bucket(CONFIG_BUCKET)
@@ -44,22 +48,28 @@ def download_config_file(config_file_path):
 
 
 def process_config_input(arguments):
-    LOGGER.info('validating arguments')
+    LOGGER.info('validating config file path')
 
     LOGGER.info('Checking configeration file path')
+    config_file_path = None
 
-    config_file_path = arguments.config
-    result = urlparse(config_file_path)
+    if arguments.local_config == None and arguments.remote_config == None:
+        raise argparse.ArgumentTypeError(f'No config specified')
 
-    if result.scheme in ['http', 'https']:
-        LOGGER.info(f'http/https file path f{config_file_path} found for config file. Downloading config file')
-        config_file_path = download_config_file(config_file_path)
-    else:
+    if arguments.local_config != None and arguments.remote_config != None:
+        raise argparse.ArgumentTypeError(f'mulitple configs specified, specify only local_config or remote_config but not both')
+
+    if arguments.local_config:
         LOGGER.info('Checking the file path on local machine')
-        local_conf = os.path.exists(config_file_path)
+        config_file_path = arguments.local_config
+        exists = os.path.exists(config_file_path)
 
-        if not local_conf:
+        if not exists:
             raise argparse.ArgumentTypeError(f'Cannot find config file on path {config_file_path}')
+
+    if arguments.remote_config:
+        LOGGER.info(f'http/https file path f{arguments.remote_config} found for config file. Downloading config file')
+        config_file_path = download_config_file(arguments.remote_config)
 
     return config_file_path
 
