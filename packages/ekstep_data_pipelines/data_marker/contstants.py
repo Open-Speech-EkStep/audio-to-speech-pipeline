@@ -6,12 +6,17 @@ NUMBER_OF_SPEAKERS = "number_of_speakers"
 DURATION = "number_of_minutes_per_speaker"
 SOURCE_NAME = "source_name"
 SOURCE = "source"
+PROCESS_MODE = "process_mode"
 LANDING_PATH = "landing_directory_path"
 SOURCE_PATH = "source_directory_path"
 
 # Speaker critieria queries
-SELECT_SPEAKER_QUERY = "select speaker_name from downloaded_data where staged_for_snr = false group by speaker_name having sum(duration) >= :duration  limit :speaker_count"
-SELECT_SPEAKER_QUERY_WITH_SOURCE = "select speaker_name from downloaded_data where source = :source_name and staged_for_snr = false group by speaker_name having sum(duration) >= :duration  limit :speaker_count"
+SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY = "select speaker_name from downloaded_data where staged_for_snr = false group by speaker_name having sum(duration) >= :duration  limit :speaker_count"
+SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_QUERY = "select speaker_name from downloaded_data where staged_for_snr = false group by speaker_name having sum(duration) <= :duration  limit :speaker_count"
+
+SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_WITH_SOURCE_QUERY = "select speaker_name from downloaded_data where source = :source_name and staged_for_snr = false group by speaker_name having sum(duration) >= :duration  limit :speaker_count"
+SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_WITH_SOURCE_QUERY = "select speaker_name from downloaded_data where source = :source_name and staged_for_snr = false group by speaker_name having sum(duration) <= :duration  limit :speaker_count"
+
 FILE_INFO_UPDATE_QUERY = "update downloaded_data set staged_for_snr = true where raw_file_name in"
 FILE_INFO_QUERY = "select source,raw_file_name,duration,speaker_name from downloaded_data where speaker_name in"
 
