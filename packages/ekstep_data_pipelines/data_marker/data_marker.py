@@ -1,7 +1,7 @@
 from common.utils import get_logger
 from data_marker.contstants import CONFIG_NAME, SPEAKER_CRITERIA, SOURCE_CRITERIA, \
     FILTER_CRITERIA, NUMBER_OF_SPEAKERS, DURATION, SOURCE, \
-    FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, CONFIGERATION_DICT \
+    FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, CONFIGERATION_DICT ,\
     SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY, FILE_INFO_QUERY, SOURCE_UPDATE_QUERY, SOURCE_NAME, SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_WITH_SOURCE_QUERY,\
     PROCESS_MODE, SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_WITH_SOURCE_QUERY, SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_QUERY
 from concurrent.futures import ThreadPoolExecutor
@@ -104,43 +104,6 @@ class DataMarker:
 
         return query_1, query_2
 
-
-
-    def trigger_query(self, process_mode, source_name):
-        if process_mode == 1 and source_name:
-            select_greater_than_duration = text(
-                SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_WITH_SOURCE_QUERY)
-            select_less_than_duration = text(
-                SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_WITH_SOURCE_QUERY)
-            return select_greater_than_duration, select_less_than_duration
-
-        elif process_mode == 1 and not source_name:
-            select_greater_than_duration = text(
-                SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY)
-            select_less_than_duration = text(
-                SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_QUERY)
-            return select_greater_than_duration, select_less_than_duration
-
-        elif process_mode == 2 and source_name:
-            select_greater_than_duration = text(
-                SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_WITH_SOURCE_QUERY)
-            return select_less_than_duration, None
-
-        elif process_mode == 2 and not source_name:
-            select_greater_than_duration = text(
-                SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY)
-            return select_less_than_duration, None
-
-        elif process_mode == 3 and source_name:
-            select_less_than_duration = text(
-                SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_WITH_SOURCE_QUERY)
-            return select_less_than_duration, None
-
-        elif process_mode == 3 and not source_name:
-            select_less_than_duration = text(
-                SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_QUERY)
-            return select_less_than_duration, None
-
     def _get_speaker_name_list(self, speaker_criteria):
 
         duration = speaker_criteria.get(DURATION)
@@ -148,7 +111,8 @@ class DataMarker:
         source_name = speaker_criteria.get(SOURCE_NAME)
         process_mode = speaker_criteria.get(PROCESS_MODE)
 
-        get_speaker_query, get_all_speaker = self.generate_query(process_mode, source_name)
+        get_speaker_query, get_all_speaker = self.generate_query(
+            process_mode, source_name)
 
         parm_dict = {}
 
