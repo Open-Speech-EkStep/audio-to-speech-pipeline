@@ -125,7 +125,7 @@ class DataMarker:
         # get_speaker_query, get_all_speaker = text(
         #     SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY)
 
-        if get_all_speaker:
+        if get_all_speaker != None:
             # get all the speakers
             speakers_greater_than_duration = self.data_processor.connection.execute(
                 get_speaker_query, **parm_dict).fetchall()
@@ -134,7 +134,7 @@ class DataMarker:
 
             speakers = speakers_greater_than_duration + speakers_less_than_duration
 
-        if not get_all_speaker:
+        if get_all_speaker == None:
             speakers = self.data_processor.connection.execute(
                 get_speaker_query, **parm_dict).fetchall()
 
