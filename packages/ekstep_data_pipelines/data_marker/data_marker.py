@@ -1,7 +1,7 @@
 from common.utils import get_logger
 from data_marker.contstants import CONFIG_NAME, SPEAKER_CRITERIA, SOURCE_CRITERIA, \
     FILTER_CRITERIA, NUMBER_OF_SPEAKERS, DURATION, SOURCE, \
-    FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, \
+    FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, CONFIGERATION_DICT \
     SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY, FILE_INFO_QUERY, SOURCE_UPDATE_QUERY, SOURCE_NAME, SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_WITH_SOURCE_QUERY,\
     PROCESS_MODE, SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_WITH_SOURCE_QUERY, SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_QUERY
 from concurrent.futures import ThreadPoolExecutor
@@ -86,6 +86,26 @@ class DataMarker:
         query = text(final_query)
         self.data_processor.connection.execute(query)
 
+    def generate_query(self, process_mode, source_name):
+        curr_config_dict = CONFIGERATION_DICT.get(process_mode)
+
+        query_tuple = curr_config_dict.get('with_source')
+
+        if not source_name:
+            query_tuple = curr_config_dict.get('without_source')
+
+        query_1, query_2 = query_tuple
+
+        if query_1 != None:
+            query_1 = text(query_1)
+
+        if query_2 != None:
+            query_2 = text(query_2)
+
+        return query_1, query_2
+
+
+
     def trigger_query(self, process_mode, source_name):
         if process_mode == 1 and source_name:
             select_greater_than_duration = text(
@@ -122,12 +142,13 @@ class DataMarker:
             return select_less_than_duration, None
 
     def _get_speaker_name_list(self, speaker_criteria):
+
         duration = speaker_criteria.get(DURATION)
         speaker_count = speaker_criteria.get(NUMBER_OF_SPEAKERS)
         source_name = speaker_criteria.get(SOURCE_NAME)
         process_mode = speaker_criteria.get(PROCESS_MODE)
 
-        get_speaker_query,get_all_speaker = self.trigger_query(process_mode, source_name)
+        get_speaker_query, get_all_speaker = self.generate_query(process_mode, source_name)
 
         parm_dict = {}
 
@@ -146,6 +167,7 @@ class DataMarker:
                 get_speaker_query, **parm_dict).fetchall()
             speakers_less_than_duration = self.data_processor.connection.execute(
                 get_all_speaker, **parm_dict).fetchall()
+
             speakers = speakers_greater_than_duration + speakers_less_than_duration
 
         if not get_all_speaker:
@@ -170,8 +192,10 @@ class DataMarker:
 
         speaker_names = self._get_speaker_name_list(speaker_criteria)
         Logger.info(f"speaker name list is {speaker_names}")
+
         file_info_query_complete = f'{FILE_INFO_QUERY} {speaker_names};'
         Logger.info(f"find info query is {file_info_query_complete}")
+
         file_info_query = text(file_info_query_complete)
         file_info = self.data_processor.connection.execute(
             file_info_query).fetchall()
@@ -190,6 +214,7 @@ class DataMarker:
         file_list_with_single_quotes = [f"'{i}'" for i in file_list]
         source_list_name_query_param = f'({",".join(file_list_with_single_quotes)})'
 
+        # format and run query
         final_file_update_query = f'{FILE_INFO_UPDATE_QUERY} {source_list_name_query_param}'
         Logger.info(f"Updated query for all files {final_file_update_query}")
         query = text(final_file_update_query)

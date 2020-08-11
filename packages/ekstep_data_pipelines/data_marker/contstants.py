@@ -24,3 +24,19 @@ FILE_INFO_QUERY = "select source,raw_file_name,duration,speaker_name from downlo
 SOURCE_UPDATE_QUERY = "update source_metadata_downloaded set staged_for_snr = true where source in"
 #SOURCE_FILE_PATH = "data/audiotospeech/raw/download/catalogued/hindi/audio"
 #DESTINATION_FILE_PATH = "data/audiotospeech/raw/landing/hindi/audio"
+
+
+CONFIGERATION_DICT = {
+    1: {
+        'with_source': (SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_WITH_SOURCE_QUERY, SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_WITH_SOURCE_QUERY),
+        'without_source': (SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY, SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_QUERY)
+    },
+    2: {
+        'with_source': (SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_WITH_SOURCE_QUERY, None),
+        'without_source': (SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY, None)
+    },
+    3: {
+        'with_source': (SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_WITH_SOURCE_QUERY, None),
+        'without_source': (SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_QUERY, None)
+    }
+}
