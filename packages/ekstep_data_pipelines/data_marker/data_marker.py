@@ -1,7 +1,7 @@
 from common.utils import get_logger
 from data_marker.contstants import CONFIG_NAME, SPEAKER_CRITERIA, SOURCE_CRITERIA, \
     FILTER_CRITERIA, NUMBER_OF_SPEAKERS, DURATION, SOURCE, \
-    FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, CONFIGERATION_DICT ,\
+    FILE_INFO_UPDATE_QUERY, LANDING_PATH, SOURCE_PATH, CONFIGERATION_DICT,\
     SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY, FILE_INFO_QUERY, SOURCE_UPDATE_QUERY, SOURCE_NAME, SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_WITH_SOURCE_QUERY,\
     PROCESS_MODE, SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_WITH_SOURCE_QUERY, SELECT_SPEAKER_FOR_DATA_LESS_THAN_DURATION_QUERY
 from concurrent.futures import ThreadPoolExecutor
@@ -197,7 +197,8 @@ class DataMarker:
         source_info['meta_data_source_file_path'] = f'{source_name}/{meta_data_file_name}'
 
         if '.' not in file_name:
-            file_path = f'{source_name}/{file_name}.mp4'
+            source_path = self.data_tagger_config.get(SOURCE_PATH)
+            file_path = f'{source_path}/{source_name}/{file_name}.mp4'
             exists = self.gcs_instance.check_path_exists(file_path)
 
             if not exists:
