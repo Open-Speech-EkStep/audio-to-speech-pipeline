@@ -146,25 +146,26 @@ class DataMarker:
         if source_name:
             parm_dict["source_name"] = source_name
 
-        # get_speaker_query, get_all_speaker = text(
-        #     SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY)
+        speakers = None
 
         if get_all_speaker != None:
             # get all the speakers
             speakers_greater_than_duration = self.data_processor.connection.execute(
                 get_speaker_query, **parm_dict).fetchall()
+
             speakers_less_than_duration = self.data_processor.connection.execute(
                 get_all_speaker, **parm_dict).fetchall()
 
             speakers = speakers_greater_than_duration + speakers_less_than_duration
 
-        if get_all_speaker == None:
+        else:
             speakers = self.data_processor.connection.execute(
                 get_speaker_query, **parm_dict).fetchall()
 
         if len(speakers) < 1:
             # TODO: Raise appropriate exception
             pass
+
         speaker_name_list = [
             f"'{self.escape_sql_special_char(speaker_name[0])}'" for speaker_name in speakers]
         formatted_name_list = ','.join(speaker_name_list)
