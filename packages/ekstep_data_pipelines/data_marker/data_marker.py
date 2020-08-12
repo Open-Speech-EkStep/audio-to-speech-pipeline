@@ -214,9 +214,7 @@ class DataMarker:
     def _get_file_path(self, source_name, file_name):
         source_info = {}
 
-        count_of_dot_occur = file_name.count(".")
-        if count_of_dot_occur == 2:
-            file_name = file_name.replace('.', '_', 1)
+        file_name = self.clean_filename(file_name)
 
         meta_data_file_name = file_name.split('.')[0] + '.csv'
         source_info['meta_data_source_file_path'] = f'{source_name}/{meta_data_file_name}'
@@ -234,6 +232,16 @@ class DataMarker:
         source_info['source_file_path'] = f'{source_name}/{file_name}'
 
         return source_info
+
+    def clean_filename(self,file_name):
+        count_of_dot_occur = file_name.count(".")
+
+        file_name = file_name.replace(' ','_')
+
+        if count_of_dot_occur == 2:
+            file_name = file_name.replace('.', '_', 1)
+        
+        return file_name
 
     def escape_sql_special_char(self, param):
         return param.replace("'", "''")
