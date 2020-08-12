@@ -208,16 +208,18 @@ class CloudStorageOperations():
 
         print("Blob {}/{} has been renamed to {}".format(bucket_name, blob.name, new_blob.name))
 
-    def copy_blob(self, bucket_name, blob_name, destination_bucket_name, destination_blob_name):
+    def copy_blob(self, blob_name, destination_blob_name,destination_bucket_name=None):
         """Copies a blob from one bucket to another with a new name."""
         # bucket_name = "your-bucket-name"
         # blob_name = "your-object-name"
         # destination_bucket_name = "destination-bucket-name"
         # destination_blob_name = "destination-object-name"
+        if not destination_bucket_name:
+            destination_bucket_name = self.bucket
 
         storage_client = storage.Client()
 
-        source_bucket = storage_client.bucket(bucket_name)
+        source_bucket = storage_client.bucket(self.bucket)
         source_blob = source_bucket.blob(blob_name)
         destination_bucket = storage_client.bucket(destination_bucket_name)
 
@@ -234,14 +236,14 @@ class CloudStorageOperations():
             )
         )
 
-    def list_blobs_in_a_path(self,bucket_name, file_prefix, delimiter=None):
+    def list_blobs_in_a_path(self, file_prefix, delimiter=None):
         """Lists all the blobs in the bucket."""
         # bucket_name = "your-bucket-name"
         print("*****File prefix is ***** " + file_prefix)
         storage_client = storage.Client()
 
         # Note: Client.list_blobs requires at least package version 1.17.0.
-        blobs = storage_client.list_blobs(bucket_name, prefix=file_prefix, delimiter=delimiter)
+        blobs = storage_client.list_blobs(self.bucket, prefix=file_prefix, delimiter=delimiter)
         return blobs
 
     def move_blob(self, blob_name, destination_blob_name,destination_bucket_name=None):

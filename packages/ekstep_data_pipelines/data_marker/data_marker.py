@@ -57,6 +57,30 @@ class DataMarker:
         if filter_criteria.get(SOURCE_CRITERIA):
             self.process_source_update_query(
                 filter_criteria.get(SOURCE_CRITERIA))
+            self._move_folder(filter_criteria,source_path,landing_path)
+
+    def _move_folder(self,filter_criteria,source_path,landing_path):
+        worker_pool = ThreadPoolExecutor(max_workers=3)
+
+        source_list = filter_criteria.get(SOURCE_CRITERIA).get(SOURCE)
+
+        for source in source_list:
+            all_path = self.gcs_instance.list_blobs_in_a_path(f'{source_path}/{source}/')
+
+        for path in all_path:
+            full_path = path.name
+        
+            worker_pool.submit(self.copy_files,full_path, source,landing_path)
+        
+        worker_pool.shutdown(wait=True)
+
+    def copy_files(self, source_file_path, source, landing_path):
+        file_path_with_source = source_file_path.split('/')[-2:]
+        join_path_source_file = '/'.join(file_path_with_source)
+
+        destination_blob_name = f'{landing_path}/{join_path_source_file}'
+
+        self.gcs_instance.move_blob(source_file_path,destination_blob_name)
 
     def _move_files(self, landing_path, source_path, file_move_info_list):
         worker_pool = ThreadPoolExecutor(max_workers=3)
