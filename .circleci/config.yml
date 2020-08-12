@@ -105,12 +105,12 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
             python --version ; pip --version ; pwd ; ls
-      # - run:
-      #     name: Run Tests
-      #     command: |
-      #       coverage run -m unittest discover src/tests
-      #       coverage report --fail-under 20  src/scripts/*.py
-      #       coverage html  # open htmlcov/index.html in a browser
+      - run:
+          name: Run Tests
+          command: |
+            coverage run -m unittest discover src/tests
+            coverage report --fail-under 20  src/scripts/*.py
+            coverage html  # open htmlcov/index.html in a browser
       - store_artifacts:
           path: htmlcov
       - persist_to_workspace:
@@ -118,6 +118,47 @@ jobs:
           paths:
             - packages/<< parameters.package_name >>
 
+  ekstep_build:
+    parameters:
+      package_name:
+        type: string
+
+       executor: node
+    machine:
+      image: ubuntu-1604:201903-01
+    working_directory: ~/project/packages/<< parameters.package_name >>
+
+    steps:
+      - checkout:
+          path: ~/project
+      # This step is added only to show that we are in the package directory
+      - run:
+          name: Sanity check to confirm correct package directory
+          command: echo "Current package directory is << parameters.package_name >> ..."
+      - run:
+          name: Setup Testing Environment
+          command: |
+            pyenv global 3.7.0
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+            sudo apt-get install -y sox
+            sudo apt-get install -y gcc-multilib g++-multilib
+            sudo apt-get install libpq-dev
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            python --version ; pip --version ; pwd ; ls
+      - run:
+          name: Run Tests
+          command: |
+            coverage -m unittest discover -s ekstep_pipelines_tests/ -p "*_tests.py" -v
+            coverage report --fail-under 20  data_marker/*.py
+            coverage html  # open htmlcov/index.html in a browser
+      - store_artifacts:
+          path: htmlcov
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - packages/<< parameters.package_name >>
   deploy:
     parameters:
       package_name:
@@ -245,7 +286,7 @@ workflows:
   ekstep_data_pipelines:
     when: << pipeline.parameters.ekstep_data_pipelines >>
     jobs:
-      - build:
+      - ekstep_build:
           name: ekstep_data_pipelines_build
           package_name: ekstep_data_pipelines
       - deploy:
