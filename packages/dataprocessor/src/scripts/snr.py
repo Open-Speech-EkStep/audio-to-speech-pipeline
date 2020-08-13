@@ -76,7 +76,7 @@ class SNR(object):
                     command = f'mv "{key}" "{rejected_dir_local}"'
                     print(command)
                     print(command_text)
-                elif
+                else:
                     clean_audio_duration.append(clip_duration)
                     command = f'mv "{key}" "{clean_dir_local}"'
                     list_file_utterances_with_duration.append(audio_file_name + ":" + str(clip_duration))
