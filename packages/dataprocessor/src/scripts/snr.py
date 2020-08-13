@@ -70,11 +70,18 @@ class SNR(object):
                 clean_dir_local = clean_dir + '/' + audio_file_name
                 y, sr = librosa.load(key)
                 clip_duration = librosa.get_duration(y)
-                clean_audio_duration.append(clip_duration)
-                command = f'mv "{key}" "{clean_dir_local}"'
-                list_file_utterances_with_duration.append(audio_file_name + ":" + str(clip_duration))
-                print(command)
-                print(command_text)
+                if(clip_duration > 15):
+                    ## copy to rejected directory of output
+                    rejected_dir_local = rejected_dir + '/' + audio_file_name
+                    command = f'mv "{key}" "{rejected_dir_local}"'
+                    print(command)
+                    print(command_text)
+                elif
+                    clean_audio_duration.append(clip_duration)
+                    command = f'mv "{key}" "{clean_dir_local}"'
+                    list_file_utterances_with_duration.append(audio_file_name + ":" + str(clip_duration))
+                    print(command)
+                    print(command_text)
             else:
                 ## copy to rejected directory of output
                 rejected_dir_local = rejected_dir + '/' + audio_file_name
