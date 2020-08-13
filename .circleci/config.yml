@@ -12,7 +12,7 @@ parameters:
     default: false
   dataprocessor:
     type: boolean
-    default: false
+    default: true
   pipeline_workflows:
     type: boolean
     default: true
@@ -27,7 +27,7 @@ parameters:
     default: false
   ekstep_data_pipelines:
     type: boolean
-    default: true
+    default: false
 
 executors:
   node:
