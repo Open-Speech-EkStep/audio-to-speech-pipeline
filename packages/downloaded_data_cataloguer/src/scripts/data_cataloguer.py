@@ -75,7 +75,7 @@ class CatalogueDownloadedData:
                                                                                self.condition_file_name(
                                                                                    metadata_file_name))
                     if check_if_meta_data_present(source_landing_path + downloaded_source, metadata_file_name):
-                        self.move_and_upload_to_db(db_conn, destination_file_name, destination_meta_file_name,
+                        self.copy_and_upload_to_db(db_conn, destination_file_name, destination_meta_file_name,
                                                    metadata_file_name, source_file_name,
                                                    source_meta_file_name, is_source_label_data)
                     else:
@@ -106,13 +106,13 @@ class CatalogueDownloadedData:
         obj_gcs_ops.move_blob(bucket_name, source_file_name,
                               bucket_name, error_destination_file_name)
 
-    def move_and_upload_to_db(self, db_conn, destination_file_name, destination_meta_file_name, metadata_file_name, source_file_name, source_meta_file_name, is_source_label_data):
+    def copy_and_upload_to_db(self, db_conn, destination_file_name, destination_meta_file_name, metadata_file_name, source_file_name, source_meta_file_name, is_source_label_data):
         if not is_source_label_data:
             self.upload_to_db(metadata_file_name,
                               source_meta_file_name, db_conn)
-        obj_gcs_ops.move_blob(bucket_name, source_file_name,
+        obj_gcs_ops.copy_blob(bucket_name, source_file_name,
                               bucket_name, destination_file_name)
-        obj_gcs_ops.move_blob(bucket_name, source_meta_file_name,
+        obj_gcs_ops.copy_blob(bucket_name, source_meta_file_name,
                               bucket_name, destination_meta_file_name)
 
     def upload_to_db(self, metadata_file_name, source_meta_file_name, db_conn):

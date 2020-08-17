@@ -24,7 +24,7 @@ parameters:
     default: false
   downloaded_data_cataloguer:
     type: boolean
-    default: false
+    default: true
   ekstep_data_pipelines:
     type: boolean
     default: true
