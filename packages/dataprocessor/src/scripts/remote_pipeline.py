@@ -93,6 +93,7 @@ class RemoteAudioPipeline():
         transcription_input_dir = os.path.join(snr_output_base_dir, 'clean')
         print(f'******** creating transcriptions for folder {transcription_input_dir}')
         chunk_files = os.listdir(transcription_input_dir)
+        print('clean files count:' + len(chunk_files))
         for chunk_file_name in chunk_files:
             local_wave_file_path = os.path.join(transcription_input_dir, chunk_file_name)
             self.generate_transcription(args_application, args_azure, bucket_name, chunk_file_name, local_download_path,
