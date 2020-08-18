@@ -11,11 +11,20 @@ config:
       # master data bucket for ekstep
       master_bucket: ''
 
+    azure_transcription_client:
+      speech_key: ''
+      service_region: ''
+
+    google_transcription_client:
+      language: ''
+      sample_rate: ''
+      audio_channel_count: ''
+
   data_tagger_config:
     # path of to the folder in the master bucket where the data tagger will move the data to
     landing_directory_path: ''
 
-    # path of to the foler in the master bucket from where the data tagger will pick up the data that needs to be moved
+    # path of to the folder in the master bucket from where the data tagger will pick up the data that needs to be moved
     source_directory_path: ''
 
     filter_criteria:

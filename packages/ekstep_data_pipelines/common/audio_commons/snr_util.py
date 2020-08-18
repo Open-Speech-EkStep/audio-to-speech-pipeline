@@ -1,11 +1,13 @@
+import sys
+sys.path.insert(0, '..')
+sys.path.insert(0, '../..')
+
 import os
 import shutil
 import subprocess
-import soundfile as sf
-from tqdm import tqdm
 import pandas as pd
 import librosa
-from .utils import get_logger
+from packages.ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger('Snr')
 
