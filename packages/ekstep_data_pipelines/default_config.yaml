@@ -36,3 +36,28 @@ config:
 
       filter_by_source:
         source: []
+
+  audio_processing:
+    # defaults to hi-IN
+    language: ''
+
+    # path of the files on gcs which need to be processed
+    remote_raw_audio_file_path: ''
+
+    # path where the processed files need to be uploaded
+    remote_processed_audio_file_path: ''
+
+    chunking_conversion_configeration:
+      aggressiveness: ''
+
+
+
+    # SNR specific configeration
+    snr_configeration:
+
+      max_snr_threshold: ''
+      local_input_file_path: ''
+      local_output_file_path: ''
+
+
+

@@ -29,7 +29,7 @@ class DataMarker:
         self.gcs_instance = gcs_instance
         self.data_tagger_config = None
 
-    def process(self):
+    def process(self, **kwargs):
         """
         Main function for running all processing that takes places in the data marker
         """
