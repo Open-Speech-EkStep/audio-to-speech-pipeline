@@ -1,0 +1,9 @@
+#!usr/bin/env bash
+
+echo "setting up commit-msg hook"
+cp ./hooks/commit-msg ../.git/hooks/
+chmod +x ../.git/hooks/commit-msg
+echo "hook setup complete"
+
+echo "talisman setup script running"
+sh ./talisman_setup.sh
