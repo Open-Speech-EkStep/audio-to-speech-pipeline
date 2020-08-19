@@ -1,7 +1,7 @@
 import yaml
 from common.data_processor import DataProcessorUtil
 from common.gcs_operations import CloudStorageOperations
-from common.audio_commons import get_audio_commons
+from .audio_commons import get_audio_commons
 
 def get_periperhals(intialization_dict_path):
     data_processor = DataProcessorUtil.get_instance(intialization_dict_path)

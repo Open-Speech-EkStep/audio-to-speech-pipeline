@@ -1,6 +1,6 @@
-from common.audio_commons.chunking_conversion_util import ChunkingConversionUtil
-from common.audio_commons.snr_util import SNR
-from common.audio_commons.transcription_clients import get_transcription_clients
+from .chunking_conversion_util import ChunkingConversionUtil
+from .snr_util import SNR
+from .transcription_clients import get_transcription_clients
 
 def get_audio_commons(initlization_dict):
     audio_commons_dict = {}
