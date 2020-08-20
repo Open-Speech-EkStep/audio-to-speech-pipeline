@@ -11,8 +11,8 @@ LOGGER = get_logger('AzureTranscriptionClient')
 
 class AzureTranscriptionClient(object):
 
-    def get_instance(self, config_dict):
-        azure_config_dict = config_dict.get('common', {}).get('azure_transcription_client')
+    def get_instance( config_dict):
+        azure_config_dict = config_dict.get('common', {}).get('azure_transcription_client', {})
         return AzureTranscriptionClient(**azure_config_dict)
 
 

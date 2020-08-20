@@ -21,7 +21,7 @@ class SNR:
     MAX_DURATION = 15
 
     @staticmethod
-    def get_instance(self):
+    def get_instance():
         curr_instance = SNR()
         return curr_instance
 

@@ -4,7 +4,7 @@ import argparse
 from google.cloud import storage
 from urllib.parse import urlparse
 from data_marker.data_marker import DataMarker
-from audio_processing.audio_processor import AudioProcessor
+from audio_processing.audio_processer import AudioProcessor
 from common.utils import get_logger
 from common import get_periperhals
 
@@ -98,7 +98,7 @@ def validate_audio_processing_input(arguments):
             f'Audio Id list missing. Please specify comma seperated audio IDs for processing'
         )
 
-    audio_ids = list(filter(None, arguments.audio_ids.split(',')))
+    audio_ids = [i.strip() for i in list(filter(None, arguments.audio_ids.split(',')))]
 
     if audio_ids == []:
         raise argparse.ArgumentTypeError(
@@ -128,7 +128,6 @@ def perform_action(arguments, **kwargs):
 
     curr_processor = None
 
-    kwargs = {}
 
     if current_action == ACTIONS.DATA_MARKING:
         LOGGER.info('Intializing data marker with given config')
@@ -142,8 +141,8 @@ def perform_action(arguments, **kwargs):
 
         curr_processor = DataMarker.get_instance(data_processor, gcs_instance)
 
-    elif current_action == ACTIONS.DATA_MARKING:
-        kwargs = validate_audio_processing_input(arguments)
+    elif current_action == ACTIONS.AUDIO_PROCESSING:
+        kwargs.update(validate_audio_processing_input(arguments))
         LOGGER.info('Intializing audio processor marker with given config')
 
         config_params = {'config_file_path': kwargs.get('config_file_path')}

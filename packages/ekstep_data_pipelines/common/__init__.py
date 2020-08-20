@@ -12,7 +12,7 @@ def get_periperhals(intialization_dict_path):
         "gsc_instance": gcs_instance
     }
 
-    config_dict = load_config(intialization_dict_path)
+    config_dict = load_config(intialization_dict_path.get('config_file_path'))
 
     peripheral_dict['audio_commons'] = get_audio_commons(config_dict)
 

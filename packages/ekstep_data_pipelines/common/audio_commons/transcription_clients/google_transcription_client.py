@@ -21,7 +21,7 @@ class GoogleTranscriptionClient(object):
 
     @staticmethod
     def get_instance(config_dict):
-        google_config_dict = config_dict.get('common', {}).get('google_transcription_client')
+        google_config_dict = config_dict.get('common', {}).get('google_transcription_client', {})
         return GoogleTranscriptionClient(**google_config_dict)
 
     def __init__(self, **config_dict):
