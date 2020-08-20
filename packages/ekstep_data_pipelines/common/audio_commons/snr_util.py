@@ -29,7 +29,7 @@ class SNR:
         self.current_working_dir = os.getcwd()
 
     def get_command(self, current_working_dir, file_path):
-        return f'"{current_working_dir}/WadaSNR/Exe/WADASNR" -i "{file_path}" -t "{current_working_dir}/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
+        return f'"{current_working_dir}/binaries/WadaSNR/Exe/WADASNR" -i "{file_path}" -t "{current_working_dir}/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
 
     def get_output_directories(self, output_dir, ensure_path=True):
         clean_path, rejected_path = f'{output_dir}/clean', f'{output_dir}/rejected'

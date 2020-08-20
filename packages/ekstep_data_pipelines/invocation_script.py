@@ -144,7 +144,6 @@ def perform_action(arguments, **kwargs):
     elif current_action == ACTIONS.AUDIO_PROCESSING:
         kwargs.update(validate_audio_processing_input(arguments))
         LOGGER.info('Intializing audio processor marker with given config')
-
         config_params = {'config_file_path': kwargs.get('config_file_path')}
 
         object_dict = get_periperhals(config_params)

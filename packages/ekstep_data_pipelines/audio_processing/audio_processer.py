@@ -1,5 +1,6 @@
 import os
-from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG
+import glob
+from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG, SNR_CONFIG
 from common.utils import get_logger
 
 Logger = get_logger("Audio Processor")
@@ -61,13 +62,15 @@ class AudioProcessor:
         self.gcs_instance.download_to_local(self.gcs_instance.bucket, remote_download_path,
                                             local_audio_download_path, True)
 
+        meta_data_file_path = self._get_csv_in_path(local_audio_download_path)
+
         Logger.info(f'Conerting the file with audio_id {audio_id} to wav')
         local_converted_wav_file_path = self._convert_to_wav(local_audio_download_path, extension)
 
         Logger.info(f'Breaking {audio_id} at {local_converted_wav_file_path} file into chunks')
-        chunk_output_path, vad_output_path = self._break_files_into_chunks(audio_id, local_audio_download_path, local_converted_wav_file_path)
+        chunk_output_path = self._break_files_into_chunks(audio_id, local_audio_download_path, local_converted_wav_file_path)
+        self._process_snr(chunk_output_path, meta_data_file_path, local_audio_download_path, audio_id)
 
-        self._process_snr()
 
     def ensure_path(self, path):
         # TODO: make path empty before creating it again
@@ -102,9 +105,21 @@ class AudioProcessor:
 
         self.chunking_processor.create_audio_clips(aggressivness_dict.get('aggressiveness'), wav_file_path, local_chunk_output_path, local_vad_output_path, file_name)
 
-        return local_chunk_output_path, local_vad_output_path
+        return local_chunk_output_path
 
 
+    def _process_snr(self, input_file_path, meta_data_file_path, local_path, audio_id):
+        snr_config = self.audio_processor_config.get(SNR_CONFIG)
 
-    def _process_snr(self):
-        pass
+        self.snr_processor.fit_and_move(self._get_all_wav_in_path(input_file_path), meta_data_file_path, snr_config.get('max_snr_threshold', 15), local_path, audio_id)
+
+    def _get_csv_in_path(self, path):
+        all_csvs = glob.glob(f'{path}/*.csv')
+
+        if len(all_csvs) < 1:
+            return None
+
+        return all_csvs[0]
+
+    def _get_all_wav_in_path(self, path):
+        return glob.glob(f'{path}/*.wav')
