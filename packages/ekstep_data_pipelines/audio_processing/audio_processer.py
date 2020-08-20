@@ -16,7 +16,7 @@ class AudioProcessor:
     DEFAULT_DOWNLOAD_PATH = '/tmp/audio_processing_raw'
 
     def get_instance(self, data_processor, gcs_instance, audio_commons):
-        return AudioProcessor(data_processor, gcs_instance, audio_commons
+        return AudioProcessor(data_processor, gcs_instance, audio_commons)
 
     def __init__(self, data_processor, gcs_instance, audio_commons):
         self.data_processor = data_processor
