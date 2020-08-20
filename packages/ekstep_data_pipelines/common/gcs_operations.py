@@ -123,7 +123,7 @@ class CloudStorageOperations():
                 if ((not blob.name.endswith("/")) & (
                         not blob.name[blob.name.rfind("/") + 1:len(blob.name)].split(".")[1] == exclude_extn)):
                     print("Downloading blob {}/{} to local directory: {}: ".format(bucket_name, blob.name, destination))
-                    blob.download_to_filename(blob.name)
+                    blob.download_to_filename(destination + '/'+ blob.name.split('/')[-1])
                     print("Blob downloaded successfully: {}".format(blob.name))
         else:
             print("Running in FILE mode...")

@@ -37,7 +37,7 @@ config:
       filter_by_source:
         source: []
 
-  audio_processing:
+  audio_processor_config:
     # defaults to hi-IN
     language: ''
 

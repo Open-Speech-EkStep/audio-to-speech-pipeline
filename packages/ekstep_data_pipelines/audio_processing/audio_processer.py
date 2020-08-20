@@ -40,7 +40,7 @@ class AudioProcessor:
         extension = kwargs.get('extension')
 
         Logger.info(f'Processing audio ids {audio_id_list}')
-        for audio_id in self.audio_id_list:
+        for audio_id in audio_id_list:
             Logger.info(f'Processing audio_id {audio_id}')
             self.process_audio_id(audio_id, source, extension)
 
@@ -91,12 +91,16 @@ class AudioProcessor:
         local_chunk_output_path = f'{local_download_path}/chunks'
         local_vad_output_path = f'{local_download_path}/vad'
 
-        aggressivness = self.audio_processor_config.get(CHUNKING_CONFIG, 2)
+        aggressivness_dict = self.audio_processor_config.get(CHUNKING_CONFIG, {'aggressiveness':2})
 
-        if isinstance(aggressivness, int):
-            raise Exception(f'Aggressiveness must be an int, not {aggressivness}')
+        if not isinstance(aggressivness_dict.get('aggressiveness'), int):
+            raise Exception(f'Aggressiveness must be an int, not {aggressivness_dict}')
 
-        self.chunking_processor.create_audio_clips(aggressivness, wav_file_path, local_chunk_output_path, local_vad_output_path, audio_id)
+        self.ensure_path(local_chunk_output_path)
+        Logger.info(f'Ensuring path {local_chunk_output_path}')
+        file_name = wav_file_path.split('/')[-1]
+
+        self.chunking_processor.create_audio_clips(aggressivness_dict.get('aggressiveness'), wav_file_path, local_chunk_output_path, local_vad_output_path, file_name)
 
         return local_chunk_output_path, local_vad_output_path
 
