@@ -67,8 +67,6 @@ class SNR:
         except subprocess.CalledProcessError as e:
             LOGGER.error('Called process error:' + str(e))
             return float(-1)
-        else:
-            raise RuntimeError(" ".join(command))
 
         return float(process_output.split()[-3].decode("utf-8"))
 
