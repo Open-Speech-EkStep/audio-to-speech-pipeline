@@ -76,8 +76,8 @@ class AudioProcessor:
         processed_remote_file_path = self.audio_processor_config.get(REMOTE_PROCESSED_FILE_PATH)
         upload_path = f'{processed_remote_file_path}/{source}/{audio_id}'
 
-        clean_file_upload = self.gcs_instance.upload_to_gcs(f'{local_audio_download_path}/clean', upload_path)
-        rejected_file_upload = self.gcs_instance.upload_to_gcs(f'{local_audio_download_path}/clean', upload_path)
+        clean_file_upload = self.gcs_instance.upload_to_gcs(f'{local_audio_download_path}/clean', f'{upload_path}/clean')
+        rejected_file_upload = self.gcs_instance.upload_to_gcs(f'{local_audio_download_path}/rejected', f'{upload_path}/rejected')
 
         if not clean_file_upload and not rejected_file_upload:
             Logger.error(f'Uploading chunked/snr cleaned files failed for {audio_id} not processing further.')
