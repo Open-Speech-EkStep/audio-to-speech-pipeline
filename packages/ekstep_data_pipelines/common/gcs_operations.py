@@ -4,7 +4,11 @@ import shutil, glob
 from os import listdir
 from os.path import isfile, join
 from google.cloud import storage
+from concurrent.futures import ThreadPoolExecutor
 import datetime
+from common.utils import get_logger
+
+Logger = get_logger('GCS Operations')
 
 
 class CloudStorageOperations():
@@ -143,41 +147,61 @@ class CloudStorageOperations():
             print("File {}/{} downloaded to destination directory {} successfully".format(bucket_name, source_blob_name,
                                                                                           destination_directory))
 
-    def upload_to_gcs(self, bucket_name, source, destination_blob_name, is_directory):
-        """Uploads a blob from the local."""
-        # Provides options to upload a file OR folder
-        # Option 1: FILE mode: Upload a file - copies a file with same name in destination bucket folder
-        # bucket_name = "your-bucket-name"
-        # source =  "local/path/to/folder/file" e.g. "data/raw/curation/tobeprocessed/hindi/f10.txt"
-        # destination_blob_name = "storage-object-name" e.g. "data/raw/curation/tobeprocessed/hindi/f10.txt"
-        # isDirectory = flag to specify whether source is Directory OR File
+    def upload_to_gcs(self, local_source_path, destination_blob_name, upload_directory=True):
+        """
+        Uploads a blob from the local.
 
-        # Option 2: DIRECTORY mode: Upload all files inside a folder to cloud storage
-        # bucket_name = "your-bucket-name"
-        # source =  "local/path/to/folder" e.g. "data/raw/curation/tobeprocessed/hindi"
-        # destination_blob_name = "storage-object-name" e.g. "data/raw/curation/tobeprocessed/hindi"
-        # isDirectory = flag to specify whether source is Directory OR File
+        :param string local_source_path: Local path to the file/directory being uploaded.
+                                         Must include the file name incase of file upload
 
-        print("Creating storage client object")
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(bucket_name)
-        if (is_directory):
-            print("Running in DIRECTORY mode...")
-            print("Fetching list of files to be uploaded ")
-            files = [f for f in listdir(source) if isfile(join(source, f))]
-            for file in files:
-                src_file = source + "/" + file
-                blob = bucket.blob(destination_blob_name + "/" + file)
-                print("Uploading files from source: {} to destination: {}/{} ".format(src_file, bucket_name, blob.name))
-                blob.upload_from_filename(src_file)
-            print("All files uploaded successfully")
-        else:
-            print("Running in FILE mode...")
-            print("Uploading file from source: {} to destination: {}/{} ".format(source, bucket_name,
-                                                                                 destination_blob_name))
+        :param string destination_blob_name: Remote path where the file/directory needs to be uploaded to
+
+        :param bool upload_directy: Flag for specifying if the function is being used to
+                                    upload a file or a directory. Pass false incase of file
+
+        """
+
+        bucket = self.client.bucket(self.bucket)
+
+        if not upload_directory:
+            Logger.info(f"Uploading file from source: {local_source_path} to destination: {self.bucket}/{destination_blob_name}")
             blob = bucket.blob(destination_blob_name)
-            blob.upload_from_filename(source)
-            print("File uploaded successfully to {}/{}".format(bucket_name, destination_blob_name))
+            try:
+                blob.upload_from_filename(local_source_path)
+            except Exception as e:
+                Logger.info(f'Single file Upload failed with error {e.__str__()}')
+                return False
+
+            Logger.info(f"Single File uploaded successfully to {self.bucket}/{destination_blob_name}")
+            return True
+
+        files = [f for f in listdir(local_source_path) if isfile(join(local_source_path, f))]
+        Logger.info(f'All the files in directory {files}')
+
+        executor = ThreadPoolExecutor(max_workers=5)
+
+        futures = []
+
+        for file in files:
+            src_file = local_source_path + "/" + file
+            blob = bucket.blob(destination_blob_name + "/" + file)
+            Logger.info("Uploading files from source: {} to destination: {}/{} ".format(src_file, self.bucket, blob.name))
+            futures.append(executor.submit(blob.upload_from_filename, src_file))
+
+        executor.shutdown(wait=True)
+
+        Logger.info(f'Checking the result of all upload values')
+
+        for upload_future in futures:
+            try:
+                upload_future.result()
+            except Exception as e:
+                Logger.error(f'Uploading directory {local_source_path} failed with error {e.__str__()}')
+                return False
+
+        Logger.info(f'All the files in directory {local_source_path} uploaded successfully')
+        return True
+
 
     def list_blobs(self, bucket_name, prefix, delimiter=None):
         """Lists all the blobs in the bucket."""

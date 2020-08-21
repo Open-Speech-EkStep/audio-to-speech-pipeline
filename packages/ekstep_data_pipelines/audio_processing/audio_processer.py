@@ -1,6 +1,6 @@
 import os
 import glob
-from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG, SNR_CONFIG
+from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG, SNR_CONFIG, REMOTE_PROCESSED_FILE_PATH
 from common.utils import get_logger
 
 Logger = get_logger("Audio Processor")
@@ -69,8 +69,20 @@ class AudioProcessor:
 
         Logger.info(f'Breaking {audio_id} at {local_converted_wav_file_path} file into chunks')
         chunk_output_path = self._break_files_into_chunks(audio_id, local_audio_download_path, local_converted_wav_file_path)
+
+        Logger.info(f'Processing SNR ratios for the all the chunks for audio_id {audio_id}')
         self._process_snr(chunk_output_path, meta_data_file_path, local_audio_download_path, audio_id)
 
+        processed_remote_file_path = self.audio_processor_config.get(REMOTE_PROCESSED_FILE_PATH)
+        upload_path = f'{processed_remote_file_path}/{source}/{audio_id}'
+
+        clean_file_upload = self.gcs_instance.upload_to_gcs(f'{local_audio_download_path}/clean', upload_path)
+        rejected_file_upload = self.gcs_instance.upload_to_gcs(f'{local_audio_download_path}/clean', upload_path)
+
+        if not clean_file_upload and not rejected_file_upload:
+            Logger.error(f'Uploading chunked/snr cleaned files failed for {audio_id} not processing further.')
+
+        self.upload_file(meta_data_file_path)
 
     def ensure_path(self, path):
         # TODO: make path empty before creating it again
@@ -123,3 +135,17 @@ class AudioProcessor:
 
     def _get_all_wav_in_path(self, path):
         return glob.glob(f'{path}/*.wav')
+
+    def upload_file(self, meta_data_path):
+        """
+        Uploading the meta data file from local to
+        """
+
+        db_conn = self.data_processor.connection
+
+        with open(meta_data_path, 'r') as f:
+            conn = db_conn.raw_connection()
+            cursor = conn.cursor()
+            cmd = 'COPY media_metadata_staging(raw_file_name,duration,title,speaker_name,audio_id,cleaned_duration,num_of_speakers,language,has_other_audio_signature,type,source,experiment_use,utterances_files_list,source_url,speaker_gender,source_website,experiment_name,mother_tongue,age_group,recorded_state,recorded_district,recorded_place,recorded_date,purpose) FROM STDIN WITH (FORMAT CSV, HEADER)'
+            cursor.copy_expert(cmd, f)
+            conn.commit()
