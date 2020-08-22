@@ -1,51 +1,221 @@
-cachetools==4.1.0
-argparse
-certifi==2020.4.5.1
-cffi==1.14.0
+
+apispec==1.3.3
+appdirs==1.4.4
+appnope==0.1.0
+argcomplete==1.11.1
+astroid==2.4.1
+attrs==19.3.0
+audioread==2.1.8
+autopep8==1.5.2
+azure-cognitiveservices-speech==1.13.0
+Babel==2.8.0
+backcall==0.2.0
+cached-property==1.5.1
+cachetools==4.1.1
+cattrs==0.9.2
+certifi==2020.6.20
+cffi==1.14.1
 chardet==3.0.4
+click==7.1.2
+colorama==0.4.3
+colorlog==4.0.2
+configparser==3.5.3
+coverage==5.1
+crcmod==1.7
+croniter==0.3.34
+databricks-cli==0.11.0
 decorator==4.4.2
-google-api-core==1.17.0
-google-auth==1.15.0
-google-cloud-core==1.3.0
+defusedxml==0.6.0
+dill==0.3.2
+distlib==0.3.0
+dnspython==1.16.0
+docutils==0.16
+email-validator==1.1.1
+filelock==3.0.12
+flake8==3.8.3
+Flask==1.1.2
+Flask-Admin==1.5.4
+Flask-AppBuilder==2.3.4
+Flask-Babel==1.0.0
+Flask-Caching==1.3.3
+Flask-JWT-Extended==3.24.1
+Flask-Login==0.4.1
+Flask-OpenID==1.2.5
+Flask-SQLAlchemy==2.4.3
+flask-swagger==0.2.13
+Flask-WTF==0.14.3
+funcsigs==1.0.2
+future==0.18.2
+google-api-core==1.22.0
+google-auth==1.20.1
+google-cloud-core==1.4.1
 google-cloud-speech==1.3.2
-google-cloud-storage==1.17
-google-resumable-media==0.5.0
-googleapis-common-protos==1.51.0
+google-cloud-storage==1.30.0
+google-crc32c==0.1.0
+google-resumable-media==0.7.1
+googleapis-common-protos==1.52.0
+graphviz==0.14
 grpcio==1.29.0
-idna==2.9
+gunicorn==19.10.0
+idna==2.10
 imageio==2.8.0
 imageio-ffmpeg==0.4.2
+importlib-metadata==1.6.0
+ipdb==0.13.3
+ipython==7.16.1
+ipython-genutils==0.2.0
+iso8601==0.1.12
+isort==4.3.21
+itsdangerous==1.1.0
+jedi==0.17.2
+Jinja2==2.10.3
+joblib==0.15.1
+json-merge-patch==0.2
+jsonschema==3.2.0
+lazy-object-proxy==1.4.3
+librosa==0.7.2
+llvmlite==0.31.0
+lockfile==0.12.2
+Mako==1.1.3
+Markdown==2.6.11
+MarkupSafe==1.1.1
+marshmallow==2.21.0
+marshmallow-enum==1.5.1
+marshmallow-sqlalchemy==0.23.1
+mccabe==0.6.1
 moviepy==1.0.0
+natsort==7.0.1
+numba==0.48.0
 numpy==1.18.4
+pandas==0.25.3
+parso==0.7.1
+pendulum==1.4.4
+pexpect==4.8.0
+pg8000==1.13.2
+pickleshare==0.7.5
 Pillow==7.1.2
+prison==0.1.3
 proglog==0.1.9
-protobuf==3.12.0
+prompt-toolkit==3.0.5
+protobuf==3.12.4
+psutil==5.7.0
+psycopg2==2.8.5
+psycopg2-binary==2.8.5
+ptyprocess==0.6.0
+py4j==0.10.9
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
+pycodestyle==2.6.0
 pycparser==2.20
+pydub==0.24.1
+pyflakes==2.2.0
+Pygments==2.6.1
+PyJWT==1.7.1
+pylint==2.5.2
+pyrsistent==0.16.0
+pyspark==3.0.0
+python-daemon==2.1.2
+python-dateutil==2.8.1
+python-dotenv==0.13.0
+python-editor==1.0.4
+python3-openid==3.2.0
 pytube3==9.6.4
 pytz==2020.1
+pytzdata==2019.3
 PyYAML==5.3.1
-requests==2.23.0
-rsa==4.0
+requests==2.24.0
+resampy==0.2.2
+rope==0.17.0
+rsa==4.6
+scikit-learn==0.23.1
 scipy==1.4.1
-six==1.14.0
+scramp==1.1.0
+setproctitle==1.1.10
+six==1.15.0
 SoundFile==0.10.3.post1
+SQLAlchemy==1.3.18
+SQLAlchemy-JSONField==0.9.0
+SQLAlchemy-Utils==0.36.7
 srt==3.0.0
+tabulate==0.8.7
+tenacity==4.12.0
+termcolor==1.1.0
+text-unidecode==1.2
+threadpoolctl==2.1.0
+thrift==0.13.0
+toml==0.10.1
 tqdm==4.46.0
+traitlets==4.3.3
+typed-ast==1.4.1
 typing-extensions==3.7.4.2
+tzlocal==1.5.1
+unicodecsv==0.14.1
 urllib3==1.25.9
-uuid~=1.30
-librosa
-pydub
-pandas
-coverage
-flake8
-SQLAlchemy==1.3.17
-pg8000==1.13.2
-python-dotenv==0.13.0
-psycopg2
-numba<=0.48
-webrtcvad
-sox
-azure-cognitiveservices-speech
+uuid==1.30
+virtualenv==20.0.21
+wcwidth==0.2.5
+webrtcvad==2.0.10
+Werkzeug==0.16.1
+wget==3.2
+wrapt==1.12.1
+WTForms==2.3.1
+yapf==0.30.0
+zipp==3.1.0
+zope.deprecation==4.4.0
+
+
+
+
+
+
+# cachetools==4.1.0
+# argparse
+# certifi==2020.4.5.1
+# cffi==1.14.0
+# chardet==3.0.4
+# decorator==4.4.2
+# google-api-core==1.17.0
+# google-auth==1.15.0
+# google-cloud-core==1.3.0
+# google-cloud-speech==1.3.2
+# google-cloud-storage==1.17
+# google-resumable-media==0.5.0
+# googleapis-common-protos==1.51.0
+# grpcio
+# idna==2.9
+# imageio==2.8.0
+# imageio-ffmpeg==0.4.2
+# moviepy==1.0.0
+# numpy==1.18.4
+# Pillow==7.1.2
+# proglog==0.1.9
+# protobuf==3.12.0
+# pyasn1==0.4.8
+# pyasn1-modules==0.2.8
+# pycparser==2.20
+# pytube3==9.6.4
+# pytz==2020.1
+# PyYAML==5.3.1
+# requests==2.23.0
+# rsa==4.0
+# scipy==1.4.1
+# six==1.14.0
+# SoundFile==0.10.3.post1
+# srt==3.0.0
+# tqdm==4.46.0
+# typing-extensions==3.7.4.2
+# urllib3==1.25.9
+# uuid~=1.30
+# librosa
+# pydub
+# # pandas
+# coverage
+# flake8
+# SQLAlchemy==1.3.17
+# pg8000==1.13.2
+# python-dotenv==0.13.0
+# psycopg2
+# numba<=0.48
+# webrtcvad
+# sox
+# azure-cognitiveservices-speech
