@@ -144,6 +144,7 @@ jobs:
             sudo apt-get install -y sox
             sudo apt-get install -y gcc-multilib g++-multilib
             sudo apt-get install libpq-dev
+            sudo apt install liblzma-dev
             pip install --upgrade pip
             pip install -r requirements.txt
             python --version ; pip --version ; pwd ; ls
