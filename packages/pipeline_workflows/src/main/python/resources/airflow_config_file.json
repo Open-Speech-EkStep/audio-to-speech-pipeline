@@ -6,6 +6,14 @@
   "batchsize":"10800",
   "apibatchratio":{"google":3,"azure":2,"gtts":1},
   "sourceinfo" : {"brahmakumaris2": {"count":30, "format": "mp3"},"joshtalks2":{"count":2, "format": "mp4"},"youtube":{"count":1, "format": "mp4"},"iitspokentutorial2": {"count":7, "format": "mp4"}},
+  "snrcatalogue" : {"brahmakumaris2": {"count":30, "format": "mp3"},"joshtalks2":{"count":2, "format": "mp4"},"youtube":{"count":1, "format": "mp4"},"iitspokentutorial2": {"count":7, "format": "mp4"}},
+
+  "sourcepathforsnr" : "data/audiotospeech/raw/download/downloaded/hindi/audio/",
+  "errorlandingpathsnr" : "data/audiotospeech/raw/download/downloaded/hindi/audio/error/",
+  "tobeprocessedpathsnr" : "data/audiotospeech/raw/download/tobeprocessed/hindi/audio/",
+  "snrdonepath" : "data/audiotospeech/raw/download/snrdonepath/hindi/audio/",
+
+
   "sourcelandingpath" : "data/audiotospeech/raw/landing/hindi/audio/",
   "errorlandingpath" : "data/audiotospeech/raw/landing/hindi/audio/error/",
   "tobeprocessedpath" : "data/audiotospeech/raw/tobeprocessed/hindi/audio/",

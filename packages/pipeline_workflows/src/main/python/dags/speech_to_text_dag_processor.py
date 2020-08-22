@@ -11,7 +11,6 @@ from airflow.models import Variable
 def get_variables():
     global source_landing_path
     global error_landing_path
-    global error_landing_path
     global tobe_processed_path
     global bucket_name
     global meta_file_extention
