@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import pandas as pd
 import librosa
-from packages.ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger('Snr')
 

@@ -4,7 +4,7 @@ sys.path.insert(0, '../..')
 sys.path.insert(0, '../../...')
 
 from azure.cognitiveservices import speech
-from packages.ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger('AzureTranscriptionClient')
 

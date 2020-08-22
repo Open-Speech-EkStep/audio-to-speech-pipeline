@@ -12,7 +12,7 @@ import pickle
 from google.cloud import speech_v1
 from google.cloud.speech_v1 import enums
 
-from packages.ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger('GoogleTranscriptionClient')
 
