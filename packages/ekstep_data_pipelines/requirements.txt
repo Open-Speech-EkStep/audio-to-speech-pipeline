@@ -51,7 +51,7 @@ urllib3==1.25.9
 uuid~=1.30
 librosa
 pydub
-xz-devel
+# xz-devel
 python-backports-lzma
 backports.lzma
 pandas==1.1.0
