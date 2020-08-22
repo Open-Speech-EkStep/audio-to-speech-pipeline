@@ -52,8 +52,8 @@ uuid~=1.30
 librosa
 pydub
 # xz-devel
-python-backports-lzma
-backports.lzma
+# python-backports-lzma
+# backports.lzma
 pandas==1.1.0
 coverage
 flake8
