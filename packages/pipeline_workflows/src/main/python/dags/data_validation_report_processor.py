@@ -50,7 +50,7 @@ def generate_row(full_path, file_name, raw_file_name, source, audio_id, status):
 def generate_bucket_file_list(source):
     get_variables()
     all_blobs = list_blobs_in_a_path(bucket_name, processed_path + source)
-    output_file = open(source+bucket_file_list, "w")
+    output_file = open(source + bucket_file_list, "w")
     output_file.write(
         'bucket_file_path' + ',' + 'source' + ',' + 'audio_id' + ',' + 'raw_file_name' + ',' + 'utterances_files_list' + ',' + 'status')
     for blob in all_blobs:
@@ -90,7 +90,7 @@ def fetch_data_catalog(source, db_catalog_tbl, db_conn_obj):
 
 def fetch_bucket_list(source, bucket_file_list):
     generate_bucket_file_list(source)
-    data_bucket_raw = pd.read_csv(source+bucket_file_list)
+    data_bucket_raw = pd.read_csv(source + bucket_file_list)
     return data_bucket_raw
 
 
@@ -200,7 +200,7 @@ def generate_data_validation_report(source, data_catalog_raw, data_bucket_raw):
     writer.save()
 
 
-source = 'joshtalks'
+
 
 
 # generate_bucket_file_list(source)
@@ -211,6 +211,8 @@ def fetch_data(source):
     data_bucket_raw = fetch_bucket_list(source, bucket_file_list)
     return data_catalog_raw, data_bucket_raw
 
+
 if __name__ == "__main__":
+    source = 'joshtalks'
     data_catalog_raw, data_bucket_raw = fetch_data(source)
     generate_data_validation_report(source, data_catalog_raw, data_bucket_raw)
