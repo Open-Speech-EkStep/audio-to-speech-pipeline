@@ -29,6 +29,10 @@ class ChunkingConversionUtil:
 
         Logger.info(f'Files to be completed: {audio_paths}')
 
+        if len(audio_paths) < 1:
+            return None, False
+
+
         input_file_name = audio_paths[0]
         output_file_name = input_file_name.split('/')[-1].split('.')[0] + '.wav'
 
@@ -41,7 +45,7 @@ class ChunkingConversionUtil:
 
         if (os.path.exists(output_file_path) and os.path.isfile(output_file_path)):
             Logger.info(f'WAV file at {output_file_name} already exists, not doing anything')
-            return output_file_path
+            return output_file_path, True
 
         Logger.info(f'No file exists on {output_file_name}, running the command')
 
@@ -49,7 +53,7 @@ class ChunkingConversionUtil:
         subprocess.call(command, shell=True)
 
         Logger.info(f'No file exists on {output_file_name}, running the command')
-        return output_file_path
+        return output_file_path, True
 
     def create_audio_clips(self, aggressiveness, wav_file_path, dir_to_save_chunks, vad_output_file_path, base_chunk_name):
         audio, sample_rate = self.read_wave(wav_file_path)

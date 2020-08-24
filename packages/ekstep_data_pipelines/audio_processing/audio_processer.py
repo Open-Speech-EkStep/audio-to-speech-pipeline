@@ -67,6 +67,9 @@ class AudioProcessor:
         Logger.info(f'Conerting the file with audio_id {audio_id} to wav')
         local_converted_wav_file_path = self._convert_to_wav(local_audio_download_path, extension)
 
+        if not local_audio_download_path:
+            return
+
         Logger.info(f'Breaking {audio_id} at {local_converted_wav_file_path} file into chunks')
         chunk_output_path = self._break_files_into_chunks(audio_id, local_audio_download_path, local_converted_wav_file_path)
 
@@ -96,7 +99,12 @@ class AudioProcessor:
         self.ensure_path(local_output_directory)
         Logger.info(f'Output initialized to local path {local_output_directory}')
 
-        return self.chunking_processor.convert_to_wav(source_file_directory, output_dir=local_output_directory, ext=extension)
+        output_file_path, converted = self.chunking_processor.convert_to_wav(source_file_directory, output_dir=local_output_directory, ext=extension)
+
+        if not converted:
+            return None
+
+        return output_file_path
 
 
 
