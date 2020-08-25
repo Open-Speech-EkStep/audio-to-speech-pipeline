@@ -5,17 +5,21 @@ from google.cloud import storage
 from urllib.parse import urlparse
 from data_marker.data_marker import DataMarker
 from audio_processing.audio_processer import AudioProcessor
+from audio_transcription.audio_transcription import AudioTranscription
 from common.utils import get_logger
 from common import get_periperhals
+
+STT_CLIENT = ['google','azure']
 
 
 class ACTIONS:
     DATA_MARKING = 'data_marking'
     AUDIO_PROCESSING = 'audio_processing'
+    AUDIO_TRANSCRIPTION = 'audio_transcription'
 
 
 LOGGER = get_logger('EKSTEP_PROCESSOR')
-ACTIONS_LIST = [ACTIONS.DATA_MARKING, ACTIONS.AUDIO_PROCESSING]
+ACTIONS_LIST = [ACTIONS.DATA_MARKING, ACTIONS.AUDIO_PROCESSING,ACTIONS.AUDIO_TRANSCRIPTION]
 CONFIG_BUCKET = 'ekstepspeechrecognition-dev'
 
 parser = argparse.ArgumentParser(
@@ -39,6 +43,11 @@ parser.add_argument('-as', '--audio-source', dest='audio_source', default=None,
 
 parser.add_argument('-af', '--audio-format', dest='audio_format', default=None,
                    help='The format of the audio which is being processed eg mp4,mp3 . Only works with audio processor')
+
+parser.add_argument('-stt', '--speech-to-text',dest='speech_to_text_client',default=None,
+                    help='The client name which we want to call for stt')
+
+parser.add_argument('-aid', '--audio-id', dest='audio_id',default=None,help="audio id that need to processed")
 
 
 processor_args = parser.parse_args()
@@ -121,6 +130,30 @@ def validate_audio_processing_input(arguments):
 
     return {'audio_id_list': audio_ids, 'source': audio_source, 'extension': audio_format}
 
+def validate_audio_transcription_input(arguments):
+
+    if arguments.audio_id == None:
+        raise argparse.ArgumentTypeError(
+            f'Audio Id list missing. Please audio ID for processing'
+        )
+    
+    audio_id = arguments.audio_id
+
+    if arguments.speech_to_text_client not in STT_CLIENT:
+        raise argparse.ArgumentTypeError(
+            f'Stt client must be google or azure'
+        )
+
+    speech_to_text_client = arguments.speech_to_text_client
+
+    if arguments.audio_source is None:
+        raise argparse.ArgumentTypeError(
+            f'Audio Source missing. Please specify source for the source for the audio'
+        )
+
+    audio_source = arguments.audio_source
+
+    return {'audio_id': audio_id,"speech_to_text_client":speech_to_text_client,"audio_source":audio_source}
 
 
 def perform_action(arguments, **kwargs):
@@ -154,6 +187,18 @@ def perform_action(arguments, **kwargs):
 
         curr_processor = AudioProcessor.get_instance(data_processor, gcs_instance, audio_commons)
 
+    elif current_action == ACTIONS.AUDIO_TRANSCRIPTION:
+        kwargs.update(validate_audio_transcription_input(arguments))
+        LOGGER.info('Intializing audio processor marker with given config')
+        config_params = {'config_file_path': kwargs.get('config_file_path')}
+
+        object_dict = get_periperhals(config_params)
+
+        data_processor = object_dict.get('data_processor')
+        gcs_instance = object_dict.get('gsc_instance')
+        audio_commons = object_dict.get('audio_commons')
+
+        curr_processor = AudioTranscription.get_instance(data_processor, gcs_instance, audio_commons)
 
     LOGGER.info(f'Starting processing for {current_action}')
     curr_processor.process(**kwargs)
