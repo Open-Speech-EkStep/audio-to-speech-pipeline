@@ -11,10 +11,10 @@ LOGGER = get_logger('AzureTranscriptionClient')
 
 class AzureTranscriptionClient(object):
 
+    @staticmethod
     def get_instance( config_dict):
         azure_config_dict = config_dict.get('common', {}).get('azure_transcription_client', {})
         return AzureTranscriptionClient(**azure_config_dict)
-
 
     def __init__(self, **kwargs):
         self.speech_key = kwargs.get('speech_key')
@@ -26,14 +26,14 @@ class AzureTranscriptionClient(object):
         result = self.speech_to_text(source_file_path, language)
         return self.remove_punctation(result.text)
 
-    def remove_punctation(data_string):
+    def remove_punctation(self, data_string):
         punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~।'
         table = str.maketrans(dict.fromkeys(punctuation))
         return data_string.translate(table)
 
 
     def speech_to_text(self, audio_file_path, language):
-        audio_input = self.speech.audio.AudioConfig(filename=audio_file_path)
+        audio_input = speech.audio.AudioConfig(filename=audio_file_path)
 
         LOGGER.info(f'calling azure stt API for file: {audio_file_path}')
         speech_recognizer = speech.SpeechRecognizer(speech_config=self.speech_config, language=language,

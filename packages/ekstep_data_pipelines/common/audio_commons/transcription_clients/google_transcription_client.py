@@ -1,3 +1,7 @@
+from ekstep_data_pipelines.common.utils import get_logger
+from google.cloud.speech_v1 import enums
+from google.cloud import speech_v1
+import pickle
 import sys
 import os
 
@@ -7,13 +11,6 @@ sys.path.insert(0, '../..')
 sys.path.insert(0, '../../...')
 
 
-import pickle
-
-from google.cloud import speech_v1
-from google.cloud.speech_v1 import enums
-
-from ekstep_data_pipelines.common.utils import get_logger
-
 LOGGER = get_logger('GoogleTranscriptionClient')
 
 
@@ -21,13 +18,15 @@ class GoogleTranscriptionClient(object):
 
     @staticmethod
     def get_instance(config_dict):
-        google_config_dict = config_dict.get('common', {}).get('google_transcription_client', {})
+        google_config_dict = config_dict.get('common', {}).get(
+            'google_transcription_client', {})
         return GoogleTranscriptionClient(**google_config_dict)
 
     def __init__(self, **config_dict):
         self.language = config_dict.get('language', 'hi-IN')
         self.sample_rate = config_dict.get('sample_rate', 16000)
         self.channels = config_dict.get('audio_channel_count', 1)
+        self.bucket = config_dict.get('bucket')
         self._client = None
 
     def make_directories(self, path):
@@ -55,16 +54,20 @@ class GoogleTranscriptionClient(object):
         return self._client
 
     def generate_transcription(self, language, source_file_path):
-        content = self.call_speech_to_text(source_file_path, language)
-        transcriptions = list(map(lambda c: c.alternatives[0].transcript, content.results))
+        source_file_path = source_file_path.replace('/tmp/',f'gs://{self.bucket}/')
+        content = self.call_speech_to_text(source_file_path)
+        transcriptions = list(
+            map(lambda c: c.alternatives[0].transcript, content.results))
         return ' '.join(transcriptions)
 
     def call_speech_to_text(self, input_file_path):
 
         LOGGER.info(f'Queuing operation on GCP for {input_file_path}')
-        operation = self.client.long_running_recognize(self.config, {"uri": input_file_path})
+        operation = self.client.long_running_recognize(
+            self.config, {"uri": input_file_path})
 
-        LOGGER.info(f'Waiting for {operation} to complete on GCP for {input_file_path}')
+        LOGGER.info(
+            f'Waiting for {operation} to complete on GCP for {input_file_path}')
         response = operation.result()
 
         return response

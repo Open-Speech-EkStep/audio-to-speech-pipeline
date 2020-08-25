@@ -94,7 +94,7 @@ class CloudStorageOperations():
         else:
             print("Directory {} already exists".format(path))
 
-    def download_to_local(self, bucket_name, source_blob_name, destination, is_directory, exclude_extn=None):
+    def download_to_local(self, source_blob_name, destination, is_directory, exclude_extn=None):
         """Downloads a blob from the bucket."""
         # Provides options to download a file OR folder
         # Option 1: FILE mode: Download a file - copies a file with same name in destination folder
@@ -117,16 +117,16 @@ class CloudStorageOperations():
             print("Creating destination directories if not exists")
 
             self.make_directories(destination)
-            print("Fetching all blobs list from Bucket: {} and Source: {}".format(bucket_name, source_blob_name))
+            print("Fetching all blobs list from Bucket: {} and Source: {}".format(self.bucket, source_blob_name))
 
-            blobs = list(storage_client.list_blobs(bucket_name, prefix=source_blob_name))
+            blobs = list(storage_client.list_blobs(self.bucket, prefix=source_blob_name))
             print("Fetched all blobs list successfully")
             print("Will exclude {} extension file while copying to local destination".format(exclude_extn))
 
             for blob in blobs:
                 if ((not blob.name.endswith("/")) & (
                         not blob.name[blob.name.rfind("/") + 1:len(blob.name)].split(".")[1] == exclude_extn)):
-                    print("Downloading blob {}/{} to local directory: {}: ".format(bucket_name, blob.name, destination))
+                    print("Downloading blob {}/{} to local directory: {}: ".format(self.bucket, blob.name, destination))
                     blob.download_to_filename(destination + '/'+ blob.name.split('/')[-1])
                     print("Blob downloaded successfully: {}".format(blob.name))
         else:
@@ -138,13 +138,13 @@ class CloudStorageOperations():
             print("Creating destination directories if not exists")
             self.make_directories(destination_directory)
 
-            bucket = storage_client.bucket(bucket_name)
+            bucket = storage_client.bucket(self.bucket)
             src_blob = bucket.blob(source_blob_name)
 
             # Download the file
             print("Downloading file {} to destination: {}".format(source_blob_name, destination_directory))
             src_blob.download_to_filename(destination)
-            print("File {}/{} downloaded to destination directory {} successfully".format(bucket_name, source_blob_name,
+            print("File {}/{} downloaded to destination directory {} successfully".format(self.bucket, source_blob_name,
                                                                                           destination_directory))
 
     def upload_to_gcs(self, local_source_path, destination_blob_name, upload_directory=True):
@@ -308,3 +308,15 @@ class CloudStorageOperations():
             )
         )
         return source_blob
+
+    def delete_object(self,dir_path):
+    
+        bucket = self.client.bucket(self.bucket)
+        # blob = bucket.blob(f'{dir_path}')
+
+        all_file = self.list_blobs_in_a_path(dir_path)
+
+        for file in all_file:
+            blob = bucket.blob(file.name)
+            blob.delete()
+            print("Blob {} deleted.".format(file.name))

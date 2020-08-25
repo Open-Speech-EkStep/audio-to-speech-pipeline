@@ -59,5 +59,14 @@ config:
       local_input_file_path: ''
       local_output_file_path: ''
 
+  audio_transcription_config:
+    # defaults to hi-IN
+    language: ''
+
+    # path of the files on gcs which need to be processed for stt
+    remote_clean_audio_file_path: ''
+
+    # path where the processed files need to be uploaded
+    remote_stt_audio_file_path: ''
 
 
