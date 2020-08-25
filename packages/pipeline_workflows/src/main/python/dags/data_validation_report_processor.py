@@ -6,8 +6,6 @@ from gcs_utils import list_blobs_in_a_path, copy_blob, check_blob, \
     move_blob, upload_blob, read_blob, move_directory
 # from airflow.models import Variable
 import pandas as pd
-import numpy as np
-import seaborn as sns
 import ast
 from sqlalchemy import create_engine
 from datetime import datetime
@@ -19,9 +17,15 @@ def get_variables():
     global bucket_file_list
     global db_conn_string
     global db_catalog_tbl
+    global report_file_name
+    global report_upload_path
     # processed_path = Variable.get("rawprocessedpath")
     # bucket_name = Variable.get("bucket")
+    now = datetime.now()
+    date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
+    report_file_name = f'Data_validation_report_{source}_{date_time}.xlsx'
     bucket_name = 'ekstepspeechrecognition-dev'
+    report_upload_path = 'data/audiotospeech/integration/processed/hindi/reports/data_validation_report/'
     processed_path = 'data/audiotospeech/integration/processed/hindi/audio/'
     bucket_file_list = '_bucket_file_list.csv'
     db_conn_string = ''
@@ -134,29 +138,37 @@ def get_invalid_utterance_duration(bucket_list_in_catalog):
         'raw_file_name')
 
 
+def append_file_and_duration(valid_utterance_duration):
+    valid_utterance_duration['utterances_files_list'] = valid_utterance_duration[
+        ['utterances_files_list', 'utterances_file_duration']].apply(lambda x: x[0] + ':' + str(x[1]), axis=1)
+    return valid_utterance_duration
+
+
 def get_valid_utterance_duration_unexploded(bucket_list_in_catalog):
     valid_utterance_duration = bucket_list_in_catalog[
         bucket_list_in_catalog.utterances_file_duration.between(.5, 15)].sort_values(
         'raw_file_name')
+    valid_utterance_duration = append_file_and_duration(valid_utterance_duration)
+
     return valid_utterance_duration.groupby('audio_id', as_index=False).agg(
         {'utterances_file_duration': lambda x: x.sum() / 60,
          'utterances_files_list': lambda tdf: tdf.tolist()})
 
 
-def get_duplicates_utterances(bucket_list_in_catalog_unexploded):
-    return bucket_list_in_catalog_unexploded[
-        bucket_list_in_catalog_unexploded.duplicated(subset=['raw_file_name'], keep=False)].sort_values(
+def get_duplicates_utterances(data_catalog_raw):
+    return data_catalog_raw[
+        data_catalog_raw.duplicated(subset=['raw_file_name'], keep=False)].sort_values(
         by='raw_file_name')
 
 
-def get_unique_utterances(bucket_list_in_catalog_unexploded):
-    return bucket_list_in_catalog_unexploded[~bucket_list_in_catalog_unexploded.duplicated(subset=['raw_file_name'])]
+def get_unique_utterances(data_catalog_raw):
+    return data_catalog_raw[~data_catalog_raw.duplicated(subset=['raw_file_name'])]
 
 
 def get_valid_and_unique_utterances(df_catalog_unique, df_catalog_valid_utterance_duration_unexploded):
-    df_valid_utterances_with_unique_audioid = df_catalog_unique.merge(df_catalog_valid_utterance_duration_unexploded,
-                                                                      on='audio_id',
-                                                                      suffixes=('', '_y'))
+    df_valid_utterances_with_unique_audioid = df_catalog_valid_utterance_duration_unexploded.merge(df_catalog_unique,
+                                                                                                   on='audio_id',
+                                                                                                   suffixes=('', '_y'))
     df_valid_utterances_with_unique_audioid['cleaned_duration'] = df_valid_utterances_with_unique_audioid[
         'utterances_file_duration']
 
@@ -172,35 +184,31 @@ def get_valid_and_unique_utterances(df_catalog_unique, df_catalog_valid_utteranc
 #                                   on='audio_id')
 #
 
-def generate_data_validation_report(source, data_catalog_raw, data_bucket_raw):
+def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
+    get_variables()
     data_catalog_exploded = explode_utterances(data_catalog_raw)
-    # print(data_catalog_exploded.head())
     bucket_list_not_in_catalog = get_bucket_list_not_in_catalog(data_catalog_exploded, data_bucket_raw)
     catalog_list_not_in_bucket = get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw)
     bucket_list_in_catalog = get_bucket_list_in_catalog(data_catalog_exploded, data_bucket_raw)
+    bucket_list_in_catalog_cleaned = bucket_list_in_catalog[bucket_list_in_catalog.status == 'clean']
     catalog_list_with_rejected_status = bucket_list_in_catalog[bucket_list_in_catalog.status == 'rejected']
-
     df_catalog_invalid_utterance_duration = get_invalid_utterance_duration(bucket_list_in_catalog)
-    df_catalog_valid_utterance_duration_unexploded = get_valid_utterance_duration_unexploded(bucket_list_in_catalog)
+    df_catalog_valid_utterance_duration_unexploded = get_valid_utterance_duration_unexploded(
+        bucket_list_in_catalog_cleaned)
     df_catalog_duplicates = get_duplicates_utterances(data_catalog_raw)
     df_catalog_unique = get_unique_utterances(data_catalog_raw)
 
     df_valid_utterances_with_unique_audioid = get_valid_and_unique_utterances(df_catalog_unique,
                                                                               df_catalog_valid_utterance_duration_unexploded)
-
-    now = datetime.now()
-    date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-    writer = pd.ExcelWriter(f'Data_validation_report_{source}_{date_time}.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter(report_file_name, engine='xlsxwriter')
     bucket_list_not_in_catalog.to_excel(writer, sheet_name='bucket_list_not_in_catalog', index=False)
     catalog_list_not_in_bucket.to_excel(writer, sheet_name='catalog_list_not_in_bucket', index=False)
+    bucket_list_in_catalog.to_excel(writer, sheet_name='catalog_list_in_bucket', index=False)
     catalog_list_with_rejected_status.to_excel(writer, sheet_name='catalog_list_rejected_ones', index=False)
     df_catalog_invalid_utterance_duration.to_excel(writer, sheet_name='catalog_list_invalid_duration', index=False)
     df_catalog_duplicates.to_excel(writer, sheet_name='catalog_list_with_duplicates', index=False)
     df_valid_utterances_with_unique_audioid.to_excel(writer, sheet_name='Cleaned_data_catalog', index=False)
     writer.save()
-
-
-
 
 
 # generate_bucket_file_list(source)
@@ -212,7 +220,13 @@ def fetch_data(source):
     return data_catalog_raw, data_bucket_raw
 
 
-if __name__ == "__main__":
+def upload_report_to_bucket():
+    get_variables()
+    upload_blob(bucket_name, report_file_name, report_upload_path + report_file_name)
+    os.remove(report_file_name)
+
+
+def report_generation_pipeline():
     source = 'joshtalks'
     data_catalog_raw, data_bucket_raw = fetch_data(source)
     generate_data_validation_report(source, data_catalog_raw, data_bucket_raw)
