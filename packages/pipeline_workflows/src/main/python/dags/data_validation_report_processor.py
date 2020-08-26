@@ -23,7 +23,7 @@ def get_variables():
     # bucket_name = Variable.get("bucket")
     now = datetime.now()
     date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-    report_file_name = f'Data_validation_report_{source}_{date_time}.xlsx'
+    report_file_name = f'Data_validation_report_{date_time}.xlsx'
     bucket_name = 'ekstepspeechrecognition-dev'
     report_upload_path = 'data/audiotospeech/integration/processed/hindi/reports/data_validation_report/'
     processed_path = 'data/audiotospeech/integration/processed/hindi/audio/'
@@ -52,7 +52,7 @@ def generate_row(full_path, file_name, raw_file_name, source, audio_id, status):
 
 
 def generate_bucket_file_list(source):
-    get_variables()
+    # get_variables()
     all_blobs = list_blobs_in_a_path(bucket_name, processed_path + source)
     output_file = open(source + bucket_file_list, "w")
     output_file.write(
@@ -185,7 +185,8 @@ def get_valid_and_unique_utterances(df_catalog_unique, df_catalog_valid_utteranc
 #
 
 def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
-    get_variables()
+    print("Generate reports...")
+    # get_variables()
     data_catalog_exploded = explode_utterances(data_catalog_raw)
     bucket_list_not_in_catalog = get_bucket_list_not_in_catalog(data_catalog_exploded, data_bucket_raw)
     catalog_list_not_in_bucket = get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw)
@@ -209,11 +210,13 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     df_catalog_duplicates.to_excel(writer, sheet_name='catalog_list_with_duplicates', index=False)
     df_valid_utterances_with_unique_audioid.to_excel(writer, sheet_name='Cleaned_data_catalog', index=False)
     writer.save()
+    print(f"{report_file_name} has been generated....")
 
 
 # generate_bucket_file_list(source)
 def fetch_data(source):
-    get_variables()
+    # get_variables()
+    print("Pulling data from bucket and catalog...")
     db_conn_obj = get_db_connection(db_conn_string)
     data_catalog_raw = fetch_data_catalog(source, db_catalog_tbl, db_conn_obj)
     data_bucket_raw = fetch_bucket_list(source, bucket_file_list)
@@ -221,12 +224,15 @@ def fetch_data(source):
 
 
 def upload_report_to_bucket():
-    get_variables()
+    # get_variables()
+    print("Uploading report to bucket ...")
     upload_blob(bucket_name, report_file_name, report_upload_path + report_file_name)
     os.remove(report_file_name)
 
 
 def report_generation_pipeline():
+    get_variables()
     source = 'joshtalks'
     data_catalog_raw, data_bucket_raw = fetch_data(source)
-    generate_data_validation_report(source, data_catalog_raw, data_bucket_raw)
+    generate_data_validation_report(data_catalog_raw, data_bucket_raw)
+    upload_report_to_bucket()
