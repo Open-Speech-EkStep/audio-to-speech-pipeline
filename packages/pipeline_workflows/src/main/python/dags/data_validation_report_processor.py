@@ -2,35 +2,33 @@ import datetime
 import json
 import os
 
-from gcs_utils import list_blobs_in_a_path, copy_blob, check_blob, \
-    move_blob, upload_blob, read_blob, move_directory
-# from airflow.models import Variable
+from gcs_utils import list_blobs_in_a_path, upload_blob, download_blob
+from airflow.models import Variable
 import pandas as pd
 import ast
 from sqlalchemy import create_engine
 from datetime import datetime
-
+import yaml
 
 def get_variables():
     global bucket_name
-    global processed_path
+    global integration_processed_path
     global bucket_file_list
-    global db_conn_string
     global db_catalog_tbl
     global report_file_name
     global report_upload_path
+    global validation_report_source
     # processed_path = Variable.get("rawprocessedpath")
     # bucket_name = Variable.get("bucket")
     now = datetime.now()
     date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-    report_file_name = f'Data_validation_report_{date_time}.xlsx'
-    bucket_name = 'ekstepspeechrecognition-dev'
-    report_upload_path = 'data/audiotospeech/integration/processed/hindi/reports/data_validation_report/'
-    processed_path = 'data/audiotospeech/integration/processed/hindi/audio/'
+    bucket_name = Variable.get("bucket")
+    report_upload_path = Variable.get("report_upload_path")
+    integration_processed_path = Variable.get("integrationprocessedpath")
     bucket_file_list = '_bucket_file_list.csv'
-    db_conn_string = ''
     db_catalog_tbl = 'media_metadata_staging'
-
+    validation_report_source = Variable.get("validation_report_source")
+    report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
 
 def get_prefix_split_length(full_path):
     full_path_split_list = full_path.split('/')
@@ -53,7 +51,7 @@ def generate_row(full_path, file_name, raw_file_name, source, audio_id, status):
 
 def generate_bucket_file_list(source):
     # get_variables()
-    all_blobs = list_blobs_in_a_path(bucket_name, processed_path + source)
+    all_blobs = list_blobs_in_a_path(bucket_name, integration_processed_path + source)
     output_file = open(source + bucket_file_list, "w")
     output_file.write(
         'bucket_file_path' + ',' + 'source' + ',' + 'audio_id' + ',' + 'raw_file_name' + ',' + 'utterances_files_list' + ',' + 'status')
@@ -70,10 +68,6 @@ def generate_bucket_file_list(source):
     output_file.close()
 
 
-def get_db_connection(db_conn_string):
-    alchemy_engine = create_engine(db_conn_string)
-    print("Connection created")
-    return alchemy_engine.connect()
 
 
 def cleanse_catalog(data_catalog_raw):
@@ -214,10 +208,9 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
 
 
 # generate_bucket_file_list(source)
-def fetch_data(source):
+def fetch_data(source,db_conn_obj):
     # get_variables()
     print("Pulling data from bucket and catalog...")
-    db_conn_obj = get_db_connection(db_conn_string)
     data_catalog_raw = fetch_data_catalog(source, db_catalog_tbl, db_conn_obj)
     data_bucket_raw = fetch_bucket_list(source, bucket_file_list)
     return data_catalog_raw, data_bucket_raw
@@ -230,9 +223,35 @@ def upload_report_to_bucket():
     os.remove(report_file_name)
 
 
+def __load_yaml_file(path):
+    read_dict = {}
+    with open(path, 'r') as file:
+        read_dict = yaml.safe_load(file)
+    return read_dict
+
+
+def create_db_engine(config_local_path):
+    config_file = __load_yaml_file(config_local_path)
+    db_configuration = config_file['db_configuration']
+    db_name = db_configuration['db_name']
+    db_user = db_configuration['db_user']
+    db_pass = db_configuration['db_pass']
+    cloud_sql_connection_name = db_configuration['cloud_sql_connection_name']
+    db = create_engine(
+        f'postgresql://{db_user}:{db_pass}@{cloud_sql_connection_name}/{db_name}')
+    return db
+
+
+def get_db_connection_object():
+    config_path = "./config.yaml"
+    download_blob("ekstepspeechrecognition-dev", "data/audiotospeech/config/downloaded_data_cataloguer/config.yaml",
+                  config_path)
+    return create_db_engine(config_path)
+
+
 def report_generation_pipeline():
     get_variables()
-    source = 'joshtalks'
-    data_catalog_raw, data_bucket_raw = fetch_data(source)
+    source = validation_report_source
+    data_catalog_raw, data_bucket_raw = fetch_data(source,get_db_connection_object())
     generate_data_validation_report(data_catalog_raw, data_bucket_raw)
     upload_report_to_bucket()
