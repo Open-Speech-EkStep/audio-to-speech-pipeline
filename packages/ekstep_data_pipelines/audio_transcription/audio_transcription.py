@@ -55,17 +55,19 @@ class AudioTranscription:
             f.write(transcription)
 
     def call_stt(self, all_path, language, transcription_client):
-        
         for file_path in all_path:
-            LOCAL_PATH = f"/tmp/{file_path.name}"
-            transcription_file_name = LOCAL_PATH.replace('.wav','.txt')
-            self.gcs_instance.download_to_local(
-                file_path.name,LOCAL_PATH, False)
-            
-            transcript = transcription_client.generate_transcription(
-                language, LOCAL_PATH)
 
-            self.save_transcription(transcript, transcription_file_name)
+            if ".wav" in file_path.name:
+
+                LOCAL_PATH = f"/tmp/{file_path.name}"
+                transcription_file_name = LOCAL_PATH.replace('.wav','.txt')
+                self.gcs_instance.download_to_local(
+                    file_path.name,LOCAL_PATH, False)
+
+                transcript = transcription_client.generate_transcription(
+                    language, LOCAL_PATH)
+
+                self.save_transcription(transcript, transcription_file_name)
         return LOCAL_PATH
 
     def get_local_dir_path(self,local_file_path):
