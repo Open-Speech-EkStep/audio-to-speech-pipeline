@@ -244,7 +244,7 @@ def create_db_engine(config_local_path):
 
 def get_db_connection_object():
     config_path = "./config.yaml"
-    download_blob("ekstepspeechrecognition-dev", "data/audiotospeech/config/downloaded_data_cataloguer/config.yaml",
+    download_blob(bucket_name, "data/audiotospeech/config/downloaded_data_cataloguer/config.yaml",
                   config_path)
     return create_db_engine(config_path)
 
