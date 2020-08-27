@@ -42,7 +42,7 @@ class AudioTranscription:
 
         self.move_to_gcs(local_dir_path, remote_stt_output_path)
 
-        self.delete_audio_id(remote_dir_path_for_given_audio_id)
+        self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
 
 
     def delete_audio_id(self,remote_dir_path_for_given_audio_id):

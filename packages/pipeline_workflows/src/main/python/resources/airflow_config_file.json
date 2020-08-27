@@ -5,13 +5,14 @@
   "inputtobeprocesspath":"/data/integration/ttsapi/tobeprocessed/hindi/",
   "batchsize":"10800",
   "apibatchratio":{"google":3,"azure":2,"gtts":1},
-  "sourceinfo" : {"brahmakumaris2": {"count":30, "format": "mp3"},"joshtalks2":{"count":2, "format": "mp4"},"youtube":{"count":1, "format": "mp4"},"iitspokentutorial2": {"count":7, "format": "mp4"}},
+  "sourceinfo" : {"brahmakumaris2": {"count":30}},
   "snrcatalogue" : {"brahmakumaris2": {"count":30, "format": "mp3"},"joshtalks2":{"count":2, "format": "mp4"},"youtube":{"count":1, "format": "mp4"},"iitspokentutorial2": {"count":7, "format": "mp4"}},
 
   "sourcepathforsnr" : "data/audiotospeech/raw/download/downloaded/hindi/audio/",
   "errorlandingpathsnr" : "data/audiotospeech/raw/download/downloaded/hindi/audio/error/",
   "tobeprocessedpathsnr" : "data/audiotospeech/raw/download/tobeprocessed/hindi/audio/",
   "snrdonepath" : "data/audiotospeech/raw/download/snrdonepath/hindi/audio/",
+  "sttsourcepath":"data/audiotospeech/raw/download/catalogued/hindi/audio/",
 
 
   "sourcelandingpath" : "data/audiotospeech/raw/landing/hindi/audio/",
@@ -28,6 +29,7 @@
   "archiveutterancespath" : "data/experiments/archive/",
   "sttconfigpath" : "data/audiotospeech/config/speechtotext/config.yaml",
   "audiofileids" : {"brahmakumaris2": [], "joshtalks2": [], "youtube": [],"iitspokentutorial2": []},
+  "audioidsforstt" : {"brahmakumaris2": [], "joshtalks2": [], "youtube": [],"iitspokentutorial2": []},
   "apivoice":{"google":["voice1","voice2","voice3"],"azure":["voice1","voice2"],"gtts":["voice1"]}}
 
   

@@ -320,3 +320,22 @@ class CloudStorageOperations():
             blob = bucket.blob(file.name)
             blob.delete()
             print("Blob {} deleted.".format(file.name))
+
+
+    def download_blob(self, source_blob_name, destination_file_name):
+        # """Downloads a blob from the bucket."""
+        # bucket_name = "your-bucket-name"
+        # source_blob_name = "storage-object-name"
+        # destination_file_name = "local/path/to/file"
+
+        storage_client = storage.Client()
+
+        bucket = storage_client.bucket(self.bucket)
+        blob = bucket.blob(source_blob_name)
+        blob.download_to_filename(destination_file_name)
+
+        print(
+            "Blob {} from Bucket {} downloaded to {}.".format(
+                source_blob_name, self.bucket, destination_file_name
+            )
+        )
