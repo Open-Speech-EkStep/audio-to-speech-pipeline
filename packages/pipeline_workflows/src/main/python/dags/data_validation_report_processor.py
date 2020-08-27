@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from datetime import datetime
 import yaml
 
+
 def get_variables():
     global bucket_name
     global integration_processed_path
@@ -18,8 +19,6 @@ def get_variables():
     global report_file_name
     global report_upload_path
     global validation_report_source
-    # processed_path = Variable.get("rawprocessedpath")
-    # bucket_name = Variable.get("bucket")
     now = datetime.now()
     date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
     bucket_name = Variable.get("bucket")
@@ -30,14 +29,19 @@ def get_variables():
     validation_report_source = Variable.get("validation_report_source")
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
 
+
 def get_prefix_split_length(full_path):
+    full_path = str(full_path).replace(",", "")
     full_path_split_list = full_path.split('/')
     return len(full_path_split_list), full_path_split_list
 
 
 def get_file_attributes(full_path_split_list):
     file_name = full_path_split_list[-1]
-    raw_file_name = file_name.split('_', 1)[1].split('.')[0]
+    try:
+        raw_file_name = file_name.split('_', 1)[1].split('.')[0]
+    except:
+        raw_file_name = "NA"
     source = full_path_split_list[6]
     audio_id = full_path_split_list[7]
     status = full_path_split_list[8]
@@ -57,17 +61,19 @@ def generate_bucket_file_list(source):
         'bucket_file_path' + ',' + 'source' + ',' + 'audio_id' + ',' + 'raw_file_name' + ',' + 'utterances_files_list' + ',' + 'status')
     for blob in all_blobs:
         full_path = blob.name
-        if 'wav' in full_path:
-            prefix_length, full_path_split_list = get_prefix_split_length(full_path)
-            if prefix_length == 10:
-                file_name, raw_file_name, source, audio_id, status = get_file_attributes(full_path_split_list)
-                row = generate_row(full_path, file_name, raw_file_name, source, audio_id, status)
-                output_file.write("\n")
-                output_file.write(row)
+        try:
+            if 'wav' in full_path:
+                prefix_length, full_path_split_list = get_prefix_split_length(full_path)
+                if prefix_length == 10:
+                    full_path = str(full_path).replace(",", "")
+                    file_name, raw_file_name, source, audio_id, status = get_file_attributes(full_path_split_list)
+                    row = generate_row(full_path, file_name, raw_file_name, source, audio_id, status)
+                    output_file.write("\n")
+                    output_file.write(row)
+        except:
+            print(f"Failed at {full_path}")
     print("Bucket list has been generated")
     output_file.close()
-
-
 
 
 def cleanse_catalog(data_catalog_raw):
@@ -88,7 +94,9 @@ def fetch_data_catalog(source, db_catalog_tbl, db_conn_obj):
 
 def fetch_bucket_list(source, bucket_file_list):
     generate_bucket_file_list(source)
-    data_bucket_raw = pd.read_csv(source + bucket_file_list)
+    data_bucket_raw = pd.read_csv(source + bucket_file_list, low_memory=False)
+    data_bucket_raw["audio_id"] = data_bucket_raw["audio_id"].astype("float64")
+    data_bucket_raw["audio_id"] = data_bucket_raw["audio_id"].astype("int64")
     return data_bucket_raw
 
 
@@ -208,7 +216,7 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
 
 
 # generate_bucket_file_list(source)
-def fetch_data(source,db_conn_obj):
+def fetch_data(source, db_conn_obj):
     # get_variables()
     print("Pulling data from bucket and catalog...")
     data_catalog_raw = fetch_data_catalog(source, db_catalog_tbl, db_conn_obj)
@@ -252,6 +260,6 @@ def get_db_connection_object():
 def report_generation_pipeline():
     get_variables()
     source = validation_report_source
-    data_catalog_raw, data_bucket_raw = fetch_data(source,get_db_connection_object())
+    data_catalog_raw, data_bucket_raw = fetch_data(source, get_db_connection_object())
     generate_data_validation_report(data_catalog_raw, data_bucket_raw)
     upload_report_to_bucket()
