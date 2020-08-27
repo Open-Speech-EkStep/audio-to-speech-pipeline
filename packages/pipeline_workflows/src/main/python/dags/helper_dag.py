@@ -8,6 +8,8 @@ from gcs_utils import list_blobs_in_a_path, copy_blob, check_blob, \
 from airflow.models import Variable
 
 snr_done_path = Variable.get("snrdonepath")
+stt_input_dir_path = Variable.get("snrdonepath")
+bucket_name = Variable.get("bucket")
 
 
 def get_variables():
@@ -180,6 +182,27 @@ def get_audio_ids(source, tobe_processed_path, **kwargs):
         audio_file_ids[source] = []
         audio_file_ids = mydict(audio_file_ids)
         Variable.set("audiofileids", audio_file_ids)
+
+def get_require_audio_id(source,stt_source_path,batch_count):
+
+    audio_ids = json.loads(Variable.get("audioidsforstt"))
+
+    source_dir_path = f'{stt_source_path}{source}'
+    all_audio_id_path = list_blobs_in_a_path(bucket_name,source_dir_path)
+    audio_id_list = []
+    for blob in all_audio_id_path:
+
+        if batch_count > 0:
+            if ".wav" in blob.name:
+                audio_id = blob.name.split('/')[-3]
+    
+                audio_id_list.append(audio_id)
+                batch_count = batch_count - 1
+        else:
+            break
+    audio_ids[source] = list(set(audio_id_list))
+
+    Variable.set("audioidsforstt", mydict(audio_ids))
 
 
 def move_raw_to_processed(source, batch_audio_file_ids, tobe_processed_path, **kwargs):
