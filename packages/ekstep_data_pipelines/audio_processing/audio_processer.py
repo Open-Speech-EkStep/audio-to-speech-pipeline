@@ -68,7 +68,7 @@ class AudioProcessor:
 
         Logger.info(
             f'Downloading audio file from {remote_download_path} to {local_audio_download_path}')
-        self.gcs_instance.download_to_local(self.gcs_instance.bucket, remote_download_path,
+        self.gcs_instance.download_to_local(remote_download_path,
                                             local_audio_download_path, True)
 
         meta_data_file_path = self._get_csv_in_path(local_audio_download_path)
@@ -110,10 +110,9 @@ class AudioProcessor:
         meta_data_done_path = f'{self.audio_processor_config.get(MASTER_META_DATA_DONE_FILE_PATH)}/{source}'
 
         local_metadata_downloaded_path = '/tmp/master_csv'
-        self.ensure_path(local_metadata_downloaded_path)
 
         self.gcs_instance.download_blob(
-            master_metadat_file_path, local_metadata_downloaded_path, False)
+            master_metadat_file_path, local_metadata_downloaded_path)
         self.upload_file_to_downloaded_source(local_metadata_downloaded_path)
 
         self.gcs_instance.move_blob(master_metadat_file_path, meta_data_done_path)
