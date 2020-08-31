@@ -189,18 +189,19 @@ def get_require_audio_id(source,stt_source_path,batch_count):
 
     source_dir_path = f'{stt_source_path}{source}'
     all_audio_id_path = list_blobs_in_a_path(bucket_name,source_dir_path)
-    audio_id_list = []
+    audio_id_list = set()
     for blob in all_audio_id_path:
 
         if batch_count > 0:
             if ".wav" in blob.name:
                 audio_id = blob.name.split('/')[-3]
-    
-                audio_id_list.append(audio_id)
-                batch_count = batch_count - 1
+
+                if audio_id not in audio_id_list:
+                    audio_id_list.add(audio_id)
+                    batch_count = batch_count - 1
         else:
             break
-    audio_ids[source] = list(set(audio_id_list))
+    audio_ids[source] = list(audio_id_list)
 
     Variable.set("audioidsforstt", mydict(audio_ids))
 
