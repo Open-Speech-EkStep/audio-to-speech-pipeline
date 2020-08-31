@@ -1,5 +1,5 @@
 from audio_transcription.constants import CONFIG_NAME, CLEAN_AUDIO_PATH, LANGUAGE
-
+from audio_transcription.transcription_sanitizer import TranscriptSanitizer
 
 class AudioTranscription:
 
@@ -67,7 +67,10 @@ class AudioTranscription:
 
                 transcript = transcription_client.generate_transcription(
                     language, LOCAL_PATH)
-
+                original_transcript = transcript
+                transcript = TranscriptSanitizer().sanitize(transcript)
+                if original_transcript != transcript:
+                    self.save_transcription(original_transcript, 'original_'+transcription_file_name)
                 self.save_transcription(transcript, transcription_file_name)
         return LOCAL_PATH
 
