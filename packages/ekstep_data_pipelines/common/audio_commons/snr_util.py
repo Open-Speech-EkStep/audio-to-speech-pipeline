@@ -1,4 +1,7 @@
 import sys
+
+from ekstep_data_pipelines.audio_duration import calculate_duration
+
 sys.path.insert(0, '..')
 sys.path.insert(0, '../..')
 
@@ -46,10 +49,6 @@ class SNR:
                 os.makedirs(rejected_path)
 
         return clean_path, rejected_path
-
-    def get_clip_duration(self, file_path):
-        y, sr = librosa.load(file_path)
-        return librosa.get_duration(y)
 
     def move_file_locally(self, source, destination):
         shutil.move(source, destination)
@@ -117,7 +116,7 @@ class SNR:
                     {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High-SNR', 'snr_threshold': threshold})
                 continue
 
-            clip_duration = self.get_clip_duration(file_path)
+            clip_duration = calculate_duration(file_path)
 
             if(clip_duration > SNR.MAX_DURATION):
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
