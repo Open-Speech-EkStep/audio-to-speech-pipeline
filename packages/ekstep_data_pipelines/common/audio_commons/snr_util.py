@@ -1,6 +1,6 @@
 import sys
 
-from ekstep_data_pipelines.audio_duration import calculate_duration
+from ekstep_data_pipelines.audio_processing.audio_duration import calculate_duration
 
 sys.path.insert(0, '..')
 sys.path.insert(0, '../..')
