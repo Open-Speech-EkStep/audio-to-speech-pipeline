@@ -1,8 +1,9 @@
 from audio_transcription.constants import CONFIG_NAME, CLEAN_AUDIO_PATH, LANGUAGE
 from audio_transcription.transcription_sanitizer import TranscriptionSanitizer
+import os
+
 
 class AudioTranscription:
-
     LOCAL_PATH = None
 
     @staticmethod
@@ -44,8 +45,7 @@ class AudioTranscription:
 
         self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
 
-
-    def delete_audio_id(self,remote_dir_path_for_given_audio_id):
+    def delete_audio_id(self, remote_dir_path_for_given_audio_id):
         self.gcs_instance.delete_object(remote_dir_path_for_given_audio_id)
 
     def move_to_gcs(self, local_path, remote_stt_output_path):
@@ -61,20 +61,32 @@ class AudioTranscription:
             if ".wav" in file_path.name:
 
                 LOCAL_PATH = f"/tmp/{file_path.name}"
-                transcription_file_name = LOCAL_PATH.replace('.wav','.txt')
+                transcription_file_name = LOCAL_PATH.replace('.wav', '.txt')
                 self.gcs_instance.download_to_local(
-                    file_path.name,LOCAL_PATH, False)
+                    file_path.name, LOCAL_PATH, False)
 
                 transcript = transcription_client.generate_transcription(
                     language, LOCAL_PATH)
                 original_transcript = transcript
-                transcript = TranscriptionSanitizer().sanitize(transcript)
-                if original_transcript != transcript:
-                    self.save_transcription(original_transcript, 'original_'+transcription_file_name)
-                self.save_transcription(transcript, transcription_file_name)
+                try:
+                    transcript = TranscriptionSanitizer().sanitize(transcript)
+
+                    if original_transcript != transcript:
+                        self.save_transcription(original_transcript, 'original_' + transcription_file_name)
+                    self.save_transcription(transcript, transcription_file_name)
+
+                except RuntimeError as e:
+                    print('STT API call failed: ' + str(e))
+                    rejected_dir = '/tmp/rejected'
+                    if not os.path.exists(rejected_dir):
+                        os.makedirs(rejected_dir)
+                    command = f'mv {LOCAL_PATH} {rejected_dir}'
+                    print(f'moving bad wav file: {LOCAL_PATH} to rejected folder: {rejected_dir}')
+                    os.system(command)
+
         return LOCAL_PATH
 
-    def get_local_dir_path(self,local_file_path):
+    def get_local_dir_path(self, local_file_path):
         path_array = local_file_path.split('/')
         path_array.pop()
         return '/'.join(path_array)
