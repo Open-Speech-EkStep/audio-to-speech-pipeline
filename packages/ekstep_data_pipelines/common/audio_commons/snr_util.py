@@ -3,6 +3,7 @@ sys.path.insert(0, '..')
 sys.path.insert(0, '../..')
 
 import os
+import json
 import shutil
 import subprocess
 import pandas as pd
@@ -112,6 +113,8 @@ class SNR:
             if snr_value < threshold:
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
                 metadata.to_csv(metadata_file_name, index=False)
+                list_file_utterances_with_duration.append(
+                    {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High-SNR', 'snr_threshold': threshold})
                 continue
 
             clip_duration = self.get_clip_duration(file_path)
@@ -119,13 +122,16 @@ class SNR:
             if(clip_duration > SNR.MAX_DURATION):
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
                 metadata.to_csv(metadata_file_name, index=False)
+                list_file_utterances_with_duration.append(
+                    {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High Audio Duration', 'max_duration': SNR.MAX_DURATION})
                 continue
 
             clean_audio_duration.append(clip_duration)
             self.move_file_locally(file_path, f'{clean_dir_path}/{audio_file_name}')
-            list_file_utterances_with_duration.append(audio_file_name + ":" + str(clip_duration))
+            list_file_utterances_with_duration.append({'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Clean'})
+
 
             metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60),2)
-            metadata['utterances_files_list'] = str(list_file_utterances_with_duration)
-            metadata.to_csv(metadata_file_name,index=False)
+            metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)
+            metadata.to_csv(metadata_file_name, index=False)
 
