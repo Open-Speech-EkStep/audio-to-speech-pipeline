@@ -47,9 +47,6 @@ parser.add_argument('-af', '--audio-format', dest='audio_format', default=None,
 parser.add_argument('-stt', '--speech-to-text',dest='speech_to_text_client',default=None,
                     help='The client name which we want to call for stt')
 
-parser.add_argument('-aid', '--audio-id', dest='audio_id',default=None,help="audio id that need to processed")
-
-
 processor_args = parser.parse_args()
 
 
@@ -132,12 +129,12 @@ def validate_audio_processing_input(arguments):
 
 def validate_audio_transcription_input(arguments):
 
-    if arguments.audio_id == None:
+    if arguments.audio_ids == []:
         raise argparse.ArgumentTypeError(
             f'Audio Id list missing. Please audio ID for processing'
         )
-    
-    audio_id = arguments.audio_id
+
+    audio_ids = [i.strip() for i in list(filter(None, arguments.audio_ids.split(',')))]
 
     if arguments.speech_to_text_client not in STT_CLIENT:
         raise argparse.ArgumentTypeError(
@@ -153,7 +150,7 @@ def validate_audio_transcription_input(arguments):
 
     audio_source = arguments.audio_source
 
-    return {'audio_id': audio_id,"speech_to_text_client":speech_to_text_client,"audio_source":audio_source}
+    return {'audio_ids': audio_ids,"speech_to_text_client":speech_to_text_client,"audio_source":audio_source}
 
 
 def perform_action(arguments, **kwargs):

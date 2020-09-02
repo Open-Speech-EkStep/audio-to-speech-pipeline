@@ -22,28 +22,39 @@ class AudioTranscription:
             CONFIG_NAME)
 
         source = kwargs.get('audio_source')
-        audio_id = kwargs.get('audio_id')
+        audio_ids = kwargs.get('audio_ids', [])
         stt_api = kwargs.get("speech_to_text_client")
 
         language = self.audio_transcription_config.get(LANGUAGE)
         remote_path_of_dir = self.audio_transcription_config.get(
             CLEAN_AUDIO_PATH)
-        remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean/'
-        remote_stt_output_path = self.audio_transcription_config.get(
-            'remote_stt_audio_file_path')
-        remote_stt_output_path = f'{remote_stt_output_path}/{source}/{audio_id}'
 
-        transcription_client = self.transcription_clients[stt_api]
+        for audio_id in audio_ids:
 
-        all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
+            try:
 
-        local_file_path = self.call_stt(all_path, language, transcription_client)
+                remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean/'
+                remote_stt_output_path = self.audio_transcription_config.get(
+                    'remote_stt_audio_file_path')
+                remote_stt_output_path = f'{remote_stt_output_path}/{source}/{audio_id}'
 
-        local_dir_path = self.get_local_dir_path(local_file_path)
+                transcription_client = self.transcription_clients[stt_api]
 
-        self.move_to_gcs(local_dir_path, remote_stt_output_path)
+                all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
 
-        self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
+                local_file_path = self.call_stt(all_path, language, transcription_client)
+
+                local_dir_path = self.get_local_dir_path(local_file_path)
+
+                self.move_to_gcs(local_dir_path, remote_stt_output_path)
+
+                self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
+            except Exception as e:
+                # TODO: This should be a specific exception, will need
+                #       to throw and handle this accordingly.
+                continue
+
+        return
 
     def delete_audio_id(self, remote_dir_path_for_given_audio_id):
         self.gcs_instance.delete_object(remote_dir_path_for_given_audio_id)
