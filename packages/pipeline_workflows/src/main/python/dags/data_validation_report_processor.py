@@ -30,26 +30,25 @@ def get_variables():
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
 
 
-def get_prefix_split_length(full_path):
-    full_path = str(full_path).replace(",", "")
-    full_path_split_list = full_path.split('/')
-    return len(full_path_split_list), full_path_split_list
+def get_prefix_attributes_full_path(full_path, integration_processed_path):
+    source_prefix_split_list = full_path.split(integration_processed_path)[1].split('/')
+    return get_file_attributes(source_prefix_split_list)
 
 
-def get_file_attributes(full_path_split_list):
-    file_name = full_path_split_list[-1]
+def get_file_attributes(source_prefix_split_list):
+    file_name = source_prefix_split_list[-1]
     try:
         raw_file_name = file_name.split('_', 1)[1].split('.')[0]
     except:
         raw_file_name = "NA"
-    source = full_path_split_list[6]
-    audio_id = full_path_split_list[7]
-    status = full_path_split_list[8]
-    return file_name, raw_file_name, source, audio_id, status
+    source = source_prefix_split_list[0]
+    audio_id = source_prefix_split_list[1]
+    # status = source_prefix_split_list[8]
+    return file_name, raw_file_name, source, audio_id
 
 
-def generate_row(full_path, file_name, raw_file_name, source, audio_id, status):
-    row = full_path + ',' + source + ',' + audio_id + ',' + raw_file_name + ',' + file_name + ',' + status
+def generate_row(full_path, file_name, raw_file_name, source, audio_id):
+    row = full_path + ',' + source + ',' + audio_id + ',' + raw_file_name + ',' + file_name
     return row
 
 
@@ -58,18 +57,16 @@ def generate_bucket_file_list(source):
     all_blobs = list_blobs_in_a_path(bucket_name, integration_processed_path + source)
     output_file = open(source + bucket_file_list, "w")
     output_file.write(
-        'bucket_file_path' + ',' + 'source' + ',' + 'audio_id' + ',' + 'raw_file_name' + ',' + 'utterances_files_list' + ',' + 'status')
+        'bucket_file_path' + ',' + 'source' + ',' + 'audio_id' + ',' + 'raw_file_name' + ',' + 'utterances_file_name')
     for blob in all_blobs:
-        full_path = blob.name
+        full_path = str(blob.name).replace(",", "")
         try:
             if 'wav' in full_path:
-                prefix_length, full_path_split_list = get_prefix_split_length(full_path)
-                if prefix_length == 10:
-                    full_path = str(full_path).replace(",", "")
-                    file_name, raw_file_name, source, audio_id, status = get_file_attributes(full_path_split_list)
-                    row = generate_row(full_path, file_name, raw_file_name, source, audio_id, status)
-                    output_file.write("\n")
-                    output_file.write(row)
+                file_name, raw_file_name, source, audio_id = get_prefix_attributes_full_path(full_path,
+                                                                                             integration_processed_path)
+                row = generate_row(full_path, file_name, raw_file_name, source, audio_id)
+                output_file.write("\n")
+                output_file.write(row)
         except:
             print(f"Failed at {full_path}")
     print("Bucket list has been generated")
@@ -102,7 +99,7 @@ def fetch_bucket_list(source, bucket_file_list):
 
 def get_bucket_list_not_in_catalog(data_catalog_exploded, data_bucket_raw):
     bucket_list_not_in_catalog = data_bucket_raw.merge(data_catalog_exploded, how='left',
-                                                       on=['audio_id', 'utterances_files_list'],
+                                                       on=['audio_id', 'utterances_file_name'],
                                                        suffixes=(None, "_y"))
     return bucket_list_not_in_catalog[bucket_list_not_in_catalog['raw_file_name_y'].isna()]
     # return bucket_list_not_in_catalog
@@ -110,27 +107,54 @@ def get_bucket_list_not_in_catalog(data_catalog_exploded, data_bucket_raw):
 
 def get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw):
     catalog_list_not_in_bucket = data_bucket_raw.merge(data_catalog_exploded, how='right',
-                                                       on=['audio_id', 'utterances_files_list'],
+                                                       on=['audio_id', 'utterances_file_name'],
                                                        suffixes=("_x", None))
     return catalog_list_not_in_bucket[catalog_list_not_in_bucket['raw_file_name_x'].isna()]
     # return catalog_list_not_in_bucket
+
+
+def parse_json_utterance_meta(jsonData):
+    json_dict = json.loads(jsonData)
+    return json_dict['name'] + ',' + str(json_dict['duration']) + ',' + json_dict['status']
+
+
+def check_json_utterance_meta(jsonData):
+    print(f"Utterance_file_list being processed is {jsonData}")
+    try:
+        json.loads(jsonData)
+    except (ValueError, TypeError):
+        return False
+    return True
+
+
+def parse_string_utterance_meta(data):
+    filename = data.split(':')[0]
+    duration = data.split(':')[-1]
+    status = ''
+    return filename + ',' + str(duration) + ',' + status
 
 
 def explode_utterances(data_catalog_raw):
     data_catalog_raw['utterances_files_list'].fillna('[]', inplace=True)
     data_catalog_raw.utterances_files_list = data_catalog_raw.utterances_files_list.apply(ast.literal_eval)
     data_catalog_exploded = data_catalog_raw.explode('utterances_files_list').reset_index(drop=True)
-    utterances_file_duration = data_catalog_exploded.utterances_files_list.astype('str').apply(
-        lambda x: float(x.split(':')[-1]))
-    data_catalog_exploded.insert(5, 'utterances_file_duration', utterances_file_duration)
-    data_catalog_exploded.utterances_files_list = data_catalog_exploded.utterances_files_list.astype('str').apply(
-        lambda x: x.split(':')[0])
+
+    utterances_files_list_meta = data_catalog_exploded.utterances_files_list.apply(
+        lambda x: parse_json_utterance_meta(x) if check_json_utterance_meta(
+            x) else parse_string_utterance_meta(str(x)))
+
+    utterances_files_list_meta = utterances_files_list_meta.str.split(
+        ",", expand=True)
+
+    data_catalog_exploded.insert(5, 'utterances_file_name', utterances_files_list_meta[0])
+    data_catalog_exploded.insert(6, 'utterances_file_duration', utterances_files_list_meta[1].astype('float'))
+    data_catalog_exploded.insert(7, 'utterances_file_status', utterances_files_list_meta[2])
     return data_catalog_exploded
 
 
 def get_bucket_list_in_catalog(data_catalog_exploded, data_bucket_raw):
     bucket_list_in_catalog = data_bucket_raw.merge(data_catalog_exploded, how='inner',
-                                                   on=['audio_id', 'utterances_files_list'],
+                                                   on=['audio_id', 'utterances_file_name'],
                                                    suffixes=("_x", None))
     return bucket_list_in_catalog
 
@@ -150,7 +174,7 @@ def get_valid_utterance_duration_unexploded(bucket_list_in_catalog):
     valid_utterance_duration = bucket_list_in_catalog[
         bucket_list_in_catalog.utterances_file_duration.between(.5, 15)].sort_values(
         'raw_file_name')
-    valid_utterance_duration = append_file_and_duration(valid_utterance_duration)
+    # valid_utterance_duration = append_file_and_duration(valid_utterance_duration)
 
     return valid_utterance_duration.groupby('audio_id', as_index=False).agg(
         {'utterances_file_duration': lambda x: x.sum() / 60,
@@ -188,16 +212,15 @@ def get_valid_and_unique_utterances(df_catalog_unique, df_catalog_valid_utteranc
 
 def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     print("Generate reports...")
-    # get_variables()
     data_catalog_exploded = explode_utterances(data_catalog_raw)
     bucket_list_not_in_catalog = get_bucket_list_not_in_catalog(data_catalog_exploded, data_bucket_raw)
     catalog_list_not_in_bucket = get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw)
     bucket_list_in_catalog = get_bucket_list_in_catalog(data_catalog_exploded, data_bucket_raw)
-    bucket_list_in_catalog_cleaned = bucket_list_in_catalog[bucket_list_in_catalog.status == 'clean']
-    catalog_list_with_rejected_status = bucket_list_in_catalog[bucket_list_in_catalog.status == 'rejected']
+    # bucket_list_in_catalog_cleaned = bucket_list_in_catalog[bucket_list_in_catalog.status == 'clean']
+    # catalog_list_with_rejected_status = bucket_list_in_catalog[bucket_list_in_catalog.status == 'rejected']
     df_catalog_invalid_utterance_duration = get_invalid_utterance_duration(bucket_list_in_catalog)
     df_catalog_valid_utterance_duration_unexploded = get_valid_utterance_duration_unexploded(
-        bucket_list_in_catalog_cleaned)
+        bucket_list_in_catalog)
     df_catalog_duplicates = get_duplicates_utterances(data_catalog_raw)
     df_catalog_unique = get_unique_utterances(data_catalog_raw)
 
@@ -207,7 +230,7 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     bucket_list_not_in_catalog.to_excel(writer, sheet_name='bucket_list_not_in_catalog', index=False)
     catalog_list_not_in_bucket.to_excel(writer, sheet_name='catalog_list_not_in_bucket', index=False)
     bucket_list_in_catalog.to_excel(writer, sheet_name='catalog_list_in_bucket', index=False)
-    catalog_list_with_rejected_status.to_excel(writer, sheet_name='catalog_list_rejected_ones', index=False)
+    # catalog_list_with_rejected_status.to_excel(writer, sheet_name='catalog_list_rejected_ones', index=False)
     df_catalog_invalid_utterance_duration.to_excel(writer, sheet_name='catalog_list_invalid_duration', index=False)
     df_catalog_duplicates.to_excel(writer, sheet_name='catalog_list_with_duplicates', index=False)
     df_valid_utterances_with_unique_audioid.to_excel(writer, sheet_name='Cleaned_data_catalog', index=False)
