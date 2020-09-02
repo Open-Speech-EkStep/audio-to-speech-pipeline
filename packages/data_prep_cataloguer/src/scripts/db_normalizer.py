@@ -5,7 +5,8 @@ import sys
 import yaml
 
 from .db_query import MAX_LOAD_DATE_FOR_MEDIA_QUERY, INSERT_INTO_MEDIA_TABLE_QUERY, GET_SPEAKER_ID_QUERY, GET_LOAD_TIME_FOR_AUDIO_QUERY,\
-     FIND_MAX_LOAD_DATE_QUERY, GET_AUDIO_ID_QUERY, INSERT_UNIQUE_SPEAKER_QUERY,GET_NEW_SOURCE_DATA_QUERY,UPDATE_SOURCE_METADATA_QUERY,INSERT_INTO_SOURCE_METADATA_QUERY
+     FIND_MAX_LOAD_DATE_QUERY, GET_AUDIO_ID_QUERY, INSERT_UNIQUE_SPEAKER_QUERY,GET_NEW_SOURCE_DATA_QUERY,UPDATE_SOURCE_METADATA_QUERY,INSERT_INTO_SOURCE_METADATA_QUERY,\
+         FETCH_AND_UPDATE_QUERY_WHERE_SPEAKER_IS_NULL,DEFAULT_INSERT_QUERY
 
 from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
@@ -107,11 +108,54 @@ class Db_normalizer():
 
 
     def update_source_metadata_table(self,connection):
-        self.insert_into_source_metadata(connection)
-        source_info = self.get_new_source_data(connection)
-        for source in source_info:
-            update_query = text(UPDATE_SOURCE_METADATA_QUERY)
-            connection.execute(update_query,cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
+        # self.insert_into_source_metadata(connection)
+        # source_info = self.get_new_source_data(connection)
+        # for source in source_info:
+        #     update_query = text(UPDATE_SOURCE_METADATA_QUERY)
+        #     connection.execute(update_query,cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
+
+        insert_query = self.update_utterance_in_mapping_table(connection)
+        import ipdb; ipdb.set_trace()
+
+        default_query = DEFAULT_INSERT_QUERY
+
+        final_query = default_query + insert_query
+
+        connection.execute(final_query)
+
+    def update_utterance_in_mapping_table(self,connection):
+        all_data = self.fetch_unnormalized_data(connection)
+        insert_query_into_mapping_table = []
+
+        for onefile in all_data:
+            audio_id = onefile[0]
+            utterance_list = self.parse_raw_file_data(onefile[1])
+
+            if utterance_list == None:
+                print(audio_id)
+                continue
+
+            for utterance in utterance_list:
+                insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
+                    {audio_id},{utterance['snr_value']},'{utterance['status']}','{utterance.get('reason','')}')")
+
+        return ','.join(insert_query_into_mapping_table)
+
+        #### insert into media_speaker_mapping(clipped_utterance_file_name,clipped_utterance_duration,audio_id,snr,status,utterance_file_path,fail_reason) values (),()
+
+    def parse_raw_file_data(self, raw_file_utterance):
+        try:
+            data = json.loads(raw_file_utterance)
+            return data
+        except json.decoder.JSONDecodeError as error:
+            print(error)
+            pass
+
+    def fetch_unnormalized_data(self,connection):
+
+        fetch_query_where_speaker_is_null = text(FETCH_AND_UPDATE_QUERY_WHERE_SPEAKER_IS_NULL)
+        
+        return connection.execute(fetch_query_where_speaker_is_null).fetchall()
 
     def insert_into_source_metadata(self,connection):
         insert_query = text(INSERT_INTO_SOURCE_METADATA_QUERY)

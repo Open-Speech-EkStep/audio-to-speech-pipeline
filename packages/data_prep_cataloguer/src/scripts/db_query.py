@@ -30,3 +30,11 @@ INSERT_INTO_SOURCE_METADATA_QUERY = "INSERT INTO source_metadata_processed (sour
  WHERE not exists \
   (select source_metadata_processed.source from source_metadata_processed where source_metadata_downloaded.source=source_metadata_processed.source) \
   group by source_metadata_downloaded.source"
+
+
+# "select audio_id,utterances_files_list from media_metadata_staging where is_normalized = false and speaker_name is null limit 3;"
+FETCH_AND_UPDATE_QUERY_WHERE_SPEAKER_IS_NULL = 'update media_metadata_staging set is_normalized = true \
+where audio_id in (select audio_id from media_metadata_staging where is_normalized = false and speaker_name is null) returning audio_id ,utterances_files_list'
+# 'select audio_id,utterances_files_list from media_metadata_staging order by load_datetime desc limit 3;'
+
+DEFAULT_INSERT_QUERY = "insert into media_speaker_mapping(clipped_utterance_file_name,clipped_utterance_duration,audio_id,snr,status,fail_reason) values "
