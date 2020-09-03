@@ -69,21 +69,23 @@ class AudioTranscription:
 
     def generate_transcription_for_all_utterenaces(self, all_path, language, transcription_client):
         for file_path in all_path:
-            local_path = f"/tmp/{file_path.name}"
-            self.generate_transcription_and_sanitize(local_path, file_path, language, transcription_client)
+            local_clean_path = f"/tmp/{file_path.name}/clean"
+            local_rejected_path = f"/tmp/{file_path.name}/rejected"
 
-        return self.get_local_dir_path(local_path)
+            self.generate_transcription_and_sanitize(local_clean_path, local_rejected_path,  file_path, language, transcription_client)
 
-    def generate_transcription_and_sanitize(self, local_path, file_path, language, transcription_client):
+        return self.get_local_dir_path(local_clean_path)
+
+    def generate_transcription_and_sanitize(self, local_clean_path, local_rejected_path, file_path, language, transcription_client):
         if ".wav" in file_path.name:
 
-            transcription_file_name = local_path.replace('.wav', '.txt')
+            transcription_file_name = local_clean_path.replace('.wav', '.txt')
             self.gcs_instance.download_to_local(
-                file_path.name, local_path, False)
+                file_path.name, local_clean_path, False)
 
             try:
-                transcript = transcription_client.generate_transcription_for_all_utterenaces(
-                    language, local_path)
+                transcript = transcription_client.generate_transcription(
+                    language, local_clean_path)
                 original_transcript = transcript
                 transcript = TranscriptionSanitizer().sanitize(transcript)
 
@@ -92,23 +94,23 @@ class AudioTranscription:
                 self.save_transcription(transcript, transcription_file_name)
             except TranscriptionSanitizationError as tse:
                 print('Transcription not valid: ' + str(tse))
-                self.handle_error(local_path)
+                self.handle_error(local_clean_path, local_rejected_path)
             except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as e:
                 print('STT API call failed: ' + str(e))
-                self.handle_error(local_path)
+                self.handle_error(local_clean_path, local_rejected_path)
             except RuntimeError as rte:
                 print('Error: ' + str(rte))
-                self.handle_error(local_path)
+                self.handle_error(local_clean_path, local_rejected_path)
 
-    def handle_error(self, local_path):
-        rejected_dir = '/tmp/rejected'
-        if not os.path.exists(rejected_dir):
-            os.makedirs(rejected_dir)
-        command = f'mv {local_path} {rejected_dir}'
-        print(f'moving bad wav file: {local_path} to rejected folder: {rejected_dir}')
+    def handle_error(self, local_path, local_rejected_path):
+        if not os.path.exists(local_rejected_path):
+            os.makedirs(local_rejected_path)
+        command = f'mv {local_path} {local_rejected_path}'
+        print(f'moving bad wav file: {local_path} to rejected folder: {local_rejected_path}')
         os.system(command)
 
     def get_local_dir_path(self, local_file_path):
         path_array = local_file_path.split('/')
+        path_array.pop()
         path_array.pop()
         return '/'.join(path_array)
