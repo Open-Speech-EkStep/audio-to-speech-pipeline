@@ -126,7 +126,7 @@ class Db_normalizer():
 
         default_query = DEFAULT_INSERT_QUERY
 
-        final_query = default_query + insert_query
+        final_query = default_query + ','.join(insert_query)
 
         connection.execute(final_query)
 
