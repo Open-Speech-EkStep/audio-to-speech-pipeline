@@ -70,13 +70,17 @@ class Db_normalizer():
 
 
     def create_insert_query(self,utterance, speaker_id, audio_id, datetime, connection):
-        name_and_durtion = utterance.split(":")
-        file_name = name_and_durtion[0]
-        durtion = name_and_durtion[1]
-        print(name_and_durtion)
+
+        file_name = utterance['name']
+        durtion = utterance['duration']
+        snr = utterance['snr_value']
+        status = utterance['status']
+        fail_reason = utterance['reason']
+
+        # print(utterance)
         with open("full_query.txt", 'a') as myfile:
             myfile.write(
-                f"({audio_id[0]},{speaker_id},'{file_name}',{durtion},'{datetime}'),")
+                f"({audio_id[0]},{speaker_id},'{file_name}',{durtion},'{datetime}',{snr},{status},{fail_reason}),")
 
 
     def get_load_datetime(self,audio_id, connection):
@@ -98,7 +102,8 @@ class Db_normalizer():
             "select utterances_files_list from media where audio_id = :audio_id")
         utterance = connection.execute(
             utterances_list, audio_id=audio_id[0]).fetchall()
-        utterance_in_array = ast.literal_eval(utterance[0][0])
+
+        utterance_in_array = self.parse_raw_file_data(utterance[0][0])
         return utterance_in_array
 
     def get_new_source_data(self,connection):
@@ -113,8 +118,11 @@ class Db_normalizer():
         # for source in source_info:
         #     update_query = text(UPDATE_SOURCE_METADATA_QUERY)
         #     connection.execute(update_query,cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
-
         insert_query = self.update_utterance_in_mapping_table(connection)
+
+        if len(insert_query) < 1:
+            # TODO: should raise execption
+            return
 
         default_query = DEFAULT_INSERT_QUERY
 
@@ -124,6 +132,7 @@ class Db_normalizer():
 
     def update_utterance_in_mapping_table(self,connection):
         all_data = self.fetch_unnormalized_data(connection)
+        
         insert_query_into_mapping_table = []
 
         for onefile in all_data:
@@ -138,9 +147,8 @@ class Db_normalizer():
                 insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
                     {audio_id},{utterance['snr_value']},'{utterance['status']}','{utterance.get('reason','')}')")
 
-        return ','.join(insert_query_into_mapping_table)
+        return insert_query_into_mapping_table
 
-        #### insert into media_speaker_mapping(clipped_utterance_file_name,clipped_utterance_duration,audio_id,snr,status,utterance_file_path,fail_reason) values (),()
 
     def parse_raw_file_data(self, raw_file_utterance):
         try:
@@ -170,8 +178,9 @@ class Db_normalizer():
         print(len(audio_ids))
         with open("./full_query.txt", 'w') as myfile:
             myfile.write(
-                f"insert into media_speaker_mapping(audio_id, speaker_id, clipped_utterance_file_name, clipped_utterance_duration,load_datetime) values ")
+                f"insert into media_speaker_mapping(audio_id, speaker_id, clipped_utterance_file_name, clipped_utterance_duration,load_datetime,snr,status,fail_reason) values ")
         for audio_id in audio_ids:
+
             speaker_id = self.find_speaker_id(connection, audio_id)
             get_load_datetime_for_audio = self.get_load_datetime(audio_id, connection)
             utterance_list = self.get_utterance_list(connection, audio_id)
