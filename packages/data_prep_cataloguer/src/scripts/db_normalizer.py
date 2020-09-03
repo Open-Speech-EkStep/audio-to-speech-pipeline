@@ -75,7 +75,7 @@ class Db_normalizer():
         durtion = utterance['duration']
         snr = utterance['snr_value']
         status = utterance['status']
-        fail_reason = utterance['reason']
+        fail_reason = utterance.get('reason','')
 
         # print(utterance)
         with open("full_query.txt", 'a') as myfile:
