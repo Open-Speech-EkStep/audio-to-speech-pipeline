@@ -75,3 +75,6 @@ class PostgresClient:
 
     def execute_query(self, query, **parm_dict):
         return self.connection.execute(query, **parm_dict).fetchall()
+
+    def execute_update(self, query, **parm_dict):
+        return self.connection.execute(query, **parm_dict)

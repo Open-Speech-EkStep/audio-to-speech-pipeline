@@ -1,9 +1,17 @@
 class CatalogueDao:
 
     def __init__(self, postgres_client):
-        self.data_processor = postgres_client
+        self.postgres_client = postgres_client
 
     def get_utterances(self, audio_id):
         params = {'audio_id', audio_id}
-        utterances = self.data_processor.execute_query("sql", params)
+        utterances = self.postgres_client \
+            .execute_query("select utterances_files_list from media_metadata_staging where audio_id = :audio_id"
+                           , params)
         return utterances
+
+    def update_utterances(self, audio_id, utterances):
+        update_query = 'update media_metadata_staging set utterances_files_list = :utterances where audio_id = :audio_id'
+        params = {'utterances': utterances, 'audio_id': audio_id}
+        self.postgres_client.execute_update(update_query, params)
+        return True
