@@ -115,7 +115,6 @@ class Db_normalizer():
         #     connection.execute(update_query,cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
 
         insert_query = self.update_utterance_in_mapping_table(connection)
-        import ipdb; ipdb.set_trace()
 
         default_query = DEFAULT_INSERT_QUERY
 

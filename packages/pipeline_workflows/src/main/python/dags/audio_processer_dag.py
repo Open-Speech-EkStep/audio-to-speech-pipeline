@@ -71,8 +71,8 @@ def create_dag(dag_id,
 
         for batch_audio_file_ids in batches:
             data_prep_task = kubernetes_pod_operator.KubernetesPodOperator(
-                task_id=dag_id + "_data_snr_" + batch_audio_file_ids[0],
-                name='data-prep-stt',
+                task_id=dag_id + "_data_snr_",
+                name='data-prep-snr',
                 cmds=["python", "invocation_script.py", "-a", "audio_processing", "-rc", "data/audiotospeech/config/audio_processing/config.yaml",
                       "-ai", ','.join(batch_audio_file_ids), "-af", args.get('audio_format'), "-as", dag_id],
                 namespace=composer_namespace,
@@ -82,8 +82,7 @@ def create_dag(dag_id,
                 image_pull_policy='Always')
 
             move_to_processed = PythonOperator(
-                task_id=dag_id + "_move_raw_to_processed_" +
-                batch_audio_file_ids[0],
+                task_id=dag_id + "_move_raw_to_processed_" + batch_audio_file_ids[0],
                 python_callable=move_raw_to_processed,
                 op_kwargs={'source': dag_id, 'batch_audio_file_ids': batch_audio_file_ids,
                            'tobe_processed_path': tobe_processed_path_snr},
