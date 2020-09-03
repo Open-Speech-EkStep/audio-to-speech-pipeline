@@ -2,7 +2,7 @@ import sys
 import unittest
 from unittest import mock
 
-from dao.catalogue_dao import CatalogueDao
+from common.dao.catalogue_dao import CatalogueDao
 
 sys.path.insert(0, '..')
 
