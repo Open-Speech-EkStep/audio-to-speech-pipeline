@@ -1,21 +1,21 @@
 import re
-
+from audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
 
 class TranscriptionSanitizer(object):
 
     def sanitize(self, transcription):
         transcription = transcription.strip()  # removes spaces in starting of transcription
         if ':' in transcription:
-            raise RuntimeError('transcription not acceptable for model training')
+            raise TranscriptionSanitizationError('transcription has :')
 
         transcription = self.replace_bad_char(transcription)
         transcription = transcription.strip()
 
         if len(transcription) == 0:
-            raise RuntimeError('transcription not acceptable for model training')
+            raise TranscriptionSanitizationError('transcription is empty')
 
         if self.shouldReject(transcription):
-            raise RuntimeError('transcription not acceptable for model training')
+            raise TranscriptionSanitizationError('transcription has char which is not in ँ-ःअ-ऋए-ऑओ-नप-रलव-ह़ा-ृे-ॉो-्0-9क़-य़ ॅ')
 
         return transcription
 
