@@ -1,10 +1,10 @@
 import yaml
-from common.data_processor import DataProcessorUtil
+from common.postgres_db_client import PostgresClient
 from common.gcs_operations import CloudStorageOperations
 from .audio_commons import get_audio_commons
 
 def get_periperhals(intialization_dict_path):
-    data_processor = DataProcessorUtil.get_instance(intialization_dict_path)
+    data_processor = PostgresClient.get_instance(intialization_dict_path)
     gcs_instance = CloudStorageOperations.get_instance(intialization_dict_path)
 
     peripheral_dict ={
