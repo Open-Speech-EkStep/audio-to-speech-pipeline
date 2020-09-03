@@ -23,14 +23,11 @@ class AzureTranscriptionClient(object):
         self.speech_config = speech.SpeechConfig(subscription=self.speech_key, region=self.service_region)
 
     def generate_transcription(self, language, source_file_path):
-        result = self.speech_to_text(source_file_path, language)
-        return self.remove_punctation(result.text)
-
-    def remove_punctation(self, data_string):
-        punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~।'
-        table = str.maketrans(dict.fromkeys(punctuation))
-        return data_string.translate(table)
-
+        try:
+            result = self.speech_to_text(source_file_path, language)
+        except RuntimeError as e:
+            raise AzureTranscriptionClient(e)
+        return result
 
     def speech_to_text(self, audio_file_path, language):
         audio_input = speech.audio.AudioConfig(filename=audio_file_path)

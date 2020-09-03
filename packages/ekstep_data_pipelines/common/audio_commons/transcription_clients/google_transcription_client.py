@@ -1,7 +1,6 @@
 from ekstep_data_pipelines.common.utils import get_logger
 from google.cloud.speech_v1 import enums
 from google.cloud import speech_v1
-import pickle
 import sys
 import os
 
@@ -54,10 +53,14 @@ class GoogleTranscriptionClient(object):
         return self._client
 
     def generate_transcription(self, language, source_file_path):
-        source_file_path = source_file_path.replace('/tmp/',f'gs://{self.bucket}/')
-        content = self.call_speech_to_text(source_file_path)
-        transcriptions = list(
-            map(lambda c: c.alternatives[0].transcript, content.results))
+        source_file_path = source_file_path.replace('/tmp/', f'gs://{self.bucket}/')
+        try:
+            content = self.call_speech_to_text(source_file_path)
+            transcriptions = list(
+                map(lambda c: c.alternatives[0].transcript, content.results))
+        except RuntimeError as e:
+            raise GoogleTranscriptionClient(e)
+
         return ' '.join(transcriptions)
 
     def call_speech_to_text(self, input_file_path):

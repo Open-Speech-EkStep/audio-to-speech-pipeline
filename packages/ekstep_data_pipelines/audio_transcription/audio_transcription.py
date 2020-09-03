@@ -1,8 +1,10 @@
 from audio_transcription.constants import CONFIG_NAME, CLEAN_AUDIO_PATH, LANGUAGE
 from audio_transcription.transcription_sanitizer import TranscriptionSanitizer
 from audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
-import os
+from common.audio_commons.transcription_clients.transcription_client_errors import \
+    AzureTranscriptionClientError, GoogleTranscriptionClientError
 
+import os
 
 class AudioTranscription:
     LOCAL_PATH = None
@@ -43,9 +45,7 @@ class AudioTranscription:
 
                 all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
 
-                local_file_path = self.call_stt(all_path, language, transcription_client)
-
-                local_dir_path = self.get_local_dir_path(local_file_path)
+                local_dir_path = self.generate_transcription_for_all_utterenaces(all_path, language, transcription_client)
 
                 self.move_to_gcs(local_dir_path, remote_stt_output_path)
 
@@ -67,43 +67,46 @@ class AudioTranscription:
         with open(output_file_path, "w") as f:
             f.write(transcription)
 
-    def call_stt(self, all_path, language, transcription_client):
+    def generate_transcription_for_all_utterenaces(self, all_path, language, transcription_client):
         for file_path in all_path:
+            local_path = f"/tmp/{file_path.name}"
+            self.generate_transcription_and_sanitize(local_path, file_path, language, transcription_client)
 
-            if ".wav" in file_path.name:
+        return self.get_local_dir_path(local_path)
 
-                LOCAL_PATH = f"/tmp/{file_path.name}"
-                transcription_file_name = LOCAL_PATH.replace('.wav', '.txt')
-                self.gcs_instance.download_to_local(
-                    file_path.name, LOCAL_PATH, False)
+    def generate_transcription_and_sanitize(self, local_path, file_path, language, transcription_client):
+        if ".wav" in file_path.name:
 
-                try:
-                    transcript = transcription_client.generate_transcription(
-                        language, LOCAL_PATH)
-                    original_transcript = transcript
-                    transcript = TranscriptionSanitizer().sanitize(transcript)
+            transcription_file_name = local_path.replace('.wav', '.txt')
+            self.gcs_instance.download_to_local(
+                file_path.name, local_path, False)
 
-                    if original_transcript != transcript:
-                        self.save_transcription(original_transcript, 'original_' + transcription_file_name)
-                    self.save_transcription(transcript, transcription_file_name)
-                except TranscriptionSanitizationError as tse:
-                    print('Transcription not valid: ' + str(tse))
-                    rejected_dir = '/tmp/rejected'
-                    if not os.path.exists(rejected_dir):
-                        os.makedirs(rejected_dir)
-                    command = f'mv {LOCAL_PATH} {rejected_dir}'
-                    print(f'moving bad wav file: {LOCAL_PATH} to rejected folder: {rejected_dir}')
-                    os.system(command)
-                except RuntimeError as e:
-                    print('STT API call failed: ' + str(e))
-                    rejected_dir = '/tmp/rejected'
-                    if not os.path.exists(rejected_dir):
-                        os.makedirs(rejected_dir)
-                    command = f'mv {LOCAL_PATH} {rejected_dir}'
-                    print(f'moving bad wav file: {LOCAL_PATH} to rejected folder: {rejected_dir}')
-                    os.system(command)
+            try:
+                transcript = transcription_client.generate_transcription_for_all_utterenaces(
+                    language, local_path)
+                original_transcript = transcript
+                transcript = TranscriptionSanitizer().sanitize(transcript)
 
-        return LOCAL_PATH
+                if original_transcript != transcript:
+                    self.save_transcription(original_transcript, 'original_' + transcription_file_name)
+                self.save_transcription(transcript, transcription_file_name)
+            except TranscriptionSanitizationError as tse:
+                print('Transcription not valid: ' + str(tse))
+                self.handle_error(local_path)
+            except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as e:
+                print('STT API call failed: ' + str(e))
+                self.handle_error(local_path)
+            except RuntimeError as rte:
+                print('Error: ' + str(rte))
+                self.handle_error(local_path)
+
+    def handle_error(self, local_path):
+        rejected_dir = '/tmp/rejected'
+        if not os.path.exists(rejected_dir):
+            os.makedirs(rejected_dir)
+        command = f'mv {local_path} {rejected_dir}'
+        print(f'moving bad wav file: {local_path} to rejected folder: {rejected_dir}')
+        os.system(command)
 
     def get_local_dir_path(self, local_file_path):
         path_array = local_file_path.split('/')
