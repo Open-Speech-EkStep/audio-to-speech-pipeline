@@ -40,7 +40,7 @@ class AudioTranscription:
 
             try:
                 utterances = self.catalogue_dao.get_utterances(audio_id)
-                print("utterances:" + str(utterances))
+                print("before transcription utterances:" + str(utterances))
                 remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean/'
                 remote_stt_output_path = self.audio_transcription_config.get(
                     'remote_stt_audio_file_path')
@@ -50,8 +50,10 @@ class AudioTranscription:
 
                 all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
 
-                local_dir_path = self.generate_transcription_for_all_utterenaces(all_path, language, transcription_client)
-
+                local_dir_path = self.generate_transcription_for_all_utterenaces(all_path, language, transcription_client, utterances)
+                print("after transcription utterances:" + str(utterances))
+                print('updating catalogue with updated utterances')
+                self.catalogue_dao.update_utterances(audio_id, utterances)
                 self.move_to_gcs(local_dir_path, remote_stt_output_path)
 
                 self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
@@ -72,16 +74,17 @@ class AudioTranscription:
         with open(output_file_path, "w") as f:
             f.write(transcription)
 
-    def generate_transcription_for_all_utterenaces(self, all_path, language, transcription_client):
+    def generate_transcription_for_all_utterenaces(self, all_path, language, transcription_client, utterances):
         for file_path in all_path:
+            utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, file_path.name)
             local_clean_path = f"/tmp/clean/{file_path.name}"
             local_rejected_path = f"/tmp/rejected/{file_path.name}"
 
-            self.generate_transcription_and_sanitize(local_clean_path, local_rejected_path,  file_path, language, transcription_client)
+            self.generate_transcription_and_sanitize(local_clean_path, local_rejected_path,  file_path, language, transcription_client, utterance_metadata)
 
         return self.get_local_dir_path(local_clean_path)
 
-    def generate_transcription_and_sanitize(self, local_clean_path, local_rejected_path, file_path, language, transcription_client):
+    def generate_transcription_and_sanitize(self, local_clean_path, local_rejected_path, file_path, language, transcription_client, utterance_metadata):
         if ".wav" in file_path.name:
 
             transcription_file_name = local_clean_path.replace('.wav', '.txt')
@@ -99,15 +102,20 @@ class AudioTranscription:
                 self.save_transcription(transcript, transcription_file_name)
             except TranscriptionSanitizationError as tse:
                 print('Transcription not valid: ' + str(tse))
-                self.handle_error(local_clean_path, local_rejected_path)
+                reason = 'sanitization error:' + str(tse.args)
+                self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
             except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as e:
                 print('STT API call failed: ' + str(e))
-                self.handle_error(local_clean_path, local_rejected_path)
+                reason = 'STT API error:' + str(e.args)
+                self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
             except RuntimeError as rte:
                 print('Error: ' + str(rte))
-                self.handle_error(local_clean_path, local_rejected_path)
+                reason = rte.args
+                self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
 
-    def handle_error(self, local_path, local_rejected_path):
+    def handle_error(self, local_path, local_rejected_path, utterance_metadata, reason):
+        utterance_metadata['status'] = 'Rejected'
+        utterance_metadata['reason'] = reason
         if not os.path.exists(local_rejected_path):
             os.makedirs(local_rejected_path)
         command = f'mv {local_path} {local_rejected_path}'
