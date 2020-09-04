@@ -6,6 +6,9 @@ from common.audio_commons.transcription_clients.transcription_client_errors impo
 
 import os
 
+from common.dao.catalogue_dao import CatalogueDao
+
+
 class AudioTranscription:
     LOCAL_PATH = None
 
@@ -17,6 +20,7 @@ class AudioTranscription:
         self.data_processor = data_processor
         self.gcs_instance = gcs_instance
         self.transcription_clients = audio_commons.get('transcription_clients')
+        self.catalogue_dao = audio_commons.get('catalogue_dao')
         self.audio_transcription_config = None
 
     def process(self, **kwargs):
@@ -35,7 +39,8 @@ class AudioTranscription:
         for audio_id in audio_ids:
 
             try:
-
+                utterances = self.catalogue_dao.get_utterances(audio_id)
+                print("utterances:" + str(utterances))
                 remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean/'
                 remote_stt_output_path = self.audio_transcription_config.get(
                     'remote_stt_audio_file_path')
@@ -69,8 +74,8 @@ class AudioTranscription:
 
     def generate_transcription_for_all_utterenaces(self, all_path, language, transcription_client):
         for file_path in all_path:
-            local_clean_path = f"/tmp/{file_path.name}/clean"
-            local_rejected_path = f"/tmp/{file_path.name}/rejected"
+            local_clean_path = f"/tmp/clean/{file_path.name}"
+            local_rejected_path = f"/tmp/rejected/{file_path.name}"
 
             self.generate_transcription_and_sanitize(local_clean_path, local_rejected_path,  file_path, language, transcription_client)
 
