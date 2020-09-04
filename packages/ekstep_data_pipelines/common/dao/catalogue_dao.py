@@ -1,3 +1,5 @@
+import json
+
 class CatalogueDao:
 
     def __init__(self, postgres_client):
@@ -15,3 +17,8 @@ class CatalogueDao:
         params = {'utterances': utterances, 'audio_id': audio_id}
         self.postgres_client.execute_update(update_query, params)
         return True
+
+    def find_utterance_by_name(self, utterances, name):
+        json_dict = json.loads(utterances)
+        utterances = filter(lambda d: d['name'] == name, json_dict)
+        return list(utterances)[0]
