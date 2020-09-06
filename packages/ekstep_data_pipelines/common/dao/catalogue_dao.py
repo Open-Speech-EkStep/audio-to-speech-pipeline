@@ -6,14 +6,17 @@ class CatalogueDao:
         self.postgres_client = postgres_client
 
     def get_utterances(self, audio_id):
+        print('postgres_client \
+            .execute_query signature:' + self.postgres_client.execute_query)
         params = {'audio_id', audio_id}
         utterances = self.postgres_client \
-            .execute_query("select utterances_files_list from media_metadata_staging where audio_id = :audio_id"
+            .execute_query('select utterances_files_list from media_metadata_staging where audio_id = :audio_id'
                            , params)
         return utterances
 
     def update_utterances(self, audio_id, utterances):
-        update_query = 'update media_metadata_staging set utterances_files_list = :utterances where audio_id = :audio_id'
+        update_query = 'update media_metadata_staging ' \
+                       'set utterances_files_list = :utterances where audio_id = :audio_id'
         params = {'utterances': utterances, 'audio_id': audio_id}
         self.postgres_client.execute_update(update_query, params)
         return True
