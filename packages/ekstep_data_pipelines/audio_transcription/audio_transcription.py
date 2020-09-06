@@ -65,7 +65,7 @@ class AudioTranscription:
                                                                                  transcription_client, utterances)
                 LOGGER.info("after transcription utterances:" + str(utterances))
                 LOGGER.info('updating catalogue with updated utterances')
-                self.catalogue_dao.update_utterances(audio_id, str(utterances))
+                self.catalogue_dao.update_utterances(audio_id, utterances)
                 self.move_to_gcs(local_dir_path, remote_stt_output_path)
 
                 self.delete_audio_id(f'{remote_path_of_dir}/{source}/{audio_id}')

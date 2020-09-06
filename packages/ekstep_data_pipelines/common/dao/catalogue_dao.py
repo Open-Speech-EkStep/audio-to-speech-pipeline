@@ -17,7 +17,10 @@ class CatalogueDao:
     def update_utterances(self, audio_id, utterances):
         update_query = 'update media_metadata_staging ' \
                        'set utterances_files_list = :utterances where audio_id = :audio_id'
-        parm_dict = {'utterances': str(utterances), 'audio_id': audio_id}
+        utterances_json_str = json.dumps(utterances)
+        print('utterances_json_str:' + utterances_json_str)
+        print('utterances:' + str(utterances))
+        parm_dict = {'utterances': utterances_json_str, 'audio_id': audio_id}
         self.postgres_client.execute_update(update_query, **parm_dict)
         return True
 

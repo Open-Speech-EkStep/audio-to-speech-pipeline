@@ -25,8 +25,8 @@ class CatalogueTests(unittest.TestCase):
         mock_postgres_client.execute_update.return_value = None
         catalogueDao = CatalogueDao(mock_postgres_client)
         audio_id = '2020'
-        utterances = [{"name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav", ' \
-                     '"duration": "13.38", "snr_value": 38.432806, "status": "Clean"}]
+        utterances = [{'name': '190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav',
+                       'duration': '13.38', 'snr_value': 38.432806, 'status': 'Clean'}]
 
         rows_updated = catalogueDao.update_utterances(audio_id, utterances)
         self.assertEqual(rows_updated, True)
