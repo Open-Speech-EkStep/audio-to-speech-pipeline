@@ -18,8 +18,8 @@ class CatalogueDao:
     def update_utterances(self, audio_id, utterances):
         update_query = 'update media_metadata_staging ' \
                        'set utterances_files_list = :utterances where audio_id = :audio_id'
-        params = {'utterances': utterances, 'audio_id': audio_id}
-        self.postgres_client.execute_update(update_query, params)
+        parm_dict = {'utterances': utterances, 'audio_id': audio_id}
+        self.postgres_client.execute_update(update_query, **parm_dict)
         return True
 
     def find_utterance_by_name(self, utterances, name):

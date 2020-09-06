@@ -29,7 +29,6 @@ class PostgresClient:
         self.load_configeration()
         self.setup_db_access()
 
-
     @property
     def connection(self):
         if self._connection:
