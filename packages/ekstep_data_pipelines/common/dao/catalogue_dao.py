@@ -24,5 +24,8 @@ class CatalogueDao:
 
     def find_utterance_by_name(self, utterances, name):
         json_dict = json.loads(utterances)
-        utterances = filter(lambda d: d['name'] == name, json_dict)
-        return list(utterances)[0] if len(list(utterances)) > 0 else None
+        filtered_utterances = list(filter(lambda d: d['name'] == name, json_dict))
+        if len(filtered_utterances) > 0:
+            return filtered_utterances[0]
+        else:
+            return None
