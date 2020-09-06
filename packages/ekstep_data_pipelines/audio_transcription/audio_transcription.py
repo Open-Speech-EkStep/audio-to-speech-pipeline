@@ -96,8 +96,8 @@ class AudioTranscription:
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
         for file_path in all_path:
             file_name = get_file_name(file_path.name)
-            local_clean_path = f"/tmp/clean/{file_name}"
-            local_rejected_path = f"/tmp/rejected/{file_name}"
+            local_clean_path = f"/tmp/{file_path.name}"
+            local_rejected_path = local_clean_path.replace('clean', 'rejected')
             utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, file_name)
             if utterance_metadata is None:
                 LOGGER.info('No utterance found for file_name: ' + file_name)
@@ -142,17 +142,16 @@ class AudioTranscription:
                 reason = rte.args
                 self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
 
-    def handle_error(self, local_path, local_rejected_path, utterance_metadata, reason):
+    def handle_error(self, local_clean_path, local_rejected_path, utterance_metadata, reason):
         utterance_metadata['status'] = 'Rejected'
         utterance_metadata['reason'] = reason
         if not os.path.exists(local_rejected_path):
             os.makedirs(local_rejected_path)
-        command = f'mv {local_path} {local_rejected_path}'
-        LOGGER.info(f'moving bad wav file: {local_path} to rejected folder: {local_rejected_path}')
+        command = f'mv {local_clean_path} {local_rejected_path}'
+        LOGGER.info(f'moving bad wav file: {local_clean_path} to rejected folder: {local_rejected_path}')
         os.system(command)
 
     def get_local_dir_path(self, local_file_path):
         path_array = local_file_path.split('/')
-        path_array.pop()
         path_array.pop()
         return '/'.join(path_array)
