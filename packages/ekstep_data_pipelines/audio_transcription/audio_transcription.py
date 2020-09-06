@@ -1,3 +1,5 @@
+import traceback
+
 from audio_transcription.constants import CONFIG_NAME, CLEAN_AUDIO_PATH, LANGUAGE
 from audio_transcription.transcription_sanitizer import TranscriptionSanitizer
 from audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
@@ -61,7 +63,7 @@ class AudioTranscription:
                                                                                  transcription_client, utterances)
                 LOGGER.info("after transcription utterances:" + str(utterances))
                 LOGGER.info('updating catalogue with updated utterances')
-                self.catalogue_dao.update_utterances(audio_id, utterances)
+                self.catalogue_dao.update_utterances(audio_id, str(utterances))
                 self.move_to_gcs(local_dir_path, remote_stt_output_path)
 
                 self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
@@ -70,11 +72,12 @@ class AudioTranscription:
                 #       to throw and handle this accordingly.
                 LOGGER.error(f'Transcription failed for audio_id:${audio_id}')
                 LOGGER.error(str(e))
+                traceback.print_exc()
                 failed_audio_ids.append(audio_id)
                 continue
 
         if len(failed_audio_ids) > 0:
-            LOGGER.info()
+            LOGGER.error('******* Job failed for one or more audio_ids')
             raise RuntimeError('Failed audio_ids:' + str(failed_audio_ids))
         return
 
@@ -89,14 +92,14 @@ class AudioTranscription:
             f.write(transcription)
 
     def generate_transcription_for_all_utterenaces(self, all_path, language, transcription_client, utterances):
-        LOGGER.info("***generate_transcription_for_all_utterenaces**")
+        LOGGER.info("*** generate_transcription_for_all_utterenaces **")
         for file_path in all_path:
             utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, file_path.name)
             if utterance_metadata is None:
-                LOGGER.info('No utterance found for file_name: ' + file_path)
+                LOGGER.info('No utterance found for file_name: ' + file_path.name)
                 continue
             if utterance_metadata['status'] == 'Rejected':
-                LOGGER.info('Skipping rejected file_name: ' + file_path)
+                LOGGER.info('Skipping rejected file_name: ' + file_path.name)
                 continue
             LOGGER.info('Generating transcription for utterance:' + str(utterance_metadata))
             local_clean_path = f"/tmp/clean/{file_path.name}"
