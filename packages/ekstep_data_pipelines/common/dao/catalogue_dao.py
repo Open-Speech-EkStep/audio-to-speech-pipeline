@@ -11,7 +11,8 @@ class CatalogueDao:
         utterances = self.postgres_client \
             .execute_query('select utterances_files_list from media_metadata_staging where audio_id = :audio_id'
                            , **parm_dict)
-        return json.loads(utterances[0]) if len(utterances) > 0 else []
+        print('utterances:' + str(utterances[0][0]))
+        return json.loads(utterances[0][0]) if len(utterances) > 0 else []
 
     def update_utterances(self, audio_id, utterances):
         update_query = 'update media_metadata_staging ' \
