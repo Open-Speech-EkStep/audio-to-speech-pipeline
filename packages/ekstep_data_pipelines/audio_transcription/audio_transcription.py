@@ -15,14 +15,14 @@ class AudioTranscription:
     LOCAL_PATH = None
 
     @staticmethod
-    def get_instance(data_processor, gcs_instance, audio_commons):
-        return AudioTranscription(data_processor, gcs_instance, audio_commons)
+    def get_instance(data_processor, gcs_instance, audio_commons, catalogue_dao):
+        return AudioTranscription(data_processor, gcs_instance, audio_commons, catalogue_dao)
 
-    def __init__(self, data_processor, gcs_instance, audio_commons):
+    def __init__(self, data_processor, gcs_instance, audio_commons, catalogue_dao):
         self.data_processor = data_processor
         self.gcs_instance = gcs_instance
         self.transcription_clients = audio_commons.get('transcription_clients')
-        self.catalogue_dao = audio_commons.get('catalogue_dao')
+        self.catalogue_dao = catalogue_dao
         self.audio_transcription_config = None
 
     def process(self, **kwargs):
