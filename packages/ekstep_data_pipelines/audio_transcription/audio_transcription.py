@@ -35,7 +35,7 @@ class AudioTranscription:
             CONFIG_NAME)
 
         source = kwargs.get('audio_source')
-        audio_ids = [202009040606113111]  # kwargs.get('audio_ids', [])
+        audio_ids = [202009040606103581]  # kwargs.get('audio_ids', [])
         stt_api = kwargs.get("speech_to_text_client")
 
         language = self.audio_transcription_config.get(LANGUAGE)
@@ -60,14 +60,19 @@ class AudioTranscription:
                 LOGGER.info('Using transcription client:' + str(transcription_client))
                 all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
 
-                local_dir_path = self.generate_transcription_for_all_utterenaces(audio_id, all_path, language,
+                local_clean_dir_path, local_rejected_dir_path = self.generate_transcription_for_all_utterenaces(audio_id, all_path, language,
                                                                                  transcription_client, utterances)
                 LOGGER.info("after transcription utterances:" + str(utterances))
                 LOGGER.info('updating catalogue with updated utterances')
                 self.catalogue_dao.update_utterances(audio_id, utterances)
-                self.move_to_gcs(local_dir_path, remote_stt_output_path)
 
-                self.delete_audio_id(f'{remote_path_of_dir}/{source}/{audio_id}')
+                LOGGER.info(f'Uploading local generated files from {local_clean_dir_path} to {remote_stt_output_path}')
+                self.move_to_gcs(local_clean_dir_path, remote_stt_output_path + "/clean")
+
+                LOGGER.info(f'Uploading local generated files from {local_rejected_dir_path} to {remote_stt_output_path}')
+                self.move_to_gcs(local_rejected_dir_path, remote_stt_output_path + "/rejected")
+
+                # self.delete_audio_id(f'{remote_path_of_dir}/{source}/{audio_id}')
             except Exception as e:
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
@@ -110,7 +115,7 @@ class AudioTranscription:
             self.generate_transcription_and_sanitize(audio_id, local_clean_path, local_rejected_path, file_path, language,
                                                      transcription_client, utterance_metadata)
 
-        return self.get_local_dir_path(local_clean_path)
+        return self.get_local_dir_path(local_clean_path),self.get_local_dir_path(local_rejected_path)
 
     def generate_transcription_and_sanitize(self, audio_id, local_clean_path, local_rejected_path, file_path, language,
                                             transcription_client, utterance_metadata):
@@ -126,7 +131,9 @@ class AudioTranscription:
                 transcript = TranscriptionSanitizer().sanitize(transcript)
 
                 if original_transcript != transcript:
-                    file_name_with_original_prefix = self.get_local_dir_path(transcription_file_name) + '/original_' + get_file_name(transcription_file_name)
+                    old_file_name = get_file_name(transcription_file_name)
+                    new_file_name = 'original_' + get_file_name(transcription_file_name)
+                    file_name_with_original_prefix = transcription_file_name.replace(old_file_name, new_file_name)
                     LOGGER.info("saving original transcription to:" + file_name_with_original_prefix)
                     self.save_transcription(original_transcript, file_name_with_original_prefix)
 
@@ -156,6 +163,5 @@ class AudioTranscription:
 
     def get_local_dir_path(self, local_file_path):
         path_array = local_file_path.split('/')
-        path_array.pop()
         path_array.pop()
         return '/'.join(path_array)
