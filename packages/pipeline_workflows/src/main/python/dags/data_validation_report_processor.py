@@ -292,9 +292,10 @@ def get_local_variables():
     now = datetime.now()
     date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
     bucket_name = "ekstepspeechrecognition-dev"
-    integration_processed_path = "data/audiotospeech/integration/"
+    integration_processed_path = "data/audiotospeech/integration/processed/hindi/audio"
     bucket_file_list = '_bucket_file_list.csv'
     db_catalog_tbl = 'media_metadata_staging'
+    report_upload_path ="data/audiotospeech/integration/processed/hindi/reports/data_validation_report"
     validation_report_source = "CEC"
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
 
