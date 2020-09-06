@@ -127,19 +127,22 @@ class AudioTranscription:
                 transcript = TranscriptionSanitizer().sanitize(transcript)
 
                 if original_transcript != transcript:
-                    self.save_transcription(original_transcript, 'original_' + transcription_file_name)
+                    file_name_with_original_prefix = self.get_local_dir_path(transcription_file_name) + '/original_' + get_file_name(transcription_file_name)
+                    LOGGER.info("saving original transcription to:" + file_name_with_original_prefix)
+                    self.save_transcription(original_transcript, file_name_with_original_prefix)
+
                 self.save_transcription(transcript, transcription_file_name)
             except TranscriptionSanitizationError as tse:
-                LOGGER.info('Transcription not valid: ' + str(tse))
+                LOGGER.error('Transcription not valid: ' + str(tse))
                 reason = 'sanitization error:' + str(tse.args)
                 self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
             except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as e:
-                LOGGER.info('STT API call failed: ' + str(e))
+                LOGGER.error('STT API call failed: ' + str(e))
                 reason = 'STT API error:' + str(e.args)
                 self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
-            except RuntimeError as rte:
-                LOGGER.info('Error: ' + str(rte))
-                reason = rte.args
+            except Exception as ex:
+                LOGGER.error('Error: ' + str(ex))
+                reason = ex.args
                 self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
 
     def handle_error(self, local_clean_path, local_rejected_path, utterance_metadata, reason):
