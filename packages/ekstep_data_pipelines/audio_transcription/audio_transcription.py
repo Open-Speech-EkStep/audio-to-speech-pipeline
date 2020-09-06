@@ -3,11 +3,13 @@ from audio_transcription.transcription_sanitizer import TranscriptionSanitizer
 from audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
 from common.audio_commons.transcription_clients.transcription_client_errors import \
     AzureTranscriptionClientError, GoogleTranscriptionClientError
+from common.utils import get_logger
 
 import os
 
 from common.dao.catalogue_dao import CatalogueDao
 
+LOGGER = get_logger('audio_transcription')
 
 class AudioTranscription:
     LOCAL_PATH = None
@@ -36,12 +38,12 @@ class AudioTranscription:
         language = self.audio_transcription_config.get(LANGUAGE)
         remote_path_of_dir = self.audio_transcription_config.get(
             CLEAN_AUDIO_PATH)
-
+        LOGGER.info('Generating transcriptions for audio_ids:' + str(audio_ids))
         for audio_id in audio_ids:
-
             try:
+                LOGGER.info('Generating transcription for audio_id:' + str(audio_id))
                 utterances = self.catalogue_dao.get_utterances(audio_id)
-                print("before transcription utterances:" + str(utterances))
+                LOGGER.info("before transcription utterances:" + str(utterances))
                 remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean/'
                 remote_stt_output_path = self.audio_transcription_config.get(
                     'remote_stt_audio_file_path')
@@ -52,15 +54,17 @@ class AudioTranscription:
                 all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
 
                 local_dir_path = self.generate_transcription_for_all_utterenaces(all_path, language, transcription_client, utterances)
-                print("after transcription utterances:" + str(utterances))
-                print('updating catalogue with updated utterances')
+                LOGGER.info("after transcription utterances:" + str(utterances))
+                LOGGER.info('updating catalogue with updated utterances')
                 self.catalogue_dao.update_utterances(audio_id, utterances)
                 self.move_to_gcs(local_dir_path, remote_stt_output_path)
 
                 self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
             except Exception as e:
+                LOGGER.error(f'Transcription failed for audio_id:${audio_id}, error:{e.args}')
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
+
                 continue
 
         return
@@ -102,15 +106,15 @@ class AudioTranscription:
                     self.save_transcription(original_transcript, 'original_' + transcription_file_name)
                 self.save_transcription(transcript, transcription_file_name)
             except TranscriptionSanitizationError as tse:
-                print('Transcription not valid: ' + str(tse))
+                LOGGER.info('Transcription not valid: ' + str(tse))
                 reason = 'sanitization error:' + str(tse.args)
                 self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
             except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as e:
-                print('STT API call failed: ' + str(e))
+                LOGGER.info('STT API call failed: ' + str(e))
                 reason = 'STT API error:' + str(e.args)
                 self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
             except RuntimeError as rte:
-                print('Error: ' + str(rte))
+                LOGGER.info('Error: ' + str(rte))
                 reason = rte.args
                 self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
 
@@ -120,7 +124,7 @@ class AudioTranscription:
         if not os.path.exists(local_rejected_path):
             os.makedirs(local_rejected_path)
         command = f'mv {local_path} {local_rejected_path}'
-        print(f'moving bad wav file: {local_path} to rejected folder: {local_rejected_path}')
+        LOGGER.info(f'moving bad wav file: {local_path} to rejected folder: {local_rejected_path}')
         os.system(command)
 
     def get_local_dir_path(self, local_file_path):
