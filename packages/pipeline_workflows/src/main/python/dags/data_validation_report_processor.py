@@ -3,7 +3,6 @@ import json
 import os
 
 from gcs_utils import list_blobs_in_a_path, upload_blob, download_blob
-from airflow.models import Variable
 import pandas as pd
 import ast
 from sqlalchemy import create_engine
@@ -12,6 +11,7 @@ import yaml
 
 
 def get_variables():
+    from airflow.models import Variable
     global bucket_name
     global integration_processed_path
     global bucket_file_list
@@ -75,7 +75,6 @@ def generate_bucket_file_list(source):
 
 def cleanse_catalog(data_catalog_raw):
     data_catalog_raw = data_catalog_raw[~data_catalog_raw.audio_id.isna()]
-    data_catalog_raw.audio_id = data_catalog_raw.audio_id.astype('int')
     return data_catalog_raw
 
 
@@ -92,8 +91,6 @@ def fetch_data_catalog(source, db_catalog_tbl, db_conn_obj):
 def fetch_bucket_list(source, bucket_file_list):
     generate_bucket_file_list(source)
     data_bucket_raw = pd.read_csv(source + bucket_file_list, low_memory=False)
-    data_bucket_raw["audio_id"] = data_bucket_raw["audio_id"].astype("float64")
-    data_bucket_raw["audio_id"] = data_bucket_raw["audio_id"].astype("int64")
     return data_bucket_raw
 
 
@@ -120,11 +117,15 @@ def parse_json_utterance_meta(jsonData):
 
 def check_json_utterance_meta(jsonData):
     print(f"Utterance_file_list being processed is {jsonData}")
-    try:
-        json.loads(jsonData)
-    except (ValueError, TypeError):
+    # try:
+    #     json.loads(jsonData)
+    # except (ValueError, TypeError):
+    #     return False
+    # return True
+    if type(jsonData) == dict:
+        return True
+    else:
         return False
-    return True
 
 
 def parse_string_utterance_meta(data):
@@ -140,9 +141,8 @@ def explode_utterances(data_catalog_raw):
     data_catalog_exploded = data_catalog_raw.explode('utterances_files_list').reset_index(drop=True)
 
     utterances_files_list_meta = data_catalog_exploded.utterances_files_list.apply(
-        lambda x: parse_json_utterance_meta(x) if check_json_utterance_meta(
+        lambda x: parse_json_utterance_meta(json.dumps(x)) if check_json_utterance_meta(
             x) else parse_string_utterance_meta(str(x)))
-
     utterances_files_list_meta = utterances_files_list_meta.str.split(
         ",", expand=True)
 
@@ -235,6 +235,7 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     df_catalog_duplicates.to_excel(writer, sheet_name='catalog_list_with_duplicates', index=False)
     df_valid_utterances_with_unique_audioid.to_excel(writer, sheet_name='Cleaned_data_catalog', index=False)
     writer.save()
+    df_valid_utterances_with_unique_audioid.to_csv(report_file_name.replace(".xlsx", ".csv"), index=False)
     print(f"{report_file_name} has been generated....")
 
 
@@ -280,9 +281,34 @@ def get_db_connection_object():
     return create_db_engine(config_path)
 
 
-def report_generation_pipeline():
-    get_variables()
+def get_local_variables():
+    global bucket_name
+    global integration_processed_path
+    global bucket_file_list
+    global db_catalog_tbl
+    global report_file_name
+    global report_upload_path
+    global validation_report_source
+    now = datetime.now()
+    date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
+    bucket_name = "ekstepspeechrecognition-dev"
+    integration_processed_path = "data/audiotospeech/integration/"
+    bucket_file_list = '_bucket_file_list.csv'
+    db_catalog_tbl = 'media_metadata_staging'
+    validation_report_source = "CEC"
+    report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
+
+
+def report_generation_pipeline(mode="cluster"):
+    if mode == "local":
+        get_local_variables()
+    else:
+        get_variables()
     source = validation_report_source
     data_catalog_raw, data_bucket_raw = fetch_data(source, get_db_connection_object())
     generate_data_validation_report(data_catalog_raw, data_bucket_raw)
     upload_report_to_bucket()
+
+
+if __name__ == "__main__":
+    report_generation_pipeline("local")
