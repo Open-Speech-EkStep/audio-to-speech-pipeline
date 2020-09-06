@@ -5,6 +5,7 @@ from audio_transcription.transcription_sanitizer import TranscriptionSanitizer
 from audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
 from common.audio_commons.transcription_clients.transcription_client_errors import \
     AzureTranscriptionClientError, GoogleTranscriptionClientError
+from common.file_utils import get_file_name
 from common.utils import get_logger
 
 import os
@@ -94,16 +95,17 @@ class AudioTranscription:
     def generate_transcription_for_all_utterenaces(self, all_path, language, transcription_client, utterances):
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
         for file_path in all_path:
-            utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, file_path.name)
+            file_name = get_file_name(file_path.name)
+            local_clean_path = f"/tmp/clean/{file_name}"
+            local_rejected_path = f"/tmp/rejected/{file_name}"
+            utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, file_name)
             if utterance_metadata is None:
-                LOGGER.info('No utterance found for file_name: ' + file_path.name)
+                LOGGER.info('No utterance found for file_name: ' + file_name)
                 continue
             if utterance_metadata['status'] == 'Rejected':
-                LOGGER.info('Skipping rejected file_name: ' + file_path.name)
+                LOGGER.info('Skipping rejected file_name: ' + file_name)
                 continue
             LOGGER.info('Generating transcription for utterance:' + str(utterance_metadata))
-            local_clean_path = f"/tmp/clean/{file_path.name}"
-            local_rejected_path = f"/tmp/rejected/{file_path.name}"
 
             self.generate_transcription_and_sanitize(local_clean_path, local_rejected_path, file_path, language,
                                                      transcription_client, utterance_metadata)
