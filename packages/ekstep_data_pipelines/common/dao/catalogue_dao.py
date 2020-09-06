@@ -9,10 +9,10 @@ class CatalogueDao:
     def get_utterances(self, audio_id):
         print('postgres_client \
             .execute_query signature:' + str(self.postgres_client.execute_query))
-        params = {'audio_id': audio_id}
+        parm_dict = {'audio_id': audio_id}
         utterances = self.postgres_client \
             .execute_query('select utterances_files_list from media_metadata_staging where audio_id = :audio_id'
-                           , params)
+                           , **parm_dict)
         return utterances
 
     def update_utterances(self, audio_id, utterances):
