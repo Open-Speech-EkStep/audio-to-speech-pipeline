@@ -32,7 +32,7 @@ class AudioTranscription:
             CONFIG_NAME)
 
         source = kwargs.get('audio_source')
-        audio_ids = kwargs.get('audio_ids', [])
+        audio_ids = [202009040606113111]  # kwargs.get('audio_ids', [])
         stt_api = kwargs.get("speech_to_text_client")
 
         language = self.audio_transcription_config.get(LANGUAGE)
