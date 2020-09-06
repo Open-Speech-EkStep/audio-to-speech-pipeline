@@ -32,7 +32,6 @@ class AudioTranscription:
             CONFIG_NAME)
 
         source = kwargs.get('audio_source')
-        # TODO : FIX IT audio_ids are not passed in arguments
         audio_ids = kwargs.get('audio_ids', [])
         stt_api = kwargs.get("speech_to_text_client")
 
@@ -90,6 +89,9 @@ class AudioTranscription:
             utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, file_path.name)
             if utterance_metadata is None:
                 LOGGER.info('No utterance found for file_name: ' + file_path)
+                continue
+            if utterance_metadata['status'] == 'Rejected':
+                LOGGER.info('Skipping rejected file_name: ' + file_path)
                 continue
             LOGGER.info('Generating transcription for utterance:' + utterance_metadata)
             local_clean_path = f"/tmp/clean/{file_path.name}"
