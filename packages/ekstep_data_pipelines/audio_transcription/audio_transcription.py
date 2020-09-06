@@ -47,7 +47,6 @@ class AudioTranscription:
             try:
                 LOGGER.info('Generating transcription for audio_id:' + str(audio_id))
                 utterances = self.catalogue_dao.get_utterances(audio_id)
-                utterances['audio_id'] = audio_id
                 if len(utterances) <= 0:
                     LOGGER.info('No utterances found for audio_id:' + audio_id)
                     continue

@@ -33,7 +33,7 @@ class CatalogueDao:
 
     def update_utterance_status(self, audio_id, utterance):
         update_query = 'update media_speaker_mapping set status = :status, ' \
-                       'fail_reason=:reason where audio_id=:audio_id ' \
+                       'fail_reason = :reason where audio_id = :audio_id ' \
                        'and clipped_utterance_file_name = :name'
         name = utterance['name']
         reason = utterance['reason']
