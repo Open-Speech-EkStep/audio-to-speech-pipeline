@@ -47,6 +47,7 @@ class AudioTranscription:
             try:
                 LOGGER.info('Generating transcription for audio_id:' + str(audio_id))
                 utterances = self.catalogue_dao.get_utterances(audio_id)
+                utterances['audio_id'] = audio_id
                 if len(utterances) <= 0:
                     LOGGER.info('No utterances found for audio_id:' + audio_id)
                     continue
@@ -60,14 +61,14 @@ class AudioTranscription:
                 LOGGER.info('Using transcription client:' + str(transcription_client))
                 all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
 
-                local_dir_path = self.generate_transcription_for_all_utterenaces(all_path, language,
+                local_dir_path = self.generate_transcription_for_all_utterenaces(audio_id, all_path, language,
                                                                                  transcription_client, utterances)
                 LOGGER.info("after transcription utterances:" + str(utterances))
                 LOGGER.info('updating catalogue with updated utterances')
                 self.catalogue_dao.update_utterances(audio_id, str(utterances))
                 self.move_to_gcs(local_dir_path, remote_stt_output_path)
 
-                self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
+                self.delete_audio_id(f'{remote_path_of_dir}/{source}/{audio_id}')
             except Exception as e:
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
@@ -92,7 +93,7 @@ class AudioTranscription:
         with open(output_file_path, "w") as f:
             f.write(transcription)
 
-    def generate_transcription_for_all_utterenaces(self, all_path, language, transcription_client, utterances):
+    def generate_transcription_for_all_utterenaces(self, audio_id, all_path, language, transcription_client, utterances):
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
         for file_path in all_path:
             file_name = get_file_name(file_path.name)
@@ -107,19 +108,18 @@ class AudioTranscription:
                 continue
             LOGGER.info('Generating transcription for utterance:' + str(utterance_metadata))
 
-            self.generate_transcription_and_sanitize(local_clean_path, local_rejected_path, file_path, language,
+            self.generate_transcription_and_sanitize(audio_id, local_clean_path, local_rejected_path, file_path, language,
                                                      transcription_client, utterance_metadata)
 
         return self.get_local_dir_path(local_clean_path)
 
-    def generate_transcription_and_sanitize(self, local_clean_path, local_rejected_path, file_path, language,
+    def generate_transcription_and_sanitize(self, audio_id, local_clean_path, local_rejected_path, file_path, language,
                                             transcription_client, utterance_metadata):
         if ".wav" in file_path.name:
 
             transcription_file_name = local_clean_path.replace('.wav', '.txt')
             self.gcs_instance.download_to_local(
                 file_path.name, local_clean_path, False)
-
             try:
                 transcript = transcription_client.generate_transcription(
                     language, local_clean_path)
@@ -135,19 +135,20 @@ class AudioTranscription:
             except TranscriptionSanitizationError as tse:
                 LOGGER.error('Transcription not valid: ' + str(tse))
                 reason = 'sanitization error:' + str(tse.args)
-                self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
+                self.handle_error(audio_id, local_clean_path, local_rejected_path, utterance_metadata, reason)
             except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as e:
                 LOGGER.error('STT API call failed: ' + str(e))
                 reason = 'STT API error:' + str(e.args)
-                self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
+                self.handle_error(audio_id, local_clean_path, local_rejected_path, utterance_metadata, reason)
             except Exception as ex:
                 LOGGER.error('Error: ' + str(ex))
                 reason = ex.args
-                self.handle_error(local_clean_path, local_rejected_path, utterance_metadata, reason)
+                self.handle_error(audio_id, local_clean_path, local_rejected_path, utterance_metadata, reason)
 
-    def handle_error(self, local_clean_path, local_rejected_path, utterance_metadata, reason):
+    def handle_error(self, audio_id, local_clean_path, local_rejected_path, utterance_metadata, reason):
         utterance_metadata['status'] = 'Rejected'
         utterance_metadata['reason'] = reason
+        self.catalogue_dao.update_utterance_status(audio_id, utterance_metadata)
         if not os.path.exists(local_rejected_path):
             os.makedirs(local_rejected_path)
         command = f'mv {local_clean_path} {local_rejected_path}'
@@ -156,5 +157,6 @@ class AudioTranscription:
 
     def get_local_dir_path(self, local_file_path):
         path_array = local_file_path.split('/')
+        path_array.pop()
         path_array.pop()
         return '/'.join(path_array)
