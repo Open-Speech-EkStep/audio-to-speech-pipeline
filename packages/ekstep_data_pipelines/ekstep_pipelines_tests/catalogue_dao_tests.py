@@ -44,3 +44,13 @@ class CatalogueTests(unittest.TestCase):
             {"name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav", "duration": "13.38", "snr_value": 38.432806,
              "status": "Clean"}
             , utterance)
+
+    @mock.patch('common.postgres_db_client.PostgresClient')
+    def test_utterance_by_name_return_None_if_not_found(self, mock_postgres_client):
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        name = 'not_exists.wav'
+        utterances = '[{"name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav", "duration": "13.38", "snr_value": 38.432806, "status": "Clean"}, ' \
+                     '{"name": "91_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav", "duration": "3.27", "snr_value": 37.0, "status": "Clean"}]'
+
+        utterance = catalogueDao.find_utterance_by_name(utterances, name)
+        self.assertEqual(None, utterance)
