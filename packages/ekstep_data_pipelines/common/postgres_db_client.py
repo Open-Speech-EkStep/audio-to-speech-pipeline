@@ -1,20 +1,19 @@
 import yaml
 from sqlalchemy import create_engine, select, MetaData, Table, text
-from common.gcs_operations import CloudStorageOperations
 
 
-class DataProcessorUtil:
+class PostgresClient:
     """
-    General processor for various data related activities that
-    we need to perform
+    PostgresClient for DB related operations
     1. Load Configeration
-    2. Tag/Mark data in the DB
-    3. Move marked data
+    2. execute select
+    3. execute update
+    4. execute batch updates
     """
 
     @staticmethod
     def get_instance(intialization_dict):
-        data_processor = DataProcessorUtil(**intialization_dict)
+        data_processor = PostgresClient(**intialization_dict)
         data_processor.setup_peripherals()
         return data_processor
 
@@ -29,7 +28,6 @@ class DataProcessorUtil:
         # get yaml config
         self.load_configeration()
         self.setup_db_access()
-
 
     @property
     def connection(self):
@@ -74,8 +72,8 @@ class DataProcessorUtil:
             parent_config_dict = yaml.load(file)
             self.config_dict = parent_config_dict.get('config')
 
-    def process(self):
-        raise NotImplementedError('This is not implmented')
+    def execute_query(self, query, **parm_dict):
+        return self.connection.execute(text(query), **parm_dict).fetchall()
 
-    def create_gcs_object(self):
-        return CloudStorageOperations()
+    def execute_update(self, query, **parm_dict):
+        return self.connection.execute(text(query), **parm_dict)

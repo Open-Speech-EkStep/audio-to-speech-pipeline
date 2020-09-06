@@ -194,8 +194,9 @@ def perform_action(arguments, **kwargs):
         data_processor = object_dict.get('data_processor')
         gcs_instance = object_dict.get('gsc_instance')
         audio_commons = object_dict.get('audio_commons')
+        catalogue_dao = object_dict.get('catalogue_dao')
 
-        curr_processor = AudioTranscription.get_instance(data_processor, gcs_instance, audio_commons)
+        curr_processor = AudioTranscription.get_instance(data_processor, gcs_instance, audio_commons, catalogue_dao)
 
     LOGGER.info(f'Starting processing for {current_action}')
     curr_processor.process(**kwargs)
