@@ -39,6 +39,7 @@ class AudioTranscription:
         remote_path_of_dir = self.audio_transcription_config.get(
             CLEAN_AUDIO_PATH)
         LOGGER.info('Generating transcriptions for audio_ids:' + str(audio_ids))
+        failed_audio_ids = []
         for audio_id in audio_ids:
             try:
                 LOGGER.info('Generating transcription for audio_id:' + str(audio_id))
@@ -53,7 +54,7 @@ class AudioTranscription:
                 remote_stt_output_path = f'{remote_stt_output_path}/{source}/{audio_id}'
 
                 transcription_client = self.transcription_clients[stt_api]
-                LOGGER.info('Using transcription client:' + transcription_client)
+                LOGGER.info('Using transcription client:' + str(transcription_client))
                 all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
 
                 local_dir_path = self.generate_transcription_for_all_utterenaces(all_path, language,
@@ -65,13 +66,16 @@ class AudioTranscription:
 
                 self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
             except Exception as e:
-                LOGGER.error(f'Transcription failed for audio_id:${audio_id}')
-                LOGGER.error(str(e))
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
-
+                LOGGER.error(f'Transcription failed for audio_id:${audio_id}')
+                LOGGER.error(str(e))
+                failed_audio_ids.append(audio_id)
                 continue
 
+        if len(failed_audio_ids) > 0:
+            LOGGER.info()
+            raise RuntimeError('Failed audio_ids:' + str(failed_audio_ids))
         return
 
     def delete_audio_id(self, remote_dir_path_for_given_audio_id):
