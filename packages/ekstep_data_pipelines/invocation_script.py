@@ -199,6 +199,7 @@ def perform_action(arguments, **kwargs):
 
     LOGGER.info(f'Starting processing for {current_action}')
     curr_processor.process(**kwargs)
+    curr_processor.process(**kwargs)
     LOGGER.info(f'Ending processing for {current_action}')
 
 
