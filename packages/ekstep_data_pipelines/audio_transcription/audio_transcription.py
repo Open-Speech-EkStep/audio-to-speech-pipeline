@@ -11,6 +11,7 @@ from common.dao.catalogue_dao import CatalogueDao
 
 LOGGER = get_logger('audio_transcription')
 
+
 class AudioTranscription:
     LOCAL_PATH = None
 
@@ -32,7 +33,7 @@ class AudioTranscription:
 
         source = kwargs.get('audio_source')
         # TODO : FIX IT audio_ids are not passed in arguments
-        audio_ids = kwargs.get('audio_ids', [202009040606113111])
+        audio_ids = kwargs.get('audio_ids', [])
         stt_api = kwargs.get("speech_to_text_client")
 
         language = self.audio_transcription_config.get(LANGUAGE)
@@ -43,6 +44,9 @@ class AudioTranscription:
             try:
                 LOGGER.info('Generating transcription for audio_id:' + str(audio_id))
                 utterances = self.catalogue_dao.get_utterances(audio_id)
+                if len(utterances) <= 0:
+                    LOGGER.info('No utterances found for audio_id:' + audio_id)
+                    continue
                 LOGGER.info("before transcription utterances:" + str(utterances))
                 remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean/'
                 remote_stt_output_path = self.audio_transcription_config.get(
@@ -50,10 +54,11 @@ class AudioTranscription:
                 remote_stt_output_path = f'{remote_stt_output_path}/{source}/{audio_id}'
 
                 transcription_client = self.transcription_clients[stt_api]
-
+                LOGGER.info('Using transcription client:' + transcription_client)
                 all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
 
-                local_dir_path = self.generate_transcription_for_all_utterenaces(all_path, language, transcription_client, utterances)
+                local_dir_path = self.generate_transcription_for_all_utterenaces(all_path, language,
+                                                                                 transcription_client, utterances)
                 LOGGER.info("after transcription utterances:" + str(utterances))
                 LOGGER.info('updating catalogue with updated utterances')
                 self.catalogue_dao.update_utterances(audio_id, utterances)
@@ -61,7 +66,8 @@ class AudioTranscription:
 
                 self.delete_audio_id(f'{remote_path_of_dir}/{source}/')
             except Exception as e:
-                LOGGER.error(f'Transcription failed for audio_id:${audio_id}, error:{e.args}')
+                LOGGER.error(f'Transcription failed for audio_id:${audio_id}')
+                LOGGER.error(str(e))
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
 
@@ -82,14 +88,20 @@ class AudioTranscription:
     def generate_transcription_for_all_utterenaces(self, all_path, language, transcription_client, utterances):
         for file_path in all_path:
             utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, file_path.name)
+            if utterance_metadata is None:
+                LOGGER.info('No utterance found for file_name: ' + file_path)
+                continue
+            LOGGER.info('Generating transcription for utterance:' + utterance_metadata)
             local_clean_path = f"/tmp/clean/{file_path.name}"
             local_rejected_path = f"/tmp/rejected/{file_path.name}"
 
-            self.generate_transcription_and_sanitize(local_clean_path, local_rejected_path,  file_path, language, transcription_client, utterance_metadata)
+            self.generate_transcription_and_sanitize(local_clean_path, local_rejected_path, file_path, language,
+                                                     transcription_client, utterance_metadata)
 
         return self.get_local_dir_path(local_clean_path)
 
-    def generate_transcription_and_sanitize(self, local_clean_path, local_rejected_path, file_path, language, transcription_client, utterance_metadata):
+    def generate_transcription_and_sanitize(self, local_clean_path, local_rejected_path, file_path, language,
+                                            transcription_client, utterance_metadata):
         if ".wav" in file_path.name:
 
             transcription_file_name = local_clean_path.replace('.wav', '.txt')
