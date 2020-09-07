@@ -24,7 +24,7 @@ class TestTrancriptionSanitizer(unittest.TestCase):
 
     def test_transcription_punctuations_are_being_removed(self):
         transcript_obj = TranscriptionSanitizer()
-        transcript = 'अलग-अलग होते है!"₹#$%&\'()*+,./;<=>?@[\\]^_`{|}~।'
+        transcript = 'अलग-अलग होते है!"#%&\'()*+,./;<=>?@[\\]^_`{|}~।'
         self.assertEqual(transcript_obj.replace_bad_char(transcript), 'अलग अलग होते है')
 
     def test_transcription_containing_numbers_0123456789_should_be_accepted(self):
@@ -39,8 +39,7 @@ class TestTrancriptionSanitizer(unittest.TestCase):
 
     def test_transcription_should_pass_for_given_samples(self):
         transcript_obj = TranscriptionSanitizer()
-        transcripts = [("₹100 देखकर", '100 देखकर'), ("$200000 कोड", '200000 कोड'),
-                       ("अलग-अलग होते हैं ", 'अलग अलग होते हैं'),
+        transcripts = [("अलग-अलग होते हैं ", 'अलग अलग होते हैं'),
                        ("इफ यू हॅव ठीक थी", 'इफ यू हॅव ठीक थी'), ("डिस्कॅशंस", 'डिस्कॅशंस'),
                        ("लेकिन मैक्सिमॅम ", 'लेकिन मैक्सिमॅम'), ("फ्लैट चलाते-चलाते", 'फ्लैट चलाते चलाते'),
                        ("1126 वॅन", '1126 वॅन'),
@@ -58,7 +57,7 @@ class TestTrancriptionSanitizer(unittest.TestCase):
         transcript_obj = TranscriptionSanitizer()
         transcriptions = ["8:00 से", "टेक्स्ट टू दीपा वन ऍफ़ टू", "रजिस्ट्री ऍफ़", "3dmili", "x-ray निकाल के दिखाते हैं ",
                           "e-filing आ जाती है ", "B.Ed कॉलेज ", "m.a. B.Ed पूरी कर ",
-                          "दिनभर patient-centered "]
+                          "दिनभर patient-centered ", "₹300", "$500"]
         for each_transcription in transcriptions:
             with self.assertRaises(TranscriptionSanitizationError):
                 transcript_obj.sanitize(each_transcription)

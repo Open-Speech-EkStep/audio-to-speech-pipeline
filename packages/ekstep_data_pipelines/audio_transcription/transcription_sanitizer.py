@@ -32,6 +32,6 @@ class TranscriptionSanitizer(object):
         if '-' in transcription:
             transcription = transcription.replace('-', ' ')
 
-        punctuation = '₹!"#$%&\'()*+,./;<=>?@[\\]^_`{|}~।'
+        punctuation = '!"#%&\'()*+,./;<=>?@[\\]^_`{|}~।'
         table = str.maketrans(dict.fromkeys(punctuation))
         return transcription.translate(table)

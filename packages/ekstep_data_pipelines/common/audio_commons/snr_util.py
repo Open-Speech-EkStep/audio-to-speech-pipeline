@@ -109,6 +109,8 @@ class SNR:
             metadata["audio_id"] = audio_id
             metadata['utterances_files_list'] = str(list_file_utterances_with_duration)
 
+            clip_duration = calculate_duration(file_path)
+            
             if snr_value < threshold:
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
                 metadata.to_csv(metadata_file_name, index=False)
@@ -116,7 +118,7 @@ class SNR:
                     {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High-SNR', 'snr_threshold': threshold})
                 continue
 
-            clip_duration = calculate_duration(file_path)
+            
 
             if(clip_duration > SNR.MAX_DURATION):
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
