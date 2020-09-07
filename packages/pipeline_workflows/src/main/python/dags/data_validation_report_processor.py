@@ -252,6 +252,8 @@ def upload_report_to_bucket():
     # get_variables()
     print("Uploading report to bucket ...")
     upload_blob(bucket_name, report_file_name, report_upload_path + report_file_name)
+    upload_blob(bucket_name, report_file_name.replace(".xlsx", ".csv"),
+                report_upload_path + "/cleaned_csv_reports" + report_file_name.replace(".xlsx", ".csv"))
     os.remove(report_file_name)
 
 
@@ -295,7 +297,7 @@ def get_local_variables():
     integration_processed_path = "data/audiotospeech/integration/processed/hindi/audio"
     bucket_file_list = '_bucket_file_list.csv'
     db_catalog_tbl = 'media_metadata_staging'
-    report_upload_path ="data/audiotospeech/integration/processed/hindi/reports/data_validation_report"
+    report_upload_path = "data/audiotospeech/integration/processed/hindi/reports/data_validation_report"
     validation_report_source = "CEC"
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
 
