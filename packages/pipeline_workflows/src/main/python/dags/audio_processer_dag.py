@@ -62,19 +62,30 @@ def create_dag(dag_id,
 
         audio_file_ids = json.loads(Variable.get("audiofileids"))[dag_id]
 
-        batches = []
-
         if len(audio_file_ids) > 0:
             chunk_size = math.ceil(len(audio_file_ids) / parallelism)
-            batches = [audio_file_ids[i:i + chunk_size]
-                       for i in range(0, len(audio_file_ids), chunk_size)]
+            batches = [audio_file_ids[i:i + chunk_size] for i in range(0, len(audio_file_ids), chunk_size)]
+            data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
+                task_id='data-normalizer',
+                name='data-normalizer',
+                cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", "ekstepspeechrecognition-dev",
+                      "data/audiotospeech/config/datacataloguer-prep/config.yaml"],
+                # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
+                namespace=composer_namespace,
+                startup_timeout_seconds=300,
+                secrets=[secret_file],
+                image='us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:1.0.0',
+                image_pull_policy='Always')
+        else:
+            batches = []
 
         for batch_audio_file_ids in batches:
             data_prep_task = kubernetes_pod_operator.KubernetesPodOperator(
-                task_id=dag_id + "_data_snr_",
+                task_id=dag_id + "_data_snr_" + batch_audio_file_ids[0],
                 name='data-prep-snr',
                 cmds=["python", "invocation_script.py", "-a", "audio_processing", "-rc", "data/audiotospeech/config/audio_processing/config.yaml",
                       "-ai", ','.join(batch_audio_file_ids), "-af", args.get('audio_format'), "-as", dag_id],
+                # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
@@ -84,11 +95,10 @@ def create_dag(dag_id,
             move_to_processed = PythonOperator(
                 task_id=dag_id + "_move_raw_to_processed_" + batch_audio_file_ids[0],
                 python_callable=move_raw_to_processed,
-                op_kwargs={'source': dag_id, 'batch_audio_file_ids': batch_audio_file_ids,
-                           'tobe_processed_path': tobe_processed_path_snr},
+                op_kwargs={'source': dag_id, 'batch_audio_file_ids': batch_audio_file_ids,'tobe_processed_path': tobe_processed_path_snr},
                 dag_number=dag_number)
 
-            fetch_audio_ids >> data_prep_task >> move_to_processed
+            fetch_audio_ids >> data_prep_task >> move_to_processed >> data_prep_cataloguer
 
     return dag
 
