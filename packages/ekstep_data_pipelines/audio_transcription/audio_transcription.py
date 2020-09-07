@@ -35,7 +35,7 @@ class AudioTranscription:
             CONFIG_NAME)
 
         source = kwargs.get('audio_source')
-        audio_ids = [202009040606103581]  # kwargs.get('audio_ids', [])
+        audio_ids = kwargs.get('audio_ids', [])
         stt_api = kwargs.get("speech_to_text_client")
 
         language = self.audio_transcription_config.get(LANGUAGE)
@@ -70,9 +70,12 @@ class AudioTranscription:
                 self.move_to_gcs(local_clean_dir_path, remote_stt_output_path + "/clean")
 
                 LOGGER.info(f'Uploading local generated files from {local_rejected_dir_path} to {remote_stt_output_path}')
-                self.move_to_gcs(local_rejected_dir_path, remote_stt_output_path + "/rejected")
+                if os.path.exists(local_rejected_dir_path):
+                    self.move_to_gcs(local_rejected_dir_path, remote_stt_output_path + "/rejected")
+                else:
+                    LOGGER.info('No rejected files found')
 
-                # self.delete_audio_id(f'{remote_path_of_dir}/{source}/{audio_id}')
+                self.delete_audio_id(f'{remote_path_of_dir}/{source}/{audio_id}')
             except Exception as e:
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
@@ -99,6 +102,7 @@ class AudioTranscription:
 
     def generate_transcription_for_all_utterenaces(self, audio_id, all_path, language, transcription_client, utterances):
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
+        utterances_processed = []
         for file_path in all_path:
             file_name = get_file_name(file_path.name)
             local_clean_path = f"/tmp/{file_path.name}"
@@ -115,7 +119,7 @@ class AudioTranscription:
             self.generate_transcription_and_sanitize(audio_id, local_clean_path, local_rejected_path, file_path, language,
                                                      transcription_client, utterance_metadata)
 
-        return self.get_local_dir_path(local_clean_path),self.get_local_dir_path(local_rejected_path)
+        return self.get_local_dir_path(local_clean_path), self.get_local_dir_path(local_rejected_path)
 
     def generate_transcription_and_sanitize(self, audio_id, local_clean_path, local_rejected_path, file_path, language,
                                             transcription_client, utterance_metadata):
