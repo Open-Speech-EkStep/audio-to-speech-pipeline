@@ -107,11 +107,11 @@ class SNR:
 
             metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60), 2)
             metadata["audio_id"] = audio_id
-            metadata['utterances_files_list'] = str(list_file_utterances_with_duration)
+            metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)
 
             clip_duration = calculate_duration(file_path)
-            
             if snr_value < threshold:
+
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
                 metadata.to_csv(metadata_file_name, index=False)
                 list_file_utterances_with_duration.append(
