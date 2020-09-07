@@ -50,7 +50,6 @@ class AudioTranscription:
                 if len(utterances) <= 0:
                     LOGGER.info('No utterances found for audio_id:' + audio_id)
                     continue
-                LOGGER.info("before transcription utterances:" + str(utterances))
                 remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean/'
                 remote_stt_output_path = self.audio_transcription_config.get(
                     'remote_stt_audio_file_path')
@@ -62,7 +61,6 @@ class AudioTranscription:
 
                 local_clean_dir_path, local_rejected_dir_path = self.generate_transcription_for_all_utterenaces(audio_id, all_path, language,
                                                                                  transcription_client, utterances)
-                LOGGER.info("after transcription utterances:" + str(utterances))
                 LOGGER.info('updating catalogue with updated utterances')
                 self.catalogue_dao.update_utterances(audio_id, utterances)
 
