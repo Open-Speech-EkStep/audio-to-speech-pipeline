@@ -177,7 +177,7 @@ def get_valid_utterance_duration_unexploded(bucket_list_in_catalog):
         bucket_list_in_catalog.utterances_file_duration.between(.5, 15)].sort_values(
         'raw_file_name')
     # valid_utterance_duration = append_file_and_duration(valid_utterance_duration)
-
+    valid_utterance_duration = valid_utterance_duration[valid_utterance_duration.utterances_file_status != "Rejected"]
     return valid_utterance_duration.groupby('audio_id', as_index=False).agg(
         {'utterances_file_duration': lambda x: x.sum() / 60,
          'utterances_files_list': lambda tdf: tdf.tolist()})
