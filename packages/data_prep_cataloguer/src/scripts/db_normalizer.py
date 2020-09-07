@@ -113,11 +113,11 @@ class Db_normalizer():
 
 
     def update_source_metadata_table(self,connection):
-        # self.insert_into_source_metadata(connection)
-        # source_info = self.get_new_source_data(connection)
-        # for source in source_info:
-        #     update_query = text(UPDATE_SOURCE_METADATA_QUERY)
-        #     connection.execute(update_query,cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
+        self.insert_into_source_metadata(connection)
+        source_info = self.get_new_source_data(connection)
+        for source in source_info:
+            update_query = text(UPDATE_SOURCE_METADATA_QUERY)
+            connection.execute(update_query,cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
         insert_query = self.update_utterance_in_mapping_table(connection)
 
         if len(insert_query) < 1:
@@ -156,7 +156,7 @@ class Db_normalizer():
             return data
         except json.decoder.JSONDecodeError as error:
             print(error)
-            pass
+            return raw_file_utterance
 
     def fetch_unnormalized_data(self,connection):
 
@@ -170,12 +170,13 @@ class Db_normalizer():
 
     def copy_data_media_speaker_mapping(self,db):
         connection = db.connect()
+
         max_load_date = self.get_load_date_for_mapping(connection)
         get_audio_id = text(GET_AUDIO_ID_QUERY)
         results = connection.execute(
             get_audio_id, max_load_date=max_load_date).fetchall()
         audio_ids = results
-        print(len(audio_ids))
+
         with open("./full_query.txt", 'w') as myfile:
             myfile.write(
                 f"insert into media_speaker_mapping(audio_id, speaker_id, clipped_utterance_file_name, clipped_utterance_duration,load_datetime,snr,status,fail_reason) values ")
