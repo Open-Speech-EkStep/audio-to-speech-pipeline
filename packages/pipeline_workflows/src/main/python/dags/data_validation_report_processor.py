@@ -18,6 +18,7 @@ def get_variables():
     global db_catalog_tbl
     global report_file_name
     global report_upload_path
+    global cleaned_csv_report_file_name
     global validation_report_source
     now = datetime.now()
     date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
@@ -28,6 +29,7 @@ def get_variables():
     db_catalog_tbl = 'media_metadata_staging'
     validation_report_source = Variable.get("validation_report_source")
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
+    cleaned_csv_report_file_name = report_file_name.replace(".xlsx", ".csv")
 
 
 def get_prefix_attributes_full_path(full_path, integration_processed_path):
@@ -235,7 +237,7 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     df_catalog_duplicates.to_excel(writer, sheet_name='catalog_list_with_duplicates', index=False)
     df_valid_utterances_with_unique_audioid.to_excel(writer, sheet_name='Cleaned_data_catalog', index=False)
     writer.save()
-    df_valid_utterances_with_unique_audioid.to_csv(report_file_name.replace(".xlsx", ".csv"), index=False)
+    df_valid_utterances_with_unique_audioid.to_csv(cleaned_csv_report_file_name, index=False)
     print(f"{report_file_name} has been generated....")
 
 
@@ -251,10 +253,11 @@ def fetch_data(source, db_conn_obj):
 def upload_report_to_bucket():
     # get_variables()
     print("Uploading report to bucket ...")
-    upload_blob(bucket_name, report_file_name, report_upload_path + report_file_name)
-    upload_blob(bucket_name, report_file_name.replace(".xlsx", ".csv"),
-                report_upload_path + "/cleaned_csv_reports" + report_file_name.replace(".xlsx", ".csv"))
+    upload_blob(bucket_name, report_file_name, os.path.join(report_upload_path, report_file_name))
+    upload_blob(bucket_name, cleaned_csv_report_file_name,
+                os.path.join(report_upload_path, "cleaned_csv_reports", cleaned_csv_report_file_name))
     os.remove(report_file_name)
+    os.remove(cleaned_csv_report_file_name)
 
 
 def __load_yaml_file(path):
@@ -289,17 +292,19 @@ def get_local_variables():
     global bucket_file_list
     global db_catalog_tbl
     global report_file_name
+    global cleaned_csv_report_file_name
     global report_upload_path
     global validation_report_source
     now = datetime.now()
     date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
     bucket_name = "ekstepspeechrecognition-dev"
-    integration_processed_path = "data/audiotospeech/integration/processed/hindi/audio"
+    integration_processed_path = "data/audiotospeech/integration/processed/hindi/audio/"
     bucket_file_list = '_bucket_file_list.csv'
     db_catalog_tbl = 'media_metadata_staging'
-    report_upload_path = "data/audiotospeech/integration/processed/hindi/reports/data_validation_report"
+    report_upload_path = "data/audiotospeech/integration/processed/hindi/reports/data_validation_report/"
     validation_report_source = "CEC"
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
+    cleaned_csv_report_file_name = report_file_name.replace(".xlsx", ".csv")
 
 
 def report_generation_pipeline(mode="cluster"):
