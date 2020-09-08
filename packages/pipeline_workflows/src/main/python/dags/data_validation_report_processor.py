@@ -159,7 +159,7 @@ def convert_string_utterance_meta(data):
     snr = np.nan
     reason = np.nan
     dicti["name"] = filename
-    dicti["duration"] = float(duration)
+    dicti["duration"] = duration
     dicti["snr_value"] = snr
     dicti["status"] = status
     dicti["reason"] = reason
