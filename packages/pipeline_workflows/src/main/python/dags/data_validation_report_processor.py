@@ -10,23 +10,37 @@ from datetime import datetime
 import yaml
 import numpy as np
 
-def get_variables():
-    from airflow.models import Variable
+
+def get_config_variables():
+    config_path = "./config.yaml"
+    download_blob("ekstepspeechrecognition-dev", "data/audiotospeech/config/validation_report_dag/config.yaml",
+                  config_path)
+    variables = __load_yaml_file(config_path)["report_configuration"]
+    return variables
+
+
+def get_common_variables():
     global bucket_name
     global integration_processed_path
     global bucket_file_list
     global db_catalog_tbl
-    global report_file_name
     global report_upload_path
+    variables = get_config_variables()
+    bucket_name = variables["bucket_name"]
+    report_upload_path = variables["report_upload_path"]
+    integration_processed_path = variables["integration_processed_path"]
+    db_catalog_tbl = variables["db_catalog_tbl"]
+    bucket_file_list = '_bucket_file_list.csv'
+
+
+def get_variables():
+    from airflow.models import Variable
+    global report_file_name
     global cleaned_csv_report_file_name
     global validation_report_source
     now = datetime.now()
     date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-    bucket_name = Variable.get("bucket")
-    report_upload_path = Variable.get("report_upload_path")
-    integration_processed_path = Variable.get("integrationprocessedpath")
-    bucket_file_list = '_bucket_file_list.csv'
-    db_catalog_tbl = 'media_metadata_staging'
+    get_common_variables()
     validation_report_source = Variable.get("validation_report_source")
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
     cleaned_csv_report_file_name = report_file_name.replace(".xlsx", ".csv")
@@ -170,6 +184,13 @@ def explode_utterances(data_catalog_raw):
     return data_catalog_exploded
 
 
+def explode_utterences_copy(data_catalog_raw):
+    data_catalog_raw['utterances_files_list'].fillna('[]', inplace=True)
+    data_catalog_raw.utterances_files_list = data_catalog_raw.utterances_files_list.apply(ast.literal_eval)
+    data_catalog_exploded = data_catalog_raw.explode('utterances_files_list').reset_index(drop=True)
+    return data_catalog_exploded
+
+
 def get_bucket_list_in_catalog(data_catalog_exploded, data_bucket_raw):
     bucket_list_in_catalog = data_bucket_raw.merge(data_catalog_exploded, how='inner',
                                                    on=['audio_id', 'utterances_file_name'],
@@ -297,28 +318,17 @@ def create_db_engine(config_local_path):
 
 def get_db_connection_object():
     config_path = "./config.yaml"
-    download_blob(bucket_name, "data/audiotospeech/config/downloaded_data_cataloguer/config.yaml",
-                  config_path)
     return create_db_engine(config_path)
 
 
 def get_local_variables():
-    global bucket_name
-    global integration_processed_path
-    global bucket_file_list
-    global db_catalog_tbl
     global report_file_name
     global cleaned_csv_report_file_name
-    global report_upload_path
     global validation_report_source
     now = datetime.now()
     date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-    bucket_name = "ekstepspeechrecognition-dev"
-    integration_processed_path = "data/audiotospeech/integration/processed/hindi/audio/"
-    bucket_file_list = '_bucket_file_list.csv'
-    db_catalog_tbl = 'media_metadata_staging'
-    report_upload_path = "data/audiotospeech/integration/processed/hindi/reports/data_validation_report/"
-    validation_report_source = "CEC"
+    get_common_variables()
+    validation_report_source = "Dummy"
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
     cleaned_csv_report_file_name = report_file_name.replace(".xlsx", ".csv")
 
