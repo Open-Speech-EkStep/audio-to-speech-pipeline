@@ -39,11 +39,22 @@ class AudioProcessor:
         audio_id_list = kwargs.get('audio_id_list', [])
         source = kwargs.get('source')
         extension = kwargs.get('extension')
+        process_master_csv = kwargs.get('process_master_csv','false')
 
         Logger.info(f'Processing audio ids {audio_id_list}')
         for audio_id in audio_id_list:
             Logger.info(f'Processing audio_id {audio_id}')
             self.process_audio_id(audio_id, source, extension)
+        
+        if process_master_csv:
+            master_metadat_file_path = f'{self.audio_processor_config.get(MASTER_META_DATA_FILE_PATH)}/{source}/{source}_master.csv'
+
+            meta_data_file_exists = self.gcs_instance.check_path_exists(
+                master_metadat_file_path)
+
+            if meta_data_file_exists:
+                self.upload_and_move(master_metadat_file_path, source)
+
 
     def process_audio_id(self, audio_id, source, extension):
 
@@ -54,14 +65,6 @@ class AudioProcessor:
 
         self.ensure_path(local_audio_download_path)
         Logger.info(f'Ensured {local_audio_download_path} exists')
-
-        master_metadat_file_path = f'{self.audio_processor_config.get(MASTER_META_DATA_FILE_PATH)}/{source}/{source}_master.csv'
-
-        meta_data_file_exists = self.gcs_instance.check_path_exists(
-            master_metadat_file_path)
-
-        if meta_data_file_exists:
-            self.upload_and_move(master_metadat_file_path,source)
 
         remote_file_path = self.audio_processor_config.get(REMOTE_RAW_FILE)
         remote_download_path = f'{remote_file_path}/{source}/{audio_id}'
@@ -105,7 +108,7 @@ class AudioProcessor:
 
         self.upload_file(meta_data_file_path)
 
-    def upload_and_move(self, master_metadat_file_path,source):
+    def upload_and_move(self, master_metadat_file_path, source):
 
         meta_data_done_path = f'{self.audio_processor_config.get(MASTER_META_DATA_DONE_FILE_PATH)}/{source}'
 
@@ -115,7 +118,8 @@ class AudioProcessor:
             master_metadat_file_path, local_metadata_downloaded_path)
         self.upload_file_to_downloaded_source(local_metadata_downloaded_path)
 
-        self.gcs_instance.move_blob(master_metadat_file_path, meta_data_done_path)
+        self.gcs_instance.move_blob(
+            master_metadat_file_path, meta_data_done_path)
 
     def ensure_path(self, path):
         # TODO: make path empty before creating it again

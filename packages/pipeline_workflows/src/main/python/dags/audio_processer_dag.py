@@ -43,7 +43,7 @@ def create_dag(dag_id,
         print(args)
 
         copy_files_in_buckets = PythonOperator(
-            task_id=dag_id + "_copy_landing_tobeprocessed",
+            task_id=dag_id + "_move_download_tobeprocessed",
             python_callable=get_files_from_landing_zone,
             op_kwargs={'source': dag_id, 'source_landing_path': source_path_for_snr, 'error_landing_path': error_landing_path_snr,
                        'tobe_processed_path': tobe_processed_path_snr, 'batch_count': batch_count, 'audio_format': audio_format},
@@ -63,6 +63,7 @@ def create_dag(dag_id,
         audio_file_ids = json.loads(Variable.get("audiofileids"))[dag_id]
 
         if len(audio_file_ids) > 0:
+            
             chunk_size = math.ceil(len(audio_file_ids) / parallelism)
             batches = [audio_file_ids[i:i + chunk_size] for i in range(0, len(audio_file_ids), chunk_size)]
             data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
