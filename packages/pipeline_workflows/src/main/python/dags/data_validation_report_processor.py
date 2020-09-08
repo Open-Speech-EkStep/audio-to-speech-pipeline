@@ -168,8 +168,14 @@ def convert_string_utterance_meta(data):
 
 def explode_utterances(data_catalog_raw):
     data_catalog_raw['utterances_files_list'].fillna('[]', inplace=True)
-    data_catalog_raw.utterances_files_list = data_catalog_raw.utterances_files_list.apply(ast.literal_eval)
+    data_catalog_raw.utterances_files_list = data_catalog_raw.utterances_files_list.astype('str').apply(
+        ast.literal_eval)
     data_catalog_exploded = data_catalog_raw.explode('utterances_files_list').reset_index(drop=True)
+    return data_catalog_exploded
+
+
+def normalize_exploded_utterances(data_catalog_raw):
+    data_catalog_exploded = explode_utterances(data_catalog_raw)
     utterances_files_list_meta = data_catalog_exploded.utterances_files_list.apply(
         lambda x: parse_json_utterance_meta(json.dumps(x)) if check_json_utterance_meta(
             x) else parse_string_utterance_meta(str(x)))
@@ -181,13 +187,6 @@ def explode_utterances(data_catalog_raw):
     data_catalog_exploded.insert(5, 'utterances_file_name', utterances_files_list_meta[0])
     data_catalog_exploded.insert(6, 'utterances_file_duration', utterances_files_list_meta[1].astype('float'))
     data_catalog_exploded.insert(7, 'utterances_file_status', utterances_files_list_meta[2])
-    return data_catalog_exploded
-
-
-def explode_utterences_copy(data_catalog_raw):
-    data_catalog_raw['utterances_files_list'].fillna('[]', inplace=True)
-    data_catalog_raw.utterances_files_list = data_catalog_raw.utterances_files_list.apply(ast.literal_eval)
-    data_catalog_exploded = data_catalog_raw.explode('utterances_files_list').reset_index(drop=True)
     return data_catalog_exploded
 
 
@@ -249,9 +248,30 @@ def get_valid_and_unique_utterances(df_catalog_unique, df_catalog_valid_utteranc
 #                                   on='audio_id')
 #
 
+def append_transcription_files_list(df_cleaned_dataset):
+    df_cleaned_dataset_transcipts = df_cleaned_dataset.copy()
+    df_cleaned_dataset_transcipts.bucket_file_path = df_cleaned_dataset_transcipts.bucket_file_path.apply(
+        lambda x: x.replace('wav', 'txt'))
+    df_cleaned_dataset_transcipts.utterances_file_name = df_cleaned_dataset_transcipts.utterances_file_name.apply(
+        lambda x: x.replace('wav', 'txt'))
+    df_cleaned_dataset_final = df_cleaned_dataset.append(df_cleaned_dataset_transcipts).sort_values(
+        'utterances_file_name')
+
+    return df_cleaned_dataset_final
+
+
+def generate_cleaned_dataset(df_cleaned_utterances_unexploded, bucket_list_in_catalog):
+    df_cleaned_dataset = df_cleaned_utterances_unexploded.merge(bucket_list_in_catalog,
+                                                                on=['audio_id', 'utterances_files_list'],
+                                                                suffixes=('_y', ' '))
+    return append_transcription_files_list(
+        df_cleaned_dataset[['bucket_file_path', 'utterances_file_name', 'utterances_file_duration']])
+
+
 def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     print("Generate reports...")
-    data_catalog_exploded = explode_utterances(data_catalog_raw)
+    data_catalog_exploded = normalize_exploded_utterances(data_catalog_raw)
+    print(data_catalog_exploded.utterances_files_list)
     bucket_list_not_in_catalog = get_bucket_list_not_in_catalog(data_catalog_exploded, data_bucket_raw)
     catalog_list_not_in_bucket = get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw)
     bucket_list_in_catalog = get_bucket_list_in_catalog(data_catalog_exploded, data_bucket_raw)
@@ -265,6 +285,11 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
 
     df_valid_utterances_with_unique_audioid = get_valid_and_unique_utterances(df_catalog_unique,
                                                                               df_catalog_valid_utterance_duration_unexploded)
+
+    df_cleaned_utterances_unexploded = explode_utterances(df_valid_utterances_with_unique_audioid
+                                                          )
+    df_cleaned_dataset = generate_cleaned_dataset(df_cleaned_utterances_unexploded, bucket_list_in_catalog)
+
     writer = pd.ExcelWriter(report_file_name, engine='xlsxwriter')
     bucket_list_not_in_catalog.to_excel(writer, sheet_name='bucket_list_not_in_catalog', index=False)
     catalog_list_not_in_bucket.to_excel(writer, sheet_name='catalog_list_not_in_bucket', index=False)
@@ -274,7 +299,7 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     df_catalog_duplicates.to_excel(writer, sheet_name='catalog_list_with_duplicates', index=False)
     df_valid_utterances_with_unique_audioid.to_excel(writer, sheet_name='Cleaned_data_catalog', index=False)
     writer.save()
-    df_valid_utterances_with_unique_audioid.to_csv(cleaned_csv_report_file_name, index=False)
+    df_cleaned_dataset.to_csv(cleaned_csv_report_file_name, index=False)
     print(f"{report_file_name} has been generated....")
 
 
