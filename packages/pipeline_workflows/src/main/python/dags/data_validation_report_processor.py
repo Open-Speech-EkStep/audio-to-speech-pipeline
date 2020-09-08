@@ -8,7 +8,7 @@ import ast
 from sqlalchemy import create_engine
 from datetime import datetime
 import yaml
-
+import numpy as np
 
 def get_variables():
     from airflow.models import Variable
@@ -137,17 +137,33 @@ def parse_string_utterance_meta(data):
     return filename + ',' + str(duration) + ',' + status
 
 
+def convert_string_utterance_meta(data):
+    dicti = {}
+    filename = data.split(':')[0]
+    duration = data.split(':')[-1]
+    status = np.nan
+    snr = np.nan
+    reason = np.nan
+    dicti["name"] = filename
+    dicti["duration"] = float(duration)
+    dicti["snr_value"] = snr
+    dicti["status"] = status
+    dicti["reason"] = reason
+    return json.dumps(dicti)
+
+
 def explode_utterances(data_catalog_raw):
     data_catalog_raw['utterances_files_list'].fillna('[]', inplace=True)
     data_catalog_raw.utterances_files_list = data_catalog_raw.utterances_files_list.apply(ast.literal_eval)
     data_catalog_exploded = data_catalog_raw.explode('utterances_files_list').reset_index(drop=True)
-
     utterances_files_list_meta = data_catalog_exploded.utterances_files_list.apply(
         lambda x: parse_json_utterance_meta(json.dumps(x)) if check_json_utterance_meta(
             x) else parse_string_utterance_meta(str(x)))
     utterances_files_list_meta = utterances_files_list_meta.str.split(
         ",", expand=True)
-
+    data_catalog_exploded["utterances_files_list"] = data_catalog_exploded.utterances_files_list.apply(
+        lambda x: json.dumps(x) if check_json_utterance_meta(
+            x) else convert_string_utterance_meta(str(x)))
     data_catalog_exploded.insert(5, 'utterances_file_name', utterances_files_list_meta[0])
     data_catalog_exploded.insert(6, 'utterances_file_duration', utterances_files_list_meta[1].astype('float'))
     data_catalog_exploded.insert(7, 'utterances_file_status', utterances_files_list_meta[2])
@@ -316,7 +332,6 @@ def report_generation_pipeline(mode="cluster"):
     data_catalog_raw, data_bucket_raw = fetch_data(source, get_db_connection_object())
     generate_data_validation_report(data_catalog_raw, data_bucket_raw)
     upload_report_to_bucket()
-
 
 if __name__ == "__main__":
     report_generation_pipeline("local")
