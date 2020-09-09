@@ -15,7 +15,7 @@ GET_LOAD_TIME_FOR_AUDIO_QUERY = "select load_datetime from media where audio_id 
 
 FIND_MAX_LOAD_DATE_QUERY = "SELECT MAX(load_datetime) FROM media_speaker_mapping;"
 
-GET_AUDIO_ID_QUERY = "SELECT media.audio_id FROM media where load_datetime > :max_load_date"
+GET_AUDIO_ID_QUERY = "SELECT media_metadata_staging.audio_id FROM media_metadata_staging where is_normalized = false and speaker_name is not null"
 
 INSERT_UNIQUE_SPEAKER_QUERY = "INSERT INTO speaker(speaker_name,source,gender,mother_tongue,age_group,load_datetime) SELECT t.speaker_name, \
     t.source,min(speaker_gender),min(t.mother_tongue),min(t.age_group),min(t.load_datetime) \

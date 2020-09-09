@@ -85,10 +85,10 @@ class Db_normalizer():
         date_time = results[0][0]
         return date_time
 
-    def get_load_date_for_mapping(self, connection):
-        results = connection.execute(FIND_MAX_LOAD_DATE_QUERY).fetchall()
-        max_date = results[0][0]
-        return max_date
+    # def get_load_date_for_mapping(self, connection):
+    #     results = connection.execute(FIND_MAX_LOAD_DATE_QUERY).fetchall()
+    #     max_date = results[0][0]
+    #     return max_date
 
     def get_utterance_list(self, connection, audio_id):
         utterances_list = text(
@@ -165,10 +165,9 @@ class Db_normalizer():
     def copy_data_media_speaker_mapping(self,db):
         connection = db.connect()
 
-        max_load_date = self.get_load_date_for_mapping(connection)
+        # max_load_date = self.get_load_date_for_mapping(connection)
         get_audio_id = text(GET_AUDIO_ID_QUERY)
-        results = connection.execute(
-            get_audio_id, max_load_date=max_load_date).fetchall()
+        results = connection.execute(get_audio_id).fetchall()
         audio_ids = results
         with open("./full_query.txt", 'w') as myfile:
             myfile.write(
