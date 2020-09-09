@@ -15,7 +15,7 @@ GET_LOAD_TIME_FOR_AUDIO_QUERY = "select load_datetime from media where audio_id 
 
 FIND_MAX_LOAD_DATE_QUERY = "SELECT MAX(load_datetime) FROM media_speaker_mapping;"
 
-GET_AUDIO_ID_QUERY = "SELECT media.audio_id FROM media where load_datetime > :max_load_date"
+GET_AUDIO_ID_QUERY = "SELECT media_metadata_staging.audio_id FROM media_metadata_staging where is_normalized = false and speaker_name is not null"
 
 INSERT_UNIQUE_SPEAKER_QUERY = "INSERT INTO speaker(speaker_name,source,gender,mother_tongue,age_group,load_datetime) SELECT t.speaker_name, \
     t.source,min(speaker_gender),min(t.mother_tongue),min(t.age_group),min(t.load_datetime) \
@@ -34,7 +34,8 @@ INSERT_INTO_SOURCE_METADATA_QUERY = "INSERT INTO source_metadata_processed (sour
 
 # "select audio_id,utterances_files_list from media_metadata_staging where is_normalized = false and speaker_name is null limit 3;"
 FETCH_AND_UPDATE_QUERY_WHERE_SPEAKER_IS_NULL = 'update media_metadata_staging set is_normalized = true \
-where audio_id in (select audio_id from media_metadata_staging where is_normalized = false and speaker_name is null) returning audio_id ,utterances_files_list'
+where audio_id in (select audio_id from media_metadata_staging where is_normalized = false and speaker_name is null) returning audio_id ,utterances_files_list,load_datetime'
 # 'select audio_id,utterances_files_list from media_metadata_staging order by load_datetime desc limit 3;'
 
-DEFAULT_INSERT_QUERY = "insert into media_speaker_mapping(clipped_utterance_file_name,clipped_utterance_duration,audio_id,snr,status,fail_reason) values "
+DEFAULT_INSERT_QUERY = "insert into media_speaker_mapping(clipped_utterance_file_name,clipped_utterance_duration,audio_id,snr,status,fail_reason,load_datetime) values "
+DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG = "update media_metadata_staging set is_normalized = true where audio_id in "

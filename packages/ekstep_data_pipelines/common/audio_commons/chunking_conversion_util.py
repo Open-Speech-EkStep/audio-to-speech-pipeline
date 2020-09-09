@@ -11,12 +11,15 @@ import contextlib
 import sys
 import wave
 import webrtcvad
+import sox
 
 from ekstep_data_pipelines.common.utils import get_logger
 
 Logger = get_logger('Chunking Util')
 
 class ChunkingConversionUtil:
+
+    re_chunking_aggressiveness = 3
 
     @staticmethod
     def get_instance():
@@ -55,7 +58,7 @@ class ChunkingConversionUtil:
         Logger.info(f'No file exists on {output_file_name}, running the command')
         return output_file_path, True
 
-    def create_audio_clips(self, aggressiveness, wav_file_path, dir_to_save_chunks, vad_output_file_path, base_chunk_name):
+    def create_audio_clips(self, aggressiveness,max_duration, wav_file_path, dir_to_save_chunks, vad_output_file_path, base_chunk_name,is_rechunking=True):
         audio, sample_rate = self.read_wave(wav_file_path)
         vad = webrtcvad.Vad(int(aggressiveness))
         frames = self.frame_generator(30, audio, sample_rate)
@@ -68,8 +71,28 @@ class ChunkingConversionUtil:
             file.write('\nWriting %s' % (path,))
             file.write('\n')
             self.write_wave(path, segment, sample_rate)
-
+            
         file.close()
+
+        if is_rechunking:
+            self.rechunking_acc_to_duration(max_duration,dir_to_save_chunks,vad_output_file_path,base_chunk_name)
+    
+    def rechunking_acc_to_duration(self,max_duration,dir_of_chunks, vad_output_file_path, base_chunk_name):
+
+        file_list = glob.glob(dir_of_chunks + "/*.wav")
+
+        for file in file_list:
+            file_path = f'{dir_of_chunks}/{file}'
+            duration = self.calculate_duration(file_path)
+
+            if duration > max_duration:
+                self.create_audio_clips(ChunkingConversionUtil.re_chunking_aggressiveness,max_duration,file_path,dir_of_chunks,vad_output_file_path,base_chunk_name,False)
+                os.remove(file_path)               
+
+    def calculate_duration(self,input_filepath):
+        duration = sox.file_info.duration(input_filepath)
+        Logger.info(f'Duration for input_filepath:{input_filepath} : {str(duration)}')
+        return duration
 
     def read_wave(self, path):
         """Reads a .wav file.

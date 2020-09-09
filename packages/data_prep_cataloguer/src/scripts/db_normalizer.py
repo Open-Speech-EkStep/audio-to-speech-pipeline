@@ -5,13 +5,12 @@ import sys
 import yaml
 
 from .db_query import MAX_LOAD_DATE_FOR_MEDIA_QUERY, INSERT_INTO_MEDIA_TABLE_QUERY, GET_SPEAKER_ID_QUERY, GET_LOAD_TIME_FOR_AUDIO_QUERY,\
-     FIND_MAX_LOAD_DATE_QUERY, GET_AUDIO_ID_QUERY, INSERT_UNIQUE_SPEAKER_QUERY,GET_NEW_SOURCE_DATA_QUERY,UPDATE_SOURCE_METADATA_QUERY,INSERT_INTO_SOURCE_METADATA_QUERY,\
-         FETCH_AND_UPDATE_QUERY_WHERE_SPEAKER_IS_NULL,DEFAULT_INSERT_QUERY
+    FIND_MAX_LOAD_DATE_QUERY, GET_AUDIO_ID_QUERY, INSERT_UNIQUE_SPEAKER_QUERY, GET_NEW_SOURCE_DATA_QUERY, UPDATE_SOURCE_METADATA_QUERY, INSERT_INTO_SOURCE_METADATA_QUERY,\
+    FETCH_AND_UPDATE_QUERY_WHERE_SPEAKER_IS_NULL, DEFAULT_INSERT_QUERY, DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG
 
 from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
 from .gcs_operations import CloudStorageOperations
-
 
 
 # def get_max_date(table_name,connection):
@@ -21,7 +20,7 @@ from .gcs_operations import CloudStorageOperations
 
 class Db_normalizer():
 
-    def copy_data_from_media_metadata_staging_to_media(self,db):
+    def copy_data_from_media_metadata_staging_to_media(self, db):
         connection = db.connect()
         trans = connection.begin()
         try:
@@ -31,14 +30,13 @@ class Db_normalizer():
             insert_into_media_table_from_staging = text(
                 INSERT_INTO_MEDIA_TABLE_QUERY)
             connection.execute(insert_into_media_table_from_staging,
-                            max_datetime=max_datetime)
+                               max_datetime=max_datetime)
             trans.commit()
         except:
             trans.rollback()
             raise
 
-
-    def copy_data_from_media_metadata_staging_to_speaker(self,connection):
+    def copy_data_from_media_metadata_staging_to_speaker(self, connection):
         # connection = db.connect()
         # trans = connection.begin()
         try:
@@ -49,18 +47,17 @@ class Db_normalizer():
             raise
         # connection.commit()
 
-
-    def find_speaker_id(self,connection, audio_id):
+    def find_speaker_id(self, connection, audio_id):
         # get_speaker_id = text("select speaker_id from speaker s JOIN media_metadata_staging b on s.speaker_name = b.speaker_name \
         #         where b.audio_id = :audio_id")
+        
         get_speaker_id = text(GET_SPEAKER_ID_QUERY)
         results = connection.execute(
             get_speaker_id, audio_id=audio_id[0]).fetchall()
         speaker_id = results[0][0]
         return speaker_id
 
-
-    def insert_file(self,connection,file_name):
+    def insert_file(self, connection, file_name):
         with open(file_name, 'r') as myfile:
             content = myfile.read()
             clear_content = content[:-1]
@@ -68,36 +65,32 @@ class Db_normalizer():
             connection.execute(clear_content)
             print("insertion done")
 
-
-    def create_insert_query(self,utterance, speaker_id, audio_id, datetime, connection):
+    def create_insert_query(self, utterance, speaker_id, audio_id, datetime, connection):
 
         file_name = utterance['name']
         durtion = utterance['duration']
         snr = utterance['snr_value']
         status = utterance['status']
-        fail_reason = utterance.get('reason','')
+        fail_reason = utterance.get('reason', '')
 
         # print(utterance)
         with open("full_query.txt", 'a') as myfile:
             myfile.write(
-                f"({audio_id[0]},{speaker_id},'{file_name}',{durtion},'{datetime}',{snr},{status},{fail_reason}),")
+                f"({audio_id[0]},{speaker_id},'{file_name}',{durtion},'{datetime}',{snr},'{status}','{fail_reason}'),")
 
-
-    def get_load_datetime(self,audio_id, connection):
+    def get_load_datetime(self, audio_id, connection):
         load_date_time_for_audio = text(GET_LOAD_TIME_FOR_AUDIO_QUERY)
         results = connection.execute(
             load_date_time_for_audio, audio_id=audio_id[0]).fetchall()
         date_time = results[0][0]
         return date_time
 
+    # def get_load_date_for_mapping(self, connection):
+    #     results = connection.execute(FIND_MAX_LOAD_DATE_QUERY).fetchall()
+    #     max_date = results[0][0]
+    #     return max_date
 
-    def get_load_date_for_mapping(self,connection):
-        results = connection.execute(FIND_MAX_LOAD_DATE_QUERY).fetchall()
-        max_date = results[0][0]
-        return max_date
-
-
-    def get_utterance_list(self,connection, audio_id):
+    def get_utterance_list(self, connection, audio_id):
         utterances_list = text(
             "select utterances_files_list from media where audio_id = :audio_id")
         utterance = connection.execute(
@@ -106,18 +99,18 @@ class Db_normalizer():
         utterance_in_array = self.parse_raw_file_data(utterance[0][0])
         return utterance_in_array
 
-    def get_new_source_data(self,connection):
+    def get_new_source_data(self, connection):
         results = connection.execute(GET_NEW_SOURCE_DATA_QUERY).fetchall()
         max_date = results
         return max_date
 
-
-    def update_source_metadata_table(self,connection):
+    def update_source_metadata_table(self, connection):
         self.insert_into_source_metadata(connection)
         source_info = self.get_new_source_data(connection)
         for source in source_info:
             update_query = text(UPDATE_SOURCE_METADATA_QUERY)
-            connection.execute(update_query,cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
+            connection.execute(
+                update_query, cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
         insert_query = self.update_utterance_in_mapping_table(connection)
 
         if len(insert_query) < 1:
@@ -130,13 +123,14 @@ class Db_normalizer():
 
         connection.execute(final_query)
 
-    def update_utterance_in_mapping_table(self,connection):
+    def update_utterance_in_mapping_table(self, connection):
         all_data = self.fetch_unnormalized_data(connection)
-        
+
         insert_query_into_mapping_table = []
 
         for onefile in all_data:
             audio_id = onefile[0]
+            load_datetime = onefile[2]
             utterance_list = self.parse_raw_file_data(onefile[1])
 
             if utterance_list == None:
@@ -145,7 +139,7 @@ class Db_normalizer():
 
             for utterance in utterance_list:
                 insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
-                    {audio_id},{utterance['snr_value']},'{utterance['status']}','{utterance.get('reason','')}')")
+                    {audio_id},{utterance['snr_value']},'{utterance['status']}','{utterance.get('reason','')}','{load_datetime}')")
 
         return insert_query_into_mapping_table
 
@@ -171,26 +165,38 @@ class Db_normalizer():
     def copy_data_media_speaker_mapping(self,db):
         connection = db.connect()
 
-        max_load_date = self.get_load_date_for_mapping(connection)
+        # max_load_date = self.get_load_date_for_mapping(connection)
         get_audio_id = text(GET_AUDIO_ID_QUERY)
-        results = connection.execute(
-            get_audio_id, max_load_date=max_load_date).fetchall()
+        results = connection.execute(get_audio_id).fetchall()
         audio_ids = results
-
         with open("./full_query.txt", 'w') as myfile:
             myfile.write(
                 f"insert into media_speaker_mapping(audio_id, speaker_id, clipped_utterance_file_name, clipped_utterance_duration,load_datetime,snr,status,fail_reason) values ")
         for audio_id in audio_ids:
 
             speaker_id = self.find_speaker_id(connection, audio_id)
-            get_load_datetime_for_audio = self.get_load_datetime(audio_id, connection)
+            get_load_datetime_for_audio = self.get_load_datetime(
+                audio_id, connection)
             utterance_list = self.get_utterance_list(connection, audio_id)
             for utterance_name_diration in utterance_list:
                 self.create_insert_query(utterance_name_diration, speaker_id,
-                                    audio_id, get_load_datetime_for_audio, connection)
-            self.insert_file(connection,"./full_query.txt")
+                                         audio_id, get_load_datetime_for_audio, connection)
+            self.insert_file(connection, "./full_query.txt")
+
+        self.set_isnormalized_flag(audio_ids,connection)
         print(audio_ids)
 
+    def set_isnormalized_flag(self,audio_ids,connection):
+
+        if len(audio_ids) <= 0:
+            print("No file found with metadata")
+            return
+
+        audio_id_list = f"({','.join([f'{audio_id[0]}' for audio_id in audio_ids])})"
+
+        query = DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG + audio_id_list
+
+        connection.execute(query)
 
 def __load_yaml_file(path):
     read_dict = {}

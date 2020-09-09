@@ -24,7 +24,7 @@ class TestDbNormalizer(unittest.TestCase):
         self.normalizer.insert_file(self.conn,'src/tests/tests_resources/query.txt')
         self.assertEqual(find_count(self.conn,'media_speaker_mapping'), 2)
 
-    def test_get_max_load_datetime_should_return_max_load_datetime(self):
-        self.normalizer.insert_file(self.conn,'src/tests/tests_resources/query.txt')
-        result = self.normalizer.get_load_date_for_mapping(self.conn)
-        self.assertEqual(result, '123445')
+    # def test_get_max_load_datetime_should_return_max_load_datetime(self):
+    #     self.normalizer.insert_file(self.conn,'src/tests/tests_resources/query.txt')
+    #     result = self.normalizer.get_load_date_for_mapping(self.conn)
+    #     self.assertEqual(result, '123445')
