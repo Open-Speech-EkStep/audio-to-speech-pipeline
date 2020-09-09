@@ -43,7 +43,7 @@ def get_variables():
     get_common_variables()
     validation_report_source = Variable.get("validation_report_source")
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
-    cleaned_csv_report_file_name = report_file_name.replace(".xlsx", ".csv")
+    cleaned_csv_report_file_name = f"Final_Report_{date_time}_{validation_report_source}.csv"
 
 
 def get_prefix_attributes_full_path(full_path, integration_processed_path):
@@ -59,12 +59,12 @@ def get_file_attributes(source_prefix_split_list):
         raw_file_name = "NA"
     source = source_prefix_split_list[0]
     audio_id = source_prefix_split_list[1]
-    # status = source_prefix_split_list[8]
-    return file_name, raw_file_name, source, audio_id
+    status = source_prefix_split_list[2]
+    return file_name, raw_file_name, source, audio_id, status
 
 
-def generate_row(full_path, file_name, raw_file_name, source, audio_id):
-    row = full_path + ',' + source + ',' + audio_id + ',' + raw_file_name + ',' + file_name
+def generate_row(full_path, file_name, raw_file_name, source, audio_id, status):
+    row = full_path + ',' + source + ',' + audio_id + ',' + raw_file_name + ',' + file_name + ',' + status
     return row
 
 
@@ -73,14 +73,14 @@ def generate_bucket_file_list(source):
     all_blobs = list_blobs_in_a_path(bucket_name, integration_processed_path + source)
     output_file = open(source + bucket_file_list, "w")
     output_file.write(
-        'bucket_file_path' + ',' + 'source' + ',' + 'audio_id' + ',' + 'raw_file_name' + ',' + 'utterances_file_name')
+        'bucket_file_path' + ',' + 'source' + ',' + 'audio_id' + ',' + 'raw_file_name' + ',' + 'utterances_file_name' + ',' + 'status')
     for blob in all_blobs:
         full_path = str(blob.name).replace(",", "")
         try:
             if 'wav' in full_path:
-                file_name, raw_file_name, source, audio_id = get_prefix_attributes_full_path(full_path,
-                                                                                             integration_processed_path)
-                row = generate_row(full_path, file_name, raw_file_name, source, audio_id)
+                file_name, raw_file_name, source, audio_id, status = get_prefix_attributes_full_path(full_path,
+                                                                                                     integration_processed_path)
+                row = generate_row(full_path, file_name, raw_file_name, source, audio_id, status)
                 output_file.write("\n")
                 output_file.write(row)
         except:
@@ -101,6 +101,7 @@ def fetch_data_catalog(source, db_catalog_tbl, db_conn_obj):
         filter_string = f"source='{source}'"
     data_catalog_raw = pd.read_sql(f"SELECT * FROM {db_catalog_tbl} where {filter_string}", db_conn_obj)
     data_catalog_raw = cleanse_catalog(data_catalog_raw)
+    data_catalog_raw["raw_file_name"] = data_catalog_raw.raw_file_name.apply(lambda x: x.replace(",", ""))
     return data_catalog_raw
 
 
@@ -145,6 +146,7 @@ def check_json_utterance_meta(jsonData):
 
 
 def parse_string_utterance_meta(data):
+    data = data.replace(",", "")
     filename = data.split(':')[0]
     duration = data.split(':')[-1]
     status = ''
@@ -153,6 +155,7 @@ def parse_string_utterance_meta(data):
 
 def convert_string_utterance_meta(data):
     dicti = {}
+    data = data.replace(",", "")
     filename = data.split(':')[0]
     duration = data.split(':')[-1]
     status = np.nan
@@ -213,7 +216,9 @@ def get_valid_utterance_duration_unexploded(bucket_list_in_catalog):
         bucket_list_in_catalog.utterances_file_duration.between(.5, 15)].sort_values(
         'raw_file_name')
     # valid_utterance_duration = append_file_and_duration(valid_utterance_duration)
-    valid_utterance_duration = valid_utterance_duration[valid_utterance_duration.utterances_file_status != "Rejected"]
+    valid_utterance_duration = valid_utterance_duration[valid_utterance_duration.status.str.lower() != "rejected"]
+    valid_utterance_duration = valid_utterance_duration[
+        valid_utterance_duration.utterances_file_status.str.lower() != "rejected"]
     return valid_utterance_duration.groupby('audio_id', as_index=False).agg(
         {'utterances_file_duration': lambda x: x.sum() / 60,
          'utterances_files_list': lambda tdf: tdf.tolist()})
@@ -254,10 +259,12 @@ def append_transcription_files_list(df_cleaned_dataset):
         lambda x: x.replace('wav', 'txt'))
     df_cleaned_dataset_transcipts.utterances_file_name = df_cleaned_dataset_transcipts.utterances_file_name.apply(
         lambda x: x.replace('wav', 'txt'))
-    df_cleaned_dataset_final = df_cleaned_dataset.append(df_cleaned_dataset_transcipts).sort_values(
-        'utterances_file_name')
-
-    return df_cleaned_dataset_final
+    df_cleaned_dataset.insert(loc=1, column="transcriptions_path_bucket",
+                              value=df_cleaned_dataset_transcipts["bucket_file_path"].values.tolist())
+    df_cleaned_dataset = df_cleaned_dataset.drop(["utterances_file_name"], axis=1)
+    df_cleaned_dataset = df_cleaned_dataset.rename(
+        columns={"bucket_file_path": "wav_path_bucket", "utterances_file_duration": "duration"})
+    return df_cleaned_dataset
 
 
 def generate_cleaned_dataset(df_cleaned_utterances_unexploded, bucket_list_in_catalog):
@@ -301,6 +308,7 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     writer.save()
     df_cleaned_dataset.to_csv(cleaned_csv_report_file_name, index=False)
     print(f"{report_file_name} has been generated....")
+    print(f"{cleaned_csv_report_file_name} has been generated....")
 
 
 # generate_bucket_file_list(source)
@@ -317,7 +325,7 @@ def upload_report_to_bucket():
     print("Uploading report to bucket ...")
     upload_blob(bucket_name, report_file_name, os.path.join(report_upload_path, report_file_name))
     upload_blob(bucket_name, cleaned_csv_report_file_name,
-                os.path.join(report_upload_path, "cleaned_csv_reports", cleaned_csv_report_file_name))
+                os.path.join(report_upload_path, "Final_csv_reports", cleaned_csv_report_file_name))
     os.remove(report_file_name)
     os.remove(cleaned_csv_report_file_name)
 
@@ -353,9 +361,9 @@ def get_local_variables():
     now = datetime.now()
     date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
     get_common_variables()
-    validation_report_source = "Dummy"
+    validation_report_source = "joshtalks"
     report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
-    cleaned_csv_report_file_name = report_file_name.replace(".xlsx", ".csv")
+    cleaned_csv_report_file_name = f"Final_Report_{date_time}_{validation_report_source}.csv"
 
 
 def report_generation_pipeline(mode="cluster"):
