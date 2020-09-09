@@ -22,7 +22,7 @@ def get_config_variables():
 def get_local_variables():
     global validation_report_source
     get_common_variables()
-    validation_report_source = ["CEC", "joshtalks"]
+    validation_report_source = ["CEC"]
 
 
 def get_common_variables():
@@ -364,14 +364,34 @@ def get_db_connection_object():
     return create_db_engine(config_path)
 
 
+def check_dataframes(data_catalog_raw, data_bucket_raw):
+    catalouge_len = len(data_catalog_raw)
+    bucket_len = len(data_bucket_raw)
+    if (catalouge_len == 0 and bucket_len != 0):
+        print("For the given source no data in catalouge")
+        exit(1)
+    elif (catalouge_len != 0 and bucket_len == 0):
+        print("For the given source no data in bucket")
+        exit(1)
+    elif (catalouge_len == 0 and bucket_len == 0):
+        print("For the given source no data found. Check the path and source name!!!!")
+        exit(1)
+    else:
+        pass
+
+
 def report_generation_pipeline(mode="cluster"):
     if mode == "local":
         get_local_variables()
     else:
         get_variables()
-    for _source in ast.literal_eval(str(validation_report_source)):
+    source_list = ast.literal_eval(str(validation_report_source))
+    if len(source_list) == 0:
+        source_list.append("")
+    for _source in source_list:
         set_report_names(_source)
         data_catalog_raw, data_bucket_raw = fetch_data(_source, get_db_connection_object())
+        check_dataframes(data_catalog_raw, data_bucket_raw)
         generate_data_validation_report(data_catalog_raw, data_bucket_raw)
         upload_report_to_bucket()
 
