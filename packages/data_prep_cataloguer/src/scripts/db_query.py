@@ -38,3 +38,4 @@ where audio_id in (select audio_id from media_metadata_staging where is_normaliz
 # 'select audio_id,utterances_files_list from media_metadata_staging order by load_datetime desc limit 3;'
 
 DEFAULT_INSERT_QUERY = "insert into media_speaker_mapping(clipped_utterance_file_name,clipped_utterance_duration,audio_id,snr,status,fail_reason) values "
+DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG = "update media_metadata_staging set is_normalized = true where audio_id in "
