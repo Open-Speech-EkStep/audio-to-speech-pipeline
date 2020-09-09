@@ -105,26 +105,31 @@ class SNR:
             audio_file_name = file_path.split('/')[-1]
             LOGGER.info(audio_file_name)
 
-            metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60), 2)
             metadata["audio_id"] = audio_id
-            metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)
 
             clip_duration = calculate_duration(file_path)
             if snr_value < threshold:
 
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
-                metadata.to_csv(metadata_file_name, index=False)
+                
                 list_file_utterances_with_duration.append(
                     {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High-SNR', 'snr_threshold': threshold})
+                metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60),2)
+                metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)
+
+                metadata.to_csv(metadata_file_name, index=False)
                 continue
 
             
 
             if(clip_duration > SNR.MAX_DURATION):
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
-                metadata.to_csv(metadata_file_name, index=False)
                 list_file_utterances_with_duration.append(
                     {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High Audio Duration', 'max_duration': SNR.MAX_DURATION})
+                metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60),2)
+                metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)
+                
+                metadata.to_csv(metadata_file_name, index=False)
                 continue
 
             clean_audio_duration.append(clip_duration)
