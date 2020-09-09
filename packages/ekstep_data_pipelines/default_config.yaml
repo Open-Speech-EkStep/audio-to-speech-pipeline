@@ -53,6 +53,7 @@ config:
 
     chunking_conversion_configeration:
       aggressiveness: ''
+      max_duration: ''
 
 
 
