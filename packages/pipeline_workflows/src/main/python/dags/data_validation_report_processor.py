@@ -19,6 +19,12 @@ def get_config_variables():
     return variables
 
 
+def get_local_variables():
+    global validation_report_source
+    get_common_variables()
+    validation_report_source = ["CEC", "joshtalks"]
+
+
 def get_common_variables():
     global bucket_name
     global integration_processed_path
@@ -35,15 +41,18 @@ def get_common_variables():
 
 def get_variables():
     from airflow.models import Variable
-    global report_file_name
-    global cleaned_csv_report_file_name
     global validation_report_source
-    now = datetime.now()
-    date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
     get_common_variables()
     validation_report_source = Variable.get("validation_report_source")
-    report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
-    cleaned_csv_report_file_name = f"Final_Report_{date_time}_{validation_report_source}.csv"
+
+
+def set_report_names(source):
+    global report_file_name
+    global cleaned_csv_report_file_name
+    now = datetime.now()
+    date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
+    report_file_name = f'Data_validation_report_{date_time}_{source}.xlsx'
+    cleaned_csv_report_file_name = f"Final_Report_{date_time}_{source}.csv"
 
 
 def get_prefix_attributes_full_path(full_path, integration_processed_path):
@@ -108,6 +117,7 @@ def fetch_data_catalog(source, db_catalog_tbl, db_conn_obj):
 def fetch_bucket_list(source, bucket_file_list):
     generate_bucket_file_list(source)
     data_bucket_raw = pd.read_csv(source + bucket_file_list, low_memory=False)
+    os.remove(source + bucket_file_list)
     return data_bucket_raw
 
 
@@ -354,27 +364,17 @@ def get_db_connection_object():
     return create_db_engine(config_path)
 
 
-def get_local_variables():
-    global report_file_name
-    global cleaned_csv_report_file_name
-    global validation_report_source
-    now = datetime.now()
-    date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-    get_common_variables()
-    validation_report_source = "joshtalks"
-    report_file_name = f'Data_validation_report_{date_time}_{validation_report_source}.xlsx'
-    cleaned_csv_report_file_name = f"Final_Report_{date_time}_{validation_report_source}.csv"
-
-
 def report_generation_pipeline(mode="cluster"):
     if mode == "local":
         get_local_variables()
     else:
         get_variables()
-    source = validation_report_source
-    data_catalog_raw, data_bucket_raw = fetch_data(source, get_db_connection_object())
-    generate_data_validation_report(data_catalog_raw, data_bucket_raw)
-    upload_report_to_bucket()
+    for _source in ast.literal_eval(str(validation_report_source)):
+        set_report_names(_source)
+        data_catalog_raw, data_bucket_raw = fetch_data(_source, get_db_connection_object())
+        generate_data_validation_report(data_catalog_raw, data_bucket_raw)
+        upload_report_to_bucket()
+
 
 if __name__ == "__main__":
     report_generation_pipeline("local")
