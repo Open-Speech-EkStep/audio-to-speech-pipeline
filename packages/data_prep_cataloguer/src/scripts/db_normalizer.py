@@ -130,6 +130,7 @@ class Db_normalizer():
 
         for onefile in all_data:
             audio_id = onefile[0]
+            load_datetime = onefile[2]
             utterance_list = self.parse_raw_file_data(onefile[1])
 
             if utterance_list == None:
@@ -138,7 +139,7 @@ class Db_normalizer():
 
             for utterance in utterance_list:
                 insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
-                    {audio_id},{utterance['snr_value']},'{utterance['status']}','{utterance.get('reason','')}')")
+                    {audio_id},{utterance['snr_value']},'{utterance['status']}','{utterance.get('reason','')}','{load_datetime}')")
 
         return insert_query_into_mapping_table
 
