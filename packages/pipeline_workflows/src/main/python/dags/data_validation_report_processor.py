@@ -274,6 +274,10 @@ def append_transcription_files_list(df_cleaned_dataset):
     df_cleaned_dataset = df_cleaned_dataset.drop(["utterances_file_name"], axis=1)
     df_cleaned_dataset = df_cleaned_dataset.rename(
         columns={"bucket_file_path": "wav_path_bucket", "utterances_file_duration": "duration"})
+    df_cleaned_dataset.wav_path_bucket = df_cleaned_dataset.wav_path_bucket.apply(
+        lambda x: "gs://" + bucket_name + "/" + x)
+    df_cleaned_dataset.transcriptions_path_bucket = df_cleaned_dataset.transcriptions_path_bucket.apply(
+        lambda x: "gs://" + bucket_name + "/" + x)
     return df_cleaned_dataset
 
 
