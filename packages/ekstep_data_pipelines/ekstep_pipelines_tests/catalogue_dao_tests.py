@@ -1,3 +1,4 @@
+import json
 import sys
 import unittest
 from unittest import mock
@@ -29,7 +30,13 @@ class CatalogueTests(unittest.TestCase):
                        'duration': '13.38', 'snr_value': 38.432806, 'status': 'Clean'}]
 
         rows_updated = catalogueDao.update_utterances(audio_id, utterances)
+        args = mock_postgres_client.execute_update.call_args_list
+        called_with_params = {"utterances": json.dumps(utterances),
+                              "audio_id": audio_id}
+        called_with_sql = 'update media_metadata_staging set utterances_files_list = :utterances where audio_id = :audio_id'
         self.assertEqual(rows_updated, True)
+        self.assertEqual(called_with_sql, args[0][0][0])
+        self.assertEqual(called_with_params, args[0][1])
 
     @mock.patch('common.postgres_db_client.PostgresClient')
     def test_utterance_by_name(self, mock_postgres_client):
@@ -60,5 +67,15 @@ class CatalogueTests(unittest.TestCase):
         utterance = {"name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav",
                      "duration": "13.38", "snr_value": 38.432806, "status": "Clean", 'reason': 'stt error'}
 
+        args = mock_postgres_client.execute_update.call_args_list
+
         rows_updated = catalogueDao.update_utterance_status(audio_id, utterance)
+
+        called_with_query = 'update media_speaker_mapping set status = :status, ' \
+                       'fail_reason = :reason where audio_id = :audio_id ' \
+                       'and clipped_utterance_file_name = :name'
+
+        called_with_args = {'status': 'Clean', 'reason': 'stt error', 'audio_id': audio_id, 'name': '190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav'}
         self.assertEqual(True, rows_updated)
+        self.assertEqual(called_with_query, args[0][0][0])
+        self.assertEqual(called_with_args, args[0][1])
