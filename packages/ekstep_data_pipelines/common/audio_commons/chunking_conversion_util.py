@@ -87,6 +87,8 @@ class ChunkingConversionUtil:
 
             if duration > max_duration:
                 base_chunk_name =  file_path.split('/').pop()
+                Logger.info(f"rechunking of file {base_chunk_name} and duration of file is: {duration}")
+                
                 self.create_audio_clips(ChunkingConversionUtil.re_chunking_aggressiveness,max_duration,file_path,dir_of_chunks,vad_output_file_path,base_chunk_name,False)
                 os.remove(file_path)               
 
