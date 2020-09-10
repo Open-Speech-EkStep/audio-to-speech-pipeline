@@ -123,7 +123,20 @@ class Db_normalizer():
 
         connection.execute(final_query)
 
-        self.set_isnormalized_flag(processed_audio_ids,connection)
+        self.set_isnormalized_flag_for_source_data(processed_audio_ids,connection)
+
+
+    def set_isnormalized_flag_for_source_data(self, audio_ids, connection):
+
+        if len(audio_ids) <= 0:
+            print("No file found with metadata")
+            return
+
+        audio_id_list = f"({','.join([f'{audio_id}' for audio_id in audio_ids])})"
+
+        query = DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG + audio_id_list
+
+        connection.execute(query)
 
     def update_utterance_in_mapping_table(self, connection):
 
@@ -219,6 +232,7 @@ class Db_normalizer():
 
         connection.execute(query)
 
+
 def __load_yaml_file(path):
     read_dict = {}
     with open(path, 'r') as file:
@@ -258,7 +272,6 @@ if __name__ == "__main__":
                                   destination=config_local_path,
                                   is_directory=False)
 
-    
     db = create_db_engine(config_local_path)
     connection = db.connect()
 
