@@ -6,7 +6,7 @@ import yaml
 
 from .db_query import MAX_LOAD_DATE_FOR_MEDIA_QUERY, INSERT_INTO_MEDIA_TABLE_QUERY, GET_SPEAKER_ID_QUERY, GET_LOAD_TIME_FOR_AUDIO_QUERY,\
     FIND_MAX_LOAD_DATE_QUERY, GET_AUDIO_ID_QUERY, INSERT_UNIQUE_SPEAKER_QUERY, GET_NEW_SOURCE_DATA_QUERY, UPDATE_SOURCE_METADATA_QUERY, INSERT_INTO_SOURCE_METADATA_QUERY,\
-    FETCH_AND_UPDATE_QUERY_WHERE_SPEAKER_IS_NULL, DEFAULT_INSERT_QUERY, DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG
+    FETCH_QUERY_WHERE_SPEAKER_IS_NULL, DEFAULT_INSERT_QUERY, DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG
 
 from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
@@ -50,7 +50,7 @@ class Db_normalizer():
     def find_speaker_id(self, connection, audio_id):
         # get_speaker_id = text("select speaker_id from speaker s JOIN media_metadata_staging b on s.speaker_name = b.speaker_name \
         #         where b.audio_id = :audio_id")
-        
+
         get_speaker_id = text(GET_SPEAKER_ID_QUERY)
         results = connection.execute(
             get_speaker_id, audio_id=audio_id[0]).fetchall()
@@ -111,7 +111,7 @@ class Db_normalizer():
             update_query = text(UPDATE_SOURCE_METADATA_QUERY)
             connection.execute(
                 update_query, cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
-        insert_query = self.update_utterance_in_mapping_table(connection)
+        insert_query,processed_audio_ids = self.update_utterance_in_mapping_table(connection)
 
         if len(insert_query) < 1:
             # TODO: should raise execption
@@ -123,26 +123,46 @@ class Db_normalizer():
 
         connection.execute(final_query)
 
+        self.set_isnormalized_flag(processed_audio_ids,connection)
+
     def update_utterance_in_mapping_table(self, connection):
+
         all_data = self.fetch_unnormalized_data(connection)
+
+        processed_audio_ids = []
 
         insert_query_into_mapping_table = []
 
         for onefile in all_data:
             audio_id = onefile[0]
             load_datetime = onefile[2]
+
             utterance_list = self.parse_raw_file_data(onefile[1])
+
+            processed_audio_ids.append(audio_id)
 
             if utterance_list == None:
                 print(audio_id)
                 continue
 
             for utterance in utterance_list:
+                try:
+                    if str(utterance.get('snr_value')) == 'nan':
+
+                        snr_value = 0.0
+                    else:
+                        snr_value = float(utterance.get('snr_value', 0))
+
+                except TypeError:
+                    snr_value = 0.0
+
+                except ValueError:
+                    snr_value = 0.0
+
                 insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
-                    {audio_id},{utterance['snr_value']},'{utterance['status']}','{utterance.get('reason','')}','{load_datetime}')")
+                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{load_datetime}')")
 
-        return insert_query_into_mapping_table
-
+        return insert_query_into_mapping_table , processed_audio_ids
 
     def parse_raw_file_data(self, raw_file_utterance):
         try:
@@ -152,17 +172,18 @@ class Db_normalizer():
             print(error)
             return raw_file_utterance
 
-    def fetch_unnormalized_data(self,connection):
+    def fetch_unnormalized_data(self, connection):
 
-        fetch_query_where_speaker_is_null = text(FETCH_AND_UPDATE_QUERY_WHERE_SPEAKER_IS_NULL)
-        
+        fetch_query_where_speaker_is_null = text(
+            FETCH_QUERY_WHERE_SPEAKER_IS_NULL)
+
         return connection.execute(fetch_query_where_speaker_is_null).fetchall()
 
-    def insert_into_source_metadata(self,connection):
+    def insert_into_source_metadata(self, connection):
         insert_query = text(INSERT_INTO_SOURCE_METADATA_QUERY)
         connection.execute(insert_query)
 
-    def copy_data_media_speaker_mapping(self,db):
+    def copy_data_media_speaker_mapping(self, db):
         connection = db.connect()
 
         # max_load_date = self.get_load_date_for_mapping(connection)
@@ -183,10 +204,10 @@ class Db_normalizer():
                                          audio_id, get_load_datetime_for_audio, connection)
             self.insert_file(connection, "./full_query.txt")
 
-        self.set_isnormalized_flag(audio_ids,connection)
+        self.set_isnormalized_flag(audio_ids, connection)
         print(audio_ids)
 
-    def set_isnormalized_flag(self,audio_ids,connection):
+    def set_isnormalized_flag(self, audio_ids, connection):
 
         if len(audio_ids) <= 0:
             print("No file found with metadata")
@@ -251,6 +272,5 @@ if __name__ == "__main__":
     normalizer.copy_data_from_media_metadata_staging_to_speaker(connection)
     print("moving data from staging to speaker done")
     print("moving data from staging to media_speaker_mapping ....")
-    normalizer.copy_data_media_speaker_mapping(db)    
+    normalizer.copy_data_media_speaker_mapping(db)
     print("moving data from staging to media_speaker_mapping done")
-    
