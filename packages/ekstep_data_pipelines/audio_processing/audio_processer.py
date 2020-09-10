@@ -1,7 +1,7 @@
 import os
 import glob
 from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG, SNR_CONFIG, REMOTE_PROCESSED_FILE_PATH,\
-    MASTER_META_DATA_FILE_PATH,MASTER_META_DATA_DONE_FILE_PATH
+    MASTER_META_DATA_FILE_PATH, MASTER_META_DATA_DONE_FILE_PATH
 from common.utils import get_logger
 
 Logger = get_logger("Audio Processor")

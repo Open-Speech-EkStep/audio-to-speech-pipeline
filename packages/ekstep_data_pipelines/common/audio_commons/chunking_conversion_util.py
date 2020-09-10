@@ -75,17 +75,20 @@ class ChunkingConversionUtil:
         file.close()
 
         if is_rechunking:
-            self.rechunking_acc_to_duration(max_duration,dir_to_save_chunks,vad_output_file_path,base_chunk_name)
+            self.rechunking_acc_to_duration(max_duration,dir_to_save_chunks,vad_output_file_path)
     
-    def rechunking_acc_to_duration(self,max_duration,dir_of_chunks, vad_output_file_path, base_chunk_name):
+    def rechunking_acc_to_duration(self,max_duration,dir_of_chunks, vad_output_file_path):
 
         file_list = glob.glob(dir_of_chunks + "/*.wav")
 
-        for file in file_list:
-            file_path = f'{dir_of_chunks}/{file}'
+        for file_path in file_list:
+
             duration = self.calculate_duration(file_path)
 
             if duration > max_duration:
+                base_chunk_name =  file_path.split('/').pop()
+                Logger.info(f"rechunking of file {base_chunk_name} and duration of file is: {duration}")
+                
                 self.create_audio_clips(ChunkingConversionUtil.re_chunking_aggressiveness,max_duration,file_path,dir_of_chunks,vad_output_file_path,base_chunk_name,False)
                 os.remove(file_path)               
 
