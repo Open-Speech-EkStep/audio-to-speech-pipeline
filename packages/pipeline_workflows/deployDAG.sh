@@ -1,5 +1,9 @@
 #!/bin/bash
 source ./env-config.cfg
+echo $PROJECT_NAME
+echo $LOCATION
+echo $COMPOSER_ENV
+eccho ${ENV}
 #Fetch current Composer environment details
 
 for env in  $(gcloud composer environments list --project=$PROJECT_NAME --locations=$LOCATION --format="value(NAME)")
