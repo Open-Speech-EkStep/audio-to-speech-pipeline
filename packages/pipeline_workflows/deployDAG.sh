@@ -1,9 +1,5 @@
 #!/bin/bash
 . ./env-config.cfg
-echo $PROJECT_NAME
-echo $LOCATION
-echo $COMPOSER_ENV
-eccho ${ENV}
 #Fetch current Composer environment details
 
 for env in  $(gcloud composer environments list --project=$PROJECT_NAME --locations=$LOCATION --format="value(NAME)")
@@ -32,7 +28,8 @@ composer=$(gcloud composer environments describe $COMPOSER_ENV --location $LOCAT
 gcloud container clusters get-credentials $composer --zone us-east1-b --project $PROJECT_NAME
 # gcloud components update
 # sudo gcloud components install kubectl
-
+echo $variables_json
+ls ./src/main/python/resources/${variables_json}
 gcloud composer environments storage data import --environment $COMPOSER_ENV --location $LOCATION --source ./src/main/python/resources/${variables_json}
 gcloud composer environments run $COMPOSER_ENV --location $LOCATION variables -- --import /home/airflow/gcs/data/${variables_json}
 
