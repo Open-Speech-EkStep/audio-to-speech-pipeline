@@ -11,7 +11,7 @@ do
   fi
 
   case "$env" in
-    *_"$ENV"_*) COMPOSER_ENV=$env;variables_json="airflow_config_file_${ENV}.json";echo "Composer environment name: $COMPOSER_ENV"  ;;
+    *"$ENV"*) COMPOSER_ENV=$env;variables_json="airflow_config_file_${ENV}.json";echo "Composer environment name: $COMPOSER_ENV"  ;;
     *)              echo 'False'
   esac
 
