@@ -3,7 +3,9 @@ import pandas as pd
 
 class DataFilter(object):
     def by_snr(self, utterances, filters):
-        return filter(lambda t: filters['lte'] >= t[4] >= filters['gte'], utterances)
+        # TODO: apply randomness
+        by_snr_utterances = filter(lambda t: filters['lte_snr'] >= t[4] >= filters['gte_snr'], utterances)
+        return self.by_duration(by_snr_utterances, filters)
 
     def by_duration(self, utterances, filters):
         duration = 0
@@ -11,7 +13,7 @@ class DataFilter(object):
         for utterance in utterances:
             duration = duration + utterance[2]
             filtered_utterances.append(utterance)
-            if duration >= filters['duration']:
+            if duration >= filters['total_duration']:
                 break
         return filtered_utterances
 
