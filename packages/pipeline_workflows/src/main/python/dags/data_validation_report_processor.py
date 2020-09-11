@@ -13,16 +13,18 @@ import numpy as np
 
 def get_config_variables():
     config_path = "./config.yaml"
-    download_blob("ekstepspeechrecognition-dev", "data/audiotospeech/config/validation_report_dag/config.yaml",
+    download_blob(bucket_name, "data/audiotospeech/config/validation_report_dag/config.yaml",
                   config_path)
     variables = __load_yaml_file(config_path)["report_configuration"]
     return variables
 
 
-def get_local_variables():
+def get_local_variables(bucket, source):
     global validation_report_source
+    global bucket_name
+    bucket_name = bucket
     get_common_variables()
-    validation_report_source = ["CEC"]
+    validation_report_source = source
 
 
 def get_common_variables():
@@ -32,7 +34,6 @@ def get_common_variables():
     global db_catalog_tbl
     global report_upload_path
     variables = get_config_variables()
-    bucket_name = variables["bucket_name"]
     report_upload_path = variables["report_upload_path"]
     integration_processed_path = variables["integration_processed_path"]
     db_catalog_tbl = variables["db_catalog_tbl"]
@@ -42,6 +43,8 @@ def get_common_variables():
 def get_variables():
     from airflow.models import Variable
     global validation_report_source
+    global bucket_name
+    bucket_name = Variable.get("bucket")
     get_common_variables()
     validation_report_source = Variable.get("validation_report_source")
 
@@ -384,9 +387,9 @@ def check_dataframes(data_catalog_raw, data_bucket_raw):
         pass
 
 
-def report_generation_pipeline(mode="cluster"):
+def report_generation_pipeline(mode="cluster", bucket='ekstepspeechrecognition-test', source=[]):
     if mode == "local":
-        get_local_variables()
+        get_local_variables(bucket, source)
     else:
         get_variables()
     source_list = ast.literal_eval(str(validation_report_source))
@@ -401,4 +404,4 @@ def report_generation_pipeline(mode="cluster"):
 
 
 if __name__ == "__main__":
-    report_generation_pipeline("local")
+    report_generation_pipeline("local", bucket='ekstepspeechrecognition-test', source=['CEC'])

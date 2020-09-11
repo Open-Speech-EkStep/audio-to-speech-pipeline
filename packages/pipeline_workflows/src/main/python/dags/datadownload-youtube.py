@@ -6,6 +6,7 @@ from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.models import Variable
 
 composer_namespace = Variable.get("composer_namespace")
+bucket_name = Variable.get("bucket")
 
 default_args = {
     'email': ['gaurav.gupta@thoughtworks.com']
@@ -46,8 +47,8 @@ with models.DAG(
         # Entrypoint of the container, if not specified the Docker container's
         # entrypoint is used. The cmds parameter is templated.
         # cmds=['echo'],
-        cmds=["python", "-m", "src.scripts.download", "cluster", "ekstepspeechrecognition-dev", "data/audiotospeech/config/datadownload/config.yaml"],
-        #cmds=["python", "src/scripts/pipeline.py","cluster", "ekstepspeechrecognition-dev", "data/texttospeech/config/curation/config.yaml"],
+        cmds=["python", "-m", "src.scripts.download", "cluster", bucket_name, "data/audiotospeech/config/datadownload/config.yaml"],
+        #cmds=["python", "src/scripts/pipeline.py","cluster", bucket_name, "data/texttospeech/config/curation/config.yaml"],
         # The namespace to run within Kubernetes, default namespace is
         # `default`. There is the potential for the resource starvation of
         # Airflow workers and scheduler within the Cloud Composer environment,

@@ -14,7 +14,7 @@ snr_catalogue_source = json.loads(Variable.get("snrcatalogue"))
 source_path_for_snr = Variable.get("sourcepathforsnr")
 error_landing_path_snr = Variable.get("errorlandingpathsnr")
 tobe_processed_path_snr = Variable.get("tobeprocessedpathsnr")
-
+bucket_name = Variable.get("bucket")
 # processed_path = Variable.get("rawprocessedpath")
 
 composer_namespace = Variable.get("composer_namespace")
@@ -69,7 +69,7 @@ def create_dag(dag_id,
             data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id='data-normalizer',
                 name='data-normalizer',
-                cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", "ekstepspeechrecognition-dev",
+                cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", bucket_name,
                       "data/audiotospeech/config/datacataloguer-prep/config.yaml"],
                 # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,

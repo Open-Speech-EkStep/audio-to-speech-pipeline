@@ -17,7 +17,7 @@ secret_file = secret.Secret(
     key='key.json')
 
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
-
+bucket_name = Variable.get("bucket")
 
 def create_dag(dag_id, default_args, source):
     dag = DAG(dag_id,

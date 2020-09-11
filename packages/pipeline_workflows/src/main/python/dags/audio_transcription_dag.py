@@ -14,7 +14,7 @@ sourceinfo = json.loads(Variable.get("sourceinfo"))
 source_path_for_snr = Variable.get("sourcepathforsnr")
 stt_source_path = Variable.get("sttsourcepath")
 snr_done_path = Variable.get("snrdonepath")
-
+bucket_name = Variable.get("bucket")
 
 composer_namespace = Variable.get("composer_namespace")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)

@@ -10,6 +10,7 @@ downloaded_catalog_config = json.loads(Variable.get("downloadcatalogconfig"))
 # downloaded_source_audio_format = json.loads(Variable.get("downloadedsourceaudioformat"))
 composer_namespace = Variable.get("composer_namespace")
 source_audio_format = downloaded_catalog_config["audioformat"]
+bucket_name = Variable.get("bucket")
 
 default_args = {
     'email': ['gaurav.gupta@thoughtworks.com']
@@ -38,7 +39,7 @@ def create_dag(dag_id,
         downloaded_data_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
             task_id='data-cataloguer',
             name='data-cataloguer',
-            cmds=["python", "-m", "src.scripts.data_cataloguer", "cluster", "ekstepspeechrecognition-dev",
+            cmds=["python", "-m", "src.scripts.data_cataloguer", "cluster", bucket_name,
                   "data/audiotospeech/config/downloaded_data_cataloguer/config.yaml", source, source_audio_format[source]],
 
             namespace=composer_namespace,

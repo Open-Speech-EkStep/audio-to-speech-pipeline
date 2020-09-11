@@ -1,20 +1,21 @@
 #!/bin/bash
-
+source ./env-config.cfg
 #Fetch current Composer environment details
-COMPOSER_ENV="composer"
-PROJECT_NAME="ekstepspeechrecognition"
-LOCATION="us-east1"
+
 for env in  $(gcloud composer environments list --project=$PROJECT_NAME --locations=$LOCATION --format="value(NAME)")
 do
   if [ -z "$env" ]; then 
   	echo "ERROR: There is no existing Composer environment, hence exiting..." >&2
   	exit -1
-  fi		
-  COMPOSER_ENV=$env
-  echo "Composer environment name: $COMPOSER_ENV" 
+  fi
+  if [[ "$env" == *"$ENV"* ]]; then
+    COMPOSER_ENV=$env
+    variables_json="airflow_config_file_${ENV}.json"
+    echo "Composer environment name: $COMPOSER_ENV"
+  fi
 done
 #Upload env variables
-variables_json="./src/main/python/resources/airflow_config_file.json"
+
 echo "$variables_json file"
 echo "$PATH path "
 echo "$(python -V)"
@@ -28,8 +29,8 @@ gcloud container clusters get-credentials $composer --zone us-east1-b --project 
 # gcloud components update
 # sudo gcloud components install kubectl
 
-gcloud composer environments storage data import --environment $COMPOSER_ENV --location $LOCATION --source ./src/main/python/resources/airflow_config_file.json
-gcloud composer environments run $COMPOSER_ENV --location $LOCATION variables -- --import /home/airflow/gcs/data/airflow_config_file.json
+gcloud composer environments storage data import --environment $COMPOSER_ENV --location $LOCATION --source ./src/main/python/resources/${variables_json}
+gcloud composer environments run $COMPOSER_ENV --location $LOCATION variables -- --import /home/airflow/gcs/data/${variables_json}
 
 # Upload DAG files to Composer bucket
 for file in ./src/main/python/dags/*.py

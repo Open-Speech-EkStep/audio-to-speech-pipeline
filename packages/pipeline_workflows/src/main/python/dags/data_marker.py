@@ -9,6 +9,7 @@ from airflow.contrib.operators import kubernetes_pod_operator
 downloaded_catalog_config = json.loads(Variable.get("downloadcatalogconfig"))
 # downloaded_source_audio_format = json.loads(Variable.get("downloadedsourceaudioformat"))
 composer_namespace = Variable.get("composer_namespace")
+bucket_name = Variable.get("bucket")
 # source_audio_format = downloaded_catalog_config["audioformat"]
 
 default_args = {
