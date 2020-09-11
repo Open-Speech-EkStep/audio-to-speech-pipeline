@@ -8,7 +8,7 @@ do
   	echo "ERROR: There is no existing Composer environment, hence exiting..." >&2
   	exit -1
   fi
-  if [[ "$env" == *"$ENV"* ]]; then
+  if [[ $env =~ $ENV ]]; then
     COMPOSER_ENV=$env
     variables_json="airflow_config_file_${ENV}.json"
     echo "Composer environment name: $COMPOSER_ENV"
