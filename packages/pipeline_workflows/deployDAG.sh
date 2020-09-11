@@ -1,9 +1,10 @@
 #!/bin/bash
 . ./env-config.cfg
 #Fetch current Composer environment details
-
+echo $ENV
 for env in  $(gcloud composer environments list --project=$PROJECT_NAME --locations=$LOCATION --format="value(NAME)")
 do
+  echo "The composer is : " $env
   if [ -z "$env" ]; then 
   	echo "ERROR: There is no existing Composer environment, hence exiting..." >&2
   	exit -1
