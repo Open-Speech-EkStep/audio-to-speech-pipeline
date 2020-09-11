@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./env-config.cfg
+. ./env-config.cfg
 echo $PROJECT_NAME
 echo $LOCATION
 echo $COMPOSER_ENV
