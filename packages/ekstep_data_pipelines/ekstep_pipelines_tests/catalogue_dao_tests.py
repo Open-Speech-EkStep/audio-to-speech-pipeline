@@ -67,10 +67,10 @@ class CatalogueTests(unittest.TestCase):
         utterance = {"name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav",
                      "duration": "13.38", "snr_value": 38.432806, "status": "Clean", 'reason': 'stt error'}
 
-        args = mock_postgres_client.execute_update.call_args_list
 
         rows_updated = catalogueDao.update_utterance_status(audio_id, utterance)
 
+        args = mock_postgres_client.execute_update.call_args_list
         called_with_query = 'update media_speaker_mapping set status = :status, ' \
                        'fail_reason = :reason where audio_id = :audio_id ' \
                        'and clipped_utterance_file_name = :name'
@@ -79,3 +79,27 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(True, rows_updated)
         self.assertEqual(called_with_query, args[0][0][0])
         self.assertEqual(called_with_args, args[0][1])
+
+    @mock.patch('common.postgres_db_client.PostgresClient')
+    def test_get_utterances_by_source(self, mock_postgres_client):
+        source = 'test_source'
+        status = 'Clean'
+        # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
+        expected_utterances = [
+                                (1, 'file_1.wav', '10', '2010123', 16),
+                                (2, 'file_2.wav', '11', '2010124', 17),
+                                (3, 'file_3.wav', '12', '2010125', 18),
+                                (4, 'file_4.wav', '13', '2010126', 19)
+                               ]
+        called_with_sql = 'select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr ' \
+                          'from media_speaker_mapping ' \
+                          'where audio_id in ' \
+                          '(select audio_id from media_metadata_staging ' \
+                          'where "source" = :audio_id) ' \
+                          'and status = :status'
+        mock_postgres_client.execute_query.return_value = expected_utterances
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        args = mock_postgres_client.execute_query.call_args_list
+        utterances = catalogueDao.get_utterances_by_source(source, status)
+        self.assertEqual(utterances, expected_utterances)
+        self.assertEqual(called_with_sql, args[0][0][0])

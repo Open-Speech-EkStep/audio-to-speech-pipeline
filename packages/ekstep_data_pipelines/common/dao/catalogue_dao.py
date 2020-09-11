@@ -14,6 +14,18 @@ class CatalogueDao:
         print('utterances:' + str(utterances[0][0]))
         return json.loads(utterances[0][0]) if len(utterances) > 0 else []
 
+
+    def get_utterances_by_source(self, source, status):
+        parm_dict = {'source': source, 'status': status}
+        data = self.postgres_client \
+            .execute_query('select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr '
+                           'from media_speaker_mapping '
+                           'where audio_id '
+                           'in (select audio_id from media_metadata_staging where "source" = :audio_id) '
+                           'and status = :status'
+                           , **parm_dict)
+        return data
+
     def update_utterances(self, audio_id, utterances):
         update_query = 'update media_metadata_staging ' \
                        'set utterances_files_list = :utterances where audio_id = :audio_id'
