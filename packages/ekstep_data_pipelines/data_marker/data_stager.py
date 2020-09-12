@@ -55,7 +55,7 @@ class DataStager:
             filtered_utterances = self.data_filter.by_per_speaker_duration(utterances, filter_criteria)
         else:
             raise Exception('filter criteria is not valid')
-
+        self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances)
         files = self.to_files(filtered_utterances, source_path, landing_path)
         self.data_mover.move_media_files(files, landing_path)
 

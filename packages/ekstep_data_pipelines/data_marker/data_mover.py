@@ -1,10 +1,7 @@
-import multiprocessing
-
 from common.utils import get_logger
-
 from concurrent.futures import ThreadPoolExecutor
-Logger = get_logger("MediaFilesMover")
 
+Logger = get_logger("MediaFilesMover")
 
 class MediaFilesMover(object):
     def __init__(self, file_system, concurrency):
