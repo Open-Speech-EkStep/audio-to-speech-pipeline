@@ -109,7 +109,7 @@ class CatalogueTests(unittest.TestCase):
         audio_id = '2020'
         name = '190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav'
         catalogueDao = CatalogueDao(mock_postgres_client)
-        catalogueDao.update_utterance_staged_for_trasncription(audio_id, name)
+        catalogueDao.update_utterance_staged_for_transcription(audio_id, name)
         called_with_query = 'update media_speaker_mapping set staged_for_transcription = True, ' \
                             'where audio_id = :audio_id ' \
                             'and clipped_utterance_file_name = :name'
