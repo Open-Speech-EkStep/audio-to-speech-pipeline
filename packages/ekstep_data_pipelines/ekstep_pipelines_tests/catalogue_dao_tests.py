@@ -96,7 +96,8 @@ class CatalogueTests(unittest.TestCase):
                           'where audio_id in ' \
                           '(select audio_id from media_metadata_staging ' \
                           'where "source" = :audio_id) ' \
-                          'and status = :status'
+                          'and status = :status ' \
+                          'and staged_for_transcription = false'
         mock_postgres_client.execute_query.return_value = expected_utterances
         catalogueDao = CatalogueDao(mock_postgres_client)
         args = mock_postgres_client.execute_query.call_args_list
@@ -111,7 +112,7 @@ class CatalogueTests(unittest.TestCase):
         ]
         catalogueDao = CatalogueDao(mock_postgres_client)
         catalogueDao.update_utterances_staged_for_transcription(utterances)
-        called_with_query = 'update media_speaker_mapping set staged_for_transcription = True, ' \
+        called_with_query = 'update media_speaker_mapping set staged_for_transcription = true, ' \
                             'where audio_id = :audio_id ' \
                             'and clipped_utterance_file_name = :name'
 

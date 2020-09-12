@@ -22,7 +22,8 @@ class CatalogueDao:
                            'from media_speaker_mapping '
                            'where audio_id '
                            'in (select audio_id from media_metadata_staging where "source" = :audio_id) '
-                           'and status = :status'
+                           'and status = :status '
+                           'and staged_for_transcription = false'
                            , **parm_dict)
         return data
 
@@ -55,7 +56,7 @@ class CatalogueDao:
         return True
 
     def update_utterances_staged_for_transcription(self, utterances):
-        update_query = 'update media_speaker_mapping set staged_for_transcription = True, ' \
+        update_query = 'update media_speaker_mapping set staged_for_transcription = true, ' \
                        'where audio_id = :audio_id ' \
                        'and clipped_utterance_file_name = :name'
         for utterance in utterances:
