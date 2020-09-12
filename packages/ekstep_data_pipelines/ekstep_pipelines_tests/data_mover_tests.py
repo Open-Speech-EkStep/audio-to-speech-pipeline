@@ -11,7 +11,7 @@ class DataMoverTests(unittest.TestCase):
 
     def setUp(self):
         self.file_system = Mock()
-        self.media_files_mover = MediaFilesMover(self.file_system)
+        self.media_files_mover = MediaFilesMover(self.file_system, 2)
 
 
     def test__should_move_media_files(self):

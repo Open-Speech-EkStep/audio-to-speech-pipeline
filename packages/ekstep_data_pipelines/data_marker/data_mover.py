@@ -7,12 +7,12 @@ Logger = get_logger("MediaFilesMover")
 
 
 class MediaFilesMover(object):
-    def __init__(self, file_system):
+    def __init__(self, file_system, concurrency):
         self.file_system = file_system
+        self.concurrency = concurrency
 
     def move_media_files(self, files, landing_base_path):
-        workers = multiprocessing.cpu_count() / .2
-        worker_pool = ThreadPoolExecutor(max_workers=workers)
+        worker_pool = ThreadPoolExecutor(max_workers=self.concurrency)
         for file in files:
             file_relative_path = '/'.join(file.split('/')[-3:])
             landing_path = f'{landing_base_path}/{file_relative_path}'
