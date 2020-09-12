@@ -35,6 +35,15 @@ class DataMoverTests(unittest.TestCase):
         self.assertEqual(call_args[1][0][0], f'{src_dir}/path2')
         self.assertEqual(call_args[1][0][1], f'{target_dir}/path2')
 
+    def test__should_move_file(self):
+        target_dir = 'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/landing/hindi/audio/swayamprabha_chapter/1/clean'
+        self.gcp_file_system.mv_file('gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/swayamprabha_chapter/1/clean/file1.wav',
+                                     target_dir)
+        call_args = self.gcp_operations.move_blob.call_args
+        self.assertEqual(call_args[0][0], 'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/swayamprabha_chapter/1/clean/file1.wav')
+        self.assertEqual(call_args[0][1], 'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/landing/hindi/audio/swayamprabha_chapter/1/clean/file1.wav')
+        #
+
 
 class Path:
     def __init__(self, path):
