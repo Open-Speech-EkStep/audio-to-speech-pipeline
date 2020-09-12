@@ -16,7 +16,8 @@ class MediaFilesMover(object):
         for audio_id in audio_ids:
             clean_path = f'{source_base_path}/{audio_id}/clean'
             rejected_path = f'{source_base_path}/{audio_id}/rejected'
-            landing_path = f'{landing_base_path}/{audio_id}'
-            worker_pool.submit(self.file_system.mv, clean_path, landing_path)
-            worker_pool.submit(self.file_system.mv, rejected_path, landing_path)
+            clean_landing_path = f'{landing_base_path}/{audio_id}/clean'
+            rejected_landing_path = f'{landing_base_path}/{audio_id}/rejected'
+            worker_pool.submit(self.file_system.mv, clean_path, clean_landing_path)
+            worker_pool.submit(self.file_system.mv, rejected_path, rejected_landing_path)
         worker_pool.shutdown(wait=True)

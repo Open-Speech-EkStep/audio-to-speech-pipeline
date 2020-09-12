@@ -19,9 +19,9 @@ class GCPFileSystem:
 
         files = self.ls(source_dir)
         for f in files:
-            self.mv(source_dir, f, target_dir)
+            self.mv_f(source_dir, f, target_dir)
 
-    def mv(self, source_dir, file, target_dir):
+    def mv_f(self, source_dir, file, target_dir):
         destination_blob_name = file.replace(source_dir, target_dir)
         Logger.info(f'Moving file {file} --> {destination_blob_name}')
         self.gcp_operations.move_blob(file, destination_blob_name)
