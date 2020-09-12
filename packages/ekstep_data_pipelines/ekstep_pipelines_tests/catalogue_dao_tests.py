@@ -103,3 +103,19 @@ class CatalogueTests(unittest.TestCase):
         utterances = catalogueDao.get_utterances_by_source(source, status)
         self.assertEqual(utterances, expected_utterances)
         self.assertEqual(called_with_sql, args[0][0][0])
+
+    @mock.patch('common.postgres_db_client.PostgresClient')
+    def test__should_update_utterance_staged_for_trasncription(self, mock_postgres_client):
+        audio_id = '2020'
+        name = '190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav'
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        catalogueDao.update_utterance_staged_for_trasncription(audio_id, name)
+        called_with_query = 'update media_speaker_mapping set staged_for_transcription = True, ' \
+                            'where audio_id = :audio_id ' \
+                            'and clipped_utterance_file_name = :name'
+
+        called_with_args = {'audio_id': audio_id, 'name': name}
+        args = mock_postgres_client.execute_update.call_args_list
+
+        self.assertEqual(args[0][0][0], called_with_query)
+        self.assertEqual(args[0][1], called_with_args)

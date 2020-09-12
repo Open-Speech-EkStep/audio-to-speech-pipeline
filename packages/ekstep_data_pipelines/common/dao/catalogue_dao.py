@@ -53,3 +53,11 @@ class CatalogueDao:
         param_dict = {'status': status, 'reason': reason, 'audio_id': audio_id, 'name': name}
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
+
+    def update_utterance_staged_for_trasncription(self, audio_id, utterance_name):
+        update_query = 'update media_speaker_mapping set staged_for_transcription = True, ' \
+                       'where audio_id = :audio_id ' \
+                       'and clipped_utterance_file_name = :name'
+        param_dict = {'audio_id': audio_id, 'name': utterance_name}
+        self.postgres_client.execute_update(update_query, **param_dict)
+        return True
