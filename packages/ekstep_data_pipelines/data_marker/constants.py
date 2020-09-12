@@ -1,4 +1,4 @@
-CONFIG_NAME = "data_tagger_config"
+CONFIG_NAME = "data_stager_config"
 SPEAKER_CRITERIA = "filter_by_speaker_meta_data"
 SOURCE_CRITERIA = "filter_by_source"
 FILTER_CRITERIA = "filter_criteria"
