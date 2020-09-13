@@ -69,14 +69,22 @@ class Db_normalizer():
 
         file_name = utterance['name']
         durtion = utterance['duration']
-        snr = utterance['snr_value']
         status = utterance['status']
         fail_reason = utterance.get('reason', '')
+        try:
+            if str(utterance.get('snr_value')) == 'nan':
+                snr_value = 0.0
+            else:
+                snr_value = float(utterance.get('snr_value', 0))
+        except TypeError:
+            snr_value = 0.0
+        except ValueError:
+            snr_value = 0.0
 
         # print(utterance)
         with open("full_query.txt", 'a') as myfile:
             myfile.write(
-                f"({audio_id[0]},{speaker_id},'{file_name}',{durtion},'{datetime}',{snr},'{status}','{fail_reason}'),")
+                f"({audio_id[0]},{speaker_id},'{file_name}',{durtion},'{datetime}',{snr_value},'{status}','{fail_reason}'),")
 
     def get_load_datetime(self, audio_id, connection):
         load_date_time_for_audio = text(GET_LOAD_TIME_FOR_AUDIO_QUERY)

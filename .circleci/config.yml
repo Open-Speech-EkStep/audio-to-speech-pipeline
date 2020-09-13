@@ -21,13 +21,13 @@ parameters:
     default: false
   data_prep_cataloguer:
     type: boolean
-    default: false
+    default: true
   downloaded_data_cataloguer:
     type: boolean
     default: false
   ekstep_data_pipelines:
     type: boolean
-    default: true
+    default: false
 
 executors:
   node:
