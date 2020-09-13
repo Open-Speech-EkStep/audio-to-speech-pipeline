@@ -33,8 +33,8 @@ class DataMarker:
         self.gcs_instance = gcs_instance
         self.data_tagger_config = None
         self.data_filter = DataFilter()
-        self.data_mover = MediaFilesMover(GCPFileSystem(self.gcs_instance),
-                                          multiprocessing.cpu_count() / 1 - ESTIMATED_BLOCKING_TIME_FRACTION)
+        Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
+        self.data_mover = MediaFilesMover(GCPFileSystem(self.gcs_instance), 8)
         self.catalogue_dao = CatalogueDao(self.postgres_client)
 
     def process(self, **kwargs):
