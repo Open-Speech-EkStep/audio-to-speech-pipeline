@@ -42,7 +42,6 @@ class DataMoverTests(unittest.TestCase):
         call_args = self.gcp_operations.move_blob.call_args
         self.assertEqual(call_args[0][0], 'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/swayamprabha_chapter/1/clean/file1.wav')
         self.assertEqual(call_args[0][1], 'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/landing/hindi/audio/swayamprabha_chapter/1/clean/file1.wav')
-        #
 
 
 class Path:

@@ -55,14 +55,15 @@ class DataMarker:
         Logger.info("updating utterances that need to be staged, count=" + str(len(filtered_utterances)))
         self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances)
 
-        landing_path = f'{self.data_tagger_config.get(LANDING_BASE_PATH)}/{source}'
-        source_path = f'{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}'
-        files = self.to_files(filtered_utterances, source_path)
+        landing_path_with_source = f'{self.data_tagger_config.get(LANDING_BASE_PATH)}/{source}'
+        source_path_with_source = f'{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}'
+        files = self.to_files(filtered_utterances, source_path_with_source)
         Logger.info("Staging utterances......")
-        self.data_mover.move_media_files(files, landing_path)
+        self.data_mover.move_media_files(files, landing_path_with_source)
         Logger.info('************* Data marker completed ****************')
 
-    def to_files(self, utterances, source_path):
-        wav_files = list(map(lambda u: f'{source_path}/{u[3]}/clean/{u[1]}', utterances))
-        txt_files = list(map(lambda u: f'{source_path}/{u[3]}/clean/{u[1].replace("wav", "txt")}', utterances))
+    def to_files(self, utterances, source_path_with_source):
+        wav_files = list(map(lambda u: f'{source_path_with_source}/{u[3]}/clean/{u[1]}', utterances))
+        txt_files = list(map(lambda u: f'{source_path_with_source}/{u[3]}/clean/{u[1].replace("wav", "txt")}'
+                             , utterances))
         return wav_files + txt_files

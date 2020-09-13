@@ -23,8 +23,8 @@ class DataMoverTests(unittest.TestCase):
         call_args_list = self.file_system.mv_file.call_args_list
 
         self.assertEqual(call_args_list[0][0][0], 'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/swayamprabha_chapter/1/clean/file1.wav')
-        self.assertEqual(call_args_list[0][0][1], f'{landing_base_path}/1/clean/file1.wav')
+        self.assertEqual(call_args_list[0][0][1], f'{landing_base_path}/1/clean')
 
         self.assertEqual(call_args_list[1][0][0],
                          'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/swayamprabha_chapter/1/clean/file2.wav')
-        self.assertEqual(call_args_list[1][0][1], f'{landing_base_path}/1/clean/file2.wav')
+        self.assertEqual(call_args_list[1][0][1], f'{landing_base_path}/1/clean')
