@@ -11,7 +11,6 @@ class DataMarkerTests(unittest.TestCase):
     def setUp(self):
         pass
 
-
     def test__should_filter_by_snr(self):
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
         utterances = [
@@ -31,7 +30,6 @@ class DataMarkerTests(unittest.TestCase):
         ]
         print(type(filtered[0][3]))
         self.assertEqual(expected_utterances, filtered)
-
 
     def test__should_filter_by_duration(self):
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
@@ -117,7 +115,6 @@ class DataMarkerTests(unittest.TestCase):
         self.assertEqual(type(expected_utterances), type(filtered))  # check they are the same type
         self.assertEqual(len(expected_utterances), len(filtered))  # check they are the same length
         self.assertEqual(expected_utterances, filtered)
-
 
     def test__should_apply_filters_only_source(self):
         utterances = [
