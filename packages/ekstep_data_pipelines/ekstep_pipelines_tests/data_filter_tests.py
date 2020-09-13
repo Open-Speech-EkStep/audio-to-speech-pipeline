@@ -369,7 +369,7 @@ class DataMarkerTests(unittest.TestCase):
             'by_source': 'swayamprabha_chapter_30',
             'then_by_snr': {'gte': 13, 'lte': 26},
             'then_by_duration': 21,
-            'with_randomness': 'true'
+            'with_randomness': True
         }
 
         expected_utterances = [

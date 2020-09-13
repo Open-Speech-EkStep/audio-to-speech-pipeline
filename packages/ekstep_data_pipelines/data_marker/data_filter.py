@@ -13,6 +13,7 @@ class DataFilter(object):
     def by_duration(self, utterances, total_duration, with_randomness=False, with_fraction=1):
         df = self.to_df(utterances)
         if with_randomness:
+            Logger.info('applying randomness')
             df = df.sample(frac=with_fraction)
         df['cum_hours'] = df['clipped_utterance_duration'].cumsum()
         df = df[(df.cum_hours <= total_duration)] \
