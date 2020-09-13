@@ -48,15 +48,20 @@ class DataMarker:
         source = filter_criteria['source']
         by_snr = filter_criteria['by_snr']
         by_speaker = filter_criteria['by_speaker']
+        Logger.info("Fetching utterances for source:" + source)
         utterances = self.catalogue_dao.get_utterances_by_source(source, 'Clean')
         if by_snr is not None:
-            filtered_utterances = self.data_filter.by_snr(utterances, filter_criteria)
+            Logger.info("Filtering by snr:" + str(by_snr))
+            filtered_utterances = self.data_filter.by_snr(utterances, by_snr)
         elif by_speaker is not None:
-            filtered_utterances = self.data_filter.by_per_speaker_duration(utterances, filter_criteria)
+            Logger.info("Filtering by speaker:" + str(by_speaker))
+            filtered_utterances = self.data_filter.by_per_speaker_duration(utterances, by_speaker)
         else:
             raise Exception('filter criteria is not valid')
+        Logger.info("updating utterances that need to be staged, count=" + len(filtered_utterances))
         self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances)
         files = self.to_files(filtered_utterances, source_path, landing_path)
+        Logger.info("Staging utterances......")
         self.data_mover.move_media_files(files, landing_path)
 
     def to_files(self, utterances, source_path):
