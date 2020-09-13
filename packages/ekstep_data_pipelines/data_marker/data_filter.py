@@ -10,13 +10,13 @@ class DataFilter(object):
         by_snr_utterances = filter(lambda t: filters['lte'] >= t[4] >= filters['gte'], utterances)
         return by_snr_utterances
 
-    def by_duration(self, utterances, total_duration, with_randomness=False, with_fraction=1):
+    def by_duration(self, utterances, total_duration_in_hrs, with_randomness=False, with_fraction=1):
         df = self.to_df(utterances)
         if with_randomness:
             Logger.info('applying randomness')
             df = df.sample(frac=with_fraction)
         df['cum_hours'] = df['clipped_utterance_duration'].cumsum()
-        df = df[(df.cum_hours <= total_duration)] \
+        df = df[(df.cum_hours <= total_duration_in_hrs * 3600)] \
             .drop(columns='cum_hours')
         return self.to_tuples(df)
 
@@ -29,9 +29,10 @@ class DataFilter(object):
         return [tuple(x) for x in df.to_records(index=False)]
 
     def by_per_speaker_duration(self, utterances, filters):
-        lte_speaker_duration = filters['lte_per_speaker_duration']
-        gte_speaker_duration = filters['gte_per_speaker_duration']
-        threshold = filters['with_threshold']
+        lte_speaker_duration = filters['lte_per_speaker_duration'] * 60
+        gte_speaker_duration = filters['gte_per_speaker_duration'] * 60
+        threshold = filters['with_threshold'] * 60
+
         lower_bound = gte_speaker_duration - threshold
         upper_bound = lte_speaker_duration + threshold
 

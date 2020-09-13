@@ -43,7 +43,7 @@ class DataMarkerTests(unittest.TestCase):
             (4, 'file_4.wav', 2, '2010126', 24)
         ]
         data_filter = DataFilter()
-        filtered = data_filter.by_duration(utterances, 7)
+        filtered = data_filter.by_duration(utterances, 7/3600)
         expected_utterances = [
             (1, 'file_1.wav', 4, '2010123', 13),
             (2, 'file_2.wav', 2, '2010124', 11)
@@ -67,8 +67,8 @@ class DataMarkerTests(unittest.TestCase):
             (6, 'file_4.wav', 2, '2010126', 24)
         ]
         data_filter = DataFilter()
-        filtered1 = data_filter.by_duration(utterances, 7, True, 1)
-        filtered2 = data_filter.by_duration(utterances, 7, True, 1)
+        filtered1 = data_filter.by_duration(utterances, 7/3600, True, 1)
+        filtered2 = data_filter.by_duration(utterances, 7/3600, True, 1)
         expected_utterances = [
             (1, 'file_1.wav', 4, '2010123', 13),
             (2, 'file_2.wav', 2, '2010124', 11)
@@ -99,7 +99,7 @@ class DataMarkerTests(unittest.TestCase):
             (6, 'file_55.wav', 5, '10', 27)
         ]
         data_filter = DataFilter()
-        filtered = list(data_filter.by_per_speaker_duration(utterances, {'lte_per_speaker_duration': 8, 'gte_per_speaker_duration': 0, 'with_threshold': 2}))
+        filtered = list(data_filter.by_per_speaker_duration(utterances, {'lte_per_speaker_duration': 8/60, 'gte_per_speaker_duration': 0, 'with_threshold': 2/60}))
         expected_utterances = [
             (1, 'file_10.wav', 4, '1', 13),
             (1, 'file_11.wav', 1, '2', 13),
@@ -237,7 +237,7 @@ class DataMarkerTests(unittest.TestCase):
         filters = {
             'by_source': 'swayamprabha_chapter_30',
             'then_by_snr': {'gte': 13, 'lte': 26},
-            'then_by_speaker': {'lte_per_speaker_duration': 8, 'gte_per_speaker_duration': 5, 'with_threshold': 0}
+            'then_by_speaker': {'lte_per_speaker_duration': 8/60, 'gte_per_speaker_duration': 5/60, 'with_threshold': 0}
             # 'then_by_duration': 35
         }
 
@@ -283,8 +283,8 @@ class DataMarkerTests(unittest.TestCase):
         filters = {
             'by_source': 'swayamprabha_chapter_30',
             'then_by_snr': {'gte': 13, 'lte': 26},
-            'then_by_speaker': {'lte_per_speaker_duration': 8, 'gte_per_speaker_duration': 5, 'with_threshold': 0},
-            'then_by_duration': 21
+            'then_by_speaker': {'lte_per_speaker_duration': 8/60, 'gte_per_speaker_duration': 5/60, 'with_threshold': 0},
+            'then_by_duration': 21/3600
         }
 
         expected_utterances = [
@@ -326,7 +326,7 @@ class DataMarkerTests(unittest.TestCase):
         filters = {
             'by_source': 'swayamprabha_chapter_30',
             'then_by_snr': {'gte': 13, 'lte': 26},
-            'then_by_duration': 21
+            'then_by_duration': 21/3600
         }
 
         expected_utterances = [
@@ -413,7 +413,7 @@ class DataMarkerTests(unittest.TestCase):
 
         filters = {
             'by_source': 'swayamprabha_chapter_30',
-            'then_by_duration': 21
+            'then_by_duration': 21/3600
         }
 
         expected_utterances = [
