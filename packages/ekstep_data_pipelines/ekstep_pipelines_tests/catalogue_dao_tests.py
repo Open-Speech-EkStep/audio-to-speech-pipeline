@@ -112,7 +112,7 @@ class CatalogueTests(unittest.TestCase):
         ]
         catalogueDao = CatalogueDao(mock_postgres_client)
         catalogueDao.update_utterances_staged_for_transcription(utterances)
-        called_with_query = 'update media_speaker_mapping set staged_for_transcription = true, ' \
+        called_with_query = 'update media_speaker_mapping set staged_for_transcription = true ' \
                             'where audio_id = :audio_id ' \
                             'and clipped_utterance_file_name = :name'
 
