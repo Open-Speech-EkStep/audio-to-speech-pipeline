@@ -21,7 +21,7 @@ parameters:
     default: false
   data_prep_cataloguer:
     type: boolean
-    default: true
+    default: false
   downloaded_data_cataloguer:
     type: boolean
     default: false
