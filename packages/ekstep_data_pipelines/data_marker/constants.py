@@ -1,7 +1,7 @@
 CONFIG_NAME = "data_marker_config"
 SPEAKER_CRITERIA = "filter_by_speaker_meta_data"
 SOURCE_CRITERIA = "filter_by_source"
-FILTER_CRITERIA = "filter_criteria"
+FILTER_CRITERIA = "filter"
 NUMBER_OF_SPEAKERS = "number_of_speakers"
 DURATION = "number_of_minutes_per_speaker"
 SOURCE_NAME = "source_name"
