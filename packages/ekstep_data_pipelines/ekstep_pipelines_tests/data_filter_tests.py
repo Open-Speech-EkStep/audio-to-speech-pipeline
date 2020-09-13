@@ -69,7 +69,7 @@ class DataMarkerTests(unittest.TestCase):
             (6, 'file_55.wav', 5, '10', 27)
         ]
         data_filter = DataFilter()
-        filtered = list(data_filter.by_per_speaker_duration(utterances, {'total_duration': 34, 'lte_per_speaker_duration': 8, 'gte_per_speaker_duration': 0, 'threshold': 2}))
+        filtered = list(data_filter.by_per_speaker_duration(utterances, {'total_duration': 35, 'lte_per_speaker_duration': 8, 'gte_per_speaker_duration': 0, 'threshold': 2}))
         expected_utterances = [
             (1, 'file_10.wav', 4, '1', 13),
             (1, 'file_11.wav', 1, '2', 13),
