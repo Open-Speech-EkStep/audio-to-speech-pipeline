@@ -9,7 +9,7 @@ class MediaFilesMover(object):
         self.concurrency = concurrency
 
     def move_media_files(self, files, landing_path_with_source):
-        Logger.info("using concurrency:" + self.concurrency)
+        Logger.info("using concurrency:" + str(self.concurrency))
         worker_pool = ThreadPoolExecutor(max_workers=self.concurrency)
         for file in files:
             relative_audio_id_clean_path = '/'.join(file.split('/')[-3:-1])
