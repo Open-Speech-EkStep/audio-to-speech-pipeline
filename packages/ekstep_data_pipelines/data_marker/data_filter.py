@@ -21,7 +21,6 @@ class DataFilter(object):
         lte_speaker_duration = filters['lte_per_speaker_duration']
         gte_speaker_duration = filters['gte_per_speaker_duration']
         threshold = filters['threshold']
-
         lower_bound = gte_speaker_duration - threshold
         upper_bound = lte_speaker_duration + threshold
 
@@ -32,4 +31,5 @@ class DataFilter(object):
         df = df[df['speaker_id'].isin(list(df[(df.cum_hours <= upper_bound) & (df.cum_hours >= lower_bound)]['speaker_id']))]
         df = df[(df.cum_hours <= upper_bound)]\
             .drop(columns='cum_hours')
-        return list(df.to_records(index=False))
+
+        return self.by_duration(df.to_records(index=False), filters)

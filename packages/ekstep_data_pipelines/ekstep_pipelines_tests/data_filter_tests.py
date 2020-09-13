@@ -63,10 +63,13 @@ class DataMarkerTests(unittest.TestCase):
             (4, 'file_7.wav', 4, '10', 24),
             (5, 'file_50.wav', 5, '10', 25),
             (5, 'file_51.wav', 4, '10', 26),
-            (5, 'file_52.wav', 5, '10', 27)
+            (5, 'file_52.wav', 5, '10', 27),
+            (6, 'file_53.wav', 5, '10', 25),
+            (6, 'file_54.wav', 4, '10', 26),
+            (6, 'file_55.wav', 5, '10', 27)
         ]
         data_filter = DataFilter()
-        filtered = list(data_filter.by_per_speaker_duration(utterances, {'lte_per_speaker_duration': 8, 'gte_per_speaker_duration': 0, 'threshold': 2}))
+        filtered = list(data_filter.by_per_speaker_duration(utterances, {'total_duration': 35, 'lte_per_speaker_duration': 8, 'gte_per_speaker_duration': 0, 'threshold': 2}))
         expected_utterances = [
             (1, 'file_10.wav', 4, '1', 13),
             (1, 'file_11.wav', 1, '2', 13),
@@ -77,7 +80,8 @@ class DataMarkerTests(unittest.TestCase):
             (4, 'file_5.wav', 4, '8', 19),
             (4, 'file_6.wav', 4, '9', 24),
             (5, 'file_50.wav', 5, '10', 25),
-            (5, 'file_51.wav', 4, '10', 26)
+            (5, 'file_51.wav', 4, '10', 26),
+            (6, 'file_53.wav', 5, '10', 25)
         ]
         self.assertEqual(type(expected_utterances), type(filtered))  # check they are the same type
         self.assertEqual(len(expected_utterances), len(filtered))  # check they are the same length
