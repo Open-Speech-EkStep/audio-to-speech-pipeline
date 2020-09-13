@@ -116,8 +116,8 @@ class CatalogueTests(unittest.TestCase):
         catalogueDao = CatalogueDao(mock_postgres_client)
         rows_updated = catalogueDao.update_utterances_staged_for_transcription(utterances)
         called_with_query = 'update media_speaker_mapping set staged_for_transcription = true ' \
-                            'where audio_id = %(audio_id)d ' \
-                            'and clipped_utterance_file_name = %(name)s'
+                            'where audio_id = :audio_id ' \
+                            'and clipped_utterance_file_name = :name'
 
         called_with_args = [{'audio_id': 2010123, 'name': 'file_1.wav'}, {'audio_id': 2010124, 'name': 'file_2.wav'}]
         args = mock_postgres_client.execute_batch.call_args

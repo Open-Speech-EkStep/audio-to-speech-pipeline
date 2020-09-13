@@ -87,8 +87,8 @@ class CatalogueDao:
 
     def update_utterances_staged_for_transcription(self, utterances):
         update_query = 'update media_speaker_mapping set staged_for_transcription = true ' \
-                       'where audio_id = %(audio_id)d ' \
-                       'and clipped_utterance_file_name = %(name)s'
+                       'where audio_id = :audio_id ' \
+                       'and clipped_utterance_file_name = :name'
         data_list = []
         for utterance in utterances:
             audio_id = utterance[3]
