@@ -108,17 +108,19 @@ class CatalogueTests(unittest.TestCase):
 
     @mock.patch('common.postgres_db_client.PostgresClient')
     def test__should_update_utterance_staged_for_trasncription(self, mock_postgres_client):
+        mock_postgres_client.execute_batch.return_value = 2
         utterances = [
-            (1, 'file_1.wav', '10', '2010123', 16),
+            (1, 'file_1.wav', '10', 2010123, 16),
+            (2, 'file_2.wav', '11', 2010124, 16)
         ]
         catalogueDao = CatalogueDao(mock_postgres_client)
-        catalogueDao.update_utterances_staged_for_transcription(utterances)
+        rows_updated = catalogueDao.update_utterances_staged_for_transcription(utterances)
         called_with_query = 'update media_speaker_mapping set staged_for_transcription = true ' \
-                            'where audio_id = :audio_id ' \
-                            'and clipped_utterance_file_name = :name'
+                            'where audio_id = %(audio_id)d ' \
+                            'and clipped_utterance_file_name = %(name)s'
 
-        called_with_args = {'audio_id': '2010123', 'name': 'file_1.wav'}
-        args = mock_postgres_client.execute_update.call_args_list
-
-        self.assertEqual(args[0][0][0], called_with_query)
+        called_with_args = [{'audio_id': 2010123, 'name': 'file_1.wav'}, {'audio_id': 2010124, 'name': 'file_2.wav'}]
+        args = mock_postgres_client.execute_batch.call_args
+        self.assertEqual(2, rows_updated)
+        self.assertEqual(args[0][0], called_with_query)
         self.assertEqual(args[0][1], called_with_args)

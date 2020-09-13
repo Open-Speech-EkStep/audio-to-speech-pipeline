@@ -1,3 +1,4 @@
+import psycopg2
 import yaml
 from sqlalchemy import create_engine, select, MetaData, Table, text
 
@@ -77,3 +78,12 @@ class PostgresClient:
 
     def execute_update(self, query, **parm_dict):
         return self.connection.execute(text(query), **parm_dict)
+
+    def execute_batch(self, query, data_list):
+        cur = self._connection.cursor()
+        cur.executemany(query, data_list)
+        updated_rows = cur.rowcount
+        self._connection.commit()
+        cur.close()
+        return updated_rows
+
