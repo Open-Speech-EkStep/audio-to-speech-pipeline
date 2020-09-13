@@ -1,5 +1,35 @@
 import json
 
+import numpy as np
+from psycopg2.extensions import register_adapter, AsIs
+
+
+def addapt_numpy_float64(numpy_float64):
+    return AsIs(numpy_float64)
+
+
+def addapt_numpy_int64(numpy_int64):
+    return AsIs(numpy_int64)
+
+
+def addapt_numpy_float32(numpy_float32):
+    return AsIs(numpy_float32)
+
+
+def addapt_numpy_int32(numpy_int32):
+    return AsIs(numpy_int32)
+
+
+def addapt_numpy_array(numpy_array):
+    return AsIs(tuple(numpy_array))
+
+
+register_adapter(np.float64, addapt_numpy_float64)
+register_adapter(np.int64, addapt_numpy_int64)
+register_adapter(np.float32, addapt_numpy_float32)
+register_adapter(np.int32, addapt_numpy_int32)
+register_adapter(np.ndarray, addapt_numpy_array)
+
 
 class CatalogueDao:
 
@@ -13,7 +43,6 @@ class CatalogueDao:
                            , **parm_dict)
         print('utterances:' + str(utterances[0][0]))
         return json.loads(utterances[0][0]) if len(utterances) > 0 else []
-
 
     def get_utterances_by_source(self, source, status):
         parm_dict = {'source': source, 'status': status}

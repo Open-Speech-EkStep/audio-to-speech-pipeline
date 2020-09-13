@@ -15,20 +15,21 @@ class DataMarkerTests(unittest.TestCase):
     def test__should_filter_by_snr(self):
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
         utterances = [
-            (1, 'file_1.wav', 10, '2010123', 13),
-            (2, 'file_2.wav', 11, '2010124', 11),
-            (3, 'file_3.wav', 12, '2010125', 45),
-            (4, 'file_4.wav', 13, '2010126', 19),
-            (4, 'file_4.wav', 6, '2010126', 21),
-            (4, 'file_4.wav', 13, '2010126', 100)
+            (1, 'file_1.wav', 10, 202009112003117071, 13),
+            (2, 'file_2.wav', 11, 202009112003117071, 11),
+            (3, 'file_3.wav', 12, 202009112003117071, 45),
+            (4, 'file_4.wav', 13, 202009112003117071, 19),
+            (4, 'file_4.wav', 6, 202009112003117071, 21),
+            (4, 'file_4.wav', 13, 202009112003117071, 100)
         ]
         data_filter = DataFilter()
         filtered = list(data_filter.by_snr(utterances, {'gte': 15, 'lte': 50}))
         expected_utterances = [
-            (3, 'file_3.wav', 12, '2010125', 45),
-            (4, 'file_4.wav', 13, '2010126', 19),
-            (4, 'file_4.wav', 6, '2010126', 21),
+            (3, 'file_3.wav', 12, 202009112003117071, 45),
+            (4, 'file_4.wav', 13, 202009112003117071, 19),
+            (4, 'file_4.wav', 6, 202009112003117071, 21),
         ]
+        print(type(filtered[0][3]))
         self.assertEqual(expected_utterances, filtered)
 
 
