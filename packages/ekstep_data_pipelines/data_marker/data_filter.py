@@ -45,17 +45,13 @@ class DataFilter(object):
         if by_snr is not None:
             Logger.info("Filtering by snr:" + str(by_snr))
             filtered_utterances = self.by_snr(utterances, by_snr)
-            Logger.info('count after snr filter:' + str(len(filtered_utterances)))
 
         if by_speaker is not None:
             Logger.info("Filtering by speaker:" + str(by_speaker))
             filtered_utterances = self.by_per_speaker_duration(filtered_utterances, by_speaker)
-            Logger.info('count after speaker filter:' + str(len(filtered_utterances)))
-
 
         if by_duration is not None:
             Logger.info("Filtering by duration:" + str(by_duration))
             filtered_utterances = self.by_duration(filtered_utterances, by_duration)
-            Logger.info('count after duration filter:' + str(len(filtered_utterances)))
 
         return list(filtered_utterances)
