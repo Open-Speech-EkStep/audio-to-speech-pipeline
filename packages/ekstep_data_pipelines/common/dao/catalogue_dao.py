@@ -55,9 +55,9 @@ class CatalogueDao:
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
 
-    def update_utterances_staged_for_transcription(self, utterances):
+    def  (self, utterances):
         # TODO: use batch update
-        update_query = 'update media_speaker_mapping set staged_for_transcription = true, ' \
+        update_query = 'update media_speaker_mapping set staged_for_transcription = true ' \
                        'where audio_id = :audio_id ' \
                        'and clipped_utterance_file_name = :name'
         for utterance in utterances:
