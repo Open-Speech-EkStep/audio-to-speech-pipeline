@@ -10,10 +10,11 @@ class DataFilter(object):
     def by_duration(self, utterances, filters):
         duration = 0
         filtered_utterances = []
+        total_duration_filter = filters['total_duration']
         for utterance in utterances:
             duration = duration + utterance[2]
             filtered_utterances.append(utterance)
-            if duration >= filters['total_duration']:
+            if duration >= total_duration_filter:
                 break
         return filtered_utterances
 
