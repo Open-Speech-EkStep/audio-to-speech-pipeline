@@ -17,15 +17,15 @@ class DataMarkerTests(unittest.TestCase):
         utterances = [
             (1, 'file_1.wav', 10, '2010123', 13),
             (2, 'file_2.wav', 11, '2010124', 11),
-            (3, 'file_3.wav', 12, '2010125', 18),
+            (3, 'file_3.wav', 12, '2010125', 45),
             (4, 'file_4.wav', 13, '2010126', 19),
             (4, 'file_4.wav', 6, '2010126', 21),
-            (4, 'file_4.wav', 13, '2010126', 24)
+            (4, 'file_4.wav', 13, '2010126', 100)
         ]
         data_filter = DataFilter()
-        filtered = list(data_filter.by_snr(utterances, {'gte': 18, 'lte': 21}))
+        filtered = list(data_filter.by_snr(utterances, {'gte': 15, 'lte': 50}))
         expected_utterances = [
-            (3, 'file_3.wav', 12, '2010125', 18),
+            (3, 'file_3.wav', 12, '2010125', 45),
             (4, 'file_4.wav', 13, '2010126', 19),
             (4, 'file_4.wav', 6, '2010126', 21),
         ]

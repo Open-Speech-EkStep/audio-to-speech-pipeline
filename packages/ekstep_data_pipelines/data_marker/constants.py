@@ -7,8 +7,8 @@ DURATION = "number_of_minutes_per_speaker"
 SOURCE_NAME = "source_name"
 SOURCE = "source"
 PROCESS_MODE = "process_mode"
-LANDING_PATH = "landing_directory_path"
-SOURCE_PATH = "source_directory_path"
+LANDING_BASE_PATH = "landing_directory_path"
+SOURCE_BASE_PATH = "source_directory_path"
 
 # Speaker critieria queries
 SELECT_SPEAKER_FOR_DATA_GREATER_THAN_DURATION_QUERY = "select speaker_name from downloaded_data where staged_for_snr = false group by speaker_name having sum(duration) >= :duration  limit :speaker_count"
