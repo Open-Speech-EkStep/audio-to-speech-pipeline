@@ -1,6 +1,7 @@
 import multiprocessing
 
 from common import CatalogueDao
+from common.file_system.gcp_file_systen import GCPFileSystem
 from common.utils import get_logger
 import sys
 
@@ -32,7 +33,8 @@ class DataMarker:
         self.gcs_instance = gcs_instance
         self.data_tagger_config = None
         self.data_filter = DataFilter()
-        self.data_mover = MediaFilesMover(self.gcs_instance, multiprocessing.cpu_count() / 1 - ESTIMATED_BLOCKING_TIME_FRACTION)
+        self.data_mover = MediaFilesMover(GCPFileSystem(self.gcs_instance),
+                                          multiprocessing.cpu_count() / 1 - ESTIMATED_BLOCKING_TIME_FRACTION)
         self.catalogue_dao = CatalogueDao(self.postgres_client)
 
     def process(self, **kwargs):
