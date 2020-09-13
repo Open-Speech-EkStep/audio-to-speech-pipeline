@@ -55,7 +55,7 @@ class DataMarker:
         filtered_utterances = self.data_filter.apply_filters(filter_criteria, utterances)
         Logger.info("updating utterances that need to be staged, count=" + str(len(filtered_utterances)))
         self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances)
-        files = self.to_files(filtered_utterances, source_path, landing_path)
+        files = self.to_files(filtered_utterances, source_path)
         Logger.info("Staging utterances......")
         self.data_mover.move_media_files(files, landing_path)
         Logger.info('************* Data marker completed ****************')
