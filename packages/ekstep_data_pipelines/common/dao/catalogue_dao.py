@@ -23,7 +23,8 @@ class CatalogueDao:
                            'where audio_id '
                            'in (select audio_id from media_metadata_staging where "source" = :source) '
                            'and status = :status '
-                           'and staged_for_transcription = false'
+                           'and staged_for_transcription = false '
+                           'and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15'
                            , **parm_dict)
         return data
 

@@ -97,7 +97,8 @@ class CatalogueTests(unittest.TestCase):
                           '(select audio_id from media_metadata_staging ' \
                           'where "source" = :source) ' \
                           'and status = :status ' \
-                          'and staged_for_transcription = false'
+                          'and staged_for_transcription = false '\
+                          'and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15'
         mock_postgres_client.execute_query.return_value = expected_utterances
         catalogueDao = CatalogueDao(mock_postgres_client)
         args = mock_postgres_client.execute_query.call_args_list
