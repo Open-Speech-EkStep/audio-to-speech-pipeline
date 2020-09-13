@@ -62,6 +62,7 @@ class DataMarker:
         self.data_mover.move_media_files(files, landing_path)
         Logger.info('************* Data marker completed ****************')
 
-
     def to_files(self, utterances, source_path):
-        return list(map(lambda u: f'{source_path}/{u[3]}/clean/{u[1]}', utterances))
+        wav_files = list(map(lambda u: f'{source_path}/{u[3]}/clean/{u[1]}', utterances))
+        txt_files = list(map(lambda u: f'{source_path}/{u[3]}/clean/{u[1].replace("wav", "txt")}', utterances))
+        return wav_files + txt_files

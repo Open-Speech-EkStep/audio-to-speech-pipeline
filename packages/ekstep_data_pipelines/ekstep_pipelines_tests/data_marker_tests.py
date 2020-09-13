@@ -24,6 +24,8 @@ class DataMarkerTests(unittest.TestCase):
 
         expected_files = [
             'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/source_1/2020123/clean/file_10.wav',
-            'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/source_1/2020124/clean/file_11.wav'
+            'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/source_1/2020124/clean/file_11.wav',
+            'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/source_1/2020123/clean/file_10.txt',
+            'gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/source_1/2020124/clean/file_11.txt'
         ]
         self.assertListEqual(files, expected_files)
