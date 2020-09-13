@@ -12,7 +12,7 @@ class DataMarkerTests(unittest.TestCase):
         pass
 
 
-    def test__should_filter_by_source(self):
+    def test__should_filter_by_snr(self):
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
         utterances = [
             (1, 'file_1.wav', 10, '2010123', 13),
@@ -91,7 +91,58 @@ class DataMarkerTests(unittest.TestCase):
         self.assertEqual(expected_utterances[6][0], filtered[6][0])
         self.assertEqual(expected_utterances[6][2], filtered[6][2])
 
-    def test__should_apply_filters_only_snr(self):
+
+    def test__should_apply_filters_only_source(self):
+        utterances = [
+            (1, 'file_10.wav', 4, '1', 13),
+            (1, 'file_11.wav', 1, '2', 13),
+            (1, 'file_12.wav', 2, '3', 13),
+            (1, 'file_13.wav', 4, '4', 13),
+            (2, 'file_2.wav', 4, '5', 11),
+            (3, 'file_3.wav', 2, '6', 18),
+            (3, 'file_4.wav', 4, '7', 18),
+            (4, 'file_5.wav', 4, '8', 19),
+            (4, 'file_6.wav', 4, '9', 24),
+            (4, 'file_7.wav', 4, '10', 24),
+            (5, 'file_50.wav', 5, '10', 25),
+            (5, 'file_51.wav', 4, '10', 26),
+            (5, 'file_52.wav', 5, '10', 27),
+            (6, 'file_53.wav', 5, '10', 25),
+            (6, 'file_54.wav', 4, '10', 26),
+            (6, 'file_55.wav', 5, '10', 27)
+        ]
+
+        filters = {
+            'by_source': 'swayamprabha_chapter_30',
+        }
+
+        expected_utterances = [
+            (1, 'file_10.wav', 4, '1', 13),
+            (1, 'file_11.wav', 1, '2', 13),
+            (1, 'file_12.wav', 2, '3', 13),
+            (1, 'file_13.wav', 4, '4', 13),
+            (2, 'file_2.wav', 4, '5', 11),
+            (3, 'file_3.wav', 2, '6', 18),
+            (3, 'file_4.wav', 4, '7', 18),
+            (4, 'file_5.wav', 4, '8', 19),
+            (4, 'file_6.wav', 4, '9', 24),
+            (4, 'file_7.wav', 4, '10', 24),
+            (5, 'file_50.wav', 5, '10', 25),
+            (5, 'file_51.wav', 4, '10', 26),
+            (5, 'file_52.wav', 5, '10', 27),
+            (6, 'file_53.wav', 5, '10', 25),
+            (6, 'file_54.wav', 4, '10', 26),
+            (6, 'file_55.wav', 5, '10', 27)
+        ]
+        data_filter = DataFilter()
+        filtered = data_filter.apply_filters(filters, utterances)
+        self.assertEqual(type(expected_utterances), type(filtered))  # check they are the same type
+        self.assertEqual(len(expected_utterances), len(filtered))  # check they are the same length
+        self.assertEqual(expected_utterances[1][0], filtered[1][0])
+        self.assertEqual(expected_utterances[6][0], filtered[6][0])
+        self.assertEqual(expected_utterances[12][4], filtered[12][4])
+
+    def test__should_apply_filters_by_source_and_then_by_snr(self):
         utterances = [
             (1, 'file_10.wav', 4, '1', 13),
             (1, 'file_11.wav', 1, '2', 13),
