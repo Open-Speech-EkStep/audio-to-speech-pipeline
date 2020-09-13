@@ -63,7 +63,5 @@ class DataMarker:
         Logger.info('************* Data marker completed ****************')
 
     def to_files(self, utterances, source_path_with_source):
-        wav_files = list(map(lambda u: f'{source_path_with_source}/{u[3]}/clean/{u[1]}', utterances))
-        txt_files = list(map(lambda u: f'{source_path_with_source}/{u[3]}/clean/{u[1].replace("wav", "txt")}'
-                             , utterances))
-        return wav_files + txt_files
+        list(map(lambda u: f'{source_path_with_source}/{u[3]}/clean/{u[1]}', utterances))
+        return list(map(lambda u: f'{source_path_with_source}/{u[3]}/clean/{u[1]}', utterances))
