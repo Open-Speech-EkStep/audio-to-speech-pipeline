@@ -21,7 +21,7 @@ class CatalogueDao:
             .execute_query('select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr '
                            'from media_speaker_mapping '
                            'where audio_id '
-                           'in (select audio_id from media_metadata_staging where "source" = :audio_id) '
+                           'in (select audio_id from media_metadata_staging where "source" = :source) '
                            'and status = :status '
                            'and staged_for_transcription = false'
                            , **parm_dict)

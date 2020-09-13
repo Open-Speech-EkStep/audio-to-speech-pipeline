@@ -95,7 +95,7 @@ class CatalogueTests(unittest.TestCase):
                           'from media_speaker_mapping ' \
                           'where audio_id in ' \
                           '(select audio_id from media_metadata_staging ' \
-                          'where "source" = :audio_id) ' \
+                          'where "source" = :source) ' \
                           'and status = :status ' \
                           'and staged_for_transcription = false'
         mock_postgres_client.execute_query.return_value = expected_utterances
