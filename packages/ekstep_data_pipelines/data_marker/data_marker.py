@@ -47,7 +47,7 @@ class DataMarker:
         filter_criteria = self.data_tagger_config.get(FILTER_CRITERIA)
         landing_path = self.data_tagger_config.get(LANDING_PATH)
         source_path = self.data_tagger_config.get(SOURCE_PATH)
-        source = filter_criteria.get('source', None)
+        source = filter_criteria.get('by_source', None)
         if source is None:
             raise Exception('filter by source is mandatory')
         Logger.info("Fetching utterances for source:" + source)
