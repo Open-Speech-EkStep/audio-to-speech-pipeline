@@ -39,7 +39,9 @@ class DataMarker:
         """
         Main function for running all processing that takes places in the data marker
         """
-        self.data_tagger_config = self.data_processor.config_dict.get(
+
+        Logger.info('*************Starting data marker****************')
+        self.data_tagger_config = self.postgres_client.config_dict.get(
             CONFIG_NAME)
 
         filter_criteria = self.data_tagger_config.get(FILTER_CRITERIA)
@@ -63,6 +65,8 @@ class DataMarker:
         files = self.to_files(filtered_utterances, source_path, landing_path)
         Logger.info("Staging utterances......")
         self.data_mover.move_media_files(files, landing_path)
+        Logger.info('************* Data marker completed ****************')
+
 
     def to_files(self, utterances, source_path):
         return list(map(lambda u: f'{source_path}/{u[3]}/clean/{u[1]}', utterances))
