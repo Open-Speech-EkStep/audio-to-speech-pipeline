@@ -9,7 +9,7 @@ from data_marker.constants import CONFIG_NAME, FILTER_CRITERIA, LANDING_BASE_PAT
 from data_marker.data_filter import DataFilter
 from data_marker.data_mover import MediaFilesMover
 
-ESTIMATED_ACTIVE_TIME_FRACTION = .1
+ESTIMATED_ACTIVE_TIME_FRACTION = .05
 
 sys.path.insert(0, '..')
 

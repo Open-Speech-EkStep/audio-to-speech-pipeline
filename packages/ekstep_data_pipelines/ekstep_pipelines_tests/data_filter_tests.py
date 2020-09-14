@@ -133,9 +133,7 @@ class DataMarkerTests(unittest.TestCase):
             (6, 'file_55.wav', 5, '10', 27)
         ]
 
-        filters = {
-            'by_source': 'swayamprabha_chapter_30',
-        }
+        filters = {}
 
         expected_utterances = [
             (1, 'file_10.wav', 4, '1', 13),
@@ -182,7 +180,6 @@ class DataMarkerTests(unittest.TestCase):
         ]
 
         filters = {
-            'by_source': 'swayamprabha_chapter_30',
             'by_snr': {'gte': 13, 'lte': 26}
         }
 
@@ -406,7 +403,6 @@ class DataMarkerTests(unittest.TestCase):
         ]
 
         filters = {
-            'by_source': 'swayamprabha_chapter_30',
             'by_duration': 21/3600
         }
 
