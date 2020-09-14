@@ -119,7 +119,8 @@ class Db_normalizer():
             update_query = text(UPDATE_SOURCE_METADATA_QUERY)
             connection.execute(
                 update_query, cleaned_duration=source[0], num_audio=source[2], source_name=source[1])
-        insert_query,processed_audio_ids = self.update_utterance_in_mapping_table(connection)
+        insert_query, processed_audio_ids = self.update_utterance_in_mapping_table(
+            connection)
 
         if len(insert_query) < 1:
             # TODO: should raise execption
@@ -131,8 +132,8 @@ class Db_normalizer():
 
         connection.execute(final_query)
 
-        self.set_isnormalized_flag_for_source_data(processed_audio_ids,connection)
-
+        self.set_isnormalized_flag_for_source_data(
+            processed_audio_ids, connection)
 
     def set_isnormalized_flag_for_source_data(self, audio_ids, connection):
 
@@ -183,7 +184,7 @@ class Db_normalizer():
                 insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
                     {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{load_datetime}')")
 
-        return insert_query_into_mapping_table , processed_audio_ids
+        return insert_query_into_mapping_table, processed_audio_ids
 
     def parse_raw_file_data(self, raw_file_utterance):
         try:
@@ -223,7 +224,7 @@ class Db_normalizer():
             for utterance_name_diration in utterance_list:
                 self.create_insert_query(utterance_name_diration, speaker_id,
                                          audio_id, get_load_datetime_for_audio, connection)
-            self.insert_file(connection, "./full_query.txt")
+        self.insert_file(connection, "./full_query.txt")
 
         self.set_isnormalized_flag(audio_ids, connection)
         print(audio_ids)
