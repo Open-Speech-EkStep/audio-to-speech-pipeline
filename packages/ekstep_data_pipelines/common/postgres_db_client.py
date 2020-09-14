@@ -80,10 +80,11 @@ class PostgresClient:
         return self.connection.execute(text(query), **parm_dict)
 
     def execute_batch(self, query, data_list):
-        cur = self.db.raw_connection().cursor()
+        conn = self.db.raw_connection()
+        cur = conn.cursor()
         cur.executemany(query, data_list)
         updated_rows = cur.rowcount
-        self._connection.commit()
+        conn.commit()
         cur.close()
         return updated_rows
 
