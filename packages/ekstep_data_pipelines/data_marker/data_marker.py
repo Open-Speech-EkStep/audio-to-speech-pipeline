@@ -43,19 +43,13 @@ class DataMarker:
         Main function for running all processing that takes places in the data marker
         """
         Logger.info('*************Starting data marker****************')
-        self.data_tagger_config = self.postgres_client.config_dict.get(
-            CONFIG_NAME)
-
-        filter_criteria = self.data_tagger_config.get(FILTER_CRITERIA)
-        source = filter_criteria.get('by_source', None)
-        if source is None:
-            raise Exception('filter by source is mandatory')
+        self.data_tagger_config = self.postgres_client.config_dict.get(CONFIG_NAME)
+        source, filter_criteria = self.get_config(**kwargs)
         Logger.info("Fetching utterances for source:" + source)
         utterances = self.catalogue_dao.get_utterances_by_source(source, 'Clean')
         filtered_utterances = self.data_filter.apply_filters(filter_criteria, utterances)
         Logger.info("updating utterances that need to be staged, count=" + str(len(filtered_utterances)))
         self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances)
-
         landing_path_with_source = f'{self.data_tagger_config.get(LANDING_BASE_PATH)}/{source}'
         source_path_with_source = f'{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}'
         files = self.to_files(filtered_utterances, source_path_with_source)
@@ -66,3 +60,12 @@ class DataMarker:
     def to_files(self, utterances, source_path_with_source):
         list(map(lambda u: f'{source_path_with_source}/{u[3]}/clean/{u[1]}', utterances))
         return list(map(lambda u: f'{source_path_with_source}/{u[3]}/clean/{u[1]}', utterances))
+
+    def get_config(self, **kwargs):
+        filter_criteria = kwargs.get(FILTER_CRITERIA, {})
+        source = kwargs.get('source')
+
+        if source is None:
+            raise Exception('filter by source is mandatory')
+
+        return source, filter_criteria.get(FILTER_CRITERIA)

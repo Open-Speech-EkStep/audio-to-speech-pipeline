@@ -1,21 +1,17 @@
-import datetime
 import json
-import time
-from airflow import models
+import datetime
+
+from airflow import DAG
 from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
+from airflow.operators.python_operator import PythonOperator
+from helper_dag import data_marking_start
 
-downloaded_catalog_config = json.loads(Variable.get("downloadcatalogconfig"))
-# downloaded_source_audio_format = json.loads(Variable.get("downloadedsourceaudioformat"))
-composer_namespace = Variable.get("composer_namespace")
+data_marker_config = json.loads(Variable.get("data_filter_config"))
 bucket_name = Variable.get("bucket")
-# source_audio_format = downloaded_catalog_config["audioformat"]
 
-default_args = {
-    'email': ['gaurav.gupta@thoughtworks.com']
-}
-
+composer_namespace = Variable.get("composer_namespace")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
 secret_file = secret.Secret(
@@ -25,21 +21,41 @@ secret_file = secret.Secret(
     key='key.json')
 
 
+def create_dag(data_marker_config, default_args):
+    dag = DAG(dag_id='data_marker_pipeline',
+              schedule_interval=datetime.timedelta(days=1),
+              default_args=default_args,
+              start_date=YESTERDAY)
 
-with models.DAG(
-        dag_id='data_marker_pipeline',
-        schedule_interval=datetime.timedelta(days=1),
-        default_args=default_args,
-        start_date=YESTERDAY) as dag:
-    kubernetes_list_bucket_pod = kubernetes_pod_operator.KubernetesPodOperator(
-        task_id='data-marker',
-        name='data-marker',
-        cmds=["python", "invocation_script.py" ,"-a", "data_marking", "-rc", "data/audiotospeech/config/audio_processing/config.yaml"],
-        # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
-        namespace = composer_namespace,
-        startup_timeout_seconds=300,
-        secrets=[secret_file],
-        image='us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:1.0.0',
-        image_pull_policy='Always')
+    with dag:
+        before_start = PythonOperator(
+            task_id= "data_marking_start",
+            python_callable=data_marking_start,
+            op_kwargs={},
+            )
+
+        before_start
+
+        for source in data_marker_config.keys():
+            filter_by_config = data_marker_config.get(source)
+            data_marker_task = kubernetes_pod_operator.KubernetesPodOperator(
+                task_id=f'data-marker-{source}',
+                name='data-marker',
+                cmds=["python", "invocation_script.py" ,"-a", "data_marking", "-rc", "data/audiotospeech/config/audio_processing/config.yaml",
+                      "-as", source, "-fb", json.dumps(filter_by_config)],
+                namespace = composer_namespace,
+                startup_timeout_seconds=300,
+                secrets=[secret_file],
+                image='us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:1.0.0',
+                image_pull_policy='Always')
+
+            before_start >> data_marker_task
+
+    return dag
 
 
+dag_args = {
+        'email': ['gaurav.gupta@thoughtworks.com'],
+    }
+
+globals()['data_marker_pipeline'] = create_dag(data_marker_config, dag_args)

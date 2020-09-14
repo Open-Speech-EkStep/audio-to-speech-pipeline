@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 import yaml
 
 from gcs_utils import list_blobs_in_a_path, copy_blob, check_blob, \
-    move_blob, upload_blob, read_blob, move_directory,download_blob
+    move_blob, upload_blob, read_blob, move_directory, download_blob
 from airflow.models import Variable
 
 snr_done_path = Variable.get("snrdonepath")
@@ -69,7 +69,7 @@ def move_metadata_file(source, tobe_processed_path):
     global bucket_name
     source_file_name = source + "_audio_id.txt"
     destination_blob_name = tobe_processed_path + source + \
-        '/audio_id/' + get_audio_id() + '/' + source + "_audio_id.txt"
+                            '/audio_id/' + get_audio_id() + '/' + source + "_audio_id.txt"
     if os.path.isfile(source_file_name):
         upload_blob(bucket_name, source_file_name, destination_blob_name)
         os.remove(source_file_name)
@@ -84,19 +84,20 @@ def condition_file_name(file_name):
     return '_'.join(file_name_split[:-1]) + '.' + file_name_split[-1]
 
 
-def get_files_from_landing_zone(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count, audio_format):
+def get_files_from_landing_zone(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count,
+                                audio_format):
     get_variables()
     delimiter = "/"
     print("****The source is *****" + source)
     # meta_data_flag = False
     master_metadat_file_path = f'{source_landing_path}{source}/{source}_master.csv'
 
-    has_metadata_file = check_blob(bucket_name,master_metadat_file_path)
+    has_metadata_file = check_blob(bucket_name, master_metadat_file_path)
 
     print(f'*****has meta data {has_metadata_file}*********{master_metadat_file_path}')
 
     if has_metadata_file:
-        upload_and_move(master_metadat_file_path,source)
+        upload_and_move(master_metadat_file_path, source)
 
     all_blobs = list_blobs_in_a_path(
         bucket_name, source_landing_path + source + delimiter)
@@ -151,17 +152,17 @@ def get_files_from_landing_zone(source, source_landing_path, error_landing_path,
         move_metadata_file(source, tobe_processed_path)
 
 
-def upload_and_move( master_metadat_file_path, source):
-
+def upload_and_move(master_metadat_file_path, source):
     meta_data_done_path = f'{snr_done_path}/{source}/{source}_master.csv'
 
     local_metadata_downloaded_path = '/tmp/master_csv'
 
-    download_blob(bucket_name ,master_metadat_file_path, local_metadata_downloaded_path)
+    download_blob(bucket_name, master_metadat_file_path, local_metadata_downloaded_path)
 
     upload_file_to_downloaded_source(local_metadata_downloaded_path)
 
-    move_blob(bucket_name, master_metadat_file_path,bucket_name, meta_data_done_path)
+    move_blob(bucket_name, master_metadat_file_path, bucket_name, meta_data_done_path)
+
 
 def get_latest_file_from_bucket(source_path):
     global bucket_name
@@ -194,7 +195,7 @@ def get_audio_ids(source, tobe_processed_path, **kwargs):
     audio_file_ids = json.loads(Variable.get("audiofileids"))
     audio_id_source_path = get_audio_id_path(tobe_processed_path, source)
     latest_audio_id_path = audio_id_source_path + \
-        get_latest_file_from_bucket(audio_id_source_path)
+                           get_latest_file_from_bucket(audio_id_source_path)
     audio_id_blob = get_audio_id_blob_name(latest_audio_id_path, source)
 
     if check_blob(bucket_name, audio_id_blob):
@@ -207,12 +208,12 @@ def get_audio_ids(source, tobe_processed_path, **kwargs):
         audio_file_ids = mydict(audio_file_ids)
         Variable.set("audiofileids", audio_file_ids)
 
-def get_require_audio_id(source,stt_source_path,batch_count):
 
+def get_require_audio_id(source, stt_source_path, batch_count):
     audio_ids = json.loads(Variable.get("audioidsforstt"))
 
     source_dir_path = f'{stt_source_path}{source}'
-    all_audio_id_path = list_blobs_in_a_path(bucket_name,source_dir_path)
+    all_audio_id_path = list_blobs_in_a_path(bucket_name, source_dir_path)
     audio_id_list = set()
     for blob in all_audio_id_path:
 
@@ -249,11 +250,13 @@ def upload_file_to_downloaded_source(file_path):
         cursor.copy_expert(cmd, f)
         conn.commit()
 
+
 def __load_yaml_file(path):
     read_dict = {}
     with open(path, 'r') as file:
         read_dict = yaml.safe_load(file)
     return read_dict
+
 
 def create_db_engine(config_local_path):
     config_file = __load_yaml_file(config_local_path)
@@ -266,6 +269,7 @@ def create_db_engine(config_local_path):
         f'postgresql://{db_user}:{db_pass}@{cloud_sql_connection_name}/{db_name}')
     return db
 
+
 def get_db_connection_object():
     config_path = "./config.yaml"
 
@@ -276,3 +280,7 @@ def get_db_connection_object():
 
 if __name__ == "__main__":
     pass
+
+
+def data_marking_start():
+    return 'started..'

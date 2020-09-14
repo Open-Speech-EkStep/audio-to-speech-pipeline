@@ -10,9 +10,9 @@ class DataFilter(object):
         by_snr_utterances = filter(lambda t: filters['lte'] >= t[4] >= filters['gte'], utterances)
         return by_snr_utterances
 
-    def by_duration(self, utterances, total_duration_in_hrs, with_randomness=False, with_fraction=1):
+    def by_duration(self, utterances, total_duration_in_hrs, with_randomness='false', with_fraction=1):
         df = self.to_df(utterances)
-        if with_randomness:
+        if with_randomness == 'true':
             Logger.info('applying randomness')
             df = df.sample(frac=with_fraction)
         df['cum_hours'] = df['clipped_utterance_duration'].cumsum()
@@ -46,10 +46,10 @@ class DataFilter(object):
 
     def apply_filters(self, filters, utterances):
         Logger.info('Applying filters:' + str(filters))
-        by_snr = filters.get('then_by_snr', None)
-        by_speaker = filters.get('then_by_speaker', None)
-        by_duration = filters.get('then_by_duration', None)
-        with_randomness = filters.get('with_randomness', False)
+        by_snr = filters.get('by_snr', None)
+        by_speaker = filters.get('by_speaker', None)
+        by_duration = filters.get('by_duration', None)
+        with_randomness = filters.get('with_randomness', 'false')
         with_fraction = filters.get('with_fraction', 1)
 
         filtered_utterances = utterances

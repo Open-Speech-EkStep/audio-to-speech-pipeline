@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 import argparse
@@ -47,6 +48,9 @@ parser.add_argument('-af', '--audio-format', dest='audio_format', default=None,
 parser.add_argument('-stt', '--speech-to-text',dest='speech_to_text_client',default=None,
                     help='The client name which we want to call for stt')
 
+parser.add_argument('-fb', '--filter_by', dest='filter_by', default=None,
+                    help='The filter that needs to be applied for data marking')
+
 processor_args = parser.parse_args()
 
 
@@ -95,6 +99,22 @@ def process_config_input(arguments):
         config_file_path = download_config_file(arguments.remote_config)
 
     return config_file_path
+
+def validate_data_filter_config(arguments):
+    LOGGER.info('validating input for audio processing')
+
+    if arguments.audio_source is None:
+        raise argparse.ArgumentTypeError(
+            f'Source is missing'
+        )
+
+    if arguments.filter_by is None:
+        raise argparse.ArgumentTypeError(
+            f'Filter config is missing'
+        )
+
+    return {'filter': json.loads(arguments.filter_by), 'source': arguments.audio_source}
+
 
 def validate_audio_processing_input(arguments):
     LOGGER.info('validating input for audio processing')
@@ -160,6 +180,7 @@ def perform_action(arguments, **kwargs):
 
 
     if current_action == ACTIONS.DATA_MARKING:
+        kwargs.update(validate_data_filter_config(arguments))
         LOGGER.info('Intializing data marker with given config')
 
         config_params = {'config_file_path': kwargs.get('config_file_path')}
