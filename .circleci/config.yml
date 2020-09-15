@@ -15,19 +15,19 @@ parameters:
     default: false
   pipeline_workflows:
     type: boolean
-    default: true
+    default: false
   data_tagger:
     type: boolean
     default: false
   data_prep_cataloguer:
     type: boolean
-    default: true
+    default: false
   downloaded_data_cataloguer:
     type: boolean
     default: false
   ekstep_data_pipelines:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:
