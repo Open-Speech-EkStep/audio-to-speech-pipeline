@@ -1,6 +1,6 @@
 import traceback
 
-from audio_transcription.constants import CONFIG_NAME, CLEAN_AUDIO_PATH, LANGUAGE
+from audio_transcription.constants import CONFIG_NAME, CLEAN_AUDIO_PATH, LANGUAGE, SHOULD_SKIP_REJECTED
 from audio_transcription.transcription_sanitizer import TranscriptionSanitizer
 from audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
 from common.audio_commons.transcription_clients.transcription_client_errors import \
@@ -39,6 +39,8 @@ class AudioTranscription:
         language = self.audio_transcription_config.get(LANGUAGE)
         remote_path_of_dir = self.audio_transcription_config.get(
             CLEAN_AUDIO_PATH)
+        should_skip_rejected = self.audio_transcription_config.get(
+            SHOULD_SKIP_REJECTED)
         LOGGER.info('Generating transcriptions for audio_ids:' + str(audio_ids))
         failed_audio_ids = []
         for audio_id in audio_ids:
