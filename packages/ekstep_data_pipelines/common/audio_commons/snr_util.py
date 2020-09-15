@@ -80,6 +80,10 @@ class SNR:
 
 
             snr_value = self.compute_file_snr(file_path)
+
+            if str(snr_value) == 'nan':
+                snr_value = 0.0
+
             file_snrs[file_path] = snr_value
 
             LOGGER.info(f'{file_path} has an snr value of {snr_value}')
