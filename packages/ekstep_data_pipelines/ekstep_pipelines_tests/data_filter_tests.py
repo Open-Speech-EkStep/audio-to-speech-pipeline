@@ -512,7 +512,7 @@ class DataMarkerTests(unittest.TestCase):
 
         filters = {
             'by_utterance_duration': {
-                'gte' : 2,
+                'gte': 2,
                 'lte': 4
             },
             'by_snr': {

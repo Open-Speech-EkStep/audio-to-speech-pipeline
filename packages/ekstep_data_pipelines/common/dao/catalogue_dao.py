@@ -85,15 +85,11 @@ class CatalogueDao:
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
 
-    def update_utterances_staged_for_transcription(self, utterances):
+    def update_utterances_staged_for_transcription(self, utterances, source):
         update_query = 'update media_speaker_mapping set staged_for_transcription = true ' \
-                       'where audio_id = %(audio_id)s ' \
-                       'and clipped_utterance_file_name = %(name)s'
-        data_list = []
-        for utterance in utterances:
-            audio_id = utterance[3]
-            name = utterance[1]
-            param_dict = {'audio_id': audio_id, 'name': name}
-            data_list.append(param_dict)
-        rows_updated = self.postgres_client.execute_batch(update_query, data_list)
-        return rows_updated
+                       'where audio_id in (select audio_id from media_metadata_staging ' \
+                       'where "source" = :source) and clipped_utterance_file_name in (:file_names)'
+        utterance_names = list(map(lambda u: f'{u[1]}', utterances))
+        param_dict = {'source': source, 'file_names': utterance_names}
+        self.postgres_client.execute_update(update_query, **param_dict)
+        return True
