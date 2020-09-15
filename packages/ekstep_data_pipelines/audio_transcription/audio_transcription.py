@@ -59,12 +59,15 @@ class AudioTranscription:
                 all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
 
                 local_clean_dir_path, local_rejected_dir_path = self.generate_transcription_for_all_utterenaces(audio_id, all_path, language,
-                                                                                 transcription_client, utterances)
+                                                                                 transcription_client, utterances, should_skip_rejected)
                 LOGGER.info('updating catalogue with updated utterances')
                 self.catalogue_dao.update_utterances(audio_id, utterances)
 
                 LOGGER.info(f'Uploading local generated files from {local_clean_dir_path} to {remote_stt_output_path}')
-                self.move_to_gcs(local_clean_dir_path, remote_stt_output_path + "/clean")
+                if os.path.exists(local_clean_dir_path):
+                    self.move_to_gcs(local_clean_dir_path, remote_stt_output_path + "/clean")
+                else:
+                    LOGGER.info('No clean files found')
 
                 LOGGER.info(f'Uploading local generated files from {local_rejected_dir_path} to {remote_stt_output_path}')
                 if os.path.exists(local_rejected_dir_path):
@@ -97,7 +100,7 @@ class AudioTranscription:
         with open(output_file_path, "w") as f:
             f.write(transcription)
 
-    def generate_transcription_for_all_utterenaces(self, audio_id, all_path, language, transcription_client, utterances):
+    def generate_transcription_for_all_utterenaces(self, audio_id, all_path, language, transcription_client, utterances, should_skip_rejected):
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
         local_clean_path = ''
         local_rejected_path = ''
@@ -110,9 +113,14 @@ class AudioTranscription:
                 LOGGER.info('No utterance found for file_name: ' + file_name)
                 continue
             if utterance_metadata['status'] == 'Rejected':
-                LOGGER.info('Skipping rejected file_name: ' + file_name)
-                continue
-            if float(utterance_metadata['duration']) < 0.5 or float(utterance_metadata['duration']) > 15 :
+                if should_skip_rejected:
+                    LOGGER.info('Skipping rejected file_name: ' + file_name)
+                    continue
+                else:
+                    LOGGER.info('Marking rejected file as clean, as this will be transcribed:' + file_name)
+                    utterance_metadata['status'] = 'Clean'
+                    utterance_metadata['reason'] = 'redacted'
+            if float(utterance_metadata['duration']) < 0.5 or float(utterance_metadata['duration']) > 15:
                 LOGGER.error('skipping audio file as duration > 15 or < .5')
                 continue
 
