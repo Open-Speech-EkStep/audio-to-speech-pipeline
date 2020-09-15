@@ -89,7 +89,7 @@ class CatalogueDao:
         update_query = 'update media_speaker_mapping set staged_for_transcription = true ' \
                        'where audio_id in (select audio_id from media_metadata_staging ' \
                        'where "source" = :source) and clipped_utterance_file_name in (:file_names)'
-        utterance_names = list(map(lambda u: f'{u[1]}', utterances))
-        param_dict = {'source': source, 'file_names': utterance_names}
+        utterance_names = list(map(lambda u: u[1], utterances))
+        param_dict = {'source': source, 'file_names': ','.join(utterance_names)}
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
