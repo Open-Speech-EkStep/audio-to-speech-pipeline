@@ -31,6 +31,30 @@ class DataMarkerTests(unittest.TestCase):
         print(type(filtered[0][3]))
         self.assertEqual(expected_utterances, filtered)
 
+    def test__should_filter_by_utterance_duration(self):
+        # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
+        utterances = [
+            (1, 'file_1.wav', 1, '2010123', 13),
+            (2, 'file_2.wav', 2, '2010124', 11),
+            (3, 'file_3.wav', 4, '2010125', 18),
+            (4, 'file_4.wav', 4, '2010126', 19),
+            (4, 'file_4.wav', 2, '2010126', 24),
+            (5, 'file_4.wav', 5, '2010126', 24),
+        ]
+        data_filter = DataFilter()
+        utterance_filter = {
+                'lte': 4,
+                'gte': 2
+        }
+        filtered = list(data_filter.by_utterance_duration(utterances, utterance_filter))
+        expected_utterances = [
+            (2, 'file_2.wav', 2, '2010124', 11),
+            (3, 'file_3.wav', 4, '2010125', 18),
+            (4, 'file_4.wav', 4, '2010126', 19),
+            (4, 'file_4.wav', 2, '2010126', 24),
+        ]
+        self.assertEqual(expected_utterances, filtered)
+
     def test__should_filter_by_duration(self):
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
         utterances = [
@@ -254,7 +278,7 @@ class DataMarkerTests(unittest.TestCase):
         utterances = [
             (1, 'file_10.wav', 4, '1', 13),
             (1, 'file_11.wav', 1, '2', 13),
-            (1, 'file_12.wav', 2, '3', 13),
+            (None, 'file_12.wav', 2, '3', 13),
             (1, 'file_13.wav', 4, '4', 13),
             (2, 'file_2.wav', 4, '5', 11),
             (2, 'file_2.wav', 4, '5', 18),
@@ -281,7 +305,6 @@ class DataMarkerTests(unittest.TestCase):
         expected_utterances = [
             (1, 'file_10.wav', 4, '1', 13),
             (1, 'file_11.wav', 1, '2', 13),
-            (1, 'file_12.wav', 2, '3', 13),
             (3, 'file_3.wav', 2, '6', 18),
             (3, 'file_4.wav', 4, '7', 18),
             (4, 'file_5.wav', 4, '8', 19),
@@ -419,4 +442,94 @@ class DataMarkerTests(unittest.TestCase):
         filtered = data_filter.apply_filters(filters, utterances)
         self.assertEqual(type(expected_utterances), type(filtered))  # check they are the same type
         self.assertEqual(len(expected_utterances), len(filtered))  # check they are the same length
+        self.assertEqual(expected_utterances, filtered)
+
+    def test__should_apply_filters_only_source_and_utterance_duration(self):
+        utterances = [
+            (1, 'file_10.wav', 4, '1', 13),
+            (1, 'file_11.wav', 1, '2', 13),
+            (1, 'file_12.wav', 2, '3', 13),
+            (1, 'file_13.wav', 4, '4', 13),
+            (2, 'file_2.wav', 4, '5', 11),
+            (3, 'file_3.wav', 2, '6', 18),
+            (3, 'file_4.wav', 4, '7', 18),
+            (4, 'file_5.wav', 4, '8', 19),
+            (4, 'file_6.wav', 4, '9', 24),
+            (4, 'file_7.wav', 4, '10', 24),
+            (5, 'file_50.wav', 5, '10', 25),
+            (5, 'file_51.wav', 4, '10', 26),
+            (5, 'file_52.wav', 5, '10', 27),
+            (6, 'file_53.wav', 5, '10', 25),
+            (6, 'file_54.wav', 4, '10', 26),
+            (6, 'file_55.wav', 5, '10', 27)
+        ]
+
+        filters = {
+            'by_utterance_duration': {
+                'gte' : 2,
+                'lte': 4
+            }
+        }
+
+        expected_utterances = [
+            (1, 'file_10.wav', 4, '1', 13),
+            (1, 'file_12.wav', 2, '3', 13),
+            (1, 'file_13.wav', 4, '4', 13),
+            (2, 'file_2.wav', 4, '5', 11),
+            (3, 'file_3.wav', 2, '6', 18),
+            (3, 'file_4.wav', 4, '7', 18),
+            (4, 'file_5.wav', 4, '8', 19),
+            (4, 'file_6.wav', 4, '9', 24),
+            (4, 'file_7.wav', 4, '10', 24),
+            (5, 'file_51.wav', 4, '10', 26),
+            (6, 'file_54.wav', 4, '10', 26),
+        ]
+        data_filter = DataFilter()
+        filtered = data_filter.apply_filters(filters, utterances)
+        self.assertEqual(type(expected_utterances), type(filtered))  # check they are the same type
+        self.assertEqual(len(expected_utterances), len(filtered))  # check they are the same length
+        self.assertEqual(expected_utterances, filtered)
+
+    def test__should_apply_filters_only_source_and_utterance_duration_and_then_by_snr(self):
+        utterances = [
+            (1, 'file_10.wav', 4, '1', 13),
+            (1, 'file_11.wav', 1, '2', 13),
+            (1, 'file_12.wav', 2, '3', 13),
+            (1, 'file_13.wav', 4, '4', 13),
+            (2, 'file_2.wav', 4, '5', 11),
+            (3, 'file_3.wav', 2, '6', 18),
+            (3, 'file_4.wav', 4, '7', 18),
+            (4, 'file_5.wav', 4, '8', 19),
+            (4, 'file_6.wav', 4, '9', 24),
+            (4, 'file_7.wav', 4, '10', 24),
+            (5, 'file_50.wav', 5, '10', 25),
+            (5, 'file_51.wav', 4, '10', 26),
+            (5, 'file_52.wav', 5, '10', 27),
+            (6, 'file_53.wav', 5, '10', 25),
+            (6, 'file_54.wav', 4, '10', 26),
+            (6, 'file_55.wav', 5, '10', 27)
+        ]
+
+        filters = {
+            'by_utterance_duration': {
+                'gte' : 2,
+                'lte': 4
+            },
+            'by_snr': {
+                'gte': 13,
+                'lte': 19
+            }
+        }
+
+        expected_utterances = [
+            (1, 'file_10.wav', 4, '1', 13),
+            (1, 'file_12.wav', 2, '3', 13),
+            (1, 'file_13.wav', 4, '4', 13),
+            (3, 'file_3.wav', 2, '6', 18),
+            (3, 'file_4.wav', 4, '7', 18),
+            (4, 'file_5.wav', 4, '8', 19)
+        ]
+        data_filter = DataFilter()
+        filtered = data_filter.apply_filters(filters, utterances)
+        self.assertEqual(type(expected_utterances), type(filtered))  # check they are the same type
         self.assertEqual(expected_utterances, filtered)
