@@ -10,6 +10,11 @@ from datetime import datetime
 import yaml
 import numpy as np
 
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', -1)
+
 
 def get_config_variables():
     config_path = "./config.yaml"
@@ -59,7 +64,7 @@ def set_report_names(source):
 
 
 def get_prefix_attributes_full_path(full_path, integration_processed_path):
-    source_prefix_split_list = full_path.split(integration_processed_path)[1].split('/')
+    source_prefix_split_list = full_path.split(integration_processed_path + '/')[1].split('/')
     return get_file_attributes(source_prefix_split_list)
 
 
@@ -82,7 +87,7 @@ def generate_row(full_path, file_name, raw_file_name, source, audio_id, status):
 
 def generate_bucket_file_list(source):
     # get_variables()
-    all_blobs = list_blobs_in_a_path(bucket_name, integration_processed_path + source)
+    all_blobs = list_blobs_in_a_path(bucket_name, integration_processed_path + '/' + source)
     output_file = open(source + bucket_file_list, "w")
     output_file.write(
         'bucket_file_path' + ',' + 'source' + ',' + 'audio_id' + ',' + 'raw_file_name' + ',' + 'utterances_file_name' + ',' + 'status')
@@ -103,6 +108,7 @@ def generate_bucket_file_list(source):
 
 def cleanse_catalog(data_catalog_raw):
     data_catalog_raw = data_catalog_raw[~data_catalog_raw.audio_id.isna()]
+    data_catalog_raw["raw_file_name"] = data_catalog_raw.raw_file_name.apply(lambda x: x.replace(",", ""))
     return data_catalog_raw
 
 
@@ -113,7 +119,6 @@ def fetch_data_catalog(source, db_catalog_tbl, db_conn_obj):
         filter_string = f"source='{source}'"
     data_catalog_raw = pd.read_sql(f"SELECT * FROM {db_catalog_tbl} where {filter_string}", db_conn_obj)
     data_catalog_raw = cleanse_catalog(data_catalog_raw)
-    data_catalog_raw["raw_file_name"] = data_catalog_raw.raw_file_name.apply(lambda x: x.replace(",", ""))
     return data_catalog_raw
 
 
@@ -142,11 +147,11 @@ def get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw):
 
 def parse_json_utterance_meta(jsonData):
     json_dict = json.loads(jsonData)
-    return json_dict['name'] + ',' + str(json_dict['duration']) + ',' + json_dict['status']
+    return str(json_dict['name']).replace(',', '') + ',' + str(json_dict['duration']) + ',' + json_dict['status']
 
 
 def check_json_utterance_meta(jsonData):
-    print(f"Utterance_file_list being processed is {jsonData}")
+    # print(f"Utterance_file_list being processed is {jsonData}")
     # try:
     #     json.loads(jsonData)
     # except (ValueError, TypeError):
@@ -182,10 +187,42 @@ def convert_string_utterance_meta(data):
     return json.dumps(dicti)
 
 
+def sanitize_snr_formats(record):
+    list_of_cleaned_utterances = []
+    for utterance in json.loads(record):
+        try:
+            if str(utterance.get('snr_value')) == 'nan':
+                utterance['snr_value'] = 0.0
+                list_of_cleaned_utterances.append(utterance)
+            else:
+                utterance['snr_value'] = float(utterance.get('snr_value', 0))
+                list_of_cleaned_utterances.append(utterance)
+
+        except TypeError:
+            utterance['snr_value'] = 0.0
+            list_of_cleaned_utterances.append(utterance)
+
+        except ValueError:
+            utterance['snr_value'] = 0.0
+            list_of_cleaned_utterances.append(utterance)
+    return list_of_cleaned_utterances
+
+
+def convert_str_to_list(record):
+    try:
+        return ast.literal_eval(record)
+    except ValueError as e:
+        print(e)
+        print(record)
+        clean_record = sanitize_snr_formats(record)
+
+        return clean_record
+
+
 def explode_utterances(data_catalog_raw):
     data_catalog_raw['utterances_files_list'].fillna('[]', inplace=True)
     data_catalog_raw.utterances_files_list = data_catalog_raw.utterances_files_list.astype('str').apply(
-        ast.literal_eval)
+        convert_str_to_list)
     data_catalog_exploded = data_catalog_raw.explode('utterances_files_list').reset_index(drop=True)
     return data_catalog_exploded
 
@@ -197,6 +234,7 @@ def normalize_exploded_utterances(data_catalog_raw):
             x) else parse_string_utterance_meta(str(x)))
     utterances_files_list_meta = utterances_files_list_meta.str.split(
         ",", expand=True)
+    # print(utterances_files_list_meta)
     data_catalog_exploded["utterances_files_list"] = data_catalog_exploded.utterances_files_list.apply(
         lambda x: json.dumps(x) if check_json_utterance_meta(
             x) else convert_string_utterance_meta(str(x)))
@@ -295,7 +333,6 @@ def generate_cleaned_dataset(df_cleaned_utterances_unexploded, bucket_list_in_ca
 def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     print("Generate reports...")
     data_catalog_exploded = normalize_exploded_utterances(data_catalog_raw)
-    print(data_catalog_exploded.utterances_files_list)
     bucket_list_not_in_catalog = get_bucket_list_not_in_catalog(data_catalog_exploded, data_bucket_raw)
     catalog_list_not_in_bucket = get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw)
     bucket_list_in_catalog = get_bucket_list_in_catalog(data_catalog_exploded, data_bucket_raw)
@@ -315,13 +352,21 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw):
     df_cleaned_dataset = generate_cleaned_dataset(df_cleaned_utterances_unexploded, bucket_list_in_catalog)
 
     writer = pd.ExcelWriter(report_file_name, engine='xlsxwriter')
-    bucket_list_not_in_catalog.to_excel(writer, sheet_name='bucket_list_not_in_catalog', index=False)
-    catalog_list_not_in_bucket.to_excel(writer, sheet_name='catalog_list_not_in_bucket', index=False)
-    bucket_list_in_catalog.to_excel(writer, sheet_name='catalog_list_in_bucket', index=False)
+    bucket_list_not_in_catalog.astype({'audio_id': 'str'}).to_excel(writer, sheet_name='bucket_list_not_in_catalog',
+                                                                    index=False)
+    catalog_list_not_in_bucket.astype({'audio_id': 'str'}).to_excel(writer, sheet_name='catalog_list_not_in_bucket',
+                                                                    index=False)
+    bucket_list_in_catalog.astype({'audio_id': 'str'}).to_excel(writer, sheet_name='catalog_list_in_bucket',
+                                                                index=False)
     # catalog_list_with_rejected_status.to_excel(writer, sheet_name='catalog_list_rejected_ones', index=False)
-    df_catalog_invalid_utterance_duration.to_excel(writer, sheet_name='catalog_list_invalid_duration', index=False)
-    df_catalog_duplicates.to_excel(writer, sheet_name='catalog_list_with_duplicates', index=False)
-    df_valid_utterances_with_unique_audioid.to_excel(writer, sheet_name='Cleaned_data_catalog', index=False)
+    df_catalog_invalid_utterance_duration.astype({'audio_id': 'str'}).to_excel(writer,
+                                                                               sheet_name='catalog_list_invalid_duration',
+                                                                               index=False)
+    df_catalog_duplicates.astype({'audio_id': 'str'}).to_excel(writer, sheet_name='catalog_list_with_duplicates',
+                                                               index=False)
+    df_valid_utterances_with_unique_audioid.astype({'audio_id': 'str'}).to_excel(writer,
+                                                                                 sheet_name='Cleaned_data_catalog',
+                                                                                 index=False)
     writer.save()
     df_cleaned_dataset.to_csv(cleaned_csv_report_file_name, index=False)
     print(f"{report_file_name} has been generated....")
@@ -396,12 +441,17 @@ def report_generation_pipeline(mode="cluster", bucket='ekstepspeechrecognition-t
     if len(source_list) == 0:
         source_list.append("")
     for _source in source_list:
+        print(f"Processing for source: {_source}")
         set_report_names(_source)
         data_catalog_raw, data_bucket_raw = fetch_data(_source, get_db_connection_object())
         check_dataframes(data_catalog_raw, data_bucket_raw)
         generate_data_validation_report(data_catalog_raw, data_bucket_raw)
         upload_report_to_bucket()
+        print(f"Processed successfully for source: {_source}")
 
 
 if __name__ == "__main__":
-    report_generation_pipeline("local", bucket='ekstepspeechrecognition-test', source=['CEC'])
+    report_generation_pipeline("local", bucket='ekstepspeechrecognition-dev',
+                               source=[
+                                   'Tape_A_Tale',
+                                   'maatribhasha'])
