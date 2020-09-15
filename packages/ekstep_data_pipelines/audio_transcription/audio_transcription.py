@@ -50,7 +50,8 @@ class AudioTranscription:
                     continue
                 remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean/'
                 if not self.gcs_instance.check_path_exists(remote_dir_path_for_given_audio_id):
-                    LOGGER.info('Path does not exists, skipping transcription for:' + remote_dir_path_for_given_audio_id )
+                    LOGGER.info('Path does not exists, skipping transcription for:' + remote_dir_path_for_given_audio_id)
+                    continue
                 remote_stt_output_path = self.audio_transcription_config.get(
                     'remote_stt_audio_file_path')
                 remote_stt_output_path = f'{remote_stt_output_path}/{source}/{audio_id}'

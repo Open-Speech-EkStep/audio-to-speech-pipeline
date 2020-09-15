@@ -1,9 +1,13 @@
 import re
 from audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
+from common.utils import get_logger
+
+LOGGER = get_logger('TranscriptionSanitizer')
 
 class TranscriptionSanitizer(object):
 
     def sanitize(self, transcription):
+        LOGGER.info("Sanitizing transcription:" + transcription)
         transcription = transcription.strip()  # removes spaces in starting of transcription
         if ':' in transcription:
             raise TranscriptionSanitizationError('transcription has :')
