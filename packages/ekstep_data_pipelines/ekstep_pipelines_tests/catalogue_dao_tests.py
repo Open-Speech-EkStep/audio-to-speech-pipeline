@@ -127,7 +127,7 @@ class CatalogueTests(unittest.TestCase):
                             'where audio_id in (select audio_id from media_metadata_staging ' \
                             'where "source" = :source) and clipped_utterance_file_name in (:file_names)'
 
-        called_with_args = {'source': 'test_source', 'file_names': 'file_1.wav,file_2.wav'}
+        called_with_args = {"source": "test_source", "file_names": "'file_1.wav','file_2.wav'"}
         args = mock_postgres_client.execute_update.call_args
-        self.assertEqual(args[0][0], called_with_query)
-        self.assertEqual(args[1], called_with_args)
+        self.assertEqual(called_with_query, args[0][0])
+        self.assertEqual(called_with_args, args[1])
