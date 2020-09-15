@@ -3,6 +3,7 @@ import sys
 import unittest
 from unittest import mock
 
+from common import PostgresClient
 from common.dao.catalogue_dao import CatalogueDao
 
 sys.path.insert(0, '..')
@@ -125,9 +126,9 @@ class CatalogueTests(unittest.TestCase):
         catalogueDao.update_utterances_staged_for_transcription(utterances, 'test_source')
         called_with_query = 'update media_speaker_mapping set staged_for_transcription = true ' \
                             'where audio_id in (select audio_id from media_metadata_staging ' \
-                            'where "source" = :source) and clipped_utterance_file_name in (:file_names)'
+                            'where "source" = :source) and clipped_utterance_file_name in (\'file_1.wav\',\'file_2.wav\')'
 
-        called_with_args = {"source": "test_source", "file_names": "'file_1.wav','file_2.wav'"}
+        called_with_args = {"source": "test_source"}
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(called_with_query, args[0][0])
         self.assertEqual(called_with_args, args[1])
