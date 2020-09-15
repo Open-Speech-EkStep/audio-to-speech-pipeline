@@ -25,6 +25,15 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(expected_utterances, actual_utterances)
 
     @mock.patch('common.postgres_db_client.PostgresClient')
+    def test_get_utterances_as_empty_if_no_records(self, mock_postgres_client):
+        mock_postgres_client.execute_query.return_value = []
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        audio_id = '2020'
+        actual_utterances = catalogueDao.get_utterances(audio_id)
+        expected_utterances = []
+        self.assertEqual(expected_utterances, actual_utterances)
+
+    @mock.patch('common.postgres_db_client.PostgresClient')
     def test_update_utterances(self, mock_postgres_client):
         mock_postgres_client.execute_update.return_value = None
         catalogueDao = CatalogueDao(mock_postgres_client)

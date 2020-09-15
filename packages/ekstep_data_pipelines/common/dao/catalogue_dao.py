@@ -3,6 +3,8 @@ import json
 import numpy as np
 from psycopg2.extensions import register_adapter, AsIs
 
+from common.utils import get_logger
+
 
 def addapt_numpy_float64(numpy_float64):
     return AsIs(numpy_float64)
@@ -31,6 +33,8 @@ register_adapter(np.int32, addapt_numpy_int32)
 register_adapter(np.ndarray, addapt_numpy_array)
 
 
+LOGGER = get_logger('CatalogueDao')
+
 class CatalogueDao:
 
     def __init__(self, postgres_client):
@@ -41,7 +45,6 @@ class CatalogueDao:
         utterances = self.postgres_client \
             .execute_query('select utterances_files_list from media_metadata_staging where audio_id = :audio_id'
                            , **parm_dict)
-        print('utterances:' + str(utterances[0][0]))
         return json.loads(utterances[0][0]) if len(utterances) > 0 else []
 
     def get_utterances_by_source(self, source, status):
@@ -61,8 +64,8 @@ class CatalogueDao:
         update_query = 'update media_metadata_staging ' \
                        'set utterances_files_list = :utterances where audio_id = :audio_id'
         utterances_json_str = json.dumps(utterances)
-        print('utterances_json_str:' + utterances_json_str)
-        print('utterances:' + str(utterances))
+        LOGGER.info('utterances_json_str:' + utterances_json_str)
+        LOGGER.info('utterances:' + str(utterances))
         parm_dict = {'utterances': utterances_json_str, 'audio_id': audio_id}
         self.postgres_client.execute_update(update_query, **parm_dict)
         return True
