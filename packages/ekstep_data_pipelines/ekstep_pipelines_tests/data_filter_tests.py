@@ -570,7 +570,7 @@ class DataMarkerTests(unittest.TestCase):
             (5, 'file_50.wav', 5, '10', 25),
             (5, 'file_51.wav', 4, '10', 26),
             (6, 'file_53.wav', 5, '10', 25),
-            (6, 'file_54.wav', 4, '10', 26),
+            (6, 'file_54.wav', 7, '10', 26),
             (6, 'file_55.wav', 5, '10', 27)
         ]
 
@@ -589,7 +589,7 @@ class DataMarkerTests(unittest.TestCase):
             (5, 'file_50.wav', 5, '10', 25),
             (5, 'file_51.wav', 4, '10', 26),
             (6, 'file_53.wav', 5, '10', 25),
-            (6, 'file_54.wav', 4, '10', 26),
+            (6, 'file_54.wav', 7, '10', 26),
         ]
         data_filter = DataFilter()
         filtered1 = data_filter.apply_filters(filters, utterances)

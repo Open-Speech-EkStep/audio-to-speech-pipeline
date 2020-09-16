@@ -9,7 +9,7 @@ from data_marker.constants import CONFIG_NAME, FILTER_CRITERIA, LANDING_BASE_PAT
 from data_marker.data_filter import DataFilter
 from data_marker.data_mover import MediaFilesMover
 
-ESTIMATED_ACTIVE_TIME_FRACTION = .05
+ESTIMATED_CPU_SHARE = .05
 
 sys.path.insert(0, '..')
 
@@ -35,7 +35,7 @@ class DataMarker:
         self.data_filter = DataFilter()
         Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
         self.data_mover = MediaFilesMover(GCPFileSystem(self.gcs_instance),
-                                          multiprocessing.cpu_count() / ESTIMATED_ACTIVE_TIME_FRACTION)
+                                          multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE)
         self.catalogue_dao = CatalogueDao(self.postgres_client)
 
     def process(self, **kwargs):
