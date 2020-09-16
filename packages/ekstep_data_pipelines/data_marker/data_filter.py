@@ -6,6 +6,10 @@ Logger = get_logger("DataFilter")
 
 
 class DataFilter(object):
+    def exclude_audio_ids(self, utterances, audio_ids):
+        excluding_audio_ids = filter(lambda t: t[0] not in audio_ids, utterances)
+        return excluding_audio_ids
+
     def by_utterance_duration(self, utterances, filters):
         by_utterance_duration = filter(lambda t: filters['lte'] >= t[2] >= filters['gte'], utterances)
         return by_utterance_duration
@@ -57,11 +61,15 @@ class DataFilter(object):
         by_duration = filters.get('by_duration', None)
         with_randomness = filters.get('with_randomness', 'false')
         with_fraction = filters.get('with_fraction', 1)
+        exclude_audio_ids = filters.get('exclude_audio_ids', [])
 
         filtered_utterances = utterances
+        if len(exclude_audio_ids) > 0:
+            Logger.info("Excluding audio_ids :" + str(exclude_audio_ids))
+            filtered_utterances = self.exclude_audio_ids(utterances, exclude_audio_ids)
         if by_utterance_duration is not None:
             Logger.info("Filtering by_utterance_duration :" + str(by_utterance_duration))
-            filtered_utterances = self.by_utterance_duration(utterances, by_utterance_duration)
+            filtered_utterances = self.by_utterance_duration(filtered_utterances, by_utterance_duration)
         if by_snr is not None:
             Logger.info("Filtering by snr:" + str(by_snr))
             filtered_utterances = self.by_snr(filtered_utterances, by_snr)

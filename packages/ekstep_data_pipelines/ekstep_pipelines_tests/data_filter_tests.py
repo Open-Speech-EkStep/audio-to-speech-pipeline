@@ -11,6 +11,27 @@ class DataMarkerTests(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test__should_exclude_audio_ids(self):
+        # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
+        utterances = [
+            (1, 'file_1.wav', 10, 202009112003117071, 13),
+            (2, 'file_2.wav', 11, 202009112003117071, 11),
+            (3, 'file_3.wav', 12, 202009112003117071, 45),
+            (4, 'file_4.wav', 13, 202009112003117071, 19),
+            (4, 'file_4.wav', 6, 202009112003117071, 21),
+            (4, 'file_4.wav', 13, 202009112003117071, 100)
+        ]
+        data_filter = DataFilter()
+        filtered = list(data_filter.exclude_audio_ids(utterances,  [1, 3]))
+        expected_utterances = [
+            (2, 'file_2.wav', 11, 202009112003117071, 11),
+            (4, 'file_4.wav', 13, 202009112003117071, 19),
+            (4, 'file_4.wav', 6, 202009112003117071, 21),
+            (4, 'file_4.wav', 13, 202009112003117071, 100)
+        ]
+        print(type(filtered[0][3]))
+        self.assertEqual(expected_utterances, filtered)
+
     def test__should_filter_by_snr(self):
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
         utterances = [
@@ -533,3 +554,44 @@ class DataMarkerTests(unittest.TestCase):
         filtered = data_filter.apply_filters(filters, utterances)
         self.assertEqual(type(expected_utterances), type(filtered))  # check they are the same type
         self.assertEqual(expected_utterances, filtered)
+
+    def test__should_apply_filters_with_by_snr_and_audio_ids(self):
+        utterances = [
+            (1, 'file_10.wav', 4, '1', 13),
+            (1, 'file_11.wav', 1, '2', 13),
+            (1, 'file_12.wav', 2, '3', 13),
+            (1, 'file_13.wav', 4, '4', 13),
+            (2, 'file_2.wav', 4, '5', 18),
+            (3, 'file_3.wav', 2, '6', 18),
+            (3, 'file_4.wav', 4, '7', 18),
+            (4, 'file_5.wav', 4, '8', 19),
+            (4, 'file_6.wav', 4, '9', 24),
+            (4, 'file_7.wav', 4, '10', 24),
+            (5, 'file_50.wav', 5, '10', 25),
+            (5, 'file_51.wav', 4, '10', 26),
+            (6, 'file_53.wav', 5, '10', 25),
+            (6, 'file_54.wav', 4, '10', 26),
+            (6, 'file_55.wav', 5, '10', 27)
+        ]
+
+        filters = {
+            'by_source': 'swayamprabha_chapter_30',
+            'by_snr': {'gte': 13, 'lte': 26},
+            'with_randomness': "true",
+            "exclude_audio_ids": [1, 3]
+        }
+
+        expected_utterances = [
+            (2, 'file_2.wav', 4, '5', 18),
+            (4, 'file_5.wav', 4, '8', 19),
+            (4, 'file_6.wav', 4, '9', 24),
+            (4, 'file_7.wav', 4, '10', 24),
+            (5, 'file_50.wav', 5, '10', 25),
+            (5, 'file_51.wav', 4, '10', 26),
+            (6, 'file_53.wav', 5, '10', 25),
+            (6, 'file_54.wav', 4, '10', 26),
+        ]
+        data_filter = DataFilter()
+        filtered1 = data_filter.apply_filters(filters, utterances)
+        self.assertEqual(type(expected_utterances), type(filtered1))  # check they are the same type
+        self.assertEqual(expected_utterances, filtered1)
