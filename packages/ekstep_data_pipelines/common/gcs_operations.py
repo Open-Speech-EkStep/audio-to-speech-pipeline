@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import yaml
 import shutil, glob
@@ -177,8 +178,10 @@ class CloudStorageOperations():
 
         files = [f for f in listdir(local_source_path) if isfile(join(local_source_path, f))]
         Logger.info(f'All the files in directory {files}')
-
-        executor = ThreadPoolExecutor(max_workers=5)
+        # TODO: move to constant and pass concurrency as args
+        estimated_cpu_share = .05
+        concurrency = multiprocessing.cpu_count() / estimated_cpu_share
+        executor = ThreadPoolExecutor(max_workers=concurrency)
 
         futures = []
 
