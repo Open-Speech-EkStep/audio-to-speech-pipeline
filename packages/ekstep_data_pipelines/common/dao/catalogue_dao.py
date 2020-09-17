@@ -89,6 +89,9 @@ class CatalogueDao:
         return True
 
     def update_utterances_staged_for_transcription(self, utterances, source):
+        if len(utterances) <= 0:
+            return True
+
         update_query = 'update media_speaker_mapping set staged_for_transcription = true ' \
                        'where audio_id in (select audio_id from media_metadata_staging ' \
                        'where "source" = :source) and clipped_utterance_file_name in '

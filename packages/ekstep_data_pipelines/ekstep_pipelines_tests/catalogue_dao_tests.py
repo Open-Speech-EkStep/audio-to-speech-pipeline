@@ -141,3 +141,12 @@ class CatalogueTests(unittest.TestCase):
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(called_with_query, args[0][0])
         self.assertEqual(called_with_args, args[1])
+
+    @mock.patch('common.postgres_db_client.PostgresClient')
+    def test__should_update_utterance_staged_for_transcription(self, mock_postgres_client):
+        mock_postgres_client.execute_batch.return_value = 2
+        utterances = []
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        catalogueDao.update_utterances_staged_for_transcription(utterances, 'test_source')
+        args = mock_postgres_client.execute_update.call_args
+        self.assertEqual(None, args)

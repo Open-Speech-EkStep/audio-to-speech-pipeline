@@ -49,8 +49,11 @@ class DataMarker:
         utterances = self.catalogue_dao.get_utterances_by_source(source, 'Clean')
         filtered_utterances = self.data_filter.apply_filters(filter_criteria, utterances)
         Logger.info("updating utterances that need to be staged, count=" + str(len(filtered_utterances)))
-        rows_updated = self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances, source)
-        Logger.info('Rows upadted:' + str(rows_updated))
+        if len(filtered_utterances) > 0:
+            rows_updated = self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances, source)
+            Logger.info('Rows updated:' + str(rows_updated))
+        else:
+            Logger.info("No utterances found for filter criteria")
         landing_path_with_source = f'{self.data_tagger_config.get(LANDING_BASE_PATH)}/{source}'
         source_path_with_source = f'{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}'
         files = self.to_files(filtered_utterances, source_path_with_source)
