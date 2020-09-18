@@ -11,6 +11,22 @@ class DataMarkerTests(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test__should_return_empty_list_if_zero_utterances_pased(self):
+        # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
+        utterances = [
+        ]
+        data_filter = DataFilter()
+        filters = {
+            'by_source': 'swayamprabha_chapter_30',
+            'by_snr': {'gte': 13, 'lte': 26},
+            'by_speaker': {'lte_per_speaker_duration': 8 / 60, 'gte_per_speaker_duration': 5 / 60, 'with_threshold': 0},
+            'by_duration': 21 / 3600
+        }
+        filtered = list(data_filter.apply_filters(filters, utterances))
+        expected_utterances = [
+        ]
+        self.assertEqual(expected_utterances, filtered)
+
     def test__should_exclude_audio_ids(self):
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
         utterances = [

@@ -64,6 +64,8 @@ class DataFilter(object):
         exclude_audio_ids = filters.get('exclude_audio_ids', [])
 
         filtered_utterances = utterances
+        if len(utterances) <= 0:
+            return []
         if len(exclude_audio_ids) > 0:
             Logger.info("Excluding audio_ids :" + str(exclude_audio_ids))
             filtered_utterances = self.exclude_audio_ids(utterances, exclude_audio_ids)
