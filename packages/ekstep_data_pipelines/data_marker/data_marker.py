@@ -59,7 +59,7 @@ class DataMarker:
         landing_path_with_source = f'{self.data_tagger_config.get(LANDING_BASE_PATH)}/{source_dir}'
         source_path_with_source = f'{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}'
         files = self.to_files(filtered_utterances, source_path_with_source)
-        Logger.info("Staging utterances......")
+        Logger.info("Staging utterances to dir:" + landing_path_with_source)
         self.data_mover.move_media_files(files, landing_path_with_source)
         Logger.info('************* Data marker completed ****************')
 
