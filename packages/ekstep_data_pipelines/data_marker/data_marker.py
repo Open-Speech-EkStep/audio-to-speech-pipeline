@@ -50,9 +50,8 @@ class DataMarker:
         filtered_utterances = self.data_filter.apply_filters(filter_criteria, utterances)
         Logger.info("updating utterances that need to be staged, count=" + str(len(filtered_utterances)))
         if len(filtered_utterances) > 0 :
-            # TODO: uncomment this (temp fix due to db issue)
-            # rows_updated = self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances, source)
-            Logger.info('Rows updated:' + str(False))
+            rows_updated = self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances, source)
+            Logger.info('Rows updated:' + str(rows_updated))
         else:
             Logger.info("No utterances found for filter criteria")
         source_dir = filter_criteria.get("landing_source_dir", source)
