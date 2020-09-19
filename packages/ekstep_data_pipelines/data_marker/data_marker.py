@@ -55,7 +55,8 @@ class DataMarker:
             Logger.info('Rows updated:' + str(False))
         else:
             Logger.info("No utterances found for filter criteria")
-        landing_path_with_source = f'{self.data_tagger_config.get(LANDING_BASE_PATH)}/{source}'
+        source_dir = filter_criteria.get("landing_source_dir", source)
+        landing_path_with_source = f'{self.data_tagger_config.get(LANDING_BASE_PATH)}/{source_dir}'
         source_path_with_source = f'{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}'
         files = self.to_files(filtered_utterances, source_path_with_source)
         Logger.info("Staging utterances......")
