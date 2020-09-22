@@ -2,6 +2,8 @@ import sys
 import unittest
 # from audio_processing import constants
 from unittest.mock import Mock
+import subprocess
+from unittest import mock
 
 
 from common.audio_commons.snr_util import SNR
@@ -20,14 +22,59 @@ class SNRTests(unittest.TestCase):
         
         self.assertEqual(actual_output,command)
 
-    # def test__should_return_SNR_of_given_file(self):
-    #     # actual_snr = self.snr.compute_file_snr(self.test_audio_file_path)
-    #     a = self.snr.compute_file_snr("/Users/heerabal/speech-recognition/audio-to-speech-pipeline/packages/ekstep_data_pipelines/ekstep_pipelines_tests/resources/test1.wav")
-    #     # b = self.snr.compute_file_snr("ekstep_pipelines_tests/resources/test2.wav")
-    #     # c = self.snr.compute_file_snr("ekstep_pipelines_tests/resources/test3.wav")
+    @mock.patch('subprocess.check_output')
+    def test__should_return_SNR_when_compute_file_snr_called(self,mock_subprocess_check_output):
 
-    #     # self.assertEqual(actual_snr,5)
-    #     self.assertEqual(a,5)
-    #     # self.assertEqual(b,5)
-    #     # self.assertEqual(c,5)
+        mock_subprocess_check_output.return_value = b"4.0 mock_output mock_output"
+
+        snr = self.snr.compute_file_snr(self.test_audio_file_path)
+
+        self.assertEqual(mock_subprocess_check_output.call_count, 1)
+        self.assertEqual(snr,4.0)
+
+    @mock.patch('subprocess.check_output')
+    def test__should_raise_error_when_compute_file_snr_called_and_subprocess_failed(self,mock_subprocess_check_output):
+
+        mock_subprocess_check_output.side_effect = subprocess.CalledProcessError(-1,'some_command')
+        
+        snr = self.snr.compute_file_snr(self.test_audio_file_path)
+
+        self.assertEqual(mock_subprocess_check_output.call_count, 1)
+        self.assertEqual(snr,-1)
+
+    @mock.patch('subprocess.check_output')
+    def test__should_retun_file_snr_dict_when_process_files_list_called(self,mock_subprocess_check_output):
+
+        mock_subprocess_check_output.side_effect = [b"4.0 mock_output mock_output",b"5.0 mock_output mock_output",b"80.0 mock_output mock_output"]
+        
+        snr_file_dict = self.snr.process_files_list(["file1.wav","file2.wav","file3.wav"])
+
+        expected_value = {
+            "file1.wav":4.0,
+            "file2.wav":5.0,
+            "file3.wav":80.0
+        }
+
+        self.assertEqual(mock_subprocess_check_output.call_count, 3)
+
+        self.assertEqual(snr_file_dict,expected_value)
+
+    @mock.patch('subprocess.check_output')
+    def test__should_retun_file_snr_dict_and_convert_nan_to_0_when_process_files_list_called(self,mock_subprocess_check_output):
+
+        mock_subprocess_check_output.side_effect = [b"nan mock_output mock_output",b"5.0 mock_output mock_output",b"80.0 mock_output mock_output"]
+        
+        snr_file_dict = self.snr.process_files_list(["file1.wav","file2.wav","file3.wav"])
+
+        expected_value = {
+            "file1.wav":0.0,
+            "file2.wav":5.0,
+            "file3.wav":80.0
+        }
+
+        self.assertEqual(mock_subprocess_check_output.call_count, 3)
+        
+        self.assertEqual(snr_file_dict,expected_value)
+
+
 
