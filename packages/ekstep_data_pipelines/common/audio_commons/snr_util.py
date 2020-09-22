@@ -91,7 +91,6 @@ class SNR:
         return file_snrs
 
     def fit_and_move(self, input_file_list, metadata_file_name, threshold, output_dir_path, audio_id):
-
         LOGGER.info(f'Processing SNR for for the files {input_file_list}')
         processed_file_snr_dict = self.process_files_list(input_file_list)
 
@@ -115,7 +114,7 @@ class SNR:
             if snr_value < threshold:
 
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
-                
+
                 list_file_utterances_with_duration.append(
                     {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High-SNR', 'snr_threshold': threshold})
                 metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60),2)
@@ -124,7 +123,7 @@ class SNR:
                 metadata.to_csv(metadata_file_name, index=False)
                 continue
 
-            
+
 
             if(clip_duration > SNR.MAX_DURATION):
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
@@ -132,14 +131,13 @@ class SNR:
                     {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High Audio Duration', 'max_duration': SNR.MAX_DURATION})
                 metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60),2)
                 metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)
-                
+
                 metadata.to_csv(metadata_file_name, index=False)
                 continue
 
             clean_audio_duration.append(clip_duration)
             self.move_file_locally(file_path, f'{clean_dir_path}/{audio_file_name}')
             list_file_utterances_with_duration.append({'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Clean'})
-
 
             metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60),2)
             metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)
