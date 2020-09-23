@@ -31,7 +31,8 @@
   "audiofileids" : {"brahmakumaris2": [], "joshtalks2": [], "youtube": [],"iitspokentutorial2": []},
   "audioidsforstt" : {"brahmakumaris2": [], "joshtalks2": [], "youtube": [],"iitspokentutorial2": []},
   "apivoice":{"google":["voice1","voice2","voice3"],"azure":["voice1","voice2"],"gtts":["voice1"]},
-  "validation_report_source": ["CEC"],
+  "validation_report_source_post-transcription": ["CEC"],
+  "validation_report_source_pre-transcription": ["CEC"],
   "data_filter_config": {
 	"test_source1": {
 		"filter": {
@@ -56,4 +57,3 @@
   }
 }
 
-  
