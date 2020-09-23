@@ -13,6 +13,8 @@ sys.path.insert(0, '..')
 
 class SNRTests(unittest.TestCase):
 
+    expected_file_content = 'audio_id,cleaned_duration,utterances_files_list\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean""}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean""}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean""}]"\n'
+
     def setUp(self):
         self.test_audio_file_path = "ekstep_pipelines_tests/resources/chunk.wav"
         self.audio_commons = {"snr_util": Mock(), "chunking_conversion": Mock()}
@@ -21,7 +23,7 @@ class SNRTests(unittest.TestCase):
     def setup_meta_data_file(self, file_name):
         headers = ['audio_id', 'cleaned_duration', 'utterances_files_list']
         with open(file_name, 'w') as f:
-            f.write(','.join(headers))
+            f.write(','.join(headers) + "\n" + '1,abc,null')
 
     def test__should_return_command_when_get_command_called_with_file_path_and_dir(self):
         command ='"test_dir/binaries/WadaSNR/Exe/WADASNR" -i "input_file_path" -t "test_dir/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
@@ -122,7 +124,7 @@ class SNRTests(unittest.TestCase):
         with open(meta_data_file_name) as f:
             meta_data_contents = f.read()
 
-
+        self.assertEqual(meta_data_contents,self.expected_file_content)
 
 
 
