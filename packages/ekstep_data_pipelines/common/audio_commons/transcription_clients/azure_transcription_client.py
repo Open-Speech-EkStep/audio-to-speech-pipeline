@@ -26,7 +26,7 @@ class AzureTranscriptionClient(object):
         try:
             result = self.speech_to_text(source_file_path, language)
         except RuntimeError as e:
-            raise AzureTranscriptionClient(e)
+            raise RuntimeError(e)
         return result.text
 
     def speech_to_text(self, audio_file_path, language):
