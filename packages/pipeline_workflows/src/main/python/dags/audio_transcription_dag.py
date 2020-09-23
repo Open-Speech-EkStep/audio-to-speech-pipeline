@@ -8,7 +8,7 @@ from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
-from helper_dag import get_audio_ids, get_files_from_landing_zone, move_raw_to_processed,get_require_audio_id
+from helper_dag import get_audio_ids, get_files_from_landing_zone, move_raw_to_processed, get_require_audio_id
 
 sourceinfo = json.loads(Variable.get("sourceinfo"))
 source_path_for_snr = Variable.get("sourcepathforsnr")
@@ -42,7 +42,7 @@ def create_dag(dag_id,
             task_id=dag_id + "_fetch_audio_ids",
             python_callable=get_require_audio_id,
             op_kwargs={'source': dag_id,
-                       'stt_source_path': stt_source_path,"batch_count":batch_count},
+                       'stt_source_path': stt_source_path, "batch_count": batch_count},
             dag_number=dag_number)
 
         fetch_audio_ids
@@ -63,7 +63,8 @@ def create_dag(dag_id,
             data_prep_task = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id=dag_id + "_data_stt_" + batch_audio_file_ids[0],
                 name='data-prep-stt',
-                cmds=["python", "invocation_script.py", "-a", "audio_transcription", "-rc", "data/audiotospeech/config/audio_processing/config.yaml",
+                cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "audio_transcription", "-rc",
+                      "data/audiotospeech/config/audio_processing/config.yaml",
                       "-ai", ','.join(batch_audio_file_ids), "-as", dag_id, "-stt", stt],
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
@@ -91,7 +92,7 @@ for source in sourceinfo.keys():
 
     args = {
         'parallelism': parallelism,
-        'stt':api
+        'stt': api
     }
 
     # schedule = '@daily'

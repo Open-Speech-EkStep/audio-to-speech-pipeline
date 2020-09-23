@@ -29,10 +29,10 @@ def create_dag(data_marker_config, default_args):
 
     with dag:
         before_start = PythonOperator(
-            task_id= "data_marking_start",
+            task_id="data_marking_start",
             python_callable=data_marking_start,
             op_kwargs={},
-            )
+        )
 
         before_start
 
@@ -41,9 +41,10 @@ def create_dag(data_marker_config, default_args):
             data_marker_task = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id=f'data-marker-{source}',
                 name='data-marker',
-                cmds=["python", "invocation_script.py" ,"-a", "data_marking", "-rc", "data/audiotospeech/config/audio_processing/config.yaml",
+                cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "data_marking", "-rc",
+                      "data/audiotospeech/config/audio_processing/config.yaml",
                       "-as", source, "-fb", json.dumps(filter_by_config)],
-                namespace = composer_namespace,
+                namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
                 image='us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:1.0.0',
@@ -55,7 +56,7 @@ def create_dag(data_marker_config, default_args):
 
 
 dag_args = {
-        'email': ['gaurav.gupta@thoughtworks.com'],
-    }
+    'email': ['gaurav.gupta@thoughtworks.com'],
+}
 
 globals()['data_marker_pipeline'] = create_dag(data_marker_config, dag_args)

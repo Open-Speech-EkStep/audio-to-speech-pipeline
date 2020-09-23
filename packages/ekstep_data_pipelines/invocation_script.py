@@ -10,7 +10,7 @@ from audio_transcription.audio_transcription import AudioTranscription
 from common.utils import get_logger
 from common import get_periperhals
 
-STT_CLIENT = ['google','azure']
+STT_CLIENT = ['google', 'azure']
 
 
 class ACTIONS:
@@ -20,12 +20,14 @@ class ACTIONS:
 
 
 LOGGER = get_logger('EKSTEP_PROCESSOR')
-ACTIONS_LIST = [ACTIONS.DATA_MARKING, ACTIONS.AUDIO_PROCESSING,ACTIONS.AUDIO_TRANSCRIPTION]
-CONFIG_BUCKET = 'ekstepspeechrecognition-dev'
+ACTIONS_LIST = [ACTIONS.DATA_MARKING, ACTIONS.AUDIO_PROCESSING, ACTIONS.AUDIO_TRANSCRIPTION]
+# config_bucket = 'ekstepspeechrecognition-dev'
 
 parser = argparse.ArgumentParser(
     description='Util for data processing for EkStep')
 
+parser.add_argument('-b', '--bucket', dest='config_bucket', default='ekstepspeechrecognition-dev',
+                    help='Bucket name as per the environment')
 
 parser.add_argument('-a', '--action', dest='action', default=None, choices=ACTIONS_LIST, required=True,
                     help='Action for the processor to perform')
@@ -40,12 +42,12 @@ parser.add_argument('-ai', '--audio-ids', dest='audio_ids', default=[],
                     help='list of all the audio ids that need to processed, this needs to a comma seperated list eg. audio_id1,audio_id2 . Only works with the audio processor')
 
 parser.add_argument('-as', '--audio-source', dest='audio_source', default=None,
-                   help='The name of the source of the audio which is being processed. Only works with audio processor')
+                    help='The name of the source of the audio which is being processed. Only works with audio processor')
 
 parser.add_argument('-af', '--audio-format', dest='audio_format', default=None,
-                   help='The format of the audio which is being processed eg mp4,mp3 . Only works with audio processor')
+                    help='The format of the audio which is being processed eg mp4,mp3 . Only works with audio processor')
 
-parser.add_argument('-stt', '--speech-to-text',dest='speech_to_text_client',default=None,
+parser.add_argument('-stt', '--speech-to-text', dest='speech_to_text_client', default=None,
                     help='The client name which we want to call for stt')
 
 parser.add_argument('-fb', '--filter_by', dest='filter_by', default=None,
@@ -54,14 +56,14 @@ parser.add_argument('-fb', '--filter_by', dest='filter_by', default=None,
 processor_args = parser.parse_args()
 
 
-def download_config_file(config_file_path):
+def download_config_file(config_file_path, config_bucket):
     LOGGER.info(f'Downloading config file from Google Cloud Storage')
 
     download_file_path = f'/tmp/{str(uuid.uuid4())}'
     gcs_storage_client = storage.Client()
-    bucket = gcs_storage_client.bucket(CONFIG_BUCKET)
+    bucket = gcs_storage_client.bucket(config_bucket)
 
-    LOGGER.info(f'Getting config file from config bucket {CONFIG_BUCKET}')
+    LOGGER.info(f'Getting config file from config bucket {config_bucket}')
 
     src_blob = bucket.blob(config_file_path)
     src_blob.download_to_filename(download_file_path)
@@ -96,9 +98,10 @@ def process_config_input(arguments):
     if arguments.remote_config:
         LOGGER.info(
             f'http/https file path f{arguments.remote_config} found for config file. Downloading config file')
-        config_file_path = download_config_file(arguments.remote_config)
+        config_file_path = download_config_file(arguments.remote_config, arguments.config_bucket)
 
     return config_file_path
+
 
 def validate_data_filter_config(arguments):
     LOGGER.info('validating input for audio processing')
@@ -147,8 +150,8 @@ def validate_audio_processing_input(arguments):
 
     return {'audio_id_list': audio_ids, 'source': audio_source, 'extension': audio_format}
 
-def validate_audio_transcription_input(arguments):
 
+def validate_audio_transcription_input(arguments):
     if arguments.audio_ids == []:
         raise argparse.ArgumentTypeError(
             f'Audio Id list missing. Please audio ID for processing'
@@ -170,14 +173,13 @@ def validate_audio_transcription_input(arguments):
 
     audio_source = arguments.audio_source
 
-    return {'audio_ids': audio_ids,"speech_to_text_client":speech_to_text_client,"audio_source":audio_source}
+    return {'audio_ids': audio_ids, "speech_to_text_client": speech_to_text_client, "audio_source": audio_source}
 
 
 def perform_action(arguments, **kwargs):
     current_action = arguments.action
 
     curr_processor = None
-
 
     if current_action == ACTIONS.DATA_MARKING:
         kwargs.update(validate_data_filter_config(arguments))
