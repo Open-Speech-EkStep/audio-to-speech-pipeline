@@ -4,6 +4,8 @@ from google.cloud import speech_v1
 import sys
 import os
 
+from from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import GoogleTranscriptionClientError
+
 sys.path.append('./transcription')
 sys.path.insert(0, '..')
 sys.path.insert(0, '../..')
@@ -59,7 +61,7 @@ class GoogleTranscriptionClient(object):
             transcriptions = list(
                 map(lambda c: c.alternatives[0].transcript, content.results))
         except RuntimeError as e:
-            raise GoogleTranscriptionClient(e)
+            raise GoogleTranscriptionClientError(e)
 
         return ' '.join(transcriptions)
 

@@ -5,6 +5,7 @@ sys.path.insert(0, '../../...')
 
 from azure.cognitiveservices import speech
 from ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import AzureTranscriptionClientError
 
 LOGGER = get_logger('AzureTranscriptionClient')
 
@@ -26,7 +27,7 @@ class AzureTranscriptionClient(object):
         try:
             result = self.speech_to_text(source_file_path, language)
         except RuntimeError as e:
-            raise RuntimeError(e)
+            raise AzureTranscriptionClientError(e)
         return result.text
 
     def speech_to_text(self, audio_file_path, language):

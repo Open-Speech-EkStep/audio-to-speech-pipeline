@@ -4,7 +4,7 @@ import sys
 
 from azure.cognitiveservices.speech import speech
 from common.audio_commons.transcription_clients.azure_transcription_client import AzureTranscriptionClient
-
+from common.audio_commons.transcription_clients.transcription_client_errors import AzureTranscriptionClientError
 sys.path.insert(0, '..')
 
 
@@ -39,7 +39,7 @@ class TestAzureTranscriptionClient(unittest.TestCase):
         mock_speechrecongnizer.return_value.recognize_once.return_value = result
 
         audio_file_path = 'chunk-2.wav'
-        self.assertRaises(RuntimeError, self.azure_client.generate_transcription, 'hi-IN',audio_file_path)
+        self.assertRaises(AzureTranscriptionClientError, self.azure_client.generate_transcription, 'hi-IN',audio_file_path)
 
     @mock.patch("azure.cognitiveservices.speech.SpeechRecognizer")
     def test__speech_to_text_cancelled(self, mock_speechrecongnizer):
@@ -49,4 +49,4 @@ class TestAzureTranscriptionClient(unittest.TestCase):
         mock_speechrecongnizer.return_value.recognize_once.return_value = result
 
         audio_file_path = 'chunk-2.wav'
-        self.assertRaises(RuntimeError, self.azure_client.generate_transcription, 'hi-IN',audio_file_path)
+        self.assertRaises(AzureTranscriptionClientError, self.azure_client.generate_transcription, 'hi-IN',audio_file_path)
