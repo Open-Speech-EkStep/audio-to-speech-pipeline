@@ -4,7 +4,7 @@ import sys
 
 from azure.cognitiveservices.speech import speech
 from common.audio_commons.transcription_clients.azure_transcription_client import AzureTranscriptionClient
-from common.audio_commons.transcription_clients.transcription_client_errors import AzureTranscriptionClientError
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import AzureTranscriptionClientError
 sys.path.insert(0, '..')
 
 
