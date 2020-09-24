@@ -15,7 +15,7 @@ parameters:
     default: false
   pipeline_workflows:
     type: boolean
-    default: false
+    default: true
   data_tagger:
     type: boolean
     default: false
@@ -47,6 +47,8 @@ jobs:
     parameters:
       package_name:
         type: string
+      env_name:
+        type: string
     machine:
       image: ubuntu-1604:201903-01
     working_directory: ~/project/packages/<< parameters.package_name >>
@@ -73,8 +75,7 @@ jobs:
             echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GCP_PROJECT}
-            sh ~/project/packages/<< parameters.package_name >>/deployDAG.sh 'dev'
-            sh ~/project/packages/<< parameters.package_name >>/deployDAG.sh 'test'
+            sh ~/project/packages/<< parameters.package_name >>/deployDAG.sh << parameters.env_name >>
             rm ${HOME}/gcp-key.json
 
   build:
@@ -305,3 +306,10 @@ workflows:
       - build-dags:
           name: pipeline-dag-build
           package_name: pipeline_workflows
+          env_name : 'test'
+      - build-dags:
+          name: pipeline-dag-build
+          package_name: pipeline_workflows
+          env_name: 'dev'
+          requires:
+            - build-dags
