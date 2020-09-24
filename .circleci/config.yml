@@ -304,11 +304,11 @@ workflows:
     when: << pipeline.parameters.pipeline_workflows >>
     jobs:
       - build-dags:
-          name: pipeline-dag-build
+          name: pipeline-dag-build_test
           package_name: pipeline_workflows
           env_name : 'test'
       - build-dags:
-          name: pipeline-dag-build
+          name: pipeline-dag-build_dev
           package_name: pipeline_workflows
           env_name: 'dev'
           requires:
