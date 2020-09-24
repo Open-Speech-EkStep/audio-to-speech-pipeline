@@ -4,7 +4,7 @@ from google.cloud import speech_v1
 import sys
 import os
 
-from from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import GoogleTranscriptionClientError
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import GoogleTranscriptionClientError
 
 sys.path.append('./transcription')
 sys.path.insert(0, '..')

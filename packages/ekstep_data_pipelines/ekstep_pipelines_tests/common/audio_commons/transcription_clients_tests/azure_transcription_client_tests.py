@@ -36,6 +36,7 @@ class TestAzureTranscriptionClient(unittest.TestCase):
         result = mock.Mock()
         result.text = None
         result.reason = speech.ResultReason.NoMatch
+        result.no_match_details = "test_api_error"
         mock_speechrecongnizer.return_value.recognize_once.return_value = result
 
         audio_file_path = 'chunk-2.wav'
