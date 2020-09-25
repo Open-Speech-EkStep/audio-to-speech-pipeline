@@ -111,6 +111,7 @@ class AudioTranscription:
             local_clean_path = f"/tmp/{file_path.name}"
             local_rejected_path = local_clean_path.replace('clean', 'rejected')
             utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, file_name)
+
             if utterance_metadata is None:
                 LOGGER.info('No utterance found for file_name: ' + file_name)
                 continue
@@ -135,37 +136,45 @@ class AudioTranscription:
 
     def generate_transcription_and_sanitize(self, audio_id, local_clean_path, local_rejected_path, file_path, language,
                                             transcription_client, utterance_metadata):
-        if ".wav" in file_path.name:
+        if ".wav" not in file_path.name:
+            return
 
-            transcription_file_name = local_clean_path.replace('.wav', '.txt')
-            self.gcs_instance.download_to_local(
-                file_path.name, local_clean_path, False)
-            try:
-                transcript = transcription_client.generate_transcription(
-                    language, local_clean_path)
-                original_transcript = transcript
-                transcript = TranscriptionSanitizer().sanitize(transcript)
+        transcription_file_name = local_clean_path.replace('.wav', '.txt')
 
-                if original_transcript != transcript:
-                    old_file_name = get_file_name(transcription_file_name)
-                    new_file_name = 'original_' + get_file_name(transcription_file_name)
-                    file_name_with_original_prefix = transcription_file_name.replace(old_file_name, new_file_name)
-                    LOGGER.info("saving original transcription to:" + file_name_with_original_prefix)
-                    self.save_transcription(original_transcript, file_name_with_original_prefix)
+        self.gcs_instance.download_to_local(
+            file_path.name, local_clean_path, False)
 
-                self.save_transcription(transcript, transcription_file_name)
-            except TranscriptionSanitizationError as tse:
-                LOGGER.error('Transcription not valid: ' + str(tse))
-                reason = 'sanitization error:' + str(tse.args)
-                self.handle_error(audio_id, local_clean_path, local_rejected_path, utterance_metadata, reason)
-            except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as e:
-                LOGGER.error('STT API call failed: ' + str(e))
-                reason = 'STT API error:' + str(e.args)
-                self.handle_error(audio_id, local_clean_path, local_rejected_path, utterance_metadata, reason)
-            except Exception as ex:
-                LOGGER.error('Error: ' + str(ex))
-                reason = ex.args
-                self.handle_error(audio_id, local_clean_path, local_rejected_path, utterance_metadata, reason)
+        reason = None
+        
+        try:
+            transcript = transcription_client.generate_transcription(
+                language, local_clean_path)
+            original_transcript = transcript
+            transcript = TranscriptionSanitizer().sanitize(transcript)
+
+            if original_transcript != transcript:
+                old_file_name = get_file_name(transcription_file_name)
+                new_file_name = 'original_' + get_file_name(transcription_file_name)
+                file_name_with_original_prefix = transcription_file_name.replace(old_file_name, new_file_name)
+                LOGGER.info("saving original transcription to:" + file_name_with_original_prefix)
+                self.save_transcription(original_transcript, file_name_with_original_prefix)
+
+            self.save_transcription(transcript, transcription_file_name)
+
+        except TranscriptionSanitizationError as tse:
+            LOGGER.error('Transcription not valid: ' + str(tse))
+            reason = 'sanitization error:' + str(tse.args)
+
+        except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as e:
+            LOGGER.error('STT API call failed: ' + str(e))
+            reason = 'STT API error:' + str(e.args)
+
+        except Exception as ex:
+            LOGGER.error('Error: ' + str(ex))
+            reason = ex.args
+
+        if reason is not None:
+            self.handle_error(audio_id, local_clean_path, local_rejected_path, utterance_metadata, reason)
 
     def handle_error(self, audio_id, local_clean_path, local_rejected_path, utterance_metadata, reason):
         utterance_metadata['status'] = 'Rejected'
