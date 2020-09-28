@@ -16,7 +16,7 @@ error_landing_path_snr = Variable.get("errorlandingpathsnr")
 tobe_processed_path_snr = Variable.get("tobeprocessedpathsnr")
 bucket_name = Variable.get("bucket")
 # processed_path = Variable.get("rawprocessedpath")
-
+env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
@@ -77,7 +77,7 @@ def create_dag(dag_id,
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image='us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:1.0.0',
+                image=f'us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:{env_name}:1.0.0',
                 image_pull_policy='Always')
         else:
             batches = []
@@ -93,7 +93,7 @@ def create_dag(dag_id,
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image='us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:1.0.0',
+                image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}:1.0.0',
                 image_pull_policy='Always')
 
             move_to_processed = PythonOperator(

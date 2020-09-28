@@ -11,6 +11,7 @@ from move_exp_data_dag_processor import count_utterances_file_chunks, copy_utter
 
 composer_namespace = Variable.get("composer_namespace")
 bucket_name = Variable.get("bucket")
+env_name = Variable.get("env")
 default_args = {
     'email': ['gaurav.gupta@thoughtworks.com']
 }
@@ -41,7 +42,7 @@ with dag:
         namespace=composer_namespace,
         startup_timeout_seconds=300,
         secrets=[secret_file],
-        image='us.gcr.io/ekstepspeechrecognition/data_tagger:1.0.0',
+        image=f'us.gcr.io/ekstepspeechrecognition/data_tagger:{env_name}:1.0.0',
         image_pull_policy='Always')
 
     count_utterances_chunks_list = PythonOperator(

@@ -10,7 +10,7 @@ from helper_dag import data_marking_start
 
 data_marker_config = json.loads(Variable.get("data_filter_config"))
 bucket_name = Variable.get("bucket")
-
+env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
@@ -47,7 +47,7 @@ def create_dag(data_marker_config, default_args):
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image='us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:1.0.0',
+                image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}:1.0.0',
                 image_pull_policy='Always')
 
             before_start >> data_marker_task

@@ -83,7 +83,7 @@ jobs:
       package_name:
         type: string
 
-#    executor: node
+    #    executor: node
     machine:
       image: ubuntu-1604:201903-01
     working_directory: ~/project/packages/<< parameters.package_name >>
@@ -170,8 +170,9 @@ jobs:
         type: string
       package_version:
         type: string
-
-#    executor: node
+      env_name:
+        type: string
+    #    executor: node
     machine:
       image: ubuntu-1604:201903-01
     working_directory: ~/project/packages/<< parameters.package_name >>
@@ -187,11 +188,11 @@ jobs:
           name: Build and Deploy Image
           command: |
             echo "Build << parameters.package_name >> ..."
-            docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >> .
+            docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>:<< parameters.package_version >> .
             echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GCP_PROJECT}
-            gcloud docker -- push us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >>
+            gcloud docker -- push us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>:<< parameters.package_version >>
       - run:
           name: Remove account details
           command: rm ${HOME}/gcp-key.json ; ls
@@ -215,11 +216,24 @@ workflows:
           name: datacollector_youtube_build
           package_name: datacollector_youtube
       - deploy:
-          name: datacollector_youtube_deploy
+          name: datacollector_youtube_deploy_test
           package_name: datacollector_youtube
           package_version: 2.0.0
+          env_name: test
           requires:
             - datacollector_youtube_build
+          filters:
+            branches:
+              only:
+                - master
+      - deploy:
+          name: datacollector_youtube_deploy_prod
+          package_name: datacollector_youtube
+          package_version: 2.0.0
+          env_name: prod
+          requires:
+            - datacollector_youtube_build
+            - datacollector_youtube_deploy_test
           filters:
             branches:
               only:
@@ -249,11 +263,21 @@ workflows:
           name: data_tagger_build
           package_name: data_tagger
       - deploy:
-          name: data_tagger_deploy
+          name: data_tagger_deploy_test
           package_name: data_tagger
           package_version: 1.0.0
+          env_name: test
           requires:
             - data_tagger_build
+      - deploy:
+          name: data_tagger_deploy_prod
+          package_name: data_tagger
+          package_version: 1.0.0
+          env_name: prod
+          requires:
+            - data_tagger_build
+            - data_tagger_deploy_test
+
           # filters:
           #   branches:
           #     only:
@@ -266,11 +290,20 @@ workflows:
           name: data_prep_cataloguer_build
           package_name: data_prep_cataloguer
       - deploy:
-          name: data_prep_cataloguer_deploy
+          name: data_prep_cataloguer_deploy_test
           package_name: data_prep_cataloguer
           package_version: 1.0.0
+          env_name: test
           requires:
             - data_prep_cataloguer_build
+      - deploy:
+          name: data_prep_cataloguer_deploy_prod
+          package_name: data_prep_cataloguer
+          package_version: 1.0.0
+          env_name: prod
+          requires:
+            - data_prep_cataloguer_build
+            - data_prep_cataloguer_deploy_test
           # filters:
           #   branches:
           #     only:
@@ -282,11 +315,20 @@ workflows:
           name: downloaded_data_cataloguer_build
           package_name: downloaded_data_cataloguer
       - deploy:
-          name: downloaded_data_cataloguer_deploy
+          name: downloaded_data_cataloguer_deploy_test
           package_name: downloaded_data_cataloguer
           package_version: 1.0.0
+          env_name: test
           requires:
             - downloaded_data_cataloguer_build
+      - deploy:
+          name: downloaded_data_cataloguer_deploy_prod
+          package_name: downloaded_data_cataloguer
+          package_version: 1.0.0
+          env_name: prod
+          requires:
+            - downloaded_data_cataloguer_build
+            - downloaded_data_cataloguer_deploy_test
 
   ekstep_data_pipelines:
     when: << pipeline.parameters.ekstep_data_pipelines >>
@@ -295,22 +337,32 @@ workflows:
           name: ekstep_data_pipelines_build
           package_name: ekstep_data_pipelines
       - deploy:
-          name: ekstep_data_pipelines_deploy
+          name: ekstep_data_pipelines_deploy_test
           package_name: ekstep_data_pipelines
+          env_name: test
           package_version: 1.0.0
           requires:
             - ekstep_data_pipelines_build
-     
+      - deploy:
+          name: ekstep_data_pipelines_deploy_prod
+          package_name: ekstep_data_pipelines
+          env_name: prod
+          package_version: 1.0.0
+          requires:
+            - ekstep_data_pipelines_build
+            - ekstep_data_pipelines_deploy_test
+
   pipeline_workflows:
     when: << pipeline.parameters.pipeline_workflows >>
     jobs:
       - build-dags:
           name: pipeline-dag-build_test
           package_name: pipeline_workflows
-          env_name : 'test'
+          env_name: 'test'
       - build-dags:
           name: pipeline-dag-build_prod
           package_name: pipeline_workflows
           env_name: 'prod'
           requires:
             - pipeline-dag-build_test
+

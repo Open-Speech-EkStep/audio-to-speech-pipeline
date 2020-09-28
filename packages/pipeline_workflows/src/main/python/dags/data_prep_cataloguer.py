@@ -7,6 +7,7 @@ from airflow.models import Variable
 
 composer_namespace = Variable.get("composer_namespace")
 bucket_name = Variable.get("bucket")
+env_name = Variable.get("env")
 default_args = {
     'email': ['gaurav.gupta@thoughtworks.com']
 }
@@ -38,5 +39,5 @@ with models.DAG(
         namespace = composer_namespace,
         startup_timeout_seconds=300,
         secrets=[secret_file],
-        image='us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:1.0.0',
+        image=f'us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:{env_name}:1.0.0',
         image_pull_policy='Always')

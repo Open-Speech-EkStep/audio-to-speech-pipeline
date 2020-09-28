@@ -15,7 +15,7 @@ source_path_for_snr = Variable.get("sourcepathforsnr")
 stt_source_path = Variable.get("sttsourcepath")
 snr_done_path = Variable.get("snrdonepath")
 bucket_name = Variable.get("bucket")
-
+env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
@@ -69,7 +69,7 @@ def create_dag(dag_id,
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image='us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:1.0.0',
+                image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}:1.0.0',
                 image_pull_policy='Always')
 
             fetch_audio_ids >> data_prep_task
