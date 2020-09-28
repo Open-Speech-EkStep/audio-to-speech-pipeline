@@ -309,8 +309,8 @@ workflows:
           package_name: pipeline_workflows
           env_name : 'test'
       - build-dags:
-          name: pipeline-dag-build_dev
+          name: pipeline-dag-build_prod
           package_name: pipeline_workflows
-          env_name: 'dev'
+          env_name: 'prod'
           requires:
             - pipeline-dag-build_test
