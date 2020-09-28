@@ -9,22 +9,22 @@ parameters:
   # A parameter per package
   datacollector_youtube:
     type: boolean
-    default: true
+    default: false
   dataprocessor:
     type: boolean
     default: true
   pipeline_workflows:
     type: boolean
-    default: true
+    default: false
   data_tagger:
     type: boolean
-    default: true
+    default: false
   data_prep_cataloguer:
     type: boolean
-    default: true
+    default: false
   downloaded_data_cataloguer:
     type: boolean
-    default: true
+    default: false
   ekstep_data_pipelines:
     type: boolean
     default: true
@@ -188,11 +188,11 @@ jobs:
           name: Build and Deploy Image
           command: |
             echo "Build << parameters.package_name >> ..."
-            docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>:<< parameters.package_version >> .
+            docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>_<< parameters.env_name >>:<< parameters.package_version >> .
             echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GCP_PROJECT}
-            gcloud docker -- push us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>:<< parameters.package_version >>
+            gcloud docker -- push us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>_<< parameters.env_name >>:<< parameters.package_version >>
       - run:
           name: Remove account details
           command: rm ${HOME}/gcp-key.json ; ls

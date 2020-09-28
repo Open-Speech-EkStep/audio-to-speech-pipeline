@@ -60,7 +60,7 @@ with models.DAG(
         namespace=composer_namespace,
         startup_timeout_seconds=300,
         secrets=[secret_file],
-        image=f'us.gcr.io/ekstepspeechrecognition/datacollector_youtube:{env_name}:2.0.0',
+        image=f'us.gcr.io/ekstepspeechrecognition/datacollector_youtube_{env_name}:2.0.0',
         image_pull_policy='Always')
     # config_file="{{ conf.get('core', 'kube_config') }}")
     # Docker image specified. Defaults to hub.docker.com, but any fully

@@ -69,7 +69,7 @@ def create_dag(dag_id,
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}:1.0.0',
+                image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines_{env_name}:1.0.0',
                 image_pull_policy='Always')
 
             fetch_audio_ids >> data_prep_task
