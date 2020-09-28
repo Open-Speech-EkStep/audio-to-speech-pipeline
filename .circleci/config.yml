@@ -9,22 +9,22 @@ parameters:
   # A parameter per package
   datacollector_youtube:
     type: boolean
-    default: false
+    default: true
   dataprocessor:
     type: boolean
-    default: false
+    default: true
   pipeline_workflows:
     type: boolean
-    default: false
+    default: true
   data_tagger:
     type: boolean
-    default: false
+    default: true
   data_prep_cataloguer:
     type: boolean
-    default: false
+    default: true
   downloaded_data_cataloguer:
     type: boolean
-    default: false
+    default: true
   ekstep_data_pipelines:
     type: boolean
     default: true
@@ -246,11 +246,20 @@ workflows:
           name: dataprocessor_build
           package_name: dataprocessor
       - deploy:
-          name: dataprocessor_deploy
+          name: dataprocessor_deploy_test
           package_name: dataprocessor
           package_version: 1.0.0
+          env_name: test
           requires:
             - dataprocessor_build
+      - deploy:
+          name: dataprocessor_deploy_prod
+          package_name: dataprocessor
+          package_version: 1.0.0
+          env_name: prod
+          requires:
+            - dataprocessor_build
+            - dataprocessor_deploy_test
         #  filters:
         #    branches:
         #      only:
