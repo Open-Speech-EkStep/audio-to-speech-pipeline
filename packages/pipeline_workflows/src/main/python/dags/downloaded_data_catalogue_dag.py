@@ -45,7 +45,7 @@ def create_dag(dag_id,
             namespace=composer_namespace,
             startup_timeout_seconds=300,
             secrets=[secret_file],
-            image=f'us.gcr.io/ekstepspeechrecognition/downloaded_data_cataloguer_{env_name}:1.0.0',
+            image=f'us.gcr.io/ekstepspeechrecognition/downloaded_data_cataloguer:{env_name}_1.0.0',
             image_pull_policy='Always')
 
         downloaded_data_cataloguer

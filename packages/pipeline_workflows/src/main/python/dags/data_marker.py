@@ -47,7 +47,7 @@ def create_dag(data_marker_config, default_args):
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines_{env_name}:1.0.0',
+                image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}_1.0.0',
                 image_pull_policy='Always')
 
             before_start >> data_marker_task
