@@ -187,6 +187,9 @@ jobs:
       - deploy:
           name: Build and Deploy Image
           command: |
+            echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
+            gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+            gcloud --quiet config set project ${GCP_PROJECT}
             if [[ << parameters.env_name >> == "test" ]]; then
               echo "Build << parameters.package_name >> ..."
               docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >> -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>_<< parameters.package_version >> .
@@ -196,9 +199,6 @@ jobs:
              echo "Tag << parameters.package_name >> ... with << parameters.env_name >>"
              docker tag us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >> us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>_<< parameters.package_version >>
             fi
-            echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
-            gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
-            gcloud --quiet config set project ${GCP_PROJECT}
             gcloud docker -- push us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>
       - run:
           name: Remove account details
