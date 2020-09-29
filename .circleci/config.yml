@@ -192,7 +192,7 @@ jobs:
               docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >> -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>_<< parameters.package_version >> .
             else
              echo "Pull << parameters.package_name >> ..."
-             gcloud docker pull us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >>
+             gcloud docker -- pull us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >>
              echo "Tag << parameters.package_name >> ... with << parameters.env_name >>"
              docker tag us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >> us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>_<< parameters.package_version >>
             fi
