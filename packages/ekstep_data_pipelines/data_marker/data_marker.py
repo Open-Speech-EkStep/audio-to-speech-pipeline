@@ -3,6 +3,8 @@ import multiprocessing
 from common import CatalogueDao
 from common.file_system.gcp_file_systen import GCPFileSystem
 from common.utils import get_logger
+from common import BaseProcessor
+
 import sys
 
 from data_marker.constants import CONFIG_NAME, FILTER_CRITERIA, LANDING_BASE_PATH, SOURCE_BASE_PATH
@@ -16,7 +18,7 @@ sys.path.insert(0, '..')
 Logger = get_logger("Data marker")
 
 
-class DataMarker:
+class DataMarker(BaseProcessor):
     """
     1. Load Configuration
     2. Filter data baased on criteria
@@ -25,10 +27,10 @@ class DataMarker:
     """
 
     @staticmethod
-    def get_instance(data_processor_instance, gcs_instance):
-        return DataMarker(data_processor_instance, gcs_instance)
+    def get_instance(data_processor_instance, gcs_instance, **kwargs):
+        return DataMarker(data_processor_instance, gcs_instance, **kwargs)
 
-    def __init__(self, postgres_client, gcs_instance):
+    def __init__(self, postgres_client, gcs_instance, **kwargs):
         self.postgres_client = postgres_client
         self.gcs_instance = gcs_instance
         self.data_tagger_config = None
@@ -37,6 +39,8 @@ class DataMarker:
         self.data_mover = MediaFilesMover(GCPFileSystem(self.gcs_instance),
                                           multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE)
         self.catalogue_dao = CatalogueDao(self.postgres_client)
+
+        super().__init__(**kwargs)
 
     def process(self, **kwargs):
         """

@@ -18,9 +18,14 @@ class ACTIONS:
     AUDIO_PROCESSING = 'audio_processing'
     AUDIO_TRANSCRIPTION = 'audio_transcription'
 
+class FILE_SYSTEMS:
+    GOOGLE = 'google'
+    LOCAL = 'local'
+
 
 LOGGER = get_logger('EKSTEP_PROCESSOR')
 ACTIONS_LIST = [ACTIONS.DATA_MARKING, ACTIONS.AUDIO_PROCESSING, ACTIONS.AUDIO_TRANSCRIPTION]
+FILES_SYSTEMS_LIST = [FILE_SYSTEMS.GOOGLE, FILE_SYSTEMS.LOCAL]
 # config_bucket = 'ekstepspeechrecognition-dev'
 
 parser = argparse.ArgumentParser(
@@ -52,6 +57,9 @@ parser.add_argument('-stt', '--speech-to-text', dest='speech_to_text_client', de
 
 parser.add_argument('-fb', '--filter_by', dest='filter_by', default=None,
                     help='The filter that needs to be applied for data marking')
+
+parser.add_argument('-f', '--file_system', dest='file_system', choices=FILES_SYSTEMS_LIST, default='google',
+                    help='Specify the file system to use for running the pipeline', required=False)
 
 processor_args = parser.parse_args()
 
@@ -192,7 +200,9 @@ def perform_action(arguments, **kwargs):
         data_processor = object_dict.get('data_processor')
         gcs_instance = object_dict.get('gsc_instance')
 
-        curr_processor = DataMarker.get_instance(data_processor, gcs_instance)
+
+        curr_processor = DataMarker.get_instance(data_processor, gcs_instance,
+                                                 **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
 
     elif current_action == ACTIONS.AUDIO_PROCESSING:
         kwargs.update(validate_audio_processing_input(arguments))
@@ -205,7 +215,8 @@ def perform_action(arguments, **kwargs):
         gcs_instance = object_dict.get('gsc_instance')
         audio_commons = object_dict.get('audio_commons')
 
-        curr_processor = AudioProcessor.get_instance(data_processor, gcs_instance, audio_commons)
+        curr_processor = AudioProcessor.get_instance(data_processor, gcs_instance, audio_commons,
+                                                     **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
 
     elif current_action == ACTIONS.AUDIO_TRANSCRIPTION:
         kwargs.update(validate_audio_transcription_input(arguments))
@@ -219,9 +230,11 @@ def perform_action(arguments, **kwargs):
         audio_commons = object_dict.get('audio_commons')
         catalogue_dao = object_dict.get('catalogue_dao')
 
-        curr_processor = AudioTranscription.get_instance(data_processor, gcs_instance, audio_commons, catalogue_dao)
+        curr_processor = AudioTranscription.get_instance(data_processor, gcs_instance, audio_commons, catalogue_dao,
+                                                         **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
 
     LOGGER.info(f'Starting processing for {current_action}')
+
     curr_processor.process(**kwargs)
     LOGGER.info(f'Ending processing for {current_action}')
 

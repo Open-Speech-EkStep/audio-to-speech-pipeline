@@ -7,25 +7,28 @@ from common.audio_commons.transcription_clients.transcription_client_errors impo
     AzureTranscriptionClientError, GoogleTranscriptionClientError
 from common.file_utils import get_file_name
 from common.utils import get_logger
+from common import BaseProcessor
 
 import os
 
 LOGGER = get_logger('audio_transcription')
 
 
-class AudioTranscription:
+class AudioTranscription(BaseProcessor):
     LOCAL_PATH = None
 
     @staticmethod
-    def get_instance(data_processor, gcs_instance, audio_commons, catalogue_dao):
-        return AudioTranscription(data_processor, gcs_instance, audio_commons, catalogue_dao)
+    def get_instance(data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs):
+        return AudioTranscription(data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs)
 
-    def __init__(self, data_processor, gcs_instance, audio_commons, catalogue_dao):
+    def __init__(self, data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs):
         self.data_processor = data_processor
         self.gcs_instance = gcs_instance
         self.transcription_clients = audio_commons.get('transcription_clients')
         self.catalogue_dao = catalogue_dao
         self.audio_transcription_config = None
+
+        super().__init__(**kwargs)
 
     def process(self, **kwargs):
 

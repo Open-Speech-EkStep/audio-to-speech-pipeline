@@ -3,11 +3,12 @@ import glob
 from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG, SNR_CONFIG, REMOTE_PROCESSED_FILE_PATH,\
     MASTER_META_DATA_FILE_PATH, MASTER_META_DATA_DONE_FILE_PATH
 from common.utils import get_logger
+from common import BaseProcessor
 
 Logger = get_logger("Audio Processor")
 
 
-class AudioProcessor:
+class AudioProcessor(BaseProcessor):
 
     """
     Class for breaking a downloaded file into smaller chunks of
@@ -18,15 +19,18 @@ class AudioProcessor:
     DEFAULT_DOWNLOAD_PATH = '/tmp/audio_processing_raw'
 
     @staticmethod
-    def get_instance(data_processor, gcs_instance, audio_commons):
-        return AudioProcessor(data_processor, gcs_instance, audio_commons)
+    def get_instance(data_processor, gcs_instance, audio_commons, **kwargs):
+        return AudioProcessor(data_processor, gcs_instance, audio_commons, **kwargs)
 
-    def __init__(self, data_processor, gcs_instance, audio_commons):
+    def __init__(self, data_processor, gcs_instance, audio_commons, **kwargs):
         self.data_processor = data_processor
         self.gcs_instance = gcs_instance
         self.snr_processor = audio_commons.get('snr_util')
         self.chunking_processor = audio_commons.get('chunking_conversion')
         self.audio_processor_config = None
+
+        super().__init__(**kwargs)
+
 
     def process(self, **kwargs):
         """
@@ -46,18 +50,16 @@ class AudioProcessor:
             Logger.info(f'Processing audio_id {audio_id}')
             self.process_audio_id(audio_id, source, extension)
         
-        if process_master_csv:
-            master_metadat_file_path = f'{self.audio_processor_config.get(MASTER_META_DATA_FILE_PATH)}/{source}/{source}_master.csv'
+        if not process_master_csv:
+            return
 
-            meta_data_file_exists = self.gcs_instance.check_path_exists(
-                master_metadat_file_path)
+        master_metadata_file_path = f'{self.audio_processor_config.get(MASTER_META_DATA_FILE_PATH)}/{source}/{source}_master.csv'
 
-            if meta_data_file_exists:
-                self.upload_and_move(master_metadat_file_path, source)
+        if self.fs_interface.path_exists(master_metadata_file_path):
+            self.upload_and_move(master_metadata_file_path, source)
 
 
     def process_audio_id(self, audio_id, source, extension):
-
         local_audio_download_path = f'{AudioProcessor.DEFAULT_DOWNLOAD_PATH}/{source}/{audio_id}'
 
         Logger.info(
@@ -71,9 +73,7 @@ class AudioProcessor:
 
         Logger.info(
             f'Downloading audio file from {remote_download_path} to {local_audio_download_path}')
-        self.gcs_instance.download_to_local(remote_download_path,
-                                            local_audio_download_path, True)
-
+        self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path)
         meta_data_file_path = self._get_csv_in_path(local_audio_download_path)
 
         Logger.info(f'Conerting the file with audio_id {audio_id} to wav')
@@ -97,9 +97,10 @@ class AudioProcessor:
             REMOTE_PROCESSED_FILE_PATH)
         upload_path = f'{processed_remote_file_path}/{source}/{audio_id}'
 
-        clean_file_upload = self.gcs_instance.upload_to_gcs(
+        clean_file_upload = self.fs_interface.upload_folder_to_location(
             f'{local_audio_download_path}/clean', f'{upload_path}/clean')
-        rejected_file_upload = self.gcs_instance.upload_to_gcs(
+
+        rejected_file_upload = self.fs_interface.upload_folder_to_location(
             f'{local_audio_download_path}/rejected', f'{upload_path}/rejected')
 
         if not clean_file_upload and not rejected_file_upload:
@@ -108,18 +109,19 @@ class AudioProcessor:
 
         self.upload_file(meta_data_file_path)
 
-    def upload_and_move(self, master_metadat_file_path, source):
+    def upload_and_move(self, master_metadata_file_path, source):
 
         meta_data_done_path = f'{self.audio_processor_config.get(MASTER_META_DATA_DONE_FILE_PATH)}/{source}'
 
         local_metadata_downloaded_path = '/tmp/master_csv'
 
-        self.gcs_instance.download_blob(
-            master_metadat_file_path, local_metadata_downloaded_path)
+        self.fs_interface.download_file_to_location(
+            master_metadata_file_path, local_metadata_downloaded_path)
+
         self.upload_file_to_downloaded_source(local_metadata_downloaded_path)
 
-        self.gcs_instance.move_blob(
-            master_metadat_file_path, meta_data_done_path)
+        self.fs_interface.move(
+            master_metadata_file_path, meta_data_done_path)
 
     def ensure_path(self, path):
         # TODO: make path empty before creating it again
