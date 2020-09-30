@@ -18,6 +18,7 @@ bucket_name = Variable.get("bucket")
 # processed_path = Variable.get("rawprocessedpath")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
+resource_limits = Variable.get("snr_resource_limits")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
 secret_file = secret.Secret(
@@ -94,7 +95,8 @@ def create_dag(dag_id,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
                 image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}_1.0.0',
-                image_pull_policy='Always')
+                image_pull_policy='Always',
+                resources=resource_limits)
 
             move_to_processed = PythonOperator(
                 task_id=dag_id + "_move_raw_to_processed_" + batch_audio_file_ids[0],
