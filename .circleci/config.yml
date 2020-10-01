@@ -359,8 +359,6 @@ workflows:
           package_version: 1.0.0
           requires:
             - ekstep_data_pipelines_build
-      - e2e:
-          - dag trigger
       - deploy:
           name: ekstep_data_pipelines_deploy_prod
           package_name: ekstep_data_pipelines
