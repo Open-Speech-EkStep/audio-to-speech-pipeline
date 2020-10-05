@@ -91,10 +91,10 @@ class GoogleStorage(BaseStorageInterface):
     def upload_to_location(self, source_path:str, destination_path:str):
         bucket = self.client.bucket(self.get_bucket_from_path(destination_path))
         file_path = self.get_path_without_bucket(destination_path)
-        blob = bucket.blob(source_path)
+        blob = bucket.blob(file_path)
 
         try:
-            blob.upload_from_filename(file_path)
+            blob.upload_from_filename(source_path)
         except Exception as e:
             return False
 
@@ -104,9 +104,10 @@ class GoogleStorage(BaseStorageInterface):
         files_for_upload = [f for f in listdir(source_path) if isfile(join(source_path, f))]
 
         curr_executor = ThreadPoolExecutor(max_workers=5)
-
+        
         for upload_file in files_for_upload:
-            curr_executor.submit(self.upload_to_location, upload_file, destination_path)
+
+            curr_executor.submit(self.upload_to_location,f'{source_path}/{upload_file}', f'{destination_path}/{upload_file}')
 
         curr_executor.shutdown(wait=True)
 
