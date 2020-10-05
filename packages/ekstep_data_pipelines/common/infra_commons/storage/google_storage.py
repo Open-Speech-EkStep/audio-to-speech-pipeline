@@ -83,7 +83,7 @@ class GoogleStorage(BaseStorageInterface):
         curr_executor = ThreadPoolExecutor(max_workers=5)
 
         for remote_file in source_files:
-            curr_executor.submit(self.download_to_location, f'{remote_file}/{remote_file}', f'{destination_path}/{remote_file}')
+            curr_executor.submit(self.download_to_location, f'{source_path}/{remote_file}', f'{destination_path}/{remote_file}')
 
         curr_executor.shutdown(wait=True)
 
