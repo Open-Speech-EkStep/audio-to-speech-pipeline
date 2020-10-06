@@ -88,13 +88,13 @@ class GoogleStorage(BaseStorageInterface):
 
         curr_executor.shutdown(wait=True)
 
-    def upload_to_location(self, source_path: str, destination_path: str):
+    def upload_to_location(self, local_source_path: str, destination_path: str):
         bucket = self.client.bucket(self.get_bucket_from_path(destination_path))
-        file_path = self.get_path_without_bucket(destination_path)
-        blob = bucket.blob(source_path)
+        remote_file_path = self.get_path_without_bucket(destination_path)
+        blob = bucket.blob(remote_file_path)
 
         try:
-            blob.upload_from_filename(file_path)
+            blob.upload_from_filename(local_source_path)
         except Exception as e:
             return False
 
