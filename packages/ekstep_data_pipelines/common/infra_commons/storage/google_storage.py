@@ -106,7 +106,7 @@ class GoogleStorage(BaseStorageInterface):
         curr_executor = ThreadPoolExecutor(max_workers=5)
 
         for upload_file in files_for_upload:
-            curr_executor.submit(self.upload_to_location, upload_file, destination_path)
+            curr_executor.submit(self.upload_to_location, f'{source_path}/{upload_file}', f'{destination_path}/{upload_file}')
 
         curr_executor.shutdown(wait=True)
         # Todo: check all the futures for exceptions and then send back true
