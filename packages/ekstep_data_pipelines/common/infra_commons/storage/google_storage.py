@@ -109,6 +109,8 @@ class GoogleStorage(BaseStorageInterface):
             curr_executor.submit(self.upload_to_location, upload_file, destination_path)
 
         curr_executor.shutdown(wait=True)
+        # Todo: check all the futures for exceptions and then send back true
+        return True
 
     def download_file_to_location(self, source_path: str, download_location: str):
         bucket = self.client.bucket(self.get_bucket_from_path(source_path))
