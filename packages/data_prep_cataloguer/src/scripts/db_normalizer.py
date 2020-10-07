@@ -181,8 +181,10 @@ class Db_normalizer():
                 except ValueError:
                     snr_value = 0.0
 
+                language_confidence_score = utterance.get('language_confidence_score', {})
+
                 insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
-                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{load_datetime}')")
+                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{language_confidence_score}','{load_datetime}')")
 
         return insert_query_into_mapping_table, processed_audio_ids
 
