@@ -2,6 +2,8 @@ import sys
 
 from ekstep_data_pipelines.audio_processing.audio_duration import calculate_duration
 
+from audio_language_identification.audio_language_inference import evaluation, language_confidence_score_map
+
 sys.path.insert(0, '..')
 sys.path.insert(0, '../..')
 
@@ -109,26 +111,22 @@ class SNR:
             LOGGER.info(audio_file_name)
 
             metadata["audio_id"] = audio_id
-
+            language_confidence_score = language_confidence_score_map(evaluation(file_path))
             clip_duration = calculate_duration(file_path)
             if snr_value < threshold:
-
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
-
                 list_file_utterances_with_duration.append(
-                    {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High-SNR', 'snr_threshold': threshold})
+                    {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High-SNR', 'snr_threshold': threshold, 'language_confidence_score': language_confidence_score})
                 metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60),2)
                 metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)
 
                 metadata.to_csv(metadata_file_name, index=False)
                 continue
 
-
-
             if(clip_duration > SNR.MAX_DURATION):
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
                 list_file_utterances_with_duration.append(
-                    {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High Audio Duration', 'max_duration': SNR.MAX_DURATION})
+                    {'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Rejected', 'reason': 'High Audio Duration', 'max_duration': SNR.MAX_DURATION, 'language_confidence_score': language_confidence_score})
                 metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60),2)
                 metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)
 
@@ -137,7 +135,7 @@ class SNR:
 
             clean_audio_duration.append(clip_duration)
             self.move_file_locally(file_path, f'{clean_dir_path}/{audio_file_name}')
-            list_file_utterances_with_duration.append({'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Clean'})
+            list_file_utterances_with_duration.append({'name': audio_file_name, 'duration': str(clip_duration), 'snr_value': snr_value, 'status': 'Clean', 'language_confidence_score': language_confidence_score})
 
             metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60),2)
             metadata['utterances_files_list'] = json.dumps(list_file_utterances_with_duration)

@@ -45,14 +45,13 @@ def language_confidence_score_map(language_map_path, confidence_scores):
         output_dictionary['confidence_score'][language_map[key]] = confidence_scores[key]
     return output_dictionary
 
-
 def load_yaml_file(path):
     with open(path, 'r') as file:
         read_dict = yaml.safe_load(file)
     return read_dict
 
 
-def evaluation(audio_path, model_path):
+def evaluation(audio_path, model_path='audio_language_identification/model/model.pt'):
     model = load_model(model_path)
     model_output = forward(audio_path, model=model)
     sm = torch.nn.Softmax()
