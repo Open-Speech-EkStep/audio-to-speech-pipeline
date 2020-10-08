@@ -22,5 +22,5 @@ class AudioLanguageIdentificationTests(unittest.TestCase):
         language_map_path = 'ekstep_pipelines_tests/audio_language_identification/language_map.yml'
         confidence_score = audio_language_inference.language_confidence_score_map(language_map_path, confidence_scores)
         print(confidence_score)
-        expected_score = {"confidence_score": {"hi-IN": "0.00004", "en": "0.99996"}}
+        expected_score = {"hi-IN": "0.00004", "en": "0.99996"}
         self.assertEquals(expected_score, confidence_score)

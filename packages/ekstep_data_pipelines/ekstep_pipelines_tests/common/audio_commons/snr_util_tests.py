@@ -13,9 +13,10 @@ sys.path.insert(0, '..')
 
 class SNRTests(unittest.TestCase):
 
-    expected_file_content = 'audio_id,cleaned_duration,utterances_files_list\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean""}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean""}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean""}]"\n'
+    expected_file_content = 'audio_id,cleaned_duration,utterances_files_list\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": {}}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": {}}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": {}}]"\n'
 
     def setUp(self):
+        self.maxDiff = None
         self.test_audio_file_path = "ekstep_pipelines_tests/resources/chunk.wav"
         self.audio_commons = {"snr_util": Mock(), "chunking_conversion": Mock()}
         self.snr = SNR()
@@ -124,10 +125,56 @@ class SNRTests(unittest.TestCase):
         with open(meta_data_file_name) as f:
             meta_data_contents = f.read()
 
-        self.assertEqual(meta_data_contents,self.expected_file_content)
+        self.assertEqual(meta_data_contents, self.expected_file_content)
+
+    @mock.patch('shutil.move')
+    @mock.patch('subprocess.check_output')
+    @mock.patch('sox.file_info.duration')
+    @mock.patch('audio_language_identification.audio_language_inference.infer_language')
+    def test__given_valid_file_input_list__when_fit_and_move_is_invoked__then_update_all_values_in_the_metadata_file_with_LID(self,
+        mock_infer_language, mock_sox, mock_subprocess_check_output, mock_shutil):
+        # input setup
+        input_file_list = ['file1.wav', 'file2.wav', 'file3.wav']
+        meta_data_file_name = 'test_file.csv'
+        threshold = 15
+        output_dir_path = '/tmp'
+        audio_id = '17147714'
+
+        self.setup_meta_data_file(meta_data_file_name)
+
+        mock_infer_language.return_value = {"hi-IN": "0.00004", "en": "0.99996"}
+        mock_sox.return_value = 10
+
+        mock_subprocess_check_output.side_effect = [b"24.0 mock_output mock_output",
+                                                    b"25.0 mock_output mock_output",
+                                                    b"280.0 mock_output mock_output"]
+        snr = SNR(True)
+        snr.fit_and_move(input_file_list, meta_data_file_name, threshold, output_dir_path, audio_id)
 
 
+        mock_calls = [
+            call('file1.wav'),
+            call('file2.wav'),
+            call('file3.wav')
+        ]
 
+        # assert mock calls
+        mock_shutil.has_calls(mock_calls, any_order=False)
+        self.assertEqual(mock_shutil.call_count, 3)
 
+        mock_sox.has_calls(mock_calls, any_order=False)
+        self.assertEqual(mock_sox.call_count, 3)
+
+        mock_subprocess_check_output.has_calls(mock_calls, any_order=False)
+        self.assertEqual(mock_subprocess_check_output.call_count, 3)
+
+        # check the metadata file for information
+        meta_data_contents = ''
+        with open(meta_data_file_name) as f:
+            meta_data_contents = f.read()
+        expected_file_content = 'audio_id,cleaned_duration,utterances_files_list\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}]"\n'
+        print("meta_data_contents:" + meta_data_contents)
+        print("expected_file_content:" + self.expected_file_content)
+        self.assertEqual(expected_file_content, meta_data_contents)
 
 

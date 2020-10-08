@@ -39,10 +39,10 @@ def forward(audio, model, mode='train'):
 
 
 def language_confidence_score_map(language_map_path, confidence_scores):
-    output_dictionary = {'confidence_score': {}}
+    output_dictionary = {}
     language_map = load_yaml_file(language_map_path)['languages']
     for key in language_map:
-        output_dictionary['confidence_score'][language_map[key]] = confidence_scores[key]
+        output_dictionary[language_map[key]] = confidence_scores[key]
     return output_dictionary
 
 def load_yaml_file(path):
@@ -58,3 +58,6 @@ def evaluation(audio_path, model_path='audio_language_identification/model/model
     probabilities = sm(model_output)
     confidence_scores = ["{:.5f}".format(i.item()) for i in list(probabilities[0])]
     return confidence_scores
+
+def infer_language(audio_path):
+    return language_confidence_score_map(evaluation(audio_path))

@@ -2,7 +2,6 @@ import sys
 
 from ekstep_data_pipelines.audio_processing.audio_duration import calculate_duration
 
-from audio_language_identification.audio_language_inference import evaluation, language_confidence_score_map
 
 sys.path.insert(0, '..')
 sys.path.insert(0, '../..')
@@ -12,6 +11,7 @@ import json
 import shutil
 import subprocess
 import pandas as pd
+import audio_language_identification.audio_language_inference
 import librosa
 from ekstep_data_pipelines.common.utils import get_logger
 
@@ -27,11 +27,12 @@ class SNR:
     MAX_DURATION = 15
 
     @staticmethod
-    def get_instance():
-        curr_instance = SNR()
+    def get_instance(feat_language_identification=False):
+        curr_instance = SNR(feat_language_identification)
         return curr_instance
 
-    def __init__(self):
+    def __init__(self, feat_language_identification=False):
+        self.feat_language_identification = feat_language_identification
         self.current_working_dir = os.getcwd()
 
     def get_command(self, current_working_dir, file_path):
@@ -66,6 +67,7 @@ class SNR:
 
         try:
             process_output = subprocess.check_output(command, shell=True)
+            LOGGER.info('process_output:' + str(process_output))
         except subprocess.CalledProcessError as e:
             LOGGER.error('Called process error:' + str(e))
             return float(-1)
@@ -111,7 +113,11 @@ class SNR:
             LOGGER.info(audio_file_name)
 
             metadata["audio_id"] = audio_id
-            language_confidence_score = language_confidence_score_map(evaluation(file_path))
+            if self.feat_language_identification:
+                language_confidence_score = audio_language_identification.audio_language_inference.infer_language(file_path)
+            else:
+                language_confidence_score = {}
+            LOGGER.info("language_confidence_score:" + str(language_confidence_score))
             clip_duration = calculate_duration(file_path)
             if snr_value < threshold:
                 self.move_file_locally(file_path,  f'{rejected_dir_path}/{audio_file_name}')
