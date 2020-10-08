@@ -15,13 +15,13 @@ parameters:
     default: false
   pipeline_workflows:
     type: boolean
-    default: true
+    default: false
   data_tagger:
     type: boolean
     default: false
   data_prep_cataloguer:
     type: boolean
-    default: false
+    default: true
   downloaded_data_cataloguer:
     type: boolean
     default: false
@@ -204,7 +204,7 @@ jobs:
       - run:
           name: Remove account details
           command: rm ${HOME}/gcp-key.json ; ls
-  hold:
+  approval_for_prod_deploy:
     docker:
       - image: circleci/node:4.8.2
     steps:
@@ -365,14 +365,14 @@ workflows:
           package_version: 1.0.0
           requires:
             - ekstep_data_pipelines_build
-      - hold:
+      - approval_for_prod_deploy:
           type: approval
           requires:
             - ekstep_data_pipelines_deploy_test
       - deploy:
           name: ekstep_data_pipelines_deploy_prod
           package_name: ekstep_data_pipelines
-          env_name: prod
+          env_name: approval_for_prod_deploy
           package_version: 1.0.0
           requires:
             - ekstep_data_pipelines_build

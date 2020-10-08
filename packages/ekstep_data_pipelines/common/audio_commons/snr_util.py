@@ -27,7 +27,8 @@ class SNR:
     MAX_DURATION = 15
 
     @staticmethod
-    def get_instance(feat_language_identification=False):
+    def get_instance(initlization_dict):
+        feat_language_identification = initlization_dict.get('feat_language_identification', False)
         curr_instance = SNR(feat_language_identification)
         return curr_instance
 
