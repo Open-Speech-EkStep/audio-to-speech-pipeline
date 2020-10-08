@@ -318,6 +318,10 @@ workflows:
           env_name: test
           requires:
             - data_prep_cataloguer_build
+      - approval_for_prod_deploy:
+          type: approval
+          requires:
+            - data_prep_cataloguer_deploy_test
       - deploy:
           name: data_prep_cataloguer_deploy_prod
           package_name: data_prep_cataloguer
