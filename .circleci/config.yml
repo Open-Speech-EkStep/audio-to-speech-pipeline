@@ -27,7 +27,7 @@ parameters:
     default: false
   ekstep_data_pipelines:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:
@@ -204,6 +204,11 @@ jobs:
       - run:
           name: Remove account details
           command: rm ${HOME}/gcp-key.json ; ls
+  hold:
+    docker:
+      - image: circleci/node:4.8.2
+    steps:
+      - run: echo "Hold for approval"
 
 workflows:
   version: 2
@@ -360,6 +365,10 @@ workflows:
           package_version: 1.0.0
           requires:
             - ekstep_data_pipelines_build
+      - hold:
+          type: approval
+          requires:
+            - ekstep_data_pipelines_deploy_test
       - deploy:
           name: ekstep_data_pipelines_deploy_prod
           package_name: ekstep_data_pipelines
@@ -367,7 +376,7 @@ workflows:
           package_version: 1.0.0
           requires:
             - ekstep_data_pipelines_build
-            - ekstep_data_pipelines_deploy_test
+            - hold
 
   pipeline_workflows:
     when: << pipeline.parameters.pipeline_workflows >>
