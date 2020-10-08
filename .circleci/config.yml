@@ -376,7 +376,7 @@ workflows:
           package_version: 1.0.0
           requires:
             - ekstep_data_pipelines_build
-            - hold
+            - approval_for_prod_deploy
 
   pipeline_workflows:
     when: << pipeline.parameters.pipeline_workflows >>
