@@ -29,6 +29,7 @@ class SNR:
     @staticmethod
     def get_instance(initialization_dict):
         feat_language_identification = initialization_dict.get('feat_language_identification', False)
+        LOGGER.info('Running with feat_language_identification='+ str(feat_language_identification))
         curr_instance = SNR(feat_language_identification)
         return curr_instance
 

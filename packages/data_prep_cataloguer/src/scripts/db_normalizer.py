@@ -12,11 +12,13 @@ from os.path import join, dirname
 from sqlalchemy import create_engine, select, MetaData, Table, text
 from .gcs_operations import CloudStorageOperations
 
-
+from common.utils import get_logger
 # def get_max_date(table_name,connection):
 #     get_max_date = text("SELECT MAX (load_datetime) FROM media;")
 #     max_date_result = connection.execute(get_max_date).fetchall()
 #     max_datetime = max_date_result[0][0]
+
+LOGGER = get_logger('Db_normalizer')
 
 class Db_normalizer():
 
@@ -182,6 +184,7 @@ class Db_normalizer():
                     snr_value = 0.0
 
                 language_confidence_score = utterance.get('language_confidence_score', {})
+                LOGGER.info("inserting with language_confidence_score:" + str(language_confidence_score))
                 insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
                     {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{language_confidence_score}','{load_datetime}')")
 
