@@ -55,7 +55,7 @@ def evaluation(audio_path, model_path='audio_language_identification/model/model
     sm = torch.nn.Softmax()
     probabilities = sm(model_output)
     confidence_scores = ["{:.5f}".format(i.item()) for i in list(probabilities[0])]
-    return confidence_scores
+    return list(map(lambda cs: float(cs), confidence_scores))
 
 def infer_language(audio_path, language_map_path='audio_language_identification/language_map.yml'):
     return language_confidence_score_map(evaluation(audio_path), language_map_path)
