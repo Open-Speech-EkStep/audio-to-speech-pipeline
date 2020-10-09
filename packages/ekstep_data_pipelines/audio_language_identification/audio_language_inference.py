@@ -36,7 +36,7 @@ def forward(audio, model, mode='train'):
         print("File error ", audio)
 
 
-def language_confidence_score_map(confidence_scores, language_map_path='audio_language_identification/language_map.yml'):
+def language_confidence_score_map(confidence_scores, language_map_path):
     output_dictionary = {}
     language_map = load_yaml_file(language_map_path)['languages']
     for key in language_map:
@@ -57,5 +57,6 @@ def evaluation(audio_path, model_path='audio_language_identification/model/model
     confidence_scores = ["{:.5f}".format(i.item()) for i in list(probabilities[0])]
     return confidence_scores
 
-def infer_language(audio_path):
-    return language_confidence_score_map(evaluation(audio_path))
+def infer_language(audio_path, language_map_path='audio_language_identification/language_map.yml'):
+    return language_confidence_score_map(evaluation(audio_path), language_map_path)
+
