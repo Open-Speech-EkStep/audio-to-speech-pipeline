@@ -80,11 +80,12 @@ class Db_normalizer():
             snr_value = 0.0
         except ValueError:
             snr_value = 0.0
-
+        language_confidence_score = utterance.get('language_confidence_score', {})
+        print("inserting with language_confidence_score:" + str(language_confidence_score))
         # print(utterance)
         with open("full_query.txt", 'a') as myfile:
             myfile.write(
-                f"({audio_id[0]},{speaker_id},'{file_name}',{durtion},'{datetime}',{snr_value},'{status}','{fail_reason}'),")
+                f"({audio_id[0]},{speaker_id},'{file_name}',{durtion},'{datetime}',{snr_value},'{status}','{fail_reason}','{language_confidence_score}'),")
 
     def get_load_datetime(self, audio_id, connection):
         load_date_time_for_audio = text(GET_LOAD_TIME_FOR_AUDIO_QUERY)
@@ -181,10 +182,8 @@ class Db_normalizer():
                 except ValueError:
                     snr_value = 0.0
 
-                language_confidence_score = utterance.get('language_confidence_score', {})
-                print("inserting with language_confidence_score:" + str(language_confidence_score))
                 insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
-                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{language_confidence_score}','{load_datetime}')")
+                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{load_datetime}')")
 
         return insert_query_into_mapping_table, processed_audio_ids
 
@@ -216,7 +215,7 @@ class Db_normalizer():
         audio_ids = results
         with open("./full_query.txt", 'w') as myfile:
             myfile.write(
-                f"insert into media_speaker_mapping(audio_id, speaker_id, clipped_utterance_file_name, clipped_utterance_duration,load_datetime,snr,status,fail_reason) values ")
+                f"insert into media_speaker_mapping(audio_id, speaker_id, clipped_utterance_file_name, clipped_utterance_duration,load_datetime,snr,status,fail_reason, language_confidence_score) values ")
         for audio_id in audio_ids:
 
             speaker_id = self.find_speaker_id(connection, audio_id)
