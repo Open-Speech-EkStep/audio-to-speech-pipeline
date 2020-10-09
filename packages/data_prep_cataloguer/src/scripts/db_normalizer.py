@@ -287,7 +287,7 @@ if __name__ == "__main__":
     connection = db.connect()
 
     normalizer = Db_normalizer()
-
+    print("Running DB normalizer")
     normalizer.update_source_metadata_table(connection)
     print("moving data from staging to media......")
     normalizer.copy_data_from_media_metadata_staging_to_media(db)
