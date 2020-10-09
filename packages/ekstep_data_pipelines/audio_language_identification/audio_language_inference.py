@@ -12,10 +12,8 @@ torch.manual_seed(0)
 
 
 def load_model(model_path):
-    # model = get_model(device)
     if os.path.isfile(model_path):
         model = torch.load(model_path, map_location=device)
-        # model.load_state_dict(checkpoint['state_dict'])
         model.eval()
         print("Model loaded from ", model_path)
     else:
@@ -38,7 +36,7 @@ def forward(audio, model, mode='train'):
         print("File error ", audio)
 
 
-def language_confidence_score_map(language_map_path, confidence_scores):
+def language_confidence_score_map(confidence_scores, language_map_path='audio_language_identification/language_map.yml'):
     output_dictionary = {}
     language_map = load_yaml_file(language_map_path)['languages']
     for key in language_map:
