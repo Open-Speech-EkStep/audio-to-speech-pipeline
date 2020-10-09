@@ -71,6 +71,7 @@ class Db_normalizer():
         durtion = utterance['duration']
         status = utterance['status']
         fail_reason = utterance.get('reason', '')
+        language_confidence_score = json.dumps(utterance.get('language_confidence_score', {}))
         try:
             if str(utterance.get('snr_value')) == 'nan':
                 snr_value = 0.0
@@ -80,7 +81,6 @@ class Db_normalizer():
             snr_value = 0.0
         except ValueError:
             snr_value = 0.0
-        language_confidence_score = utterance.get('language_confidence_score', {})
         print("inserting with language_confidence_score:" + str(language_confidence_score))
         # print(utterance)
         with open("full_query.txt", 'a') as myfile:
