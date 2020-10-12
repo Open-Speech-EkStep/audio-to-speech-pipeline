@@ -60,7 +60,7 @@ def create_dag(dag_id,
 
         parallelism = args.get("parallelism")
 
-        file_path_list = json.loads(Variable.get("audiofileids"))[dag_id]
+        file_path_list = json.loads(Variable.get("audiofilelist"))[dag_id]
 
 
         if len(file_path_list) > 0:

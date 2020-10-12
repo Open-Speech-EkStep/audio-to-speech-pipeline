@@ -85,7 +85,7 @@ def condition_file_name(file_name):
 
 def get_file_path_from_bucket(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count,
                                 audio_format,**context):
-    file_path_dict = {}
+    file_path_dict = json.loads(Variable.get("audiofilelist"))
     file_name_list = []
     
     get_variables()
@@ -126,7 +126,7 @@ def get_file_path_from_bucket(source, source_landing_path, error_landing_path, t
             batch_count -= 1
     file_path_dict[source] = file_name_list
     file_path_dict = mydict(file_path_dict)
-    Variable.set("audiofileids", file_path_dict)
+    Variable.set("audiofilelist", file_path_dict)
 
 def get_files_from_landing_zone(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count,
                                 audio_format):

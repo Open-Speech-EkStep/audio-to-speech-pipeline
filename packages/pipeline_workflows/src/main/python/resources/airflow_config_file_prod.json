@@ -28,7 +28,7 @@
   "downloadcatalogconfig": {"audioformat": {"mahatmagandhi":"mp3", "yourquote":"mp4", "testdag":"mp3"}, "source":["mahatmagandhi","testdag"]},
   "archiveutterancespath" : "data/experiments/archive/",
   "sttconfigpath" : "data/audiotospeech/config/speechtotext/config.yaml",
-  "audiofileids" : {"1tEdx_Talk_Indian_speaker": []},
+  "audiofilelist" : {"1tEdx_Talk_Indian_speaker": []},
   "audioidsforstt" : {"1tEdx_Talk_Indian_speaker": []},
   "apivoice":{"google":["voice1","voice2","voice3"],"azure":["voice1","voice2"],"gtts":["voice1"]},
   "validation_report_source_post-transcription": ["CEC"],
