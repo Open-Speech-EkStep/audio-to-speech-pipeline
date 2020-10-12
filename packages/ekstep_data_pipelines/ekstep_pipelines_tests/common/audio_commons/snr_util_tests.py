@@ -13,7 +13,7 @@ sys.path.insert(0, '..')
 
 class SNRTests(unittest.TestCase):
 
-    expected_file_content = 'audio_id,cleaned_duration,utterances_files_list\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": {}}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": {}}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": {}}]"\n'
+    expected_file_content = 'audio_id,cleaned_duration,utterances_files_list\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": null}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": null}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": null}]"\n'
 
     def setUp(self):
         self.maxDiff = None
