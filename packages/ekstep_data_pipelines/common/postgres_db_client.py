@@ -40,6 +40,7 @@ class PostgresClient:
     3. execute update
     4. execute batch updates
     """
+    GET_UNIQUE_ID = "SELECT nextval('audio_id_seq');"
 
     @staticmethod
     def get_instance(intialization_dict):
@@ -116,4 +117,8 @@ class PostgresClient:
         conn.commit()
         cur.close()
         return updated_rows
+
+    def get_unique_id(self):
+        return self.connection.execute(self.GET_UNIQUE_ID).fetchall()[0][0]
+
 

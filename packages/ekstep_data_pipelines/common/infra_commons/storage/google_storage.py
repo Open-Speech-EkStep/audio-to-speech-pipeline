@@ -133,7 +133,7 @@ class GoogleStorage(BaseStorageInterface):
 
         source_bucket = self.client.bucket(self.get_bucket_from_path(source_path))
         source_actual_path = self.get_path_without_bucket(source_path)
-        source_blob = source_bucket.bucket(source_actual_path)
+        source_blob = source_bucket.blob(source_actual_path)
 
         destination_bucket = self.client.bucket(self.get_bucket_from_path(destination_path))
         destination_actual_path = self.get_path_without_bucket(destination_path)

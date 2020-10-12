@@ -43,7 +43,10 @@ parser.add_argument('-c', '--config-path', dest='local_config', default=None,
 parser.add_argument('-rc', '--remote-config-path', dest='remote_config', default=None,
                     help='path to remote gcs config file. Use this when running on cluster mode')
 
-parser.add_argument('-ai', '--audio-ids', dest='audio_ids', default=[],
+parser.add_argument('-fl', '--filename_list', dest='file_name_list', default=[],
+                    help='list of all the filename that need to processed, this needs to a comma seperated list eg. audio_id1,audio_id2 . Only works with the audio processor')
+
+parser.add_argument('-ai', '--audio-ids', dest='audio-ids', default=[],
                     help='list of all the audio ids that need to processed, this needs to a comma seperated list eg. audio_id1,audio_id2 . Only works with the audio processor')
 
 parser.add_argument('-as', '--audio-source', dest='audio_source', default=None,
@@ -130,14 +133,14 @@ def validate_data_filter_config(arguments):
 def validate_audio_processing_input(arguments):
     LOGGER.info('validating input for audio processing')
 
-    if arguments.audio_ids == []:
+    if arguments.file_name_list == []:
         raise argparse.ArgumentTypeError(
             f'Audio Id list missing. Please specify comma seperated audio IDs for processing'
         )
 
-    audio_ids = [i.strip() for i in list(filter(None, arguments.audio_ids.split(',')))]
+    file_name_list = [i.strip() for i in list(filter(None, arguments.file_name_list.split(',')))]
 
-    if audio_ids == []:
+    if file_name_list == []:
         raise argparse.ArgumentTypeError(
             f'Audio Id list missing. Please specify comma seperated audio IDs for processing'
         )
@@ -156,7 +159,7 @@ def validate_audio_processing_input(arguments):
 
     audio_format = arguments.audio_format
 
-    return {'audio_id_list': audio_ids, 'source': audio_source, 'extension': audio_format}
+    return {'file_name_list': file_name_list, 'source': audio_source, 'extension': audio_format}
 
 
 def validate_audio_transcription_input(arguments):

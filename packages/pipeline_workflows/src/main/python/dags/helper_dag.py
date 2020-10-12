@@ -83,6 +83,50 @@ def condition_file_name(file_name):
     file_name_split = file_name_cleansed.split('.')
     return '_'.join(file_name_split[:-1]) + '.' + file_name_split[-1]
 
+def get_file_path_from_bucket(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count,
+                                audio_format,**context):
+    file_path_dict = {}
+    file_name_list = []
+    
+    get_variables()
+    delimiter = "/"
+    print("****The source is *****" + source)
+    # meta_data_flag = False
+    master_metadat_file_path = f'{source_landing_path}{source}/{source}_master.csv'
+
+    has_metadata_file = check_blob(bucket_name, master_metadat_file_path)
+
+    print(f'*****has meta data {has_metadata_file}*********{master_metadat_file_path}')
+
+    if has_metadata_file:
+        upload_and_move(master_metadat_file_path, source)
+
+    all_blobs = list_blobs_in_a_path(
+        bucket_name, source_landing_path + source + delimiter)
+
+    for blob in all_blobs:
+        print("*********The file name is ********* " + blob.name)
+        file_name = get_file_name(blob.name, delimiter)
+
+        file_extension = get_file_extension(file_name)
+        expected_file_extension = audio_format
+
+        if file_extension in [expected_file_extension, expected_file_extension.swapcase()]:
+
+            if batch_count > 0:
+                metadata_file_name = get_metadata_file_name(file_name)
+                print("File is {}".format(file_name))
+
+                if (check_if_meta_data_present(source_landing_path + source, metadata_file_name)):
+
+                    file_name_list.append(file_name)
+
+            else:
+                break
+            batch_count -= 1
+    file_path_dict[source] = file_name_list
+    file_path_dict = mydict(file_path_dict)
+    Variable.set("audiofileids", file_path_dict)
 
 def get_files_from_landing_zone(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count,
                                 audio_format):

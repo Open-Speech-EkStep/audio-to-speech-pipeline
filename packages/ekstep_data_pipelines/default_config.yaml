@@ -44,18 +44,15 @@ config:
     # path of the files on gcs which need to be processed
     remote_raw_audio_file_path: ''
 
-    master_meta_data_file_path: ''
-
-    master_meta_data_file_done_path: ''
+    snr_done_folder_path: ''
 
     # path where the processed files need to be uploaded
     remote_processed_audio_file_path: ''
 
+
     chunking_conversion_configeration:
       aggressiveness: ''
       max_duration: ''
-
-
 
     # SNR specific configeration
     snr_configeration:

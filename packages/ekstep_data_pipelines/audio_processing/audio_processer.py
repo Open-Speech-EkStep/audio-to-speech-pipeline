@@ -1,7 +1,7 @@
 import os
 import glob
 from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG, SNR_CONFIG, REMOTE_PROCESSED_FILE_PATH,\
-    MASTER_META_DATA_FILE_PATH, MASTER_META_DATA_DONE_FILE_PATH
+    MASTER_META_DATA_FILE_PATH, SNR_DONE_FOLDER_PATH
 from common.utils import get_logger
 from common import BaseProcessor
 
@@ -40,15 +40,18 @@ class AudioProcessor(BaseProcessor):
         self.audio_processor_config = self.data_processor.config_dict.get(
             CONFIG_NAME)
 
-        audio_id_list = kwargs.get('audio_id_list', [])
+        file_name_list = kwargs.get('file_name_list', [])
         source = kwargs.get('source')
         extension = kwargs.get('extension')
         process_master_csv = kwargs.get('process_master_csv','false')
 
-        Logger.info(f'Processing audio ids {audio_id_list}')
-        for audio_id in audio_id_list:
-            Logger.info(f'Processing audio_id {audio_id}')
-            self.process_audio_id(audio_id, source, extension)
+        Logger.info(f'Processing audio ids {file_name_list}')
+        for file_name in file_name_list:
+
+            audio_id = self.data_processor.get_unique_id()
+
+            Logger.info(f'Processing file {file_name} and audio_id {audio_id}')
+            self.process_audio_id(audio_id, source, extension,file_name)
         
         if not process_master_csv:
             return
@@ -58,9 +61,10 @@ class AudioProcessor(BaseProcessor):
         if self.fs_interface.path_exists(master_metadata_file_path):
             self.upload_and_move(master_metadata_file_path, source)
 
-
-    def process_audio_id(self, audio_id, source, extension):
+    def process_audio_id(self, audio_id, source, extension,file_name):
         local_audio_download_path = f'{AudioProcessor.DEFAULT_DOWNLOAD_PATH}/{source}/{audio_id}'
+
+        meta_data_file = file_name.replace(f'.{extension}',".csv")
 
         Logger.info(
             f'Downloading file for audio_id/{audio_id} to {local_audio_download_path}')
@@ -69,11 +73,16 @@ class AudioProcessor(BaseProcessor):
         Logger.info(f'Ensured {local_audio_download_path} exists')
 
         remote_file_path = self.audio_processor_config.get(REMOTE_RAW_FILE)
-        remote_download_path = f'{remote_file_path}/{source}/{audio_id}'
+        remote_download_path = f'{remote_file_path}/{source}/{file_name}'
+        remote_download_path_of_metadata = f'{remote_file_path}/{source}/{meta_data_file}'
 
         Logger.info(
-            f'Downloading audio file from {remote_download_path} to {local_audio_download_path}')
-        self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path)
+            f'Downloading audio file and metadat file from {remote_download_path},{remote_download_path_of_metadata} to {local_audio_download_path}')
+
+        self.fs_interface.download_file_to_location(remote_download_path,f'{local_audio_download_path}/{file_name}')
+        self.fs_interface.download_file_to_location(remote_download_path_of_metadata,f'{local_audio_download_path}/{meta_data_file}')
+
+        # self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path)
         meta_data_file_path = self._get_csv_in_path(local_audio_download_path)
 
         Logger.info(f'Conerting the file with audio_id {audio_id} to wav')
@@ -107,11 +116,25 @@ class AudioProcessor(BaseProcessor):
             Logger.error(
                 f'Uploading chunked/snr cleaned files failed for {audio_id} not processing further.')
 
-        self.upload_file(meta_data_file_path)
+        # self.upload_file(meta_data_file_path)
+
+        self.move_file_to_done_folder(remote_download_path,remote_download_path_of_metadata,source,file_name,meta_data_file)
+
+    def move_file_to_done_folder(self,audio_file_path,meta_data_file_path,source,file_name,meta_data_file):
+        snr_done_path = f'{self.audio_processor_config.get(SNR_DONE_FOLDER_PATH)}/{source}'
+
+        snr_done_path_audio_file_path = f'{snr_done_path}/{file_name}'
+        snr_done_path_metadata_file_path = f'{snr_done_path}/{meta_data_file}'
+
+        Logger.info(f"moving {audio_file_path},{meta_data_file_path} to snr done path {snr_done_path}")
+
+        self.fs_interface.move(audio_file_path,snr_done_path_audio_file_path)
+        self.fs_interface.move(meta_data_file_path,snr_done_path_metadata_file_path)
+
 
     def upload_and_move(self, master_metadata_file_path, source):
 
-        meta_data_done_path = f'{self.audio_processor_config.get(MASTER_META_DATA_DONE_FILE_PATH)}/{source}'
+        meta_data_done_path = f'{self.audio_processor_config.get(SNR_DONE_FOLDER_PATH)}/{source}'
 
         local_metadata_downloaded_path = '/tmp/master_csv'
 
