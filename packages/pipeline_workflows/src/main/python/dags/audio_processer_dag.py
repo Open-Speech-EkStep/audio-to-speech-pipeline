@@ -8,7 +8,7 @@ from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
-from helper_dag import get_audio_ids, get_files_from_landing_zone, move_raw_to_processed,get_file_path_from_bucket
+from helper_dag import get_audio_ids, move_raw_to_processed,get_file_path_from_bucket
 
 snr_catalogue_source = json.loads(Variable.get("snrcatalogue"))
 source_path_for_snr = Variable.get("sourcepathforsnr")
@@ -62,7 +62,6 @@ def create_dag(dag_id,
 
         file_path_list = json.loads(Variable.get("audiofileids"))[dag_id]
 
-        print(file_path_list,"kjsahfkjsabf")
 
         if len(file_path_list) > 0:
 
@@ -88,7 +87,7 @@ def create_dag(dag_id,
                 name='data-prep-snr',
                 cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "audio_processing", "-rc",
                       "data/audiotospeech/config/audio_processing/config.yaml",
-                      "-ai", ','.join(batch_file_path_list), "-af", args.get('audio_format'), "-as", dag_id],
+                      "-fl", ','.join(batch_file_path_list), "-af", args.get('audio_format'), "-as", dag_id],
                 # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
