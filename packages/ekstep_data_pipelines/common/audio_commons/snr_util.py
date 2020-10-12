@@ -120,7 +120,7 @@ class SNR:
             if self.feat_language_identification:
                 language_confidence_score = audio_language_identification.audio_language_inference.infer_language(file_path)
             else:
-                language_confidence_score = {}
+                language_confidence_score = None
             LOGGER.info("language_confidence_score:" + str(language_confidence_score))
             clip_duration = calculate_duration(file_path)
             if snr_value < threshold:
