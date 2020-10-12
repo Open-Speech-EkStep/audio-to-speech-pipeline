@@ -71,7 +71,7 @@ class Db_normalizer():
         durtion = utterance['duration']
         status = utterance['status']
         fail_reason = utterance.get('reason', '')
-        language_confidence_score = json.dumps(utterance.get('language_confidence_score', {}))
+        language_confidence_score = json.dumps(utterance.get('language_confidence_score', None))
         try:
             if str(utterance.get('snr_value')) == 'nan':
                 snr_value = 0.0
