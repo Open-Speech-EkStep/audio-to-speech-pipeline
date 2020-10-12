@@ -116,7 +116,7 @@ class AudioProcessor(BaseProcessor):
             Logger.error(
                 f'Uploading chunked/snr cleaned files failed for {audio_id} not processing further.')
 
-        # self.upload_file(meta_data_file_path)
+        self.upload_file(meta_data_file_path)
 
         self.move_file_to_done_folder(remote_download_path,remote_download_path_of_metadata,source,file_name,meta_data_file)
 
