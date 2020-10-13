@@ -13,8 +13,6 @@
   "tobeprocessedpathsnr" : "data/audiotospeech/raw/download/tobeprocessed/english/audio/",
   "snrdonepath" : "data/audiotospeech/raw/download/snrdonepath/english/audio/",
   "sttsourcepath": "data/audiotospeech/raw/landing/english/audio/",
-
-
   "sourcelandingpath" : "data/audiotospeech/raw/landing/english/audio/",
   "errorlandingpath" : "data/audiotospeech/raw/landing/english/audio/error/",
   "tobeprocessedpath" : "data/audiotospeech/raw/tobeprocessed/english/audio/",
@@ -33,6 +31,12 @@
   "apivoice":{"google":["voice1","voice2","voice3"],"azure":["voice1","voice2"],"gtts":["voice1"]},
   "validation_report_source_post-transcription": ["CEC"],
   "validation_report_source_pre-transcription": ["CEC"],
+  "snr_resource_limits" : {
+    "request_memory": "200m",
+    "request_cpu": "50m",
+    "limit_memory": "500m",
+    "limit_cpu": "100m"
+  },
   "data_filter_config": {
 	"test_source1": {
 		"filter": {
