@@ -18,7 +18,7 @@ bucket_name = Variable.get("bucket")
 # processed_path = Variable.get("rawprocessedpath")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
-resource_limits = Variable.get("snr_resource_limits")
+resource_limits = json.loads(Variable.get("snr_resource_limits"))
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
 
