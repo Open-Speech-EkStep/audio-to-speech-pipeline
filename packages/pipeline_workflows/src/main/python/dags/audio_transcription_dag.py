@@ -17,6 +17,7 @@ snr_done_path = Variable.get("snrdonepath")
 bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
+resource_limits = json.loads(Variable.get("stt_resource_limits"))
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
 secret_file = secret.Secret(
@@ -70,7 +71,8 @@ def create_dag(dag_id,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
                 image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}_1.0.0',
-                image_pull_policy='Always')
+                image_pull_policy='Always',
+                resources=resource_limits)
 
             fetch_audio_ids >> data_prep_task
 
