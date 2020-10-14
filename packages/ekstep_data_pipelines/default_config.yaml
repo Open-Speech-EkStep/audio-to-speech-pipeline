@@ -38,6 +38,8 @@ config:
         source: []
 
   audio_processor_config:
+
+    feat_language_identification: False
     # defaults to hi-IN
     language: ''
 

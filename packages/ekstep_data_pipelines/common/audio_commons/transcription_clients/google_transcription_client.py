@@ -55,7 +55,7 @@ class GoogleTranscriptionClient(object):
         return self._client
 
     def generate_transcription(self, language, source_file_path):
-        source_file_path = source_file_path.replace('/tmp/', f'gs://{self.bucket}/')
+        source_file_path = source_file_path.replace('/tmp/', f'gs://')
         try:
             content = self.call_speech_to_text(source_file_path)
             transcriptions = list(

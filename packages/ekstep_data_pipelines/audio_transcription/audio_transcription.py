@@ -42,18 +42,23 @@ class AudioTranscription(BaseProcessor):
         language = self.audio_transcription_config.get(LANGUAGE)
         remote_path_of_dir = self.audio_transcription_config.get(
             CLEAN_AUDIO_PATH)
+
         should_skip_rejected = self.audio_transcription_config.get(
             SHOULD_SKIP_REJECTED)
+
         LOGGER.info('Generating transcriptions for audio_ids:' + str(audio_ids))
         failed_audio_ids = []
+
         for audio_id in audio_ids:
             try:
                 LOGGER.info('Generating transcription for audio_id:' + str(audio_id))
                 utterances = self.catalogue_dao.get_utterances(audio_id)
+
                 if len(utterances) <= 0:
                     LOGGER.info('No utterances found for audio_id:' + audio_id)
                     continue
-                remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean/'
+
+                remote_dir_path_for_given_audio_id = f'{remote_path_of_dir}/{source}/{audio_id}/clean'
 
                 remote_stt_output_path = self.audio_transcription_config.get(
                     'remote_stt_audio_file_path')
@@ -61,22 +66,25 @@ class AudioTranscription(BaseProcessor):
 
                 transcription_client = self.transcription_clients[stt_api]
                 LOGGER.info('Using transcription client:' + str(transcription_client))
-                all_path = self.gcs_instance.list_blobs_in_a_path(remote_dir_path_for_given_audio_id)
+                all_files = self.fs_interface.list_files(remote_dir_path_for_given_audio_id, include_folders=False)
 
-                local_clean_dir_path, local_rejected_dir_path = self.generate_transcription_for_all_utterenaces(audio_id, all_path, language,
-                                                                                 transcription_client, utterances, should_skip_rejected)
+                LOGGER.info('listed all path in given id')
+
+
+                local_clean_dir_path, local_rejected_dir_path = self.generate_transcription_for_all_utterenaces(audio_id, all_files, language,
+                                                                                 transcription_client, utterances, should_skip_rejected, remote_dir_path_for_given_audio_id)
                 LOGGER.info('updating catalogue with updated utterances')
                 self.catalogue_dao.update_utterances(audio_id, utterances)
-
+                
                 LOGGER.info(f'Uploading local generated files from {local_clean_dir_path} to {remote_stt_output_path}')
                 if os.path.exists(local_clean_dir_path):
-                    self.move_to_gcs(local_clean_dir_path, remote_stt_output_path + "/clean")
+                    self.fs_interface.upload_folder_to_location(local_clean_dir_path, remote_stt_output_path + "/clean")
                 else:
                     LOGGER.info('No clean files found')
 
                 LOGGER.info(f'Uploading local generated files from {local_rejected_dir_path} to {remote_stt_output_path}')
                 if os.path.exists(local_rejected_dir_path):
-                    self.move_to_gcs(local_rejected_dir_path, remote_stt_output_path + "/rejected")
+                    self.fs_interface.upload_folder_to_location(local_rejected_dir_path, remote_stt_output_path + "/rejected")
                 else:
                     LOGGER.info('No rejected files found')
 
@@ -96,56 +104,67 @@ class AudioTranscription(BaseProcessor):
         return
 
     def delete_audio_id(self, remote_dir_path_for_given_audio_id):
-        self.gcs_instance.delete_object(remote_dir_path_for_given_audio_id)
+        self.fs_interface.delete(remote_dir_path_for_given_audio_id)
 
-    def move_to_gcs(self, local_path, remote_stt_output_path):
-        self.gcs_instance.upload_to_gcs(local_path, remote_stt_output_path)
+    # def move_to_gcs(self, local_path, remote_stt_output_path):
+    #     self.fs_interface.upload_to_location(local_path, remote_stt_output_path)
 
     def save_transcription(self, transcription, output_file_path):
         with open(output_file_path, "w") as f:
             f.write(transcription)
 
-    def generate_transcription_for_all_utterenaces(self, audio_id, all_path, language, transcription_client, utterances, should_skip_rejected):
+    def generate_transcription_for_all_utterenaces(self, audio_id, all_files, language, transcription_client, utterances, should_skip_rejected, remote_path):
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
+
         local_clean_path = ''
         local_rejected_path = ''
-        for file_path in all_path:
-            file_name = get_file_name(file_path.name)
-            local_clean_path = f"/tmp/{file_path.name}"
-            local_rejected_path = local_clean_path.replace('clean', 'rejected')
-            utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, file_name)
+
+        for curr_file_name in all_files:
+            file_name = f'{remote_path}/{curr_file_name}'
+
+            utterance_metadata = self.catalogue_dao.find_utterance_by_name(utterances, curr_file_name)
 
             if utterance_metadata is None:
                 LOGGER.info('No utterance found for file_name: ' + file_name)
                 continue
+
             if utterance_metadata['status'] == 'Rejected':
+
                 if should_skip_rejected:
                     LOGGER.info('Skipping rejected file_name: ' + file_name)
                     continue
-                else:
-                    LOGGER.info('Marking rejected file as clean, as this will be transcribed:' + file_name)
-                    utterance_metadata['status'] = 'Clean'
-                    utterance_metadata['reason'] = 'redacted'
+
+                LOGGER.info('Marking rejected file as clean, as this will be transcribed:' + file_name)
+                utterance_metadata['status'] = 'Clean'
+                utterance_metadata['reason'] = 'redacted'
+
             if float(utterance_metadata['duration']) < 0.5 or float(utterance_metadata['duration']) > 15:
                 LOGGER.error('skipping audio file as duration > 15 or < .5')
                 continue
 
             LOGGER.info('Generating transcription for utterance:' + str(utterance_metadata))
 
-            self.generate_transcription_and_sanitize(audio_id, local_clean_path, local_rejected_path, file_path, language,
+            local_clean_folder = f"/tmp/{remote_path}"
+            local_clean_path = f"/tmp/{file_name}"
+
+            if not os.path.exists(local_clean_folder):
+                os.makedirs(local_clean_folder)
+            
+            local_rejected_path = local_clean_folder.replace('clean', 'rejected')
+
+            self.generate_transcription_and_sanitize(audio_id, local_clean_path, local_rejected_path, file_name, language,
                                                      transcription_client, utterance_metadata)
 
-        return self.get_local_dir_path(local_clean_path), self.get_local_dir_path(local_rejected_path)
+        return local_clean_path, local_rejected_path
 
-    def generate_transcription_and_sanitize(self, audio_id, local_clean_path, local_rejected_path, file_path, language,
+    def generate_transcription_and_sanitize(self, audio_id, local_clean_path, local_rejected_path, remote_file_path, language,
                                             transcription_client, utterance_metadata):
-        if ".wav" not in file_path.name:
+        if ".wav" not in remote_file_path:
             return
 
         transcription_file_name = local_clean_path.replace('.wav', '.txt')
-
-        self.gcs_instance.download_to_local(
-            file_path.name, local_clean_path, False)
+        self.fs_interface.download_file_to_location(
+            remote_file_path, local_clean_path)
 
         reason = None
         
@@ -183,9 +202,8 @@ class AudioTranscription(BaseProcessor):
         utterance_metadata['status'] = 'Rejected'
         utterance_metadata['reason'] = reason
         self.catalogue_dao.update_utterance_status(audio_id, utterance_metadata)
-        rejected_dir = self.get_local_dir_path(local_rejected_path)
-        if not os.path.exists(rejected_dir):
-            os.makedirs(rejected_dir)
+        if not os.path.exists(local_rejected_path):
+            os.makedirs(local_rejected_path)
         command = f'mv {local_clean_path} {local_rejected_path}'
         LOGGER.info(f'moving bad wav file: {local_clean_path} to rejected folder: {local_rejected_path}')
         os.system(command)

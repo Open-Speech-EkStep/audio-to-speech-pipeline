@@ -142,15 +142,17 @@ class GoogleStorage(BaseStorageInterface):
         return True
 
     def delete(self, path: str) -> bool:
-
-        if not self.path_exists(path):
-            raise FileNotFoundException(f'{path} not found')
-
-        bucket = self.client.bucket(self.get_bucket_from_path(path))
+        bucket_name = self.get_bucket_from_path(path)
+            
+        bucket = self.client.bucket(bucket_name)
         actual_path = self.get_path_without_bucket(path)
 
-        curr_blob = bucket.blob(actual_path)
-        curr_blob.delete()
+        all_file = self._list_blobs_in_a_path(bucket_name,actual_path)
+
+        for file in all_file:
+            blob = bucket.blob(file.name)
+            blob.delete()
+            print("Blob {} deleted.".format(file.name))
 
         return True
 
@@ -162,3 +164,7 @@ class GoogleStorage(BaseStorageInterface):
         except:
             return False
         return path_exists
+
+    def _list_blobs_in_a_path(self, bucket ,file_prefix, delimiter=None):
+        blobs = self.client.list_blobs(bucket, prefix=file_prefix, delimiter=delimiter)
+        return blobs
