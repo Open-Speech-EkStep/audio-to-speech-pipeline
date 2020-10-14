@@ -1,69 +1,137 @@
 {
-  "env" : "test",
+  "env": "test",
   "table": "texttospeechpipeline",
-  "bucket":"ekstepspeechrecognition-test",
-  "inputbasepath":"/data/integration/curation/processed/hindi/",
-  "inputtobeprocesspath":"/data/integration/ttsapi/tobeprocessed/hindi/",
-  "batchsize":"10800",
-  "apibatchratio":{"google":3,"azure":2,"gtts":1},
-  "sourceinfo" : {"testamulya2": {"count":1}},
-  "snrcatalogue" : {  "testamulya2": { "count": 1, "format": "mp3" } },
-  "sourcepathforsnr" : "data/audiotospeech/raw/download/downloaded/hindi/audio/",
-  "errorlandingpathsnr" : "data/audiotospeech/raw/download/downloaded/hindi/audio/error/",
-  "tobeprocessedpathsnr" : "data/audiotospeech/raw/download/tobeprocessed/hindi/audio/",
-  "snrdonepath" : "data/audiotospeech/raw/download/snrdonepath/hindi/audio/",
-  "sttsourcepath":"data/audiotospeech/raw/landing/hindi/audio/",
-  "sourcelandingpath" : "data/audiotospeech/raw/landing/hindi/audio/",
-  "errorlandingpath" : "data/audiotospeech/raw/landing/hindi/audio/error/",
-  "tobeprocessedpath" : "data/audiotospeech/raw/tobeprocessed/hindi/audio/",
-  "rawprocessedpath" : "data/audiotospeech/raw/processed/hindi/audio/",
-  "integrationprocessedpath" : "data/audiotospeech/integration/processed/hindi/audio/",
-  "experimentoutput":"data/experiments/output/",
-  "metafileextension" : ".csv",
-  "utteranceschunkslist" : {"utteranceschunkslist":[]},
-  "utteranceschunkpath" : "data/experiments/input/",
-  "utterancesconcurrentbatchcount" : 12,
-  "downloadcatalogconfig": {"audioformat": {"mahatmagandhi":"mp3", "yourquote":"mp4", "testdag":"mp3"}, "source":["mahatmagandhi","testdag"]},
-  "archiveutterancespath" : "data/experiments/archive/",
-  "sttconfigpath" : "data/audiotospeech/config/speechtotext/config.yaml",
-  "audiofilelist" : {"testamulya2": []},
-  "audioidsforstt" : {"testamulya2": []},
-  "apivoice":{"google":["voice1","voice2","voice3"],"azure":["voice1","voice2"],"gtts":["voice1"]},
-  "validation_report_source_post-transcription": ["CEC"],
-  "validation_report_source_pre-transcription": ["CEC"],
-  "snr_resource_limits" : {
+  "bucket": "ekstepspeechrecognition-dev",
+  "inputbasepath": "/data/integration/curation/processed/{language}/",
+  "inputtobeprocesspath": "/data/integration/ttsapi/tobeprocessed/{language}/",
+  "batchsize": "10800",
+  "apibatchratio": {
+    "google": 3,
+    "azure": 2,
+    "gtts": 1
+  },
+  "sourceinfo": {
+    "1tEdx_Talk_Indian_speaker": {
+      "count": 5,
+      "language": "english"
+    }
+  },
+  "snrcatalogue": {
+    "Telugu_test": {
+      "count": 5,
+      "format": "mp3",
+      "language": "telugu"
+    },
+    "Lets_talk_in_Telugu": {
+      "count": 5,
+      "format": "mp4",
+      "language": "telugu"
+    },
+    "Telugu_Audio_BIBLE": {
+      "count": 1,
+      "format": "mp4",
+      "language": "telugu"
+    },
+    "Telugu_Bible_Audio_mp3": {
+      "count": 1,
+      "format": "mp4",
+      "language": "telugu"
+    }
+  },
+  "sourcepathforsnr": "data/audiotospeech/raw/download/downloaded/{language}/audio/",
+  "errorlandingpathsnr": "data/audiotospeech/raw/download/downloaded/{language}/audio/error/",
+  "tobeprocessedpathsnr": "data/audiotospeech/raw/download/tobeprocessed/{language}/audio/",
+  "snrdonepath": "data/audiotospeech/raw/download/snrdonepath/{language}/audio/",
+  "sttsourcepath": "data/audiotospeech/raw/landing/{language}/audio/",
+  "sourcelandingpath": "data/audiotospeech/raw/landing/{language}/audio/",
+  "errorlandingpath": "data/audiotospeech/raw/landing/{language}/audio/error/",
+  "tobeprocessedpath": "data/audiotospeech/raw/tobeprocessed/{language}/audio/",
+  "rawprocessedpath": "data/audiotospeech/raw/processed/{language}/audio/",
+  "integrationprocessedpath": "data/audiotospeech/integration/processed/{language}/audio/",
+  "experimentoutput": "data/experiments/output/",
+  "metafileextension": ".csv",
+  "utteranceschunkslist": {
+    "utteranceschunkslist": []
+  },
+  "utteranceschunkpath": "data/experiments/input/",
+  "utterancesconcurrentbatchcount": 12,
+  "downloadcatalogconfig": {
+    "audioformat": {
+      "mahatmagandhi": "mp3",
+      "yourquote": "mp4",
+      "testdag": "mp3"
+    },
+    "source": [
+      "mahatmagandhi",
+      "testdag"
+    ]
+  },
+  "archiveutterancespath": "data/experiments/archive/",
+  "sttconfigpath": "data/audiotospeech/config/speechtotext/config.yaml",
+  "audiofilelist": {
+    "Telugu_test": [],
+    "Lets_talk_in_Telugu": [],
+    "Telugu_Audio_BIBLE": [],
+    "Telugu_Bible_Audio_mp3": []
+  },
+  "audioidsforstt": {
+    "1tEdx_Talk_Indian_speaker": []
+  },
+  "apivoice": {
+    "google": [
+      "voice1",
+      "voice2",
+      "voice3"
+    ],
+    "azure": [
+      "voice1",
+      "voice2"
+    ],
+    "gtts": [
+      "voice1"
+    ]
+  },
+  "validation_report_source_post-transcription": [
+    "CEC"
+  ],
+  "validation_report_source_pre-transcription": [
+    "CEC"
+  ],
+  "snr_resource_limits": {
     "request_memory": "200Mi",
     "request_cpu": "50m",
     "limit_memory": "500Mi",
     "limit_cpu": "100m"
   },
-  "stt_resource_limits" : {
+  "stt_resource_limits": {
     "request_memory": "200Mi",
     "request_cpu": "50m",
     "limit_memory": "500Mi",
     "limit_cpu": "100m"
   },
   "data_filter_config": {
-      "test_source1": {
-          "filter": {
-              "by_snr": {
-                  "lte": 75,
-                  "gte": 15
-              },
-              "by_duration": 2,
-              "with_randomness": "true"
-          },
-        "test_source2": {
-          "filter": {
-              "by_speaker": {
-                  "lte_per_speaker_duration": 60,
-                  "gte_per_speaker_duration": 0,
-                  "with_threshold" : 0
-              },
-              "by_duration": 2
-          }
-        }
+    "test_source1": {
+      "language": "hindi",
+      "filter": {
+        "by_snr": {
+          "lte": 75,
+          "gte": 15
+        },
+        "by_duration": 2,
+        "with_randomness": "true"
+      }
+    },
+    "test_source2": {
+      "language": "hindi",
+      "filter": {
+        "by_speaker": {
+          "lte_per_speaker_duration": 60,
+          "gte_per_speaker_duration": 0,
+          "with_threshold": 0
+        },
+        "by_duration": 2
       }
     }
+  }
 }
 

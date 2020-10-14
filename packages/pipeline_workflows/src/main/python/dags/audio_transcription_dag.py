@@ -19,12 +19,20 @@ env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
 resource_limits = json.loads(Variable.get("stt_resource_limits"))
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
+LANGUAGE_CONSTANT = "{language}"
 
 secret_file = secret.Secret(
     deploy_type='volume',
     deploy_target='/tmp/secrets/google',
     secret='gc-storage-rw-key',
     key='key.json')
+
+
+def interpolate_language_paths(language):
+    stt_source_path_set = stt_source_path.replace(LANGUAGE_CONSTANT, language)
+    source_path_for_snr_set = source_path_for_snr.replace(LANGUAGE_CONSTANT, language)
+    snr_done_path_set = snr_done_path.replace(LANGUAGE_CONSTANT, language)
+    return stt_source_path_set, source_path_for_snr_set, snr_done_path_set
 
 
 def create_dag(dag_id,
@@ -39,11 +47,16 @@ def create_dag(dag_id,
 
     with dag:
 
+        language = args.get('language')
+        print(args)
+        print(f"Language for source is {language}")
+        stt_source_path_set, source_path_for_snr_set, snr_done_path_set = interpolate_language_paths(language)
+
         fetch_audio_ids = PythonOperator(
             task_id=dag_id + "_fetch_audio_ids",
             python_callable=get_require_audio_id,
             op_kwargs={'source': dag_id,
-                       'stt_source_path': stt_source_path, "batch_count": batch_count},
+                       'stt_source_path': stt_source_path_set, "batch_count": batch_count},
             dag_number=dag_number)
 
         fetch_audio_ids
@@ -65,7 +78,7 @@ def create_dag(dag_id,
                 task_id=dag_id + "_data_stt_" + batch_audio_file_ids[0],
                 name='data-prep-stt',
                 cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "audio_transcription", "-rc",
-                      "data/audiotospeech/config/audio_processing/config.yaml",
+                      f"data/audiotospeech/config/audio_processing/config_{language}.yaml",
                       "-ai", ','.join(batch_audio_file_ids), "-as", dag_id, "-stt", stt],
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
@@ -85,6 +98,7 @@ for source in sourceinfo.keys():
     batch_count = source_info.get('count')
     parallelism = source_info.get('parallelism', batch_count)
     api = source_info.get('stt')
+    language = source_info.get('language').lower()
 
     dag_id = source
 
@@ -94,7 +108,9 @@ for source in sourceinfo.keys():
 
     args = {
         'parallelism': parallelism,
-        'stt': api
+        'stt': api,
+        'language': language
+
     }
 
     # schedule = '@daily'

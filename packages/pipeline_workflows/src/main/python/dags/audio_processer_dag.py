@@ -20,13 +20,20 @@ env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
 resource_limits = json.loads(Variable.get("snr_resource_limits"))
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
-
+LANGUAGE_CONSTANT = "{language}"
 
 secret_file = secret.Secret(
     deploy_type='volume',
     deploy_target='/tmp/secrets/google',
     secret='gc-storage-rw-key',
     key='key.json')
+
+
+def interpolate_language_paths(language):
+    error_landing_path_snr_set = error_landing_path_snr.replace(LANGUAGE_CONSTANT, language)
+    source_path_for_snr_set = source_path_for_snr.replace(LANGUAGE_CONSTANT, language)
+    tobe_processed_path_snr_set = tobe_processed_path_snr.replace(LANGUAGE_CONSTANT, language)
+    return error_landing_path_snr_set, source_path_for_snr_set, tobe_processed_path_snr_set
 
 
 def create_dag(dag_id,
@@ -42,21 +49,25 @@ def create_dag(dag_id,
     with dag:
 
         audio_format = args.get('audio_format')
+        language = args.get('language')
         print(args)
+        print(f"Language for source is {language}")
+        error_landing_path_snr_set, source_path_for_snr_set, tobe_processed_path_snr_set = interpolate_language_paths(
+            language)
 
         get_file_path_from_gcp_bucket = PythonOperator(
             task_id=dag_id + "_get_file_path",
             provide_context=True,
             xcom_push=True,
             python_callable=get_file_path_from_bucket,
-            op_kwargs={'source': dag_id, 'source_landing_path': source_path_for_snr,
-                       'error_landing_path': error_landing_path_snr,
-                       'tobe_processed_path': tobe_processed_path_snr, 'batch_count': batch_count,
+            op_kwargs={'source': dag_id, 'source_landing_path': source_path_for_snr_set,
+                       'error_landing_path': error_landing_path_snr_set,
+                       'tobe_processed_path': tobe_processed_path_snr_set, 'batch_count': batch_count,
                        'audio_format': audio_format},
             dag_number=dag_number)
 
 
-        get_file_path_from_gcp_bucket 
+        get_file_path_from_gcp_bucket
 
         parallelism = args.get("parallelism")
 
@@ -71,7 +82,8 @@ def create_dag(dag_id,
                 task_id='data-normalizer',
                 name='data-normalizer',
                 cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", bucket_name,
-                      "data/audiotospeech/config/datacataloguer-prep/config.yaml"],
+                      f"data/audiotospeech/config/datacataloguer-prep/config_{language}.yaml"],
+                # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
@@ -86,7 +98,7 @@ def create_dag(dag_id,
                 task_id=dag_id + "_data_snr_" + batch_file_path_list[0],
                 name='data-prep-snr',
                 cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "audio_processing", "-rc",
-                      "data/audiotospeech/config/audio_processing/config.yaml",
+                      f"data/audiotospeech/config/audio_processing/config_{language}.yaml",
                       "-fl", ','.join(batch_file_path_list), "-af", args.get('audio_format'), "-as", dag_id],
                 # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,
@@ -107,6 +119,7 @@ for source in snr_catalogue_source.keys():
     batch_count = source_info.get('count')
     parallelism = source_info.get('parallelism', batch_count)
     audio_format = source_info.get('format')
+    language = source_info.get('language').lower()
 
     dag_id = source
 
@@ -116,7 +129,8 @@ for source in snr_catalogue_source.keys():
 
     args = {
         'audio_format': audio_format,
-        'parallelism': parallelism
+        'parallelism': parallelism,
+        'language': language
     }
 
     # schedule = '@daily'

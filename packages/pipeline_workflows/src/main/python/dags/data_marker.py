@@ -38,11 +38,13 @@ def create_dag(data_marker_config, default_args):
 
         for source in data_marker_config.keys():
             filter_by_config = data_marker_config.get(source)
+            language = filter_by_config.get('language').lower()
+            print(f"Language for source is {language}")
             data_marker_task = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id=f'data-marker-{source}',
                 name='data-marker',
                 cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "data_marking", "-rc",
-                      "data/audiotospeech/config/audio_processing/config.yaml",
+                      f"data/audiotospeech/config/audio_processing/config_{language}.yaml",
                       "-as", source, "-fb", json.dumps(filter_by_config)],
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,

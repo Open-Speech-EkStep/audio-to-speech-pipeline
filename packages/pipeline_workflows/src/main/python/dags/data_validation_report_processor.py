@@ -14,6 +14,7 @@ pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', -1)
+LANGUAGE_CONSTANT = "{language}"
 
 
 def get_config_variables(stage):
@@ -25,25 +26,27 @@ def get_config_variables(stage):
     return variables
 
 
-def get_local_variables(bucket, source, stage):
+def get_local_variables(bucket, source, stage, language):
     global validation_report_source
     global bucket_name
     bucket_name = bucket
-    get_common_variables(stage)
+    get_common_variables(stage, language)
     validation_report_source = source
 
 
-def get_common_variables(stage):
+def get_common_variables(stage, language):
     global bucket_name
     global integration_processed_path
     global bucket_file_list
     global db_catalog_tbl
     global report_upload_path
     variables = get_config_variables(stage)
-    report_upload_path = variables["report_upload_path"]
-    integration_processed_path = variables["integration_processed_path"]
+    report_upload_path = variables["report_upload_path"].replace(LANGUAGE_CONSTANT, language)
+    integration_processed_path = variables["integration_processed_path"].replace(LANGUAGE_CONSTANT, language)
     db_catalog_tbl = variables["db_catalog_tbl"]
     bucket_file_list = '_bucket_file_list.csv'
+    print(f"report_upload_path is {report_upload_path}")
+    print(f"integration_processed_path is {integration_processed_path}")
 
 
 def get_variables(stage):
@@ -51,7 +54,8 @@ def get_variables(stage):
     global validation_report_source
     global bucket_name
     bucket_name = Variable.get("bucket")
-    get_common_variables(stage)
+    language = Variable.get("language").lower()
+    get_common_variables(stage, language)
     validation_report_source = Variable.get("validation_report_source_" + stage)
 
 
@@ -435,9 +439,9 @@ def check_dataframes(data_catalog_raw, data_bucket_raw):
         pass
 
 
-def report_generation_pipeline(stage, bucket, mode="cluster", source=[]):
+def report_generation_pipeline(stage, bucket, language='', mode="cluster", source=[]):
     if mode == "local":
-        get_local_variables(bucket, source, stage)
+        get_local_variables(bucket, source, stage, language.lower())
     else:
         get_variables(stage)
     source_list = ast.literal_eval(str(validation_report_source))
@@ -454,6 +458,6 @@ def report_generation_pipeline(stage, bucket, mode="cluster", source=[]):
 
 
 if __name__ == "__main__":
-    report_generation_pipeline("local", stage="post-transcription", bucket='ekstepspeechrecognition-dev',
-                               source=[
-                                   'iskcon'])
+    report_generation_pipeline(mode="local", stage="pre-transcription", bucket='ekstepspeechrecognition-dev',
+                               language='english',
+                               source=['iskcon'])
