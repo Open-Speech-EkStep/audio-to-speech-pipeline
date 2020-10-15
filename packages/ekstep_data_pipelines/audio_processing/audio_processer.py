@@ -48,6 +48,16 @@ class AudioProcessor(BaseProcessor):
         Logger.info(f'Processing audio ids {file_name_list}')
         for file_name in file_name_list:
 
+            is_file_exist = self.data_processor.check_file_exist_in_db(file_name)
+
+            if is_file_exist:
+                meta_data_file = file_name.replace(f'.{extension}',".csv")
+                remote_download_path,remote_download_path_of_metadata = self.get_full_path(source,file_name,meta_data_file)
+
+                self.move_file_to_done_folder(remote_download_path,remote_download_path_of_metadata,source,file_name,meta_data_file)
+
+                continue
+
             audio_id = self.data_processor.get_unique_id()
 
             Logger.info(f'Processing file {file_name} and audio_id {audio_id}')
@@ -72,9 +82,7 @@ class AudioProcessor(BaseProcessor):
         self.ensure_path(local_audio_download_path)
         Logger.info(f'Ensured {local_audio_download_path} exists')
 
-        remote_file_path = self.audio_processor_config.get(REMOTE_RAW_FILE)
-        remote_download_path = f'{remote_file_path}/{source}/{file_name}'
-        remote_download_path_of_metadata = f'{remote_file_path}/{source}/{meta_data_file}'
+        remote_download_path,remote_download_path_of_metadata = self.get_full_path(source,file_name,meta_data_file)
 
         Logger.info(
             f'Downloading audio file and metadat file from {remote_download_path},{remote_download_path_of_metadata} to {local_audio_download_path}')
@@ -116,6 +124,7 @@ class AudioProcessor(BaseProcessor):
             Logger.error(
                 f'Uploading chunked/snr cleaned files failed for {audio_id} not processing further.')
 
+
         self.upload_file(meta_data_file_path)
 
         self.move_file_to_done_folder(remote_download_path,remote_download_path_of_metadata,source,file_name,meta_data_file)
@@ -130,6 +139,13 @@ class AudioProcessor(BaseProcessor):
 
         self.fs_interface.move(audio_file_path,snr_done_path_audio_file_path)
         self.fs_interface.move(meta_data_file_path,snr_done_path_metadata_file_path)
+
+    def get_full_path(self,source,file_name,meta_data_file):
+        remote_file_path = self.audio_processor_config.get(REMOTE_RAW_FILE)
+        remote_download_path = f'{remote_file_path}/{source}/{file_name}'
+        remote_download_path_of_metadata = f'{remote_file_path}/{source}/{meta_data_file}'
+
+        return remote_download_path,remote_download_path_of_metadata
 
 
     def upload_and_move(self, master_metadata_file_path, source):

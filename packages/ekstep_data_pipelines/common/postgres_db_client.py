@@ -41,6 +41,7 @@ class PostgresClient:
     4. execute batch updates
     """
     GET_UNIQUE_ID = "SELECT nextval('audio_id_seq');"
+    IS_EXIST = "select exists(select 1 from media_metadata_staging where raw_file_name= :file_name);"
 
     @staticmethod
     def get_instance(intialization_dict):
@@ -121,4 +122,6 @@ class PostgresClient:
     def get_unique_id(self):
         return self.connection.execute(self.GET_UNIQUE_ID).fetchall()[0][0]
 
+    def check_file_exist_in_db(self,file_name):
+        return self.connection.execute(text(self.IS_EXIST),file_name=file_name).fetchall()[0][0]
 
