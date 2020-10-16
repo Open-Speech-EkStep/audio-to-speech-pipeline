@@ -155,7 +155,7 @@ class AudioTranscription(BaseProcessor):
             self.generate_transcription_and_sanitize(audio_id, local_clean_path, local_rejected_path, file_name, language,
                                                      transcription_client, utterance_metadata)
 
-        return local_clean_path, local_rejected_path
+        return local_clean_folder, local_rejected_path
 
     def generate_transcription_and_sanitize(self, audio_id, local_clean_path, local_rejected_path, remote_file_path, language,
                                             transcription_client, utterance_metadata):
