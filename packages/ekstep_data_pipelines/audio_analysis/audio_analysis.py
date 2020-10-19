@@ -17,8 +17,8 @@ class AudioAnalysis(BaseProcessor):
     DEFAULT_DOWNLOAD_PATH = '/tmp/audio_speaker_cluster'
 
     @staticmethod
-    def get_instance(data_processor, audio_commons, **kwargs):
-        return AudioAnalysis(data_processor, audio_commons, **kwargs)
+    def get_instance(data_processor, **kwargs):
+        return AudioAnalysis(data_processor, **kwargs)
 
     def __init__(self, data_processor, **kwargs):
         self.data_processor = data_processor

@@ -259,8 +259,7 @@ def perform_action(arguments, **kwargs):
         data_processor = object_dict.get('data_processor')
         audio_commons = object_dict.get('audio_commons')
 
-        curr_processor = AudioAnalysis.get_instance(data_processor, audio_commons,
-                                                 **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
+        curr_processor = AudioAnalysis.get_instance(data_processor, **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
         LOGGER.info(f'Starting processing for {current_action}')
 
     curr_processor.process(**kwargs)
