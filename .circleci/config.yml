@@ -157,7 +157,6 @@ jobs:
             python -m unittest discover -s ekstep_pipelines_tests/common/audio_commons/ -p "*_tests.py" -v
             python -m unittest discover -s ekstep_pipelines_tests/common/audio_commons/transcription_clients_tests -p "*_tests.py" -v
             python -m unittest discover -s ekstep_pipelines_tests/audio_language_identification -p "*tests.py" -v
-            python -m unittest discover -s ekstep_pipelines_tests/audio_analysis/ -p "*tests.py" -v
             # coverage report --fail-under 20  data_marker/*.py
             # coverage html  # open htmlcov/index.html in a browser
       - store_artifacts:
