@@ -6,9 +6,9 @@ from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
-from helper_dag import data_marking_start
+from helper_dag import audio_analysis_start
 
-data_marker_config = json.loads(Variable.get("data_filter_config"))
+audio_analysis_config = json.loads(Variable.get("audio_analysis_config"))
 bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
@@ -22,30 +22,30 @@ secret_file = secret.Secret(
 
 
 def create_dag(data_marker_config, default_args):
-    dag = DAG(dag_id='data_marker_pipeline',
+    dag = DAG(dag_id='audio-analysis-pipeline',
               schedule_interval=datetime.timedelta(days=1),
               default_args=default_args,
               start_date=YESTERDAY)
 
     with dag:
         before_start = PythonOperator(
-            task_id="data_marking_start",
-            python_callable=data_marking_start,
+            task_id="audio_analysis_start",
+            python_callable=audio_analysis_start,
             op_kwargs={},
         )
 
         before_start
 
-        for source in data_marker_config.keys():
-            filter_by_config = data_marker_config.get(source)
-            language = filter_by_config.get('language').lower()
+        for source in audio_analysis_config.keys():
+            source_config = audio_analysis_config.get(source)
+            language = source_config.get('language').lower()
             print(f"Language for source is {language}")
             data_marker_task = kubernetes_pod_operator.KubernetesPodOperator(
-                task_id=f'data-marker-{source}',
-                name='data-marker',
-                cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "data_marking", "-rc",
+                task_id=f'data-audio-analysis-{source}',
+                name='data-audio-analysis',
+                cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "audio_analysis", "-rc",
                       f"data/audiotospeech/config/audio_processing/config_{language}.yaml",
-                      "-as", source],
+                          "-as", source, "-ac", json.dumps(source_config)],
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
@@ -58,7 +58,7 @@ def create_dag(data_marker_config, default_args):
 
 
 dag_args = {
-    'email': ['gaurav.gupta@thoughtworks.com'],
+    'email': ['srajat@thoughtworks.com'],
 }
 
-globals()['data_marker_pipeline'] = create_dag(data_marker_config, dag_args)
+globals()['audio_analysis_start'] = create_dag(audio_analysis_config, dag_args)

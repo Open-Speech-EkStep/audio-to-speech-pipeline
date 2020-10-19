@@ -328,3 +328,7 @@ if __name__ == "__main__":
 
 def data_marking_start():
     return 'started..'
+
+
+def audio_analysis_start():
+    return 'audio analysis started..'

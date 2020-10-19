@@ -132,6 +132,11 @@
         "by_duration": 2
       }
     }
+  },
+  "audio_analysis_config" : {
+    "testamulya2" : {
+      "language" : "hindi"
+    }
   }
 }
 

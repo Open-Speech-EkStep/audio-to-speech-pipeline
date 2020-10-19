@@ -4,6 +4,8 @@ import uuid
 import argparse
 from google.cloud import storage
 from urllib.parse import urlparse
+
+from audio_analysis.audio_analysis import AudioAnalysis
 from data_marker.data_marker import DataMarker
 from audio_processing.audio_processer import AudioProcessor
 from audio_transcription.audio_transcription import AudioTranscription
@@ -17,6 +19,7 @@ class ACTIONS:
     DATA_MARKING = 'data_marking'
     AUDIO_PROCESSING = 'audio_processing'
     AUDIO_TRANSCRIPTION = 'audio_transcription'
+    AUDIO_ANALYSIS = 'audio_analysis'
 
 class FILE_SYSTEMS:
     GOOGLE = 'google'
@@ -130,6 +133,16 @@ def validate_data_filter_config(arguments):
     return {'filter': json.loads(arguments.filter_by), 'source': arguments.audio_source}
 
 
+def validate_audio_analysis_config(arguments):
+    LOGGER.info('validating input for audio analysis')
+
+    if arguments.audio_source is None:
+        raise argparse.ArgumentTypeError(
+            f'Source is missing'
+        )
+
+    return {'source': arguments.audio_source}
+
 def validate_audio_processing_input(arguments):
     LOGGER.info('validating input for audio processing')
 
@@ -235,8 +248,20 @@ def perform_action(arguments, **kwargs):
 
         curr_processor = AudioTranscription.get_instance(data_processor, gcs_instance, audio_commons, catalogue_dao,
                                                          **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
+    elif current_action == ACTIONS.AUDIO_ANALYSIS:
+        kwargs.update(validate_audio_analysis_config(arguments))
+        LOGGER.info('Intializing audio analysis processor with given config')
 
-    LOGGER.info(f'Starting processing for {current_action}')
+        config_params = {'config_file_path': kwargs.get('config_file_path')}
+
+        object_dict = get_periperhals(config_params)
+
+        data_processor = object_dict.get('data_processor')
+        audio_commons = object_dict.get('audio_commons')
+
+        curr_processor = AudioAnalysis.get_instance(data_processor, audio_commons,
+                                                 **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
+        LOGGER.info(f'Starting processing for {current_action}')
 
     curr_processor.process(**kwargs)
     LOGGER.info(f'Ending processing for {current_action}')
