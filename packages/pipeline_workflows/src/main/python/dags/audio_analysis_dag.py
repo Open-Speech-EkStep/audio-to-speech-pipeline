@@ -45,7 +45,7 @@ def create_dag(data_marker_config, default_args):
                 name='data-audio-analysis',
                 cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "audio_analysis", "-rc",
                       f"data/audiotospeech/config/audio_processing/config_{language}.yaml",
-                          "-as", source, "-ac", json.dumps(source_config)],
+                          "-as", source],
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],

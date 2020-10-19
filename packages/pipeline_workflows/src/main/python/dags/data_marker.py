@@ -45,7 +45,7 @@ def create_dag(data_marker_config, default_args):
                 name='data-marker',
                 cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "data_marking", "-rc",
                       f"data/audiotospeech/config/audio_processing/config_{language}.yaml",
-                      "-as", source],
+                      "-as", source, "-fb", json.dumps(filter_by_config)],
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
