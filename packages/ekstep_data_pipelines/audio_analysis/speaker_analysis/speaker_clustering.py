@@ -1,5 +1,5 @@
-from audio_speaker_clustering.create_file_mappings import Map
-from audio_speaker_clustering.clustering import Clustering
+from audio_analysis.speaker_analysis.create_file_mappings import Map
+from audio_analysis.speaker_analysis.clustering import Clustering
 import numpy as np
 
 

@@ -143,10 +143,37 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(called_with_args, args[1])
 
     @mock.patch('common.postgres_db_client.PostgresClient')
-    def test__should_update_utterance_staged_for_transcription(self, mock_postgres_client):
-        mock_postgres_client.execute_batch.return_value = 2
+    def test__should_update_utterance_staged_for_transcription_empty_list(self, mock_postgres_client):
+        mock_postgres_client.execute_update.return_value = 2
         utterances = []
         catalogueDao = CatalogueDao(mock_postgres_client)
         catalogueDao.update_utterances_staged_for_transcription(utterances, 'test_source')
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(None, args)
+
+    @mock.patch('common.postgres_db_client.PostgresClient')
+    def test__should_update_utterance_speaker(self, mock_postgres_client):
+        mock_postgres_client.execute_update.return_value = 2
+        utterances = [
+            'file_1.wav',
+            'file_2.wav'
+        ]
+        speaker_id = 10
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        catalogueDao.update_utterance_speaker(utterances, speaker_id)
+        called_with_query = 'update media_speaker_mapping set speaker_id=:speaker_id where clipped_utterance_file_name in (\'file_1.wav\',\'file_2.wav\')'
+        called_with_args = {"speaker_id": speaker_id}
+        args = mock_postgres_client.execute_update.call_args
+        self.assertEqual(called_with_query, args[0][0])
+        self.assertEqual(called_with_args, args[0][1])
+
+    @mock.patch('common.postgres_db_client.PostgresClient')
+    def test__should_insert_speakers(self, mock_postgres_client):
+        mock_postgres_client.execute_update.return_value = 2
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        catalogueDao.insert_speaker('test_source', 'test_speaker')
+        called_with_query = 'insert into speaker (source, speaker_name) values (:source, :speaker_name)'
+        called_with_args = {'source': 'test_source', 'speaker_name': 'test_speaker'}
+        args = mock_postgres_client.execute_update.call_args
+        self.assertEqual(called_with_query, args[0][0])
+        self.assertEqual(called_with_args, args[1])

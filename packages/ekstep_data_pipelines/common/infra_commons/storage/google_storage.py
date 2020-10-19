@@ -77,10 +77,10 @@ class GoogleStorage(BaseStorageInterface):
     def download_to_location(self, source_path: str, destination_path: str):
         return self.download_file_to_location(source_path, destination_path)
 
-    def download_folder_to_location(self, source_path: str, destination_path: str):
+    def download_folder_to_location(self, source_path: str, destination_path: str, max_workers=5):
         source_files = self.list_files(source_path)
 
-        curr_executor = ThreadPoolExecutor(max_workers=5)
+        curr_executor = ThreadPoolExecutor(max_workers)
 
         for remote_file in source_files:
             curr_executor.submit(self.download_to_location, f'{source_path}/{remote_file}',
