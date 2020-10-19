@@ -18,7 +18,7 @@ parameters:
     default: true
   data_tagger:
     type: boolean
-    default: false
+    default: true
   data_prep_cataloguer:
     type: boolean
     default: false
