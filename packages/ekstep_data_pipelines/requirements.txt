@@ -99,8 +99,8 @@ proglog==0.1.9
 prompt-toolkit==3.0.5
 protobuf==3.12.4
 psutil==5.7.0
-#psycopg2==2.8.5
-#psycopg2-binary==2.8.5
+psycopg2==2.8.5
+psycopg2-binary==2.8.5
 ptyprocess==0.6.0
 py4j==0.10.9
 pyasn1==0.4.8
