@@ -33,6 +33,8 @@ class AudioProcessor(BaseProcessor):
 
 
     def process(self, **kwargs):
+        # Test comments-- remove
+        Logger.info('SNR UTILITY')
         """
         Function for breaking an audio file into smaller chunks and then
         accepting/rejecting them basis the SNR ratio.
