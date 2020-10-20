@@ -96,7 +96,7 @@ jobs:
       - run:
           name: Setup Testing Environment
           command: |
-            pyenv global 3.7.0
+            pyenv global 3.8.6
             sudo apt-get update
             sudo apt-get install -y ffmpeg
             sudo apt-get install -y sox
@@ -123,9 +123,7 @@ jobs:
       package_name:
         type: string
 
-      # executor: node
-    machine:
-      image: ubuntu-1604:201903-01
+    executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
 
     steps:
