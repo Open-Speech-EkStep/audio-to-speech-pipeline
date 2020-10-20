@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.8.6
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y ffmpeg
