@@ -32,7 +32,7 @@ parameters:
 executors:
   node:
     docker:
-      - image: circleci/python:3.7-node-browsers-legacy
+      - image: circleci/python:3.8.6
 
 jobs:
   trigger-workflows:
