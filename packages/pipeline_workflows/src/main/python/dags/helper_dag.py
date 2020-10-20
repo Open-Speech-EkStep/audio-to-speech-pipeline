@@ -4,7 +4,8 @@ import re
 import os
 from sqlalchemy import create_engine
 import yaml
-
+from operator import itemgetter
+import collections
 from gcs_utils import list_blobs_in_a_path, copy_blob, check_blob, \
     move_blob, upload_blob, read_blob, move_directory, download_blob
 from airflow.models import Variable
@@ -86,8 +87,8 @@ def condition_file_name(file_name):
 def get_file_path_from_bucket(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count,
                                 audio_format,**context):
     file_path_dict = json.loads(Variable.get("audiofilelist"))
-    file_name_list = []
-    
+    file_name_dict = {}
+
     get_variables()
     delimiter = "/"
     print("****The source is *****" + source)
@@ -106,6 +107,8 @@ def get_file_path_from_bucket(source, source_landing_path, error_landing_path, t
 
     for blob in all_blobs:
         print("*********The file name is ********* " + blob.name)
+        print("*********The file size is {} bytes *********".format(blob.size))
+        file_size = blob.size
         file_name = get_file_name(blob.name, delimiter)
 
         file_extension = get_file_extension(file_name)
@@ -116,15 +119,18 @@ def get_file_path_from_bucket(source, source_landing_path, error_landing_path, t
             if batch_count > 0:
                 metadata_file_name = get_metadata_file_name(file_name)
                 print("File is {}".format(file_name))
+                print("Meta File is {}".format(metadata_file_name))
 
                 if (check_if_meta_data_present(source_landing_path + source, metadata_file_name)):
-
-                    file_name_list.append(file_name)
+                    file_name_dict[file_name] = file_size
 
             else:
                 break
             batch_count -= 1
-    file_path_dict[source] = file_name_list
+
+    file_name_dict_sorted = collections.OrderedDict(sorted(file_name_dict.items(), key=itemgetter(1)))
+    print(f"The sorted audio_ids as per their size {file_name_dict_sorted}")
+    file_path_dict[source] = list(file_name_dict_sorted.keys())
     file_path_dict = mydict(file_path_dict)
     Variable.set("audiofilelist", file_path_dict)
 
