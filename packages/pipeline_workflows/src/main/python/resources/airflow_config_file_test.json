@@ -1,5 +1,6 @@
 {
   "env": "test",
+  "language": "hindi",
   "table": "texttospeechpipeline",
   "bucket": "ekstepspeechrecognition-dev",
   "inputbasepath": "/data/integration/curation/processed/{language}/",
