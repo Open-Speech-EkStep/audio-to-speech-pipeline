@@ -14,9 +14,9 @@ def encoder(source_dir, source_dir_pattern, embed_file_name):
     file_paths = audio_paths(source_dir, source_dir_pattern)
     print('Number of files: {}'.format(len(file_paths)))
 
-    processed_wavs = [preprocess_wav(i) for i in tqdm(file_paths)]
+    processed_wavs = [preprocess_wav(i) for i in file_paths]
     vocoder = VoiceEncoder()
-    encodings = [vocoder.embed_utterance(i) for i in tqdm(processed_wavs)]
+    encodings = [vocoder.embed_utterance(i) for i in processed_wavs]
     print('Creating embeddings')
     encodings = np.array(encodings)
     np.savez_compressed(embed_file_name, embeds=encodings, file_paths=file_paths)

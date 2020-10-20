@@ -89,7 +89,7 @@ numba==0.48.0
 numpy==1.18.4
 pandas==1.1.1
 parso==0.7.1
-#pendulum==1.4.4
+pendulum==1.4.4
 pexpect==4.8.0
 pg8000==1.13.2
 pickleshare==0.7.5
@@ -150,7 +150,7 @@ typing-extensions==3.7.4.2
 tzlocal==1.5.1
 unicodecsv==0.14.1
 urllib3==1.25.9
-#uuid==1.30
+uuid==1.30
 virtualenv==20.0.21
 wcwidth==0.2.5
 webrtcvad==2.0.10
@@ -170,7 +170,3 @@ sounddevice
 seaborn~=0.10.1
 resemblyzer~=0.1.1.dev0
 hdbscan
-
-#pandas~=1.1.1
-#numba~=0.51.0
-#tqdm~=4.48.2
