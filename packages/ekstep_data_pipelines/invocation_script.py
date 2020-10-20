@@ -217,8 +217,9 @@ def perform_action(arguments, **kwargs):
         data_processor = object_dict.get('data_processor')
         gcs_instance = object_dict.get('gsc_instance')
         audio_commons = object_dict.get('audio_commons')
+        catalogue_dao = object_dict.get('catalogue_dao')
 
-        curr_processor = AudioProcessor.get_instance(data_processor, gcs_instance, audio_commons,
+        curr_processor = AudioProcessor.get_instance(data_processor, gcs_instance, audio_commons,catalogue_dao,
                                                      **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
 
     elif current_action == ACTIONS.AUDIO_TRANSCRIPTION:

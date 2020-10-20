@@ -2,6 +2,8 @@ import json
 import sys
 import unittest
 from unittest import mock
+from unittest.mock import Mock
+
 
 from common import PostgresClient
 from common.dao.catalogue_dao import CatalogueDao
@@ -150,3 +152,33 @@ class CatalogueTests(unittest.TestCase):
         catalogueDao.update_utterances_staged_for_transcription(utterances, 'test_source')
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(None, args)
+
+    @mock.patch('common.postgres_db_client.PostgresClient')
+    def test__should_return_a_unique_id(self, mock_postgres_client):
+
+        mock_postgres_client.execute_query.return_value= [[231]]
+        args = mock_postgres_client.execute_query.call_args_list
+
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        actul_value = catalogueDao.get_unique_id()
+
+        self.assertEqual(actul_value, 231)
+
+        self.assertEqual("SELECT nextval('audio_id_seq');", args[0][0][0])
+
+
+    @mock.patch('common.postgres_db_client.PostgresClient')
+    def test__should_check_in_db_file_present_or_not(self, mock_postgres_client):
+
+        mock_postgres_client.execute_query.return_value= [[True]]
+        args = mock_postgres_client.execute_query.call_args_list
+        calling_args = {'file_name': 'test_file', 'hash_code': 'dummy_hash_code'}
+
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        actul_value = catalogueDao.check_file_exist_in_db("test_file","dummy_hash_code")
+
+        self.assertEqual(actul_value, True)
+
+        self.assertEqual("select exists(select 1 from media_metadata_staging where raw_file_name= :file_name or media_hash_code = :hash_code);", args[0][0][0])
+
+        self.assertEqual(calling_args,args[0][1])

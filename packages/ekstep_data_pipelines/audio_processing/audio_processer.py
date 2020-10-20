@@ -1,12 +1,13 @@
 import os
 import glob
+
+from audio_processing.generate_hash import get_hash_code_of_audio_file
 from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG, SNR_CONFIG, REMOTE_PROCESSED_FILE_PATH,\
-    MASTER_META_DATA_FILE_PATH, SNR_DONE_FOLDER_PATH
+    MASTER_META_DATA_FILE_PATH, SNR_DONE_FOLDER_PATH ,DUPLICATE_AUDIO_FOLDER_PATH
 from common.utils import get_logger
 from common import BaseProcessor
 
 Logger = get_logger("Audio Processor")
-
 
 class AudioProcessor(BaseProcessor):
 
@@ -19,12 +20,13 @@ class AudioProcessor(BaseProcessor):
     DEFAULT_DOWNLOAD_PATH = '/tmp/audio_processing_raw'
 
     @staticmethod
-    def get_instance(data_processor, gcs_instance, audio_commons, **kwargs):
-        return AudioProcessor(data_processor, gcs_instance, audio_commons, **kwargs)
+    def get_instance(data_processor, gcs_instance, audio_commons,catalogue_dao, **kwargs):
+        return AudioProcessor(data_processor, gcs_instance, audio_commons,catalogue_dao, **kwargs)
 
-    def __init__(self, data_processor, gcs_instance, audio_commons, **kwargs):
+    def __init__(self, data_processor, gcs_instance, audio_commons,catalogue_dao, **kwargs):
         self.data_processor = data_processor
         self.gcs_instance = gcs_instance
+        self.catalogue_dao = catalogue_dao
         self.snr_processor = audio_commons.get('snr_util')
         self.chunking_processor = audio_commons.get('chunking_conversion')
         self.audio_processor_config = None
@@ -49,18 +51,7 @@ class AudioProcessor(BaseProcessor):
 
         Logger.info(f'Processing audio ids {file_name_list}')
         for file_name in file_name_list:
-
-            is_file_exist = self.data_processor.check_file_exist_in_db(file_name)
-
-            if is_file_exist:
-                meta_data_file = file_name.replace(f'.{extension}',".csv")
-                remote_download_path,remote_download_path_of_metadata = self.get_full_path(source,file_name,meta_data_file)
-
-                self.move_file_to_done_folder(remote_download_path,remote_download_path_of_metadata,source,file_name,meta_data_file)
-
-                continue
-
-            audio_id = self.data_processor.get_unique_id()
+            audio_id = self.catalogue_dao.get_unique_id()
 
             Logger.info(f'Processing file {file_name} and audio_id {audio_id}')
             self.process_audio_id(audio_id, source, extension,file_name)
@@ -92,7 +83,18 @@ class AudioProcessor(BaseProcessor):
         self.fs_interface.download_file_to_location(remote_download_path,f'{local_audio_download_path}/{file_name}')
         self.fs_interface.download_file_to_location(remote_download_path_of_metadata,f'{local_audio_download_path}/{meta_data_file}')
 
-        # self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path)
+        hash_code = get_hash_code_of_audio_file(f'{local_audio_download_path}/{file_name}')
+
+        is_file_exist = self.catalogue_dao.check_file_exist_in_db(file_name,hash_code)
+
+        if is_file_exist:
+
+            Logger.info("file is already exist in db moving to duplicate folder")
+            base_path_for_duplicate_audio = f'{self.audio_processor_config.get(DUPLICATE_AUDIO_FOLDER_PATH)}/{source}'
+
+            self.move_file_to_done_folder(remote_download_path,remote_download_path_of_metadata,base_path_for_duplicate_audio,file_name,meta_data_file)
+            return
+        
         meta_data_file_path = self._get_csv_in_path(local_audio_download_path)
 
         Logger.info(f'Conerting the file with audio_id {audio_id} to wav')
@@ -110,7 +112,7 @@ class AudioProcessor(BaseProcessor):
         Logger.info(
             f'Processing SNR ratios for the all the chunks for audio_id {audio_id}')
         self._process_snr(chunk_output_path, meta_data_file_path,
-                          local_audio_download_path, audio_id)
+                          local_audio_download_path, audio_id,hash_code)
 
         processed_remote_file_path = self.audio_processor_config.get(
             REMOTE_PROCESSED_FILE_PATH)
@@ -127,17 +129,19 @@ class AudioProcessor(BaseProcessor):
                 f'Uploading chunked/snr cleaned files failed for {audio_id} not processing further.')
 
 
-        self.upload_file(meta_data_file_path)
+        self.catalogue_dao.upload_file(meta_data_file_path)
 
-        self.move_file_to_done_folder(remote_download_path,remote_download_path_of_metadata,source,file_name,meta_data_file)
+        snr_done_base_path = f'{self.audio_processor_config.get(SNR_DONE_FOLDER_PATH)}/{source}'
 
-    def move_file_to_done_folder(self,audio_file_path,meta_data_file_path,source,file_name,meta_data_file):
-        snr_done_path = f'{self.audio_processor_config.get(SNR_DONE_FOLDER_PATH)}/{source}'
+        self.move_file_to_done_folder(remote_download_path,remote_download_path_of_metadata,snr_done_base_path,file_name,meta_data_file)
 
-        snr_done_path_audio_file_path = f'{snr_done_path}/{file_name}'
-        snr_done_path_metadata_file_path = f'{snr_done_path}/{meta_data_file}'
+    def move_file_to_done_folder(self,audio_file_path,meta_data_file_path,base_path_with_source,file_name,meta_data_file):
+        # snr_done_path = f'{self.audio_processor_config.get(SNR_DONE_FOLDER_PATH)}/{source}'
 
-        Logger.info(f"moving {audio_file_path},{meta_data_file_path} to snr done path {snr_done_path}")
+        snr_done_path_audio_file_path = f'{base_path_with_source}/{file_name}'
+        snr_done_path_metadata_file_path = f'{base_path_with_source}/{meta_data_file}'
+
+        Logger.info(f"moving {audio_file_path},{meta_data_file_path} to snr done path {base_path_with_source}")
 
         self.fs_interface.move(audio_file_path,snr_done_path_audio_file_path)
         self.fs_interface.move(meta_data_file_path,snr_done_path_metadata_file_path)
@@ -159,7 +163,7 @@ class AudioProcessor(BaseProcessor):
         self.fs_interface.download_file_to_location(
             master_metadata_file_path, local_metadata_downloaded_path)
 
-        self.upload_file_to_downloaded_source(local_metadata_downloaded_path)
+        self.catalogue_dao.upload_file_to_downloaded_source(local_metadata_downloaded_path)
 
         self.fs_interface.move(
             master_metadata_file_path, meta_data_done_path)
@@ -210,11 +214,11 @@ class AudioProcessor(BaseProcessor):
 
         return local_chunk_output_path
 
-    def _process_snr(self, input_file_path, meta_data_file_path, local_path, audio_id):
+    def _process_snr(self, input_file_path, meta_data_file_path, local_path, audio_id,hash_code):
         snr_config = self.audio_processor_config.get(SNR_CONFIG)
 
         self.snr_processor.fit_and_move(self._get_all_wav_in_path(
-            input_file_path), meta_data_file_path, snr_config.get('max_snr_threshold', 15), local_path, audio_id)
+            input_file_path), meta_data_file_path, snr_config.get('max_snr_threshold', 15), local_path, audio_id,hash_code)
 
     def _get_csv_in_path(self, path):
         all_csvs = glob.glob(f'{path}/*.csv')
@@ -226,29 +230,3 @@ class AudioProcessor(BaseProcessor):
 
     def _get_all_wav_in_path(self, path):
         return glob.glob(f'{path}/*.wav')
-
-    def upload_file(self, meta_data_path):
-        """
-        Uploading the meta data file from local to
-        """
-
-        db = self.data_processor.db
-
-        with open(meta_data_path, 'r') as f:
-            conn = db.raw_connection()
-            cursor = conn.cursor()
-            cmd = 'COPY media_metadata_staging(raw_file_name,duration,title,speaker_name,audio_id,cleaned_duration,num_of_speakers,language,has_other_audio_signature,type,source,experiment_use,utterances_files_list,source_url,speaker_gender,source_website,experiment_name,mother_tongue,age_group,recorded_state,recorded_district,recorded_place,recorded_date,purpose) FROM STDIN WITH (FORMAT CSV, HEADER)'
-            cursor.copy_expert(cmd, f)
-            conn.commit()
-
-    def upload_file_to_downloaded_source(self, file_path):
-
-        db_conn = self.data_processor.db
-
-        Logger.info("uploading data to source_metadata")
-        with open(file_path, 'r') as f:
-            conn = db_conn.raw_connection()
-            cursor = conn.cursor()
-            cmd = 'COPY source_metadata_downloaded(source,num_speaker,total_duration,num_of_audio) FROM STDIN WITH (FORMAT CSV, HEADER)'
-            cursor.copy_expert(cmd, f)
-            conn.commit()

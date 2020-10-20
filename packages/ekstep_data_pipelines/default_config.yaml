@@ -51,6 +51,8 @@ config:
     # path where the processed files need to be uploaded
     remote_processed_audio_file_path: ''
 
+    # path where Duplicate files need to be uploaded
+    duplicate_audio_file_path: ''
 
     chunking_conversion_configeration:
       aggressiveness: ''
