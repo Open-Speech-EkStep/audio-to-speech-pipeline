@@ -83,9 +83,7 @@ jobs:
       package_name:
         type: string
 
-    #    executor: node
-    machine:
-      image: ubuntu-1604:201903-01
+    executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
 
     steps:
