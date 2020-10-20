@@ -1,6 +1,6 @@
 import os
 
-from audio_analysis import analyse_speaker
+from audio_analysis.analyse_speaker import analyse_speakers
 from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE
 from common.utils import get_logger
 from common import BaseProcessor
@@ -41,8 +41,7 @@ class AudioAnalysis(BaseProcessor):
         Logger.info(f'Ensured {local_audio_download_path} exists')
         remote_download_path = self.get_full_path(source)
         self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path, 5)
-
-        analyse_speaker(embed_file_path, '*/clean/*.wav', local_audio_download_path, source)
+        analyse_speakers(embed_file_path, '*/clean/*.wav', local_audio_download_path, source)
 
     def get_full_path(self, source):
         remote_file_path = self.audio_processor_config.get(REMOTE_RAW_FILE)
