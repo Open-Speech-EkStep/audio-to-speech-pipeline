@@ -13,6 +13,7 @@ def audio_paths(directory, pattern):
 def encoder(source_dir, source_dir_pattern, embed_file_name):
     file_paths = audio_paths(source_dir, source_dir_pattern)
     print('Number of files: {}'.format(len(file_paths)))
+    print('file_paths type:' + type(file_paths[0]))
 
     processed_wavs = [preprocess_wav(i) for i in file_paths]
     vocoder = VoiceEncoder()
