@@ -98,7 +98,7 @@ class SNR:
 
         return file_snrs
 
-    def fit_and_move(self, input_file_list, metadata_file_name, threshold, output_dir_path, audio_id):
+    def fit_and_move(self, input_file_list, metadata_file_name, threshold, output_dir_path, audio_id,hash_code):
         LOGGER.info(f'Processing SNR for for the files {input_file_list}')
         processed_file_snr_dict = self.process_files_list(input_file_list)
 
@@ -117,6 +117,8 @@ class SNR:
             LOGGER.info(audio_file_name)
 
             metadata["audio_id"] = audio_id
+            metadata["media_hash_code"] = hash_code
+            
             if self.feat_language_identification:
                 language_confidence_score = audio_language_identification.audio_language_inference.infer_language(file_path)
             else:

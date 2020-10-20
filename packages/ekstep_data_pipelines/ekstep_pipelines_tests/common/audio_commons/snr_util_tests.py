@@ -13,7 +13,7 @@ sys.path.insert(0, '..')
 
 class SNRTests(unittest.TestCase):
 
-    expected_file_content = 'audio_id,cleaned_duration,utterances_files_list\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": null}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": null}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": null}]"\n'
+    expected_file_content = 'audio_id,cleaned_duration,utterances_files_list,media_hash_code\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": null}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": null}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": null}]",dummy_hash\n'
 
     def setUp(self):
         self.maxDiff = None
@@ -93,6 +93,7 @@ class SNRTests(unittest.TestCase):
         threshold = 15
         output_dir_path = '/tmp'
         audio_id = '17147714'
+        hash_code = "dummy_hash"
 
         self.setup_meta_data_file(meta_data_file_name)
 
@@ -101,7 +102,7 @@ class SNRTests(unittest.TestCase):
         mock_subprocess_check_output.side_effect = [b"24.0 mock_output mock_output",
                                                     b"25.0 mock_output mock_output",
                                                     b"280.0 mock_output mock_output"]
-        self.snr.fit_and_move(input_file_list, meta_data_file_name, threshold, output_dir_path, audio_id)
+        self.snr.fit_and_move(input_file_list, meta_data_file_name, threshold, output_dir_path, audio_id,hash_code)
 
 
         mock_calls = [
@@ -139,6 +140,7 @@ class SNRTests(unittest.TestCase):
         threshold = 15
         output_dir_path = '/tmp'
         audio_id = '17147714'
+        hash_code = "dummy_hash"
 
         self.setup_meta_data_file(meta_data_file_name)
 
@@ -149,7 +151,7 @@ class SNRTests(unittest.TestCase):
                                                     b"25.0 mock_output mock_output",
                                                     b"280.0 mock_output mock_output"]
         snr = SNR(True)
-        snr.fit_and_move(input_file_list, meta_data_file_name, threshold, output_dir_path, audio_id)
+        snr.fit_and_move(input_file_list, meta_data_file_name, threshold, output_dir_path, audio_id,hash_code)
 
 
         mock_calls = [
@@ -172,7 +174,7 @@ class SNRTests(unittest.TestCase):
         meta_data_contents = ''
         with open(meta_data_file_name) as f:
             meta_data_contents = f.read()
-        expected_file_content = 'audio_id,cleaned_duration,utterances_files_list\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}]"\n'
+        expected_file_content = 'audio_id,cleaned_duration,utterances_files_list,media_hash_code\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}]",dummy_hash\n'
         print("meta_data_contents:" + meta_data_contents)
         print("expected_file_content:" + self.expected_file_content)
         self.assertEqual(expected_file_content, meta_data_contents)
