@@ -5,6 +5,9 @@ from google.cloud import storage
 from . import BaseStorageInterface
 from concurrent.futures import ThreadPoolExecutor
 from .exceptions import FileNotFoundException, PathDoesNotExist
+from common.utils import get_logger
+
+Logger = get_logger("GoogleStorage")
 
 
 class GoogleStorage(BaseStorageInterface):
@@ -78,13 +81,17 @@ class GoogleStorage(BaseStorageInterface):
         return self.download_file_to_location(source_path, destination_path)
 
     def download_folder_to_location(self, source_path: str, destination_path: str, max_workers=5):
-        source_files = self.list_files(source_path)
-
+        bucket = self.get_bucket_from_path(source_path)
+        source = '/'.join(source_path.split('/')[1:])
+        Logger.info('bucket:' + bucket)
+        Logger.info('source:' + source)
+        source_files = self._list_blobs_in_a_path(bucket, source)
+        Logger.info('file:' + str(source_files))
         curr_executor = ThreadPoolExecutor(max_workers)
-
         for remote_file in source_files:
-            curr_executor.submit(self.download_to_location, f'{source_path}/{remote_file}',
-                                 f'{destination_path}/{remote_file}')
+            remote_file_path = remote_file.name
+            remote_file_name = remote_file_path.split('/')[-1]
+            curr_executor.submit(self.download_to_location, f'{remote_file_path}', f'{destination_path}/{remote_file_name}')
 
         curr_executor.shutdown(wait=True)
 

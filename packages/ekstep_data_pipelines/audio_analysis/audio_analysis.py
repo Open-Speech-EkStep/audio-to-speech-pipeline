@@ -1,12 +1,13 @@
+import multiprocessing
 import os
 
 from audio_analysis.analyse_speaker import analyse_speakers
-from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE
+from audio_processing.constants import CONFIG_NAME, REMOTE_PROCESSED_FILE_PATH
 from common.utils import get_logger
 from common import BaseProcessor, CatalogueDao
 
 Logger = get_logger("AudioSpeakerClusteringProcessor")
-
+ESTIMATED_CPU_SHARE = 0.2
 class AudioAnalysis(BaseProcessor):
 
     """
@@ -36,15 +37,16 @@ class AudioAnalysis(BaseProcessor):
         source = kwargs.get('source')
         embed_file_path = f'{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}_embed_file.npz'
         local_audio_download_path = f'{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}/'
-        Logger.info(f'Downloading source to {local_audio_download_path}')
         self.ensure_path(local_audio_download_path)
         Logger.info(f'Ensured {local_audio_download_path} exists')
         remote_download_path = self.get_full_path(source)
-        self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path, 5)
-        analyse_speakers(embed_file_path, '*/clean/*.wav', local_audio_download_path, source, self.catalogue_dao)
+        Logger.info(f'Downloading source to {local_audio_download_path} from {remote_download_path}')
+        Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
+        self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path, multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE)
+        analyse_speakers(embed_file_path, '*.wav', local_audio_download_path, source, self.catalogue_dao)
 
     def get_full_path(self, source):
-        remote_file_path = self.audio_processor_config.get(REMOTE_RAW_FILE)
+        remote_file_path = self.audio_processor_config.get(REMOTE_PROCESSED_FILE_PATH)
         remote_download_path = f'{remote_file_path}/{source}'
         return remote_download_path
 
