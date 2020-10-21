@@ -12,6 +12,7 @@ audio_analysis_config = json.loads(Variable.get("audio_analysis_config"))
 bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
+resource_limits = json.loads(Variable.get("audio_analysis_resource_limits"))
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
 secret_file = secret.Secret(
@@ -50,7 +51,9 @@ def create_dag(data_marker_config, default_args):
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
                 image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}_1.0.0',
-                image_pull_policy='Always')
+                image_pull_policy='Always',
+                resources=resource_limits
+            )
 
             before_start >> data_marker_task
 

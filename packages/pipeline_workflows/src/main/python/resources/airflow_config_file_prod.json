@@ -110,6 +110,12 @@
     "limit_memory": "500Mi",
     "limit_cpu": "100m"
   },
+  "audio_analysis_resource_limits": {
+    "request_memory": "250Mi",
+    "request_cpu": "200m",
+    "limit_memory": "900Mi",
+    "limit_cpu": "900m"
+  },
   "data_filter_config": {
     "test_source1": {
       "language": "hindi",
