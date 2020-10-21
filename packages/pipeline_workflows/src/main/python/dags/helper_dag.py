@@ -84,8 +84,18 @@ def condition_file_name(file_name):
     file_name_split = file_name_cleansed.split('.')
     return '_'.join(file_name_split[:-1]) + '.' + file_name_split[-1]
 
+
+def get_sorted_file_list_after_batch(file_name_dict, batch_count):
+    file_name_dict_sorted = collections.OrderedDict(sorted(file_name_dict.items(), key=itemgetter(1)))
+    print(f"The sorted audio_ids as per their size {file_name_dict_sorted}")
+    file_name_sorted_list = list(file_name_dict_sorted.keys())
+    if len(file_name_sorted_list) > batch_count:
+        return file_name_sorted_list[:batch_count]
+    return file_name_sorted_list
+
+
 def get_file_path_from_bucket(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count,
-                                audio_format,**context):
+                              audio_format, **context):
     file_path_dict = json.loads(Variable.get("audiofilelist"))
     file_name_dict = {}
 
@@ -116,21 +126,19 @@ def get_file_path_from_bucket(source, source_landing_path, error_landing_path, t
 
         if file_extension in [expected_file_extension, expected_file_extension.swapcase()]:
 
-            if batch_count > 0:
-                metadata_file_name = get_metadata_file_name(file_name)
-                print("File is {}".format(file_name))
-                print("Meta File is {}".format(metadata_file_name))
+            # if batch_count > 0:
+            metadata_file_name = get_metadata_file_name(file_name)
+            print("File is {}".format(file_name))
+            print("Meta File is {}".format(metadata_file_name))
 
-                if (check_if_meta_data_present(source_landing_path + source, metadata_file_name)):
-                    file_name_dict[file_name] = file_size
+            if (check_if_meta_data_present(source_landing_path + source, metadata_file_name)):
+                file_name_dict[file_name] = file_size
 
-            else:
-                break
-            batch_count -= 1
+            # else:
+            #     break
+            # batch_count -= 1
 
-    file_name_dict_sorted = collections.OrderedDict(sorted(file_name_dict.items(), key=itemgetter(1)))
-    print(f"The sorted audio_ids as per their size {file_name_dict_sorted}")
-    file_path_dict[source] = list(file_name_dict_sorted.keys())
+    file_path_dict[source] = get_sorted_file_list_after_batch(file_name_dict, batch_count)
     file_path_dict = mydict(file_path_dict)
     Variable.set("audiofilelist", file_path_dict)
 
