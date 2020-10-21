@@ -73,7 +73,7 @@ joblib==0.15.1
 json-merge-patch==0.2
 jsonschema==3.2.0
 lazy-object-proxy==1.4.3
-librosa==0.8.1
+librosa==0.8.0
 llvmlite==0.31.0
 lockfile==0.12.2
 Mako==1.1.3
