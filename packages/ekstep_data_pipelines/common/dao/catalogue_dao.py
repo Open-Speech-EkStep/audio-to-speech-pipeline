@@ -120,5 +120,5 @@ class CatalogueDao:
         utterance_names = list(map(lambda u: f'\'{u}\'', utterance_file_names))
         update_query = update_query + '(' + ','.join(utterance_names) + ')'
         param_dict = {'speaker_id': speaker_id}
-        self.postgres_client.execute_update(update_query, param_dict)
+        self.postgres_client.execute_update(update_query, **param_dict)
         return True
