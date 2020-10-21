@@ -7,7 +7,7 @@ from common.utils import get_logger
 from common import BaseProcessor, CatalogueDao
 
 Logger = get_logger("AudioSpeakerClusteringProcessor")
-ESTIMATED_CPU_SHARE = 0.2
+ESTIMATED_CPU_SHARE = 0.1
 class AudioAnalysis(BaseProcessor):
 
     """
