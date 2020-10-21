@@ -14,7 +14,7 @@ class AudioAnalysis(BaseProcessor):
     Class to identify speaker for each utterance in a source
     """
 
-    DEFAULT_DOWNLOAD_PATH = '/tmp/audio_speaker_cluster'
+    DEFAULT_DOWNLOAD_PATH = './audio_speaker_cluster'
 
     @staticmethod
     def get_instance(data_processor, **kwargs):
