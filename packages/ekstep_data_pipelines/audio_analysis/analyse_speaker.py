@@ -24,6 +24,8 @@ def analyse_speakers(embed_file_path, dir_pattern, local_audio_download_path, so
             speaker_inserted = catalogue_dao.insert_speaker(source, speaker)
         else:
             Logger.info("Speaker already exists:" + speaker)
+            speaker_inserted = True
+
         if speaker_inserted:
             Logger.info('updating utterances for speaker:' + speaker)
             Logger.info('utterances:' + str(speaker_to_file_name.get(speaker)))
