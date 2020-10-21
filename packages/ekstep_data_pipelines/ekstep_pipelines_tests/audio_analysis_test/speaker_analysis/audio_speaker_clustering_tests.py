@@ -22,7 +22,7 @@ class AudioSpeakerClusteringTests(unittest.TestCase):
         embed_file_name ='ekstep_pipelines_tests/resources/embed_map.npz'
         file_map_dict, noise_file_map_dict = create_speaker_clusters(
             embed_filename_map_path=embed_file_name,
-            source_name='mkb')
+            source_name='mkb', min_cluster_size=2, partial_set_size=200, min_samples=2)
         print(len(file_map_dict))
         print(file_map_dict)
-        self.assertEqual(5, len(file_map_dict))
+        self.assertEqual(2, len(file_map_dict))

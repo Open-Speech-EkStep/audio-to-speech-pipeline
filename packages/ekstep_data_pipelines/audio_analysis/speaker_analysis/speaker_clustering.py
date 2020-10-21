@@ -3,7 +3,7 @@ from audio_analysis.speaker_analysis.clustering import Clustering
 import numpy as np
 
 
-def create_speaker_clusters(embed_filename_map_path, source_name):
+def create_speaker_clusters(embed_filename_map_path, source_name, min_cluster_size=2, partial_set_size=11112, min_samples=2):
     # step:1 -> ENCODING AND SAVING : done by create_embeddings.py
 
     # step:2 -> CLUSTERING AND MAPPING FILES TO CLUSTERS
@@ -12,10 +12,10 @@ def create_speaker_clusters(embed_filename_map_path, source_name):
     file_paths = embed_speaker_map['file_paths']
 
     clustering_obj = Clustering()
-    mean_embeds, noise_embeds, all_cluster_embeds = clustering_obj.run_partial_set_clusterings(embeddings=embeddings,
-                                                                                               min_cluster_size=2,
-                                                                                               partial_set_size=11122,
-                                                                                               min_samples=5)
+    mean_embeds, noise_embeds, all_cluster_embeds = clustering_obj.run_partial_set_clusterings(embeddings,
+                                                                                               min_cluster_size,
+                                                                                               partial_set_size,
+                                                                                               min_samples)
     num_clusters = len(mean_embeds)
 
     print('Num clusters = {}'.format(num_clusters))
