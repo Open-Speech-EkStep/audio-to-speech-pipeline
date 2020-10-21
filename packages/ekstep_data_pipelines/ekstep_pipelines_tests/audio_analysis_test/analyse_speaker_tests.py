@@ -19,6 +19,7 @@ class AnalyseSpeakersTests(unittest.TestCase):
         speaker_to_file_name_map_mock.return_value = {}
         catalogue_dao.insert_speaker.return_value = True
         catalogue_dao.update_utterance_speaker.return_value = True
+        catalogue_dao.select_speaker.return_value = -1
         source_path = 'ekstep_pipelines_tests/resources/test_source/'
         embed_file_name = '/tmp/embed_map.npz'
         analyse_speakers(embed_file_name, '*/clean/*.wav', source_path, 'test_source', catalogue_dao, min_cluster_size=2, partial_set_size=11122, min_samples=2)
