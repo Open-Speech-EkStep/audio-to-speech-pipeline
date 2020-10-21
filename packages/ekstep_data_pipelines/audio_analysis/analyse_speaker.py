@@ -16,7 +16,7 @@ def analyse_speakers(embed_file_path, dir_pattern, local_audio_download_path, so
     encoder(local_audio_download_path, dir_pattern, embed_file_path)
     file_map_dict, noise_file_map_dict = create_speaker_clusters(embed_file_path, source)
     speaker_to_file_name = speaker_to_file_name_map(file_map_dict)
-    Logger.info('total speakers:' + len(speaker_to_file_name))
+    Logger.info('total speakers:' + str(len(speaker_to_file_name)))
     for speaker in speaker_to_file_name:
         speaker_inserted = catalogue_dao.insert_speaker(source, speaker)
         if speaker_inserted:
