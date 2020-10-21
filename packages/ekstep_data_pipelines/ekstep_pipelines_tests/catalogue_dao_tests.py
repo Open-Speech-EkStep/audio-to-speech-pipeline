@@ -195,7 +195,7 @@ class CatalogueTests(unittest.TestCase):
         called_with_args = {"speaker_id": speaker_id}
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(called_with_query, args[0][0])
-        self.assertEqual(called_with_args, args[0][1])
+        self.assertEqual(called_with_args, args[1])
 
     @mock.patch('common.postgres_db_client.PostgresClient')
     def test__should_insert_speakers(self, mock_postgres_client):
