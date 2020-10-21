@@ -13,7 +13,7 @@ Logger = get_logger("analyse_speakers")
 
 
 def analyse_speakers(embed_file_path, dir_pattern, local_audio_download_path, source, catalogue_dao,
-                     min_cluster_size=10, partial_set_size=11122, min_samples=2):
+                     min_cluster_size=5, partial_set_size=11122, min_samples=2):
     encoder(local_audio_download_path, dir_pattern, embed_file_path)
     file_map_dict, noise_file_map_dict = create_speaker_clusters(embed_file_path, source, min_cluster_size, partial_set_size, min_samples)
     speaker_to_file_name = speaker_to_file_name_map(file_map_dict)
