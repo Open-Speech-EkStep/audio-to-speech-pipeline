@@ -107,6 +107,7 @@ class CatalogueDao:
             cursor.copy_expert(cmd, f)
             conn.commit()
 
+
     def insert_speaker(self, source, speaker_name):
         param_dict = {'speaker_name': speaker_name, 'source': source}
         insert_query = "insert into speaker (source, speaker_name) values (:source, :speaker_name)"
@@ -122,3 +123,9 @@ class CatalogueDao:
         param_dict = {'speaker_name': speaker_name}
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
+
+    def select_speaker(self, speaker_name, source):
+        param_dict = {'speaker_name': speaker_name, 'source': source}
+        sql = 'select speaker_id from speaker where speaker_name=:speaker_name and source=:source'
+        result = self.postgres_client.execute_query(sql, **param_dict)
+        return result[0][0] if len(result) > 0 else -1

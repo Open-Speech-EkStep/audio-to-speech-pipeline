@@ -18,7 +18,11 @@ def analyse_speakers(embed_file_path, dir_pattern, local_audio_download_path, so
     speaker_to_file_name = speaker_to_file_name_map(file_map_dict)
     Logger.info('total speakers:' + str(len(speaker_to_file_name)))
     for speaker in speaker_to_file_name:
-        speaker_inserted = catalogue_dao.insert_speaker(source, speaker)
+        speaker_id = catalogue_dao.select_speaker(speaker, source)
+        if speaker_id == -1:
+            speaker_inserted = catalogue_dao.insert_speaker(source, speaker)
+        else:
+            Logger.info("Speaker already exists:" + speaker)
         if speaker_inserted:
             Logger.info('updating utterances for speaker:' + speaker)
             Logger.info('utterances:' + str(speaker_to_file_name.get(speaker)))
