@@ -25,7 +25,7 @@ class AnalyseSpeakersTests(unittest.TestCase):
         analyse_speakers(embed_file_name, '*/clean/*.wav', source_path, 'test_source', catalogue_dao, min_cluster_size=2, partial_set_size=11122, min_samples=2)
         insert_args = catalogue_dao.insert_speaker.call_args
         update_args = catalogue_dao.update_utterance_speaker.call_args
-        self.assertEqual('test_source_sp_4', insert_args[0][1])
+        self.assertEqual('test_source_sp_1', insert_args[0][1])
         self.assertEqual('test_source', insert_args[0][0])
         self.assertEqual(3, len(update_args[0][0]))
-        self.assertEqual('test_source_sp_4', update_args[0][1])
+        self.assertEqual('test_source_sp_1', update_args[0][1])
