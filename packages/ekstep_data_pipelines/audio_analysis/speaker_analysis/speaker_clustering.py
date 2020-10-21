@@ -15,7 +15,7 @@ def create_speaker_clusters(embed_filename_map_path, source_name):
     mean_embeds, noise_embeds, all_cluster_embeds = clustering_obj.run_partial_set_clusterings(embeddings=embeddings,
                                                                                                min_cluster_size=2,
                                                                                                partial_set_size=11122,
-                                                                                               min_samples=1)
+                                                                                               min_samples=5)
     num_clusters = len(mean_embeds)
 
     print('Num clusters = {}'.format(num_clusters))
