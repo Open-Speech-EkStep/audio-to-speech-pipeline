@@ -22,7 +22,7 @@ secret_file = secret.Secret(
     key='key.json')
 
 
-def create_dag(data_marker_config, default_args):
+def create_dag(default_args):
     dag = DAG(dag_id='audio-analysis-pipeline',
               schedule_interval=datetime.timedelta(days=1),
               default_args=default_args,
@@ -64,4 +64,4 @@ dag_args = {
     'email': ['srajat@thoughtworks.com'],
 }
 
-globals()['audio_analysis_start'] = create_dag(audio_analysis_config, dag_args)
+globals()['audio_analysis_start'] = create_dag(dag_args)

@@ -2,7 +2,7 @@
   "env": "test",
   "language": "hindi",
   "table": "texttospeechpipeline",
-  "bucket": "ekstepspeechrecognition-dev",
+  "bucket": "ekstepspeechrecognition-test",
   "inputbasepath": "/data/integration/curation/processed/{language}/",
   "inputtobeprocesspath": "/data/integration/ttsapi/tobeprocessed/{language}/",
   "batchsize": "10800",
