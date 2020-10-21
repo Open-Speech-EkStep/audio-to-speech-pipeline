@@ -21,7 +21,7 @@ class AnalyseSpeakersTests(unittest.TestCase):
         catalogue_dao.update_utterance_speaker.return_value = True
         source_path = 'ekstep_pipelines_tests/resources/test_source/'
         embed_file_name = '/tmp/embed_map.npz'
-        analyse_speakers(embed_file_name, '*/clean/*.wav', source_path, 'test_source', catalogue_dao)
+        analyse_speakers(embed_file_name, '*/clean/*.wav', source_path, 'test_source', catalogue_dao, min_cluster_size=2, partial_set_size=11122, min_samples=2)
         insert_args = catalogue_dao.insert_speaker.call_args
         update_args = catalogue_dao.update_utterance_speaker.call_args
         self.assertEqual('test_source_sp_4', insert_args[0][1])
