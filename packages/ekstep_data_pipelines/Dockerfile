@@ -5,8 +5,7 @@ RUN apt-get install -y ffmpeg
 RUN apt-get install -y sox
 RUN apt-get install -y gcc-multilib g++-multilib
 RUN apt-get install -y libpq-dev
-RUN apt-get install -y libsndfile-dev
-
+RUN apt-get install -y libsndfile1
 
 RUN mkdir /opt/ekstep_data_pipelines/
 WORKDIR /opt/ekstep_data_pipelines/
