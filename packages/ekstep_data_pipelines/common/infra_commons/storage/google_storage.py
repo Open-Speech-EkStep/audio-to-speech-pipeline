@@ -6,6 +6,7 @@ from . import BaseStorageInterface
 from concurrent.futures import ThreadPoolExecutor
 from .exceptions import FileNotFoundException, PathDoesNotExist
 from common.utils import get_logger
+from tqdm import tqdm
 
 Logger = get_logger("GoogleStorage")
 
@@ -88,10 +89,15 @@ class GoogleStorage(BaseStorageInterface):
         source_files = self._list_blobs_in_a_path(bucket, source)
         Logger.info('file:' + str(source_files))
         curr_executor = ThreadPoolExecutor(max_workers)
-        for remote_file in source_files:
+
+        for remote_file in tqdm(source_files):
             remote_file_path = remote_file.name
             remote_file_name = remote_file_path.split('/')[-1]
-            curr_executor.submit(self.download_to_location, f'{remote_file_path}', f'{destination_path}/{remote_file_name}')
+
+            if remote_file_name == '' or remote_file.size <= 0:
+                continue
+
+            curr_executor.submit(self.download_to_location, f'{bucket}/{remote_file_path}', f'{destination_path}/{remote_file_name}')
 
         curr_executor.shutdown(wait=True)
 
