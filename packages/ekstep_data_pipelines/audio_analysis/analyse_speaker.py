@@ -21,4 +21,4 @@ def analyse_speakers(embed_file_path, dir_pattern, local_audio_download_path, so
         speaker_inserted = catalogue_dao.insert_speaker(source, speaker)
         if speaker_inserted:
             catalogue_dao.update_utterance_speaker(speaker_to_file_name.get(speaker), speaker)
-            Logger.info('updating utterances for speaker:'+ speaker)
+            Logger.info('updating utterances for speaker:' + speaker)
