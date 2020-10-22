@@ -6,8 +6,15 @@ from audio_processing.constants import CONFIG_NAME, REMOTE_PROCESSED_FILE_PATH
 from common.utils import get_logger
 from common import BaseProcessor, CatalogueDao
 
-Logger = get_logger("AudioSpeakerClusteringProcessor")
+MIN_SAMPLES = 2
+
+PARTIAL_SET_SIZE = 11122
+
+MIN_CLUSTER_SIZE = 5
+
 ESTIMATED_CPU_SHARE = 0.1
+
+Logger = get_logger("AudioSpeakerClusteringProcessor")
 class AudioAnalysis(BaseProcessor):
 
     """
@@ -35,6 +42,7 @@ class AudioAnalysis(BaseProcessor):
             CONFIG_NAME)
 
         source = kwargs.get('source')
+        parameters = kwargs.get('parameters', {'min_cluster_size': MIN_CLUSTER_SIZE, 'partial_set_size': PARTIAL_SET_SIZE, 'min_samples': MIN_SAMPLES})
         embed_file_path = f'{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}_embed_file.npz'
         local_audio_download_path = f'{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}/'
         self.ensure_path(local_audio_download_path)
@@ -43,7 +51,12 @@ class AudioAnalysis(BaseProcessor):
         Logger.info(f'Downloading source to {local_audio_download_path} from {remote_download_path}')
         Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
         self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path, multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE)
-        analyse_speakers(embed_file_path, '*.wav', local_audio_download_path, source, self.catalogue_dao, min_cluster_size=4, partial_set_size=11122, min_samples=2)
+
+        Logger.info('Running speaker clustering using parameters: ' + str(parameters))
+        min_cluster_size = parameters.get('min_cluster_size')
+        partial_set_size = parameters.get('partial_set_size')
+        min_samples = parameters.get('min_samples')
+        analyse_speakers(embed_file_path, '*.wav', local_audio_download_path, source, self.catalogue_dao, min_cluster_size, partial_set_size, min_samples)
 
     def get_full_path(self, source):
         remote_file_path = self.audio_processor_config.get(REMOTE_PROCESSED_FILE_PATH)

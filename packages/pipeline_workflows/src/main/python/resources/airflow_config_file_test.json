@@ -142,7 +142,12 @@
   },
   "audio_analysis_config" : {
     "testamulya2" : {
-      "language" : "hindi"
+      "language" : "hindi",
+      "parameters": {
+        "min_cluster_size": 5,
+        "partial_set_size": 11122,
+        "min_samples": 2
+      }
     }
   }
 }

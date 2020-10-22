@@ -64,6 +64,9 @@ parser.add_argument('-stt', '--speech-to-text', dest='speech_to_text_client', de
 parser.add_argument('-fb', '--filter_by', dest='filter_by', default=None,
                     help='The filter that needs to be applied for data marking')
 
+parser.add_argument('-par', '--parameters', dest='parameters', default=None,
+                    help='The parameters that need to be used in speaker clustering')
+
 parser.add_argument('-f', '--file_system', dest='file_system', choices=FILES_SYSTEMS_LIST, default='google',
                     help='Specify the file system to use for running the pipeline', required=False)
 
@@ -140,8 +143,11 @@ def validate_audio_analysis_config(arguments):
         raise argparse.ArgumentTypeError(
             f'Source is missing'
         )
-
-    return {'source': arguments.audio_source}
+    if arguments.parameters is None:
+        raise argparse.ArgumentTypeError(
+            f'Parameters config is missing'
+        )
+    return {'source': arguments.audio_source, 'parameters': json.loads(arguments.parameters).get('parameters')}
 
 def validate_audio_processing_input(arguments):
     LOGGER.info('validating input for audio processing')
@@ -258,7 +264,6 @@ def perform_action(arguments, **kwargs):
         object_dict = get_periperhals(config_params)
 
         data_processor = object_dict.get('data_processor')
-        audio_commons = object_dict.get('audio_commons')
 
         curr_processor = AudioAnalysis.get_instance(data_processor, **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
         LOGGER.info(f'Starting processing for {current_action}')
