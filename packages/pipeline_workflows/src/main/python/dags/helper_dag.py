@@ -21,7 +21,6 @@ def get_file_name(file_prefix_name, delimiter):
 def get_file_extension(file_name):
     return file_name.split('.')[-1]
 
-
 def get_metadata_file_name(file_name, meta_file_extention):
     return '.'.join(file_name.split('.')[:-1]) + meta_file_extention
 
@@ -29,46 +28,10 @@ def get_metadata_file_name(file_name, meta_file_extention):
 def check_if_meta_data_present(full_source_path, metadata_file_name, bucket_name):
     return check_blob(bucket_name, full_source_path + '/' + metadata_file_name)
 
-
-def get_files_path_with_prefix(file_path, file_prefix, file_name):
-    return file_path + '/' + str(file_prefix) + '/' + file_name
-
-
-def get_files_path_with_no_prefix(file_path, file_name):
-    return file_path + '/' + file_name
-
-
-def get_audio_id():
-    return datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')[:-2]
-
-
-def update_metadata_file(source, audio_id):
-    with open(source + "_audio_id.txt", "a+") as myfile:
-        myfile.write(audio_id + '\n')
-
-
-def create_empty_file(source):
-    with open(source + "_audio_id.txt", "a+") as myfile:
-        myfile.write("")
-
-
-def move_metadata_file(source, tobe_processed_path, bucket_name):
-    source_file_name = source + "_audio_id.txt"
-    destination_blob_name = tobe_processed_path + source + \
-                            '/audio_id/' + get_audio_id() + '/' + source + "_audio_id.txt"
-    if os.path.isfile(source_file_name):
-        upload_blob(bucket_name, source_file_name, destination_blob_name)
-        os.remove(source_file_name)
-    else:
-        create_empty_file(source)
-        move_metadata_file(source, tobe_processed_path, bucket_name)
-
-
 def condition_file_name(file_name):
     file_name_cleansed = file_name.translate({ord(i): None for i in "()&'"})
     file_name_split = file_name_cleansed.split('.')
     return '_'.join(file_name_split[:-1]) + '.' + file_name_split[-1]
-
 
 def get_sorted_file_list_after_batch(file_name_dict, batch_count):
     file_name_dict_sorted = collections.OrderedDict(sorted(file_name_dict.items(), key=itemgetter(1)))
@@ -77,7 +40,6 @@ def get_sorted_file_list_after_batch(file_name_dict, batch_count):
     if len(file_name_sorted_list) > batch_count:
         return file_name_sorted_list[:batch_count]
     return file_name_sorted_list
-
 
 def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_format, meta_file_extention, bucket_name):
     file_path_dict = json.loads(Variable.get("audiofilelist"))
@@ -110,14 +72,6 @@ def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_fo
     file_path_dict = mydict(file_path_dict)
     Variable.set("audiofilelist", file_path_dict)
 
-def get_audio_id_path(tobe_processed_path, source):
-    return tobe_processed_path + source + '/' + "audio_id" + '/'
-
-
-def get_audio_id_blob_name(latest_audio_id_path, source):
-    return latest_audio_id_path + '/' + source + '_' + "audio_id.txt"
-
-
 def get_require_audio_id(source, stt_source_path, batch_count, bucket_name):
     audio_ids = json.loads(Variable.get("audioidsforstt"))
 
@@ -139,21 +93,17 @@ def get_require_audio_id(source, stt_source_path, batch_count, bucket_name):
 
     Variable.set("audioidsforstt", mydict(audio_ids))
 
-
 def __load_yaml_file(path):
     read_dict = {}
     with open(path, 'r') as file:
         read_dict = yaml.safe_load(file)
     return read_dict
 
-
 if __name__ == "__main__":
     pass
 
-
 def data_marking_start():
     return 'started..'
-
 
 def audio_analysis_start():
     return 'audio analysis started..'
