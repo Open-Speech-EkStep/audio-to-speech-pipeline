@@ -7,7 +7,7 @@ from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
-from helper_dag import get_audio_ids, get_file_path_from_bucket
+from helper_dag import get_file_path_from_bucket
 
 snr_catalogue_source = json.loads(Variable.get("snrcatalogue"))
 source_path_for_snr = Variable.get("sourcepathforsnr")
@@ -15,6 +15,8 @@ bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
 resource_limits = json.loads(Variable.get("snr_resource_limits"))
+meta_file_extension = Variable.get("metafileextension")
+
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 LANGUAGE_CONSTANT = "{language}"
 
@@ -54,7 +56,7 @@ def create_dag(dag_id,
             provide_context=True,
             xcom_push=True,
             python_callable=get_file_path_from_bucket,
-            op_kwargs={'source': dag_id, 'source_landing_path': source_path_for_snr_set,'batch_count': batch_count ,'audio_format': audio_format},
+            op_kwargs={'source': dag_id, 'source_landing_path': source_path_for_snr_set,'batch_count': batch_count ,'audio_format': audio_format, 'meta_file_extension': meta_file_extension, 'bucket_name': bucket_name},
             dag_number=dag_number)
 
 

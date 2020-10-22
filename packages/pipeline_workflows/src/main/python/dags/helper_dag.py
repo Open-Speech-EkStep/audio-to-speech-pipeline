@@ -8,16 +8,6 @@ from gcs_utils import list_blobs_in_a_path, copy_blob, check_blob, \
     move_blob, upload_blob, read_blob, move_directory, download_blob
 from airflow.models import Variable
 
-stt_input_dir_path = Variable.get("snrdonepath")
-bucket_name = Variable.get("bucket")
-
-
-def get_variables():
-    global bucket_name
-    global meta_file_extention
-    bucket_name = Variable.get("bucket")
-    meta_file_extention = Variable.get("metafileextension")
-
 
 class mydict(dict):
     def __str__(self):
@@ -32,12 +22,11 @@ def get_file_extension(file_name):
     return file_name.split('.')[-1]
 
 
-def get_metadata_file_name(file_name):
+def get_metadata_file_name(file_name, meta_file_extention):
     return '.'.join(file_name.split('.')[:-1]) + meta_file_extention
 
 
-def check_if_meta_data_present(full_source_path, metadata_file_name):
-    global bucket_name
+def check_if_meta_data_present(full_source_path, metadata_file_name, bucket_name):
     return check_blob(bucket_name, full_source_path + '/' + metadata_file_name)
 
 
@@ -63,8 +52,7 @@ def create_empty_file(source):
         myfile.write("")
 
 
-def move_metadata_file(source, tobe_processed_path):
-    global bucket_name
+def move_metadata_file(source, tobe_processed_path, bucket_name):
     source_file_name = source + "_audio_id.txt"
     destination_blob_name = tobe_processed_path + source + \
                             '/audio_id/' + get_audio_id() + '/' + source + "_audio_id.txt"
@@ -73,7 +61,7 @@ def move_metadata_file(source, tobe_processed_path):
         os.remove(source_file_name)
     else:
         create_empty_file(source)
-        move_metadata_file(source, tobe_processed_path)
+        move_metadata_file(source, tobe_processed_path, bucket_name)
 
 
 def condition_file_name(file_name):
@@ -91,11 +79,10 @@ def get_sorted_file_list_after_batch(file_name_dict, batch_count):
     return file_name_sorted_list
 
 
-def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_format):
+def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_format, meta_file_extention, bucket_name):
     file_path_dict = json.loads(Variable.get("audiofilelist"))
     file_name_dict = {}
 
-    get_variables()
     delimiter = "/"
     print("****The source is *****" + source)
 
@@ -112,19 +99,18 @@ def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_fo
         expected_file_extension = audio_format
 
         if file_extension in [expected_file_extension, expected_file_extension.swapcase()]:
-            metadata_file_name = get_metadata_file_name(file_name)
+            metadata_file_name = get_metadata_file_name(file_name, meta_file_extention, bucket_name)
             print("File is {}".format(file_name))
             print("Meta File is {}".format(metadata_file_name))
 
-            if (check_if_meta_data_present(source_landing_path + source, metadata_file_name)):
+            if (check_if_meta_data_present(source_landing_path + source, metadata_file_name, bucket_name)):
                 file_name_dict[file_name] = file_size
 
     file_path_dict[source] = get_sorted_file_list_after_batch(file_name_dict, batch_count)
     file_path_dict = mydict(file_path_dict)
     Variable.set("audiofilelist", file_path_dict)
 
-def get_latest_file_from_bucket(source_path):
-    global bucket_name
+def get_latest_file_from_bucket(source_path, bucket_name):
     delimiter = "/"
 
     all_blobs = list_blobs_in_a_path(bucket_name, source_path, delimiter)
@@ -149,26 +135,7 @@ def get_audio_id_blob_name(latest_audio_id_path, source):
     return latest_audio_id_path + '/' + source + '_' + "audio_id.txt"
 
 
-def get_audio_ids(source, tobe_processed_path, **kwargs):
-    get_variables()
-    audio_file_ids = json.loads(Variable.get("audiofileids"))
-    audio_id_source_path = get_audio_id_path(tobe_processed_path, source)
-    latest_audio_id_path = audio_id_source_path + \
-                           get_latest_file_from_bucket(audio_id_source_path)
-    audio_id_blob = get_audio_id_blob_name(latest_audio_id_path, source)
-
-    if check_blob(bucket_name, audio_id_blob):
-        audio_ids = read_blob(bucket_name, audio_id_blob).splitlines()
-        audio_file_ids[source] = audio_ids
-        audio_file_ids = mydict(audio_file_ids)
-        Variable.set("audiofileids", audio_file_ids)
-    else:
-        audio_file_ids[source] = []
-        audio_file_ids = mydict(audio_file_ids)
-        Variable.set("audiofileids", audio_file_ids)
-
-
-def get_require_audio_id(source, stt_source_path, batch_count):
+def get_require_audio_id(source, stt_source_path, batch_count, bucket_name):
     audio_ids = json.loads(Variable.get("audioidsforstt"))
 
     source_dir_path = f'{stt_source_path}{source}'

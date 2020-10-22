@@ -7,7 +7,7 @@ from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
-from helper_dag import get_audio_ids, get_require_audio_id
+from helper_dag import get_require_audio_id
 
 sourceinfo = json.loads(Variable.get("sourceinfo"))
 stt_source_path = Variable.get("sttsourcepath")
@@ -51,7 +51,7 @@ def create_dag(dag_id,
             task_id=dag_id + "_fetch_audio_ids",
             python_callable=get_require_audio_id,
             op_kwargs={'source': dag_id,
-                       'stt_source_path': stt_source_path_set, "batch_count": batch_count},
+                       'stt_source_path': stt_source_path_set, "batch_count": batch_count, 'bucket_name': bucket_name},
             dag_number=dag_number)
 
         fetch_audio_ids
