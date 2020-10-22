@@ -99,7 +99,7 @@ def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_fo
         expected_file_extension = audio_format
 
         if file_extension in [expected_file_extension, expected_file_extension.swapcase()]:
-            metadata_file_name = get_metadata_file_name(file_name, meta_file_extention, bucket_name)
+            metadata_file_name = get_metadata_file_name(file_name, meta_file_extention)
             print("File is {}".format(file_name))
             print("Meta File is {}".format(metadata_file_name))
 
@@ -109,23 +109,6 @@ def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_fo
     file_path_dict[source] = get_sorted_file_list_after_batch(file_name_dict, batch_count)
     file_path_dict = mydict(file_path_dict)
     Variable.set("audiofilelist", file_path_dict)
-
-def get_latest_file_from_bucket(source_path, bucket_name):
-    delimiter = "/"
-
-    all_blobs = list_blobs_in_a_path(bucket_name, source_path, delimiter)
-
-    for blob in all_blobs:
-        pass
-
-    if delimiter:
-        list_prefixes = []
-        for prefix in all_blobs.prefixes:
-            list_prefixes.append(int(prefix.split(delimiter)[-2:-1][0]))
-            list_prefixes.sort(reverse=True)
-        print("Latest date_time prefix is: {} ".format(list_prefixes[0]))
-    return str(list_prefixes[0])
-
 
 def get_audio_id_path(tobe_processed_path, source):
     return tobe_processed_path + source + '/' + "audio_id" + '/'
