@@ -1,8 +1,6 @@
 import datetime
 import json
-import re
 import os
-from sqlalchemy import create_engine
 import yaml
 from operator import itemgetter
 import collections
@@ -10,7 +8,6 @@ from gcs_utils import list_blobs_in_a_path, copy_blob, check_blob, \
     move_blob, upload_blob, read_blob, move_directory, download_blob
 from airflow.models import Variable
 
-snr_done_path = Variable.get("snrdonepath")
 stt_input_dir_path = Variable.get("snrdonepath")
 bucket_name = Variable.get("bucket")
 
@@ -94,23 +91,13 @@ def get_sorted_file_list_after_batch(file_name_dict, batch_count):
     return file_name_sorted_list
 
 
-def get_file_path_from_bucket(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count,
-                              audio_format, **context):
+def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_format):
     file_path_dict = json.loads(Variable.get("audiofilelist"))
     file_name_dict = {}
 
     get_variables()
     delimiter = "/"
     print("****The source is *****" + source)
-    # meta_data_flag = False
-    master_metadat_file_path = f'{source_landing_path}{source}/{source}_master.csv'
-
-    has_metadata_file = check_blob(bucket_name, master_metadat_file_path)
-
-    print(f'*****has meta data {has_metadata_file}*********{master_metadat_file_path}')
-
-    if has_metadata_file:
-        upload_and_move(master_metadat_file_path, source)
 
     all_blobs = list_blobs_in_a_path(
         bucket_name, source_landing_path + source + delimiter)
@@ -125,8 +112,6 @@ def get_file_path_from_bucket(source, source_landing_path, error_landing_path, t
         expected_file_extension = audio_format
 
         if file_extension in [expected_file_extension, expected_file_extension.swapcase()]:
-
-            # if batch_count > 0:
             metadata_file_name = get_metadata_file_name(file_name)
             print("File is {}".format(file_name))
             print("Meta File is {}".format(metadata_file_name))
@@ -134,93 +119,9 @@ def get_file_path_from_bucket(source, source_landing_path, error_landing_path, t
             if (check_if_meta_data_present(source_landing_path + source, metadata_file_name)):
                 file_name_dict[file_name] = file_size
 
-            # else:
-            #     break
-            # batch_count -= 1
-
     file_path_dict[source] = get_sorted_file_list_after_batch(file_name_dict, batch_count)
     file_path_dict = mydict(file_path_dict)
     Variable.set("audiofilelist", file_path_dict)
-
-def get_files_from_landing_zone(source, source_landing_path, error_landing_path, tobe_processed_path, batch_count,
-                                audio_format):
-    get_variables()
-    delimiter = "/"
-    print("****The source is *****" + source)
-    # meta_data_flag = False
-    master_metadat_file_path = f'{source_landing_path}{source}/{source}_master.csv'
-
-    has_metadata_file = check_blob(bucket_name, master_metadat_file_path)
-
-    print(f'*****has meta data {has_metadata_file}*********{master_metadat_file_path}')
-
-    if has_metadata_file:
-        upload_and_move(master_metadat_file_path, source)
-
-    all_blobs = list_blobs_in_a_path(
-        bucket_name, source_landing_path + source + delimiter)
-
-    try:
-        for blob in all_blobs:
-            print("*********The file name is ********* " + blob.name)
-            file_name = get_file_name(blob.name, delimiter)
-            file_extension = get_file_extension(file_name)
-            expected_file_extension = audio_format
-
-            if file_extension in [expected_file_extension, expected_file_extension.swapcase()]:
-
-                if batch_count > 0:
-                    metadata_file_name = get_metadata_file_name(file_name)
-                    print("File is {}".format(file_name))
-                    audio_id = get_audio_id()
-
-                    source_file_name = get_files_path_with_no_prefix(
-                        source_landing_path + source, file_name)
-                    source_meta_file_name = get_files_path_with_no_prefix(source_landing_path + source,
-                                                                          metadata_file_name)
-                    destination_file_name = get_files_path_with_prefix(tobe_processed_path + source, audio_id,
-                                                                       condition_file_name(file_name))
-                    destination_meta_file_name = get_files_path_with_prefix(tobe_processed_path + source, audio_id,
-                                                                            condition_file_name(metadata_file_name))
-                    if (check_if_meta_data_present(source_landing_path + source, metadata_file_name)):
-
-                        print("Meta file {} is present".format(
-                            metadata_file_name))
-                        # meta_data_flag = True
-                        move_blob(bucket_name, source_file_name,
-                                  bucket_name, destination_file_name)
-                        move_blob(bucket_name, source_meta_file_name,
-                                  bucket_name, destination_meta_file_name)
-
-                        update_metadata_file(source, audio_id)
-                    else:
-                        print("Meta file {} is not present,Moving to error....".format(
-                            metadata_file_name))
-
-                        error_destination_file_name = get_files_path_with_no_prefix(error_landing_path + source,
-                                                                                    file_name)
-
-                        move_blob(bucket_name, source_file_name,
-                                  bucket_name, error_destination_file_name)
-
-                else:
-                    break
-                batch_count -= 1
-    finally:
-        move_metadata_file(source, tobe_processed_path)
-
-
-def upload_and_move(master_metadat_file_path, source):
-    meta_data_done_path = f'{snr_done_path}/{source}/{source}_master.csv'
-
-    local_metadata_downloaded_path = '/tmp/master_csv'
-
-    download_blob(bucket_name, master_metadat_file_path, local_metadata_downloaded_path)
-
-    upload_file_to_downloaded_source(local_metadata_downloaded_path)
-
-    move_blob(bucket_name, master_metadat_file_path, bucket_name, meta_data_done_path)
-
 
 def get_latest_file_from_bucket(source_path):
     global bucket_name
@@ -289,51 +190,11 @@ def get_require_audio_id(source, stt_source_path, batch_count):
     Variable.set("audioidsforstt", mydict(audio_ids))
 
 
-def move_raw_to_processed(source, batch_audio_file_ids, tobe_processed_path, **kwargs):
-    get_variables()
-    for audio_id in batch_audio_file_ids:
-        source_path = tobe_processed_path + source + '/' + audio_id
-        destination_path = snr_done_path + source + '/' + audio_id
-        move_directory(bucket_name, source_path, destination_path)
-
-
-def upload_file_to_downloaded_source(file_path):
-    db_conn = get_db_connection_object()
-
-    print("uploading data to source_metadata")
-    with open(file_path, 'r') as f:
-        conn = db_conn.raw_connection()
-        cursor = conn.cursor()
-        cmd = 'COPY source_metadata_downloaded(source,num_speaker,total_duration,num_of_audio) FROM STDIN WITH (FORMAT CSV, HEADER)'
-        cursor.copy_expert(cmd, f)
-        conn.commit()
-
-
 def __load_yaml_file(path):
     read_dict = {}
     with open(path, 'r') as file:
         read_dict = yaml.safe_load(file)
     return read_dict
-
-
-def create_db_engine(config_local_path):
-    config_file = __load_yaml_file(config_local_path)
-    db_configuration = config_file['db_configuration']
-    db_name = db_configuration['db_name']
-    db_user = db_configuration['db_user']
-    db_pass = db_configuration['db_pass']
-    cloud_sql_connection_name = db_configuration['cloud_sql_connection_name']
-    db = create_engine(
-        f'postgresql://{db_user}:{db_pass}@{cloud_sql_connection_name}/{db_name}')
-    return db
-
-
-def get_db_connection_object():
-    config_path = "./config.yaml"
-
-    download_blob(bucket_name, "data/audiotospeech/config/dags/config.yaml",
-                  config_path)
-    return create_db_engine(config_path)
 
 
 if __name__ == "__main__":

@@ -1,19 +1,16 @@
 import json
 import datetime
 import math
-import time
 
 from airflow import DAG
 from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
-from helper_dag import get_audio_ids, get_files_from_landing_zone, move_raw_to_processed, get_require_audio_id
+from helper_dag import get_audio_ids, get_require_audio_id
 
 sourceinfo = json.loads(Variable.get("sourceinfo"))
-source_path_for_snr = Variable.get("sourcepathforsnr")
 stt_source_path = Variable.get("sttsourcepath")
-snr_done_path = Variable.get("snrdonepath")
 bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
@@ -30,9 +27,7 @@ secret_file = secret.Secret(
 
 def interpolate_language_paths(language):
     stt_source_path_set = stt_source_path.replace(LANGUAGE_CONSTANT, language)
-    source_path_for_snr_set = source_path_for_snr.replace(LANGUAGE_CONSTANT, language)
-    snr_done_path_set = snr_done_path.replace(LANGUAGE_CONSTANT, language)
-    return stt_source_path_set, source_path_for_snr_set, snr_done_path_set
+    return stt_source_path_set
 
 
 def create_dag(dag_id,
@@ -50,7 +45,7 @@ def create_dag(dag_id,
         language = args.get('language')
         print(args)
         print(f"Language for source is {language}")
-        stt_source_path_set, source_path_for_snr_set, snr_done_path_set = interpolate_language_paths(language)
+        stt_source_path_set = interpolate_language_paths(language)
 
         fetch_audio_ids = PythonOperator(
             task_id=dag_id + "_fetch_audio_ids",
@@ -112,8 +107,6 @@ for source in sourceinfo.keys():
         'language': language
 
     }
-
-    # schedule = '@daily'
 
     dag_number = dag_id + str(batch_count)
 

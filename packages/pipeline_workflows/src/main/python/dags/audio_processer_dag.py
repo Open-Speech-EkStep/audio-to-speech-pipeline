@@ -1,19 +1,16 @@
 import json
 import datetime
 import math
-import time
 
 from airflow import DAG
 from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
-from helper_dag import get_audio_ids, move_raw_to_processed,get_file_path_from_bucket
+from helper_dag import get_audio_ids, get_file_path_from_bucket
 
 snr_catalogue_source = json.loads(Variable.get("snrcatalogue"))
 source_path_for_snr = Variable.get("sourcepathforsnr")
-error_landing_path_snr = Variable.get("errorlandingpathsnr")
-tobe_processed_path_snr = Variable.get("tobeprocessedpathsnr")
 bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
@@ -29,10 +26,8 @@ secret_file = secret.Secret(
 
 
 def interpolate_language_paths(language):
-    error_landing_path_snr_set = error_landing_path_snr.replace(LANGUAGE_CONSTANT, language)
     source_path_for_snr_set = source_path_for_snr.replace(LANGUAGE_CONSTANT, language)
-    tobe_processed_path_snr_set = tobe_processed_path_snr.replace(LANGUAGE_CONSTANT, language)
-    return error_landing_path_snr_set, source_path_for_snr_set, tobe_processed_path_snr_set
+    return source_path_for_snr_set
 
 
 def create_dag(dag_id,
@@ -59,10 +54,7 @@ def create_dag(dag_id,
             provide_context=True,
             xcom_push=True,
             python_callable=get_file_path_from_bucket,
-            op_kwargs={'source': dag_id, 'source_landing_path': source_path_for_snr_set,
-                       'error_landing_path': error_landing_path_snr_set,
-                       'tobe_processed_path': tobe_processed_path_snr_set, 'batch_count': batch_count,
-                       'audio_format': audio_format},
+            op_kwargs={'source': dag_id, 'source_landing_path': source_path_for_snr_set,'batch_count': batch_count ,'audio_format': audio_format},
             dag_number=dag_number)
 
 
@@ -82,7 +74,6 @@ def create_dag(dag_id,
                 name='data-normalizer',
                 cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", bucket_name,
                       f"data/audiotospeech/config/datacataloguer-prep/config_{language}.yaml"],
-                # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
@@ -99,7 +90,6 @@ def create_dag(dag_id,
                 cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "audio_processing", "-rc",
                       f"data/audiotospeech/config/audio_processing/config_{language}.yaml",
                       "-fl", ','.join(batch_file_path_list), "-af", args.get('audio_format'), "-as", dag_id],
-                # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
