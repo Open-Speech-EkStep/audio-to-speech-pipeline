@@ -64,7 +64,7 @@ parser.add_argument('-stt', '--speech-to-text', dest='speech_to_text_client', de
 parser.add_argument('-fb', '--filter_by', dest='filter_by', default=None,
                     help='The filter that needs to be applied for data marking')
 
-parser.add_argument('-par', '--parameters', dest='parameters', default=None,
+parser.add_argument('-par', '--params', dest='params', default=None,
                     help='The parameters that need to be used in speaker clustering')
 
 parser.add_argument('-f', '--file_system', dest='file_system', choices=FILES_SYSTEMS_LIST, default='google',
@@ -143,11 +143,11 @@ def validate_audio_analysis_config(arguments):
         raise argparse.ArgumentTypeError(
             f'Source is missing'
         )
-    if arguments.parameters is None:
+    if arguments.params is None:
         raise argparse.ArgumentTypeError(
             f'Parameters config is missing'
         )
-    return {'source': arguments.audio_source, 'parameters': json.loads(arguments.parameters)}
+    return {'source': arguments.audio_source, 'parameters': json.loads(arguments.params)}
 
 def validate_audio_processing_input(arguments):
     LOGGER.info('validating input for audio processing')

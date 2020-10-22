@@ -39,7 +39,6 @@ def create_dag(default_args):
 
         for source in audio_analysis_config.keys():
             source_config = audio_analysis_config.get(source)
-            parameters = source_config.get('parameters')
             language = source_config.get('language').lower()
             print(f"Language for source is {language}")
             data_marker_task = kubernetes_pod_operator.KubernetesPodOperator(
@@ -47,7 +46,7 @@ def create_dag(default_args):
                 name='data-audio-analysis',
                 cmds=["python", "invocation_script.py", "-b", bucket_name, "-a", "audio_analysis", "-rc",
                       f"data/audiotospeech/config/audio_processing/config_{language}.yaml",
-                          "-as", source, "-par", json.dumps(parameters)],
+                          "-as", source, "-par", json.dumps(source_config)],
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
