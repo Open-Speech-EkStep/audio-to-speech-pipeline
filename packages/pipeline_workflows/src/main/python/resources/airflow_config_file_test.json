@@ -40,12 +40,8 @@
     }
   },
   "sourcepathforsnr": "data/audiotospeech/raw/download/downloaded/{language}/audio/",
-  "snrdonepath": "data/audiotospeech/raw/download/snrdonepath/{language}/audio/",
   "sttsourcepath": "data/audiotospeech/raw/landing/{language}/audio/",
-  "sourcelandingpath": "data/audiotospeech/raw/landing/{language}/audio/",
   "errorlandingpath": "data/audiotospeech/raw/landing/{language}/audio/error/",
-  "tobeprocessedpath": "data/audiotospeech/raw/tobeprocessed/{language}/audio/",
-  "rawprocessedpath": "data/audiotospeech/raw/processed/{language}/audio/",
   "integrationprocessedpath": "data/audiotospeech/integration/processed/{language}/audio/",
   "experimentoutput": "data/experiments/output/",
   "metafileextension": ".csv",
@@ -66,7 +62,6 @@
     ]
   },
   "archiveutterancespath": "data/experiments/archive/",
-  "sttconfigpath": "data/audiotospeech/config/speechtotext/config.yaml",
   "audiofilelist": {
     "Telugu_test": [],
     "Lets_talk_in_Telugu": [],
