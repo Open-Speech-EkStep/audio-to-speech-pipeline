@@ -43,7 +43,7 @@ class AudioAnalysis(BaseProcessor):
         Logger.info(f'Downloading source to {local_audio_download_path} from {remote_download_path}')
         Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
         self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path, multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE)
-        analyse_speakers(embed_file_path, '*.wav', local_audio_download_path, source, self.catalogue_dao)
+        analyse_speakers(embed_file_path, '*.wav', local_audio_download_path, source, self.catalogue_dao, min_cluster_size=4, partial_set_size=11122, min_samples=2)
 
     def get_full_path(self, source):
         remote_file_path = self.audio_processor_config.get(REMOTE_PROCESSED_FILE_PATH)
