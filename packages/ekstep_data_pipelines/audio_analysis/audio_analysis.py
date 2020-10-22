@@ -41,8 +41,7 @@ class AudioAnalysis(BaseProcessor):
         self.audio_processor_config = self.data_processor.config_dict.get(
             CONFIG_NAME)
 
-        source = kwargs.get('source')
-        parameters = kwargs.get('parameters', {'min_cluster_size': MIN_CLUSTER_SIZE, 'partial_set_size': PARTIAL_SET_SIZE, 'min_samples': MIN_SAMPLES})
+        source, parameters = self.get_config(**kwargs)
         embed_file_path = f'{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}_embed_file.npz'
         local_audio_download_path = f'{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}/'
         self.ensure_path(local_audio_download_path)
@@ -53,9 +52,9 @@ class AudioAnalysis(BaseProcessor):
         self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path, multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE)
 
         Logger.info('Running speaker clustering using parameters: ' + str(parameters))
-        min_cluster_size = parameters.get('min_cluster_size')
-        partial_set_size = parameters.get('partial_set_size')
-        min_samples = parameters.get('min_samples')
+        min_cluster_size = parameters.get('min_cluster_size', MIN_CLUSTER_SIZE)
+        partial_set_size = parameters.get('partial_set_size', PARTIAL_SET_SIZE)
+        min_samples = parameters.get('min_samples', MIN_SAMPLES)
         analyse_speakers(embed_file_path, '*.wav', local_audio_download_path, source, self.catalogue_dao, min_cluster_size, partial_set_size, min_samples)
 
     def get_full_path(self, source):
@@ -65,3 +64,12 @@ class AudioAnalysis(BaseProcessor):
 
     def ensure_path(self, path):
         os.makedirs(path, exist_ok=True)
+
+    def get_config(self, **kwargs):
+        parameters = kwargs.get('parameters', {})
+        source = kwargs.get('source')
+
+        if source is None:
+            raise Exception('filter by source is mandatory')
+
+        return source, parameters.get('parameters')
