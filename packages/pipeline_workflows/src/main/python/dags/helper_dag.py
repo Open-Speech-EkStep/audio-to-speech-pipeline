@@ -21,8 +21,8 @@ def get_file_name(file_prefix_name, delimiter):
 def get_file_extension(file_name):
     return file_name.split('.')[-1]
 
-def get_metadata_file_name(file_name, meta_file_extention):
-    return '.'.join(file_name.split('.')[:-1]) + meta_file_extention
+def get_metadata_file_name(file_name, meta_file_extension):
+    return '.'.join(file_name.split('.')[:-1]) + meta_file_extension
 
 
 def check_if_meta_data_present(full_source_path, metadata_file_name, bucket_name):
@@ -41,7 +41,7 @@ def get_sorted_file_list_after_batch(file_name_dict, batch_count):
         return file_name_sorted_list[:batch_count]
     return file_name_sorted_list
 
-def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_format, meta_file_extention, bucket_name):
+def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_format, meta_file_extension, bucket_name):
     file_path_dict = json.loads(Variable.get("audiofilelist"))
     file_name_dict = {}
 
@@ -61,7 +61,7 @@ def get_file_path_from_bucket(source, source_landing_path, batch_count, audio_fo
         expected_file_extension = audio_format
 
         if file_extension in [expected_file_extension, expected_file_extension.swapcase()]:
-            metadata_file_name = get_metadata_file_name(file_name, meta_file_extention)
+            metadata_file_name = get_metadata_file_name(file_name, meta_file_extension)
             print("File is {}".format(file_name))
             print("Meta File is {}".format(metadata_file_name))
 
