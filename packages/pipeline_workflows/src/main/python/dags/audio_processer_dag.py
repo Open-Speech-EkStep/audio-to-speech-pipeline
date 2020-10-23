@@ -53,8 +53,6 @@ def create_dag(dag_id,
 
         get_file_path_from_gcp_bucket = PythonOperator(
             task_id=dag_id + "_get_file_path",
-            provide_context=True,
-            xcom_push=True,
             python_callable=get_file_path_from_bucket,
             op_kwargs={'source': dag_id, 'source_landing_path': source_path_for_snr_set,'batch_count': batch_count ,'audio_format': audio_format, 'meta_file_extension': meta_file_extension, 'bucket_name': bucket_name},
             dag_number=dag_number)
