@@ -48,7 +48,7 @@ def create_dag(dag_id,
         language = args.get('language')
         print(args)
         print(f"Language for source is {language}")
-        error_landing_path_snr_set, source_path_for_snr_set, tobe_processed_path_snr_set = interpolate_language_paths(
+        source_path_for_snr_set = interpolate_language_paths(
             language)
 
         get_file_path_from_gcp_bucket = PythonOperator(
