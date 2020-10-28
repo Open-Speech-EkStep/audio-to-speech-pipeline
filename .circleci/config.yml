@@ -7,27 +7,18 @@ parameters:
     default: false
 
   # A parameter per package
-  datacollector_youtube:
-    type: boolean
-    default: false
-  dataprocessor:
-    type: boolean
-    default: false
   pipeline_workflows:
     type: boolean
     default: false
   data_tagger:
     type: boolean
-    default: false
+    default: true
   data_prep_cataloguer:
     type: boolean
-    default: false
-  downloaded_data_cataloguer:
-    type: boolean
-    default: false
+    default: true
   ekstep_data_pipelines:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:
@@ -96,7 +87,7 @@ jobs:
       - run:
           name: Setup Testing Environment
           command: |
-            pyenv global 3.8.6
+            python --version ; pip --version ; pwd ; ls
             sudo apt-get update
             sudo apt-get install -y ffmpeg
             sudo apt-get install -y sox
@@ -218,61 +209,6 @@ workflows:
 
 
   # Workflows defined for each package.
-  datacollector_youtube:
-    when: << pipeline.parameters.datacollector_youtube >>
-    jobs:
-      - build:
-          name: datacollector_youtube_build
-          package_name: datacollector_youtube
-      - deploy:
-          name: datacollector_youtube_deploy_test
-          package_name: datacollector_youtube
-          package_version: 2.0.0
-          env_name: test
-          requires:
-            - datacollector_youtube_build
-          filters:
-            branches:
-              only:
-                - master
-      - deploy:
-          name: datacollector_youtube_deploy_prod
-          package_name: datacollector_youtube
-          package_version: 2.0.0
-          env_name: prod
-          requires:
-            - datacollector_youtube_build
-            - datacollector_youtube_deploy_test
-          filters:
-            branches:
-              only:
-                - master
-
-  dataprocessor:
-    when: << pipeline.parameters.dataprocessor >>
-    jobs:
-      - build:
-          name: dataprocessor_build
-          package_name: dataprocessor
-      - deploy:
-          name: dataprocessor_deploy_test
-          package_name: dataprocessor
-          package_version: 1.0.0
-          env_name: test
-          requires:
-            - dataprocessor_build
-      - deploy:
-          name: dataprocessor_deploy_prod
-          package_name: dataprocessor
-          package_version: 1.0.0
-          env_name: prod
-          requires:
-            - dataprocessor_build
-            - dataprocessor_deploy_test
-        #  filters:
-        #    branches:
-        #      only:
-        #        - master
 
   data_tagger:
     when: << pipeline.parameters.data_tagger >>
@@ -330,27 +266,6 @@ workflows:
           #   branches:
           #     only:
           #       - master
-  downloaded_data_cataloguer:
-    when: << pipeline.parameters.downloaded_data_cataloguer >>
-    jobs:
-      - build:
-          name: downloaded_data_cataloguer_build
-          package_name: downloaded_data_cataloguer
-      - deploy:
-          name: downloaded_data_cataloguer_deploy_test
-          package_name: downloaded_data_cataloguer
-          package_version: 1.0.0
-          env_name: test
-          requires:
-            - downloaded_data_cataloguer_build
-      - deploy:
-          name: downloaded_data_cataloguer_deploy_prod
-          package_name: downloaded_data_cataloguer
-          package_version: 1.0.0
-          env_name: prod
-          requires:
-            - downloaded_data_cataloguer_build
-            - downloaded_data_cataloguer_deploy_test
 
   ekstep_data_pipelines:
     when: << pipeline.parameters.ekstep_data_pipelines >>
