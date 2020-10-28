@@ -32,12 +32,11 @@ with models.DAG(
         default_args=default_args,
         start_date=YESTERDAY) as dag:
     kubernetes_list_bucket_pod = kubernetes_pod_operator.KubernetesPodOperator(
-        task_id='data-prep-cataloguer',
-        name='data-prep-cataloguer',
-        cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", bucket_name, "data/audiotospeech/config/datacataloguer-prep/config.yaml"],
-        # namespace='composer-1-10-4-airflow-1-10-6-3b791e93',
+        task_id='data-normalizer',
+        name='data-normalizer',
+        cmds=["python", "invocation_script.py", "-b",bucket_name, "-a", "normalizer", "-rc",f"data/audiotospeech/config/audio_processing/config.yaml"],
         namespace = composer_namespace,
         startup_timeout_seconds=300,
         secrets=[secret_file],
-        image=f'us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:{env_name}_1.0.0',
+        image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}_1.0.0',
         image_pull_policy='Always')
