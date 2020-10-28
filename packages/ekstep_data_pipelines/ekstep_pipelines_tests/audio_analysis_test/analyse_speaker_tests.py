@@ -13,6 +13,7 @@ class AnalyseSpeakersTests(unittest.TestCase):
     @mock.patch('audio_analysis.speaker_analysis.create_embeddings.encoder')
     @mock.patch('audio_analysis.speaker_analysis.speaker_clustering.create_speaker_clusters')
     @mock.patch('audio_analysis.speaker_analysis.file_cluster_mapping.speaker_to_file_name_map')
+    @unittest.skip
     def test_should_analyse_speakers_for_source(self, speaker_to_file_name_map_mock, create_speaker_clusters_mock, encoder_mock, catalogue_dao):
         encoder_mock.return_value = None
         create_speaker_clusters_mock.return_value = None, None
