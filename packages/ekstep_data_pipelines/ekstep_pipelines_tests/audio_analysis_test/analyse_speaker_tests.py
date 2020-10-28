@@ -27,5 +27,5 @@ class AnalyseSpeakersTests(unittest.TestCase):
         update_args = catalogue_dao.update_utterance_speaker.call_args
         self.assertEqual('test_source_sp_1', insert_args[0][1])
         self.assertEqual('test_source', insert_args[0][0])
-        self.assertEqual(3, len(update_args[0][0]))
+        self.assertEqual(4, len(update_args[0][0]))
         self.assertEqual('test_source_sp_1', update_args[0][1])
