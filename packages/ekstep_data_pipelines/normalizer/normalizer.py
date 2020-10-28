@@ -139,6 +139,9 @@ class Normalizer(BaseProcessor):
     def get_load_datetime(self, audio_id):
         results = self.data_processor.execute_query(
             GET_LOAD_TIME_FOR_AUDIO_QUERY, audio_id=audio_id[0])
+        if results <= 0:
+            Logger.info("All data normalized")
+            return []
         date_time = results[0][0]
         return date_time
 
@@ -160,6 +163,9 @@ class Normalizer(BaseProcessor):
 
             speaker_id = self.find_speaker_id(audio_id)
             get_load_datetime_for_audio = self.get_load_datetime(audio_id)
+
+            if len(get_load_datetime_for_audio) <= 0:
+                return
 
             utterance_list = self.get_utterance_list(audio_id)
 
