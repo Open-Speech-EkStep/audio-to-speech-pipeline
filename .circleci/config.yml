@@ -134,6 +134,13 @@ jobs:
             pip install -r requirements.txt
             python --version ; pip --version ; pwd ; ls
       - run:
+          name: Setup Testing Environment
+          command: |
+            pylint ../ > linting_report_<< parameters.package_name >>.txt
+            mkdir -p linting_report
+      - store_artifacts:
+          path: linting_report
+      - run:
           name: Run Tests
           command: |
             # python -m unittest discover -s ekstep_pipelines_tests/ -p "*_tests.py" -v
