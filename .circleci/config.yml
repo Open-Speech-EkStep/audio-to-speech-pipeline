@@ -9,16 +9,13 @@ parameters:
   # A parameter per package
   pipeline_workflows:
     type: boolean
-    default: false
+    default: true
   data_tagger:
-    type: boolean
-    default: false
-  data_prep_cataloguer:
     type: boolean
     default: false
   ekstep_data_pipelines:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:
@@ -232,36 +229,6 @@ workflows:
             - data_tagger_build
             - data_tagger_deploy_test
 
-          # filters:
-          #   branches:
-          #     only:
-          #       - master
-
-  data_prep_cataloguer:
-    when: << pipeline.parameters.data_prep_cataloguer >>
-    jobs:
-      - build:
-          name: data_prep_cataloguer_build
-          package_name: data_prep_cataloguer
-      - deploy:
-          name: data_prep_cataloguer_deploy_test
-          package_name: data_prep_cataloguer
-          package_version: 1.0.0
-          env_name: test
-          requires:
-            - data_prep_cataloguer_build
-      - approval_for_prod_deploy:
-          type: approval
-          requires:
-            - data_prep_cataloguer_deploy_test
-      - deploy:
-          name: data_prep_cataloguer_deploy_prod
-          package_name: data_prep_cataloguer
-          package_version: 1.0.0
-          env_name: prod
-          requires:
-            - data_prep_cataloguer_build
-            - approval_for_prod_deploy
           # filters:
           #   branches:
           #     only:
