@@ -18,7 +18,7 @@ parameters:
     default: false
   ekstep_data_pipelines:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:

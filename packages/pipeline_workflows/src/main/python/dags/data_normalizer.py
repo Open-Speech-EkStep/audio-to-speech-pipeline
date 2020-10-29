@@ -34,7 +34,7 @@ with models.DAG(
     kubernetes_list_bucket_pod = kubernetes_pod_operator.KubernetesPodOperator(
         task_id='data-normalizer',
         name='data-normalizer',
-        cmds=["python", "invocation_script.py", "-b",bucket_name, "-a", "normalizer", "-rc",f"data/audiotospeech/config/audio_processing/config.yaml"],
+        cmds=["python", "invocation_script.py", "-b",bucket_name, "-a", "normalizer", "-rc",f"data/audiotospeech/config/audio_processing/config_hindi.yaml"],
         namespace = composer_namespace,
         startup_timeout_seconds=300,
         secrets=[secret_file],
