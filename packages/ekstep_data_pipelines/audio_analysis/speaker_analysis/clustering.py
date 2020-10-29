@@ -44,46 +44,21 @@ class Clustering:
             cluster_vs_embeds[cluster] = embeddings[cluster_indices]
         return cluster_vs_embeds
 
-    def run_hdbscan(self, embeddings, metric, min_cluster_size, min_samples):
+    def run_hdbscan(self, embeddings, metric, min_cluster_size, min_samples, cluster_selection_method):
         # because HDBSCAN expects double dtype
         embeddings = embeddings.astype('double')
         distance_matrix = cosine_distances(embeddings)
 
-        clusterer = hdbscan.HDBSCAN(metric=metric, min_cluster_size=min_cluster_size, min_samples=min_samples)
+        clusterer = hdbscan.HDBSCAN(metric=metric,
+                                    min_cluster_size=min_cluster_size,
+                                    min_samples=min_samples,
+                                    cluster_selection_method=cluster_selection_method)
         clusterer.fit(distance_matrix)
 
         return clusterer
 
-    def fit_noise_points(self, mean_embeds, noise_embeds, all_cluster_embeds, max_distance_allowed=0.4):
-        '''
-        1. Calculate cos dis for each noise point wrt all mean embeds
-        2. select cluster whose cosine dis with noise is the least (or less than a set threshold)
-        3. append the newly classified noise point embed into the corresponding cluster embeds
-
-        Returns:
-         - new clusters with noise points allocated
-         - number of noise points that were allocated to clusters
-        '''
-
-        allocated_noise_point_index = []
-
-        # distances is a matrix of shape (num_noise_points, num_mean_embeds)
-        # with cosine dist of each noise embed with all mean embeds present in rows
-        distances = cosine_distances(noise_embeds, mean_embeds)
-
-        closest_cluster_index = np.argmin(distances, axis=1)
-        closest_cluster_dist = np.min(distances, axis=1)
-
-        for index, dist in enumerate(closest_cluster_dist):
-            if dist <= max_distance_allowed:
-                all_cluster_embeds[closest_cluster_index[index]].append(noise_embeds[index])
-                allocated_noise_point_index.append(index)
-
-        # embeddings for noise points that couldn't be allocated
-        unallocated_noise_embeds = [em for ind, em in enumerate(noise_embeds) if ind not in allocated_noise_point_index]
-        return all_cluster_embeds, unallocated_noise_embeds
-
-    def run_partial_set_clusterings(self, embeddings, min_cluster_size=15, partial_set_size=11122, min_samples=15):
+    def run_partial_set_clusterings(self, embeddings, min_cluster_size=15, partial_set_size=11122, min_samples=15,
+                                    cluster_selection_method='eom'):
         '''
         Runs HDBSCAN on partial sets of orginial data,
         Returns:
@@ -97,13 +72,14 @@ class Clustering:
         mean_embeddings = []
         all_cluster_embeds = []
         if min_samples is None:
-            min_samples = self.min_cluster_size
+            min_samples = min_cluster_size
 
         partial_sets = self.make_partial_sets(embeddings, partial_set_size=partial_set_size)
         for ind, partial_set in enumerate(partial_sets):
 
             clusterer = self.run_hdbscan(partial_set, metric='precomputed', min_cluster_size=min_cluster_size,
-                                         min_samples=min_samples)
+                                         min_samples=min_samples, cluster_selection_method=cluster_selection_method)
+
             partial_set_labels = clusterer.labels_
 
             noise_point_embeds = [partial_set[index] for index, label in enumerate(partial_set_labels) if label == -1]
