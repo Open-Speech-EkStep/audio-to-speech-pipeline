@@ -1,1 +1,0 @@
-insert into media_speaker_mapping(audio_id, speaker_id, clipped_utterance_file_name, clipped_utterance_duration,load_datetime) values (123,5,'some_name',3,123445),(123,5,'some_name2',3,123))

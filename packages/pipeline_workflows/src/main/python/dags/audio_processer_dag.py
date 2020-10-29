@@ -72,14 +72,14 @@ def create_dag(dag_id,
             data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id='data-normalizer',
                 name='data-normalizer',
-                cmds=["python", "-m", "src.scripts.db_normalizer", "cluster", bucket_name,
-                      f"data/audiotospeech/config/datacataloguer-prep/config_{language}.yaml"],
-                namespace=composer_namespace,
+                cmds=["python", "invocation_script.py", "-b",bucket_name, "-a", "normalizer", "-rc",f"data/audiotospeech/config/audio_processing/config_{language}.yaml"],
+                namespace = composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image=f'us.gcr.io/ekstepspeechrecognition/data_prep_cataloguer:{env_name}_1.0.0',
+                image=f'us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}_1.0.0',
                 image_pull_policy='Always',
                 resources=resource_limits)
+
         else:
             batches = []
 
