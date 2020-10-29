@@ -9,7 +9,7 @@ parameters:
   # A parameter per package
   pipeline_workflows:
     type: boolean
-    default: true
+    default: false
   data_tagger:
     type: boolean
     default: false
