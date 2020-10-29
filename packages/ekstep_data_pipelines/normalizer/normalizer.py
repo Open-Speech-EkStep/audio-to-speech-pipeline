@@ -141,7 +141,7 @@ class Normalizer(BaseProcessor):
             GET_LOAD_TIME_FOR_AUDIO_QUERY, audio_id=audio_id[0])
         if len(results) <= 0:
             Logger.info("All data normalized")
-            return []
+            return -1
         date_time = results[0][0]
         return date_time
 
@@ -164,9 +164,6 @@ class Normalizer(BaseProcessor):
             speaker_id = self.find_speaker_id(audio_id)
             get_load_datetime_for_audio = self.get_load_datetime(audio_id)
 
-            if len(get_load_datetime_for_audio) <= 0:
-                return
-
             utterance_list = self.get_utterance_list(audio_id)
 
             for utterance_name_diration in utterance_list:
@@ -176,7 +173,7 @@ class Normalizer(BaseProcessor):
                 defult_query = updated_query
 
         if defult_query == DEFULT_QUERY_FOR_INSERT_INTO_MAPPING_TABLE:
-            Logger.info("no record found")
+            Logger.info("no record found with speaker")
             return
 
         final_query = defult_query[:-1]
