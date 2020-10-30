@@ -6,7 +6,7 @@ from google.cloud import storage
 from urllib.parse import urlparse
 
 from audio_analysis.audio_analysis import AudioAnalysis
-from normalizer.normalizer import Normalizer
+from audio_cataloguer.cataloguer import AudioCataloguer
 from data_marker.data_marker import DataMarker
 from audio_processing.audio_processer import AudioProcessor
 from audio_transcription.audio_transcription import AudioTranscription
@@ -21,7 +21,7 @@ class ACTIONS:
     AUDIO_PROCESSING = 'audio_processing'
     AUDIO_TRANSCRIPTION = 'audio_transcription'
     AUDIO_ANALYSIS = 'audio_analysis'
-    NORMALIZER = 'normalizer'
+    AUDIO_CATALOGUER = 'audio_cataloguer'
 
 class FILE_SYSTEMS:
     GOOGLE = 'google'
@@ -29,7 +29,7 @@ class FILE_SYSTEMS:
 
 
 LOGGER = get_logger('EKSTEP_PROCESSOR')
-ACTIONS_LIST = [ACTIONS.DATA_MARKING, ACTIONS.AUDIO_PROCESSING, ACTIONS.AUDIO_TRANSCRIPTION, ACTIONS.AUDIO_ANALYSIS,ACTIONS.NORMALIZER]
+ACTIONS_LIST = [ACTIONS.DATA_MARKING, ACTIONS.AUDIO_PROCESSING, ACTIONS.AUDIO_TRANSCRIPTION, ACTIONS.AUDIO_ANALYSIS,ACTIONS.AUDIO_CATALOGUER]
 FILES_SYSTEMS_LIST = [FILE_SYSTEMS.GOOGLE, FILE_SYSTEMS.LOCAL]
 # config_bucket = 'ekstepspeechrecognition-dev'
 
@@ -270,8 +270,8 @@ def perform_action(arguments, **kwargs):
         curr_processor = AudioAnalysis.get_instance(data_processor, **{'commons_dict': object_dict, 'file_interface': arguments.file_system})
         LOGGER.info(f'Starting processing for {current_action}')
 
-    elif current_action == ACTIONS.NORMALIZER:
-        LOGGER.info('Intializing data normalizer with given config')
+    elif current_action == ACTIONS.AUDIO_CATALOGUER:
+        LOGGER.info('Intializing data AudioCataloguer with given config')
 
         config_params = {'config_file_path': kwargs.get('config_file_path')}
 
@@ -279,7 +279,7 @@ def perform_action(arguments, **kwargs):
 
         data_processor = object_dict.get('data_processor')
 
-        curr_processor = Normalizer.get_instance(data_processor)
+        curr_processor = AudioCataloguer.get_instance(data_processor)
         LOGGER.info(f'Starting processing for {current_action}')
 
     curr_processor.process(**kwargs)

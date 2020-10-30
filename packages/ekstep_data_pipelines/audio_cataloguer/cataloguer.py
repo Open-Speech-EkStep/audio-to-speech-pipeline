@@ -2,28 +2,28 @@ import json
 from common.utils import get_logger
 from common import BaseProcessor
 
-from normalizer.constants import MAX_LOAD_DATE_FOR_MEDIA_QUERY,INSERT_INTO_MEDIA_TABLE_QUERY,INSERT_UNIQUE_SPEAKER_QUERY,GET_AUDIO_ID_QUERY,\
+from audio_cataloguer.constants import MAX_LOAD_DATE_FOR_MEDIA_QUERY,INSERT_INTO_MEDIA_TABLE_QUERY,INSERT_UNIQUE_SPEAKER_QUERY,GET_AUDIO_ID_QUERY,\
     DEFULT_QUERY_FOR_INSERT_INTO_MAPPING_TABLE,GET_SPEAKER_ID_QUERY,FETCH_QUERY_WHERE_SPEAKER_IS_NULL,DEFAULT_INSERT_QUERY,DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG,\
         GET_LOAD_TIME_FOR_AUDIO_QUERY,GET_UTTERANCES_LIST_OF_AUDIO_ID
 
 
-Logger = get_logger("Normalizer")
+Logger = get_logger("Audio_cataloguer")
 
 
-class Normalizer(BaseProcessor):
+class AudioCataloguer(BaseProcessor):
     """
     docstring
     """
     @staticmethod
     def get_instance(data_processor):
-        return Normalizer(data_processor)
+        return AudioCataloguer(data_processor)
 
     def __init__(self,data_processor):
 
         self.data_processor = data_processor
 
     def process(self, **kwargs):
-        Logger.info('Normalizer utility')
+        Logger.info('AudioCataloguer utility')
         """
         Function for breaking an audio file into smaller chunks and then
         accepting/rejecting them basis the SNR ratio.

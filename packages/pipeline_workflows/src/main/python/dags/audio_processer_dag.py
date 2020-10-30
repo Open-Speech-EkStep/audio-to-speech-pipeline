@@ -70,9 +70,9 @@ def create_dag(dag_id,
             chunk_size = math.ceil(len(file_path_list) / parallelism)
             batches = [file_path_list[i:i + chunk_size] for i in range(0, len(file_path_list), chunk_size)]
             data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
-                task_id='data-normalizer',
-                name='data-normalizer',
-                cmds=["python", "invocation_script.py", "-b",bucket_name, "-a", "normalizer", "-rc",f"data/audiotospeech/config/audio_processing/config_{language}.yaml"],
+                task_id='data-catalogure',
+                name='data-catalogure',
+                cmds=["python", "invocation_script.py", "-b",bucket_name, "-a", "audio_cataloguer", "-rc",f"data/audiotospeech/config/audio_processing/config_{language}.yaml"],
                 namespace = composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
