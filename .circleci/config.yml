@@ -137,7 +137,8 @@ jobs:
           name: Generate Linting Report
           command: |
             set +e
-            pylint `pwd`  --exit-zero
+            mkdir -p linting_report
+            pylint `pwd`  --exit-zero > linting_report/linting_report_<< parameters.package_name >>.txt
       - store_artifacts:
           path: linting_report
       - run:
