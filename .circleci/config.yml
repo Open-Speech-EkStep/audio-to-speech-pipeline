@@ -111,7 +111,10 @@ jobs:
       package_name:
         type: string
 
-    executor: node
+    executor:
+      default: python/default
+      description: Python executor to use for this job
+      type: executor
     working_directory: ~/project/packages/<< parameters.package_name >>
 
     steps:
