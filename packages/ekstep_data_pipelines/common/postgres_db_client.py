@@ -50,7 +50,6 @@ class PostgresClient:
         return data_processor
 
     def __init__(self, config_dict,**kwargs):
-        import ipdb; ipdb.set_trace()
         self.config_dict = config_dict
         self.db = None
         self._connection = None
