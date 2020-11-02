@@ -286,6 +286,7 @@ workflows:
           name: ekstep_data_pipelines_build
           package_name: ekstep_data_pipelines
       - build_E2E:
+          name: ekstep_data_pipelines_build
       - deploy:
           name: ekstep_data_pipelines_deploy_test
           package_name: ekstep_data_pipelines
