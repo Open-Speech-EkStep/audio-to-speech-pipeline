@@ -137,7 +137,6 @@ jobs:
           name: Generate Linting Report
           command: |
             set +e
-            mkdir -p linting_report
             pylint `pwd`
       - store_artifacts:
           path: linting_report
