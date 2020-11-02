@@ -44,21 +44,18 @@ class PostgresClient:
     IS_EXIST = "select exists(select 1 from media_metadata_staging where raw_file_name= :file_name or media_hash_code = :hash_code);"
 
     @staticmethod
-    def get_instance(intialization_dict):
-        data_processor = PostgresClient(**intialization_dict)
+    def get_instance(config_dict,**kwargs):
+        data_processor = PostgresClient(config_dict,**kwargs)
         data_processor.setup_peripherals()
         return data_processor
 
-    def __init__(self, **kwargs):
-        self.config_file_path = kwargs.get('config_file_path')
-        self.config_dict = None
+    def __init__(self, config_dict,**kwargs):
+        import ipdb; ipdb.set_trace()
+        self.config_dict = config_dict
         self.db = None
         self._connection = None
 
     def setup_peripherals(self):
-
-        # get yaml config
-        self.load_configeration()
         self.setup_db_access()
 
     @property
@@ -90,19 +87,6 @@ class PostgresClient:
 
         self.db = create_engine(
             f'postgresql://{db_user}:{db_pass}@{cloud_sql_connection_name}/{db_name}')
-
-    def load_configeration(self):
-        """
-        Load up configeration
-        """
-
-        if not self.config_file_path:
-            # TODO: ideally raise exception here
-            pass
-
-        with open(self.config_file_path, 'r') as file:
-            parent_config_dict = yaml.load(file)
-            self.config_dict = parent_config_dict.get('config')
 
     def execute_query(self, query, **parm_dict):
         return self.connection.execute(text(query), **parm_dict).fetchall()

@@ -72,6 +72,9 @@ parser.add_argument('-par', '--params', dest='params', default=None,
 parser.add_argument('-f', '--file_system', dest='file_system', choices=FILES_SYSTEMS_LIST, default='google',
                     help='Specify the file system to use for running the pipeline', required=False)
 
+parser.add_argument('-l', '--language', dest='language', default='hindi',
+                    help='Specify the language')
+
 processor_args = parser.parse_args()
 
 
@@ -219,7 +222,7 @@ def perform_action(arguments, **kwargs):
 
         config_params = {'config_file_path': kwargs.get('config_file_path')}
 
-        object_dict = get_periperhals(config_params)
+        object_dict = get_periperhals(config_params,arguments.language)
 
         data_processor = object_dict.get('data_processor')
         gcs_instance = object_dict.get('gsc_instance')
@@ -233,7 +236,7 @@ def perform_action(arguments, **kwargs):
         LOGGER.info('Intializing audio processor marker with given config')
         config_params = {'config_file_path': kwargs.get('config_file_path')}
 
-        object_dict = get_periperhals(config_params)
+        object_dict = get_periperhals(config_params,arguments.language)
 
         data_processor = object_dict.get('data_processor')
         gcs_instance = object_dict.get('gsc_instance')
@@ -248,7 +251,7 @@ def perform_action(arguments, **kwargs):
         LOGGER.info('Intializing audio processor marker with given config')
         config_params = {'config_file_path': kwargs.get('config_file_path')}
 
-        object_dict = get_periperhals(config_params)
+        object_dict = get_periperhals(config_params,arguments.language)
 
         data_processor = object_dict.get('data_processor')
         gcs_instance = object_dict.get('gsc_instance')
@@ -263,7 +266,7 @@ def perform_action(arguments, **kwargs):
 
         config_params = {'config_file_path': kwargs.get('config_file_path')}
 
-        object_dict = get_periperhals(config_params)
+        object_dict = get_periperhals(config_params,arguments.language)
 
         data_processor = object_dict.get('data_processor')
 
@@ -275,7 +278,7 @@ def perform_action(arguments, **kwargs):
 
         config_params = {'config_file_path': kwargs.get('config_file_path')}
 
-        object_dict = get_periperhals(config_params)
+        object_dict = get_periperhals(config_params,arguments.language)
 
         data_processor = object_dict.get('data_processor')
 

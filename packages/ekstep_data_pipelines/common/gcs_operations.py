@@ -15,33 +15,14 @@ Logger = get_logger('GCS Operations')
 class CloudStorageOperations():
 
     @staticmethod
-    def get_instance(intialization_dict):
-        gcs_instance = CloudStorageOperations(**intialization_dict)
-        gcs_instance.setup_peripherals()
+    def get_instance(config_dict, **kwargs):
+        gcs_instance = CloudStorageOperations(config_dict,**kwargs)
         return gcs_instance
 
-    def __init__(self, **kwargs):
-        self.config_file_path = kwargs.get('config_file_path')
-        self.config_dict = None
+    def __init__(self, config_dict,**kwargs):
+        self.config_dict = config_dict
         self._bucket = None
         self._client = None
-
-    def setup_peripherals(self):
-        # get yaml config
-        self.load_configeration()
-
-    def load_configeration(self):
-        """
-        Load up configeration
-        """
-
-        if not self.config_file_path:
-            # TODO: ideally raise exception here
-            pass
-
-        with open(self.config_file_path, 'r') as file:
-            parent_config_dict = yaml.load(file)
-            self.config_dict = parent_config_dict.get('config')
 
     @property
     def client(self):
@@ -56,13 +37,12 @@ class CloudStorageOperations():
         if self._bucket:
             return self._bucket
 
-        if not self.config_dict:
-            self.setup_peripherals()
+        # if not self.config_dict:
+            # self.setup_peripherals()
 
 
         self._bucket = self.config_dict.get('common', {}).get('gcs_config', {}).get('master_bucket')
         return self._bucket
-
 
     def check_path_exists(self, path):
         bucket = self.client.bucket(self.bucket)
