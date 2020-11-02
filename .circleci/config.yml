@@ -111,7 +111,7 @@ jobs:
       package_name:
         type: string
 
-    executor: python/default
+    executor: node
     working_directory: ~/project/packages/<< parameters.package_name >>
 
     steps:
@@ -136,6 +136,7 @@ jobs:
       - run:
           name: Generate Linting Report
           command: |
+            set +e
             mkdir -p linting_report
             pylint `pwd`
       - store_artifacts:
