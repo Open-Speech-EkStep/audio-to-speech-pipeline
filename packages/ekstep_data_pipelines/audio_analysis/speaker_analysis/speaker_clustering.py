@@ -53,18 +53,24 @@ def create_speaker_clusters(embed_filename_map_path, source_name, min_cluster_si
                 min_samples=min_samples,
                 cluster_selection_method='leaf')
 
-            merger_big_cl = Merge()
-            big_cluster_embeds_merged, big_mean_embeds_merged = merger_big_cl.run_repetitive_merging(
-                all_cluster_embeds_big,
-                mean_embeds_big,
-                start_similarity_allowed=0.96,
-                end_similarity_allowed=0.94,
-                merge_closest_only=True)
+            if len(mean_embeds_big) == 1:
+                if len(all_cluster_embeds_big) != 1:
+                    all_cluster_embeds_big = [all_cluster_embeds_big]
+            big_cluster_embeds_merged = []
+            big_mean_embeds_merged = []
+            if len(mean_embeds_big) != 0:
+                merger_big_cl = Merge()
+                big_cluster_embeds_merged, big_mean_embeds_merged = merger_big_cl.run_repetitive_merging(
+                    all_cluster_embeds_big,
+                    mean_embeds_big,
+                    start_similarity_allowed=0.96,
+                    end_similarity_allowed=0.94,
+                    merge_closest_only=True)
 
-            print('Num clusters after merging big clusters = {}'.format(len(big_mean_embeds_merged)))
+                print('Num clusters after merging big clusters = {}'.format(len(big_mean_embeds_merged)))
 
             # preparing new list of clusters (after adding split+merged clusters together) and updated final noise
-            all_cluster_embeds_to_merge, mean_embeddings_to_merge, noise_embeds_final = merger_big_cl.get_final_clusters_and_noise(
+            all_cluster_embeds_to_merge, mean_embeddings_to_merge, noise_embeds_final = merger.get_final_clusters_and_noise(
                 big_clusters_indices, all_cluster_embeds_merged_initial, mean_embeds_merged_initial,
                 noise_embeds, big_cluster_embeds_merged, big_mean_embeds_merged, noise_embeds_big)
             print('Num clusters before final merging  = {}'.format(len(mean_embeddings_to_merge)))
@@ -85,7 +91,7 @@ def create_speaker_clusters(embed_filename_map_path, source_name, min_cluster_si
             all_cluster_embeds_merged_initial = all_cluster_embeds_merged
 
         # step:3 -> FIT NOISE
-        all_cluster_embeds_after_noise_fit, mean_embeds_new, unallocated_noise_embeds = merger.fit_noise_points(
+        all_cluster_embeds_after_noise_fit, mean_embeds_new, unallocated_noise_embeds, was_noise_flag = merger.fit_noise_points(
             mean_embeds_merged_initial,
             noise_embeds,
             all_cluster_embeds_merged_initial,
@@ -96,7 +102,16 @@ def create_speaker_clusters(embed_filename_map_path, source_name, min_cluster_si
         map_obj = Map(embeddings, file_paths)
         indices = [map_obj.find_index(cluster) for cluster in all_cluster_embeds_after_noise_fit]
         files_in_clusters = [map_obj.find_file(row) for row in indices]
-        file_map_dict = {source_name + '_sp_' + str(ind): j for ind, j in enumerate(files_in_clusters)}
+        # files_in_clusters_with_noise_flag = [(file, was_noise_flag[ind]) for ind, file in enumerate(files_in_clusters)]
+        files_in_clusters_with_noise_flag = []
+        for ind, list_of_files in enumerate(files_in_clusters):
+            cluster = []
+            for i, file in enumerate(list_of_files):
+                flag = was_noise_flag[ind][i]
+                cluster.append((file, flag))
+            files_in_clusters_with_noise_flag.append(cluster)
+
+        file_map_dict = {source_name + '_sp_' + str(ind): j for ind, j in enumerate(files_in_clusters_with_noise_flag)}
 
         noise_file_map_dict = dict({})
         if len(unallocated_noise_embeds):

@@ -169,6 +169,8 @@ class Merge:
         max_distance_allowed = 1 - max_sim_allowed
         all_cluster_embeds_copy = deepcopy(all_cluster_embeds)
 
+        was_noise_flag = [[0]*len(cluster) for cluster in all_cluster_embeds_copy]
+
         allocated_noise_point_index = []
         print('Trying to fit {} noise points with cos_similarity={}'.format(len(noise_embeds), max_sim_allowed))
         # distances is a matrix of shape (num_noise_points, num_mean_embeds)
@@ -181,6 +183,7 @@ class Merge:
             for index, dist in enumerate(closest_cluster_dist):
                 if dist <= max_distance_allowed:
                     all_cluster_embeds_copy[closest_cluster_index[index]].append(noise_embeds[index])
+                    was_noise_flag[closest_cluster_index[index]].append(1)
                     allocated_noise_point_index.append(index)
 
             # embeddings for noise points that couldn't be allocated
@@ -197,4 +200,4 @@ class Merge:
             print('No noise points could be fit!')
             mean_embeds_new = mean_embeds
             unallocated_noise_embeds = noise_embeds
-        return all_cluster_embeds_copy, mean_embeds_new, unallocated_noise_embeds
+        return all_cluster_embeds_copy, mean_embeds_new, unallocated_noise_embeds, was_noise_flag
