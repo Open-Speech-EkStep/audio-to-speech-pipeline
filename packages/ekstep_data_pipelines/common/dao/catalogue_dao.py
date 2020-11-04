@@ -114,13 +114,14 @@ class CatalogueDao:
         self.postgres_client.execute_update(insert_query, **param_dict)
         return True
 
-    def update_utterance_speaker(self, utterance_file_names, speaker_name):
+    def update_utterance_speaker(self, utterance_file_names, speaker_name, was_noise=0):
         update_query = "update media_speaker_mapping " \
                        "set speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name) " \
+                       "was_noise=:was_noise" \
                        "where clipped_utterance_file_name in "
         utterance_names = list(map(lambda u: f'\'{u}\'', utterance_file_names))
         update_query = update_query + '(' + ','.join(utterance_names) + ')'
-        param_dict = {'speaker_name': speaker_name}
+        param_dict = {'speaker_name': speaker_name, 'was_noise': was_noise}
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
 

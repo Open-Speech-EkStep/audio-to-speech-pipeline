@@ -28,5 +28,10 @@ def analyse_speakers(embed_file_path, dir_pattern, local_audio_download_path, so
 
         if speaker_inserted:
             Logger.info('updating utterances for speaker:' + speaker)
-            Logger.info('utterances:' + str(speaker_to_file_name.get(speaker)))
-            catalogue_dao.update_utterance_speaker(speaker_to_file_name.get(speaker), speaker)
+            utterances = speaker_to_file_name.get(speaker)
+            Logger.info('utterances:' + str(utterances))
+            to_file_name = lambda u: u[0]
+            was_noise_utterances = list(map(to_file_name, (filter(lambda u: u[1] == 1, utterances))))
+            fitted_utterances = list(map(to_file_name, (filter(lambda u: u[1] == 0, utterances))))
+            catalogue_dao.update_utterance_speaker(was_noise_utterances, speaker, 1)
+            catalogue_dao.update_utterance_speaker(fitted_utterances, speaker, 0)

@@ -188,11 +188,12 @@ class CatalogueTests(unittest.TestCase):
         ]
         speaker_name = 'xyz'
         catalogueDao = CatalogueDao(mock_postgres_client)
-        catalogueDao.update_utterance_speaker(utterances, speaker_name)
+        catalogueDao.update_utterance_speaker(utterances, speaker_name, 0)
         called_with_query = 'update media_speaker_mapping set ' \
                             'speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name) ' \
+                            'was_noise=:was_noise' \
                             'where clipped_utterance_file_name in (\'file_1.wav\',\'file_2.wav\')'
-        called_with_args = {"speaker_name": speaker_name}
+        called_with_args = {"speaker_name": speaker_name, "was_noise": 0}
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(called_with_query, args[0][0])
         self.assertEqual(called_with_args, args[1])
