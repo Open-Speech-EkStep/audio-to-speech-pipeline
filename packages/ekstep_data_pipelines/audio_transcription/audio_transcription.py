@@ -75,7 +75,7 @@ class AudioTranscription(BaseProcessor):
                                                                                  transcription_client, utterances, should_skip_rejected, remote_dir_path_for_given_audio_id)
                 LOGGER.info('updating catalogue with updated utterances')
                 self.catalogue_dao.update_utterances(audio_id, utterances)
-                
+
                 LOGGER.info(f'Uploading local generated files from {local_clean_dir_path} to {remote_stt_output_path}')
                 if os.path.exists(local_clean_dir_path):
                     self.fs_interface.upload_folder_to_location(local_clean_dir_path, remote_stt_output_path + "/clean")
@@ -149,7 +149,7 @@ class AudioTranscription(BaseProcessor):
 
             if not os.path.exists(local_clean_folder):
                 os.makedirs(local_clean_folder)
-            
+
             local_rejected_path = local_clean_folder.replace('clean', 'rejected')
 
             self.generate_transcription_and_sanitize(audio_id, local_clean_path, local_rejected_path, file_name, language,
@@ -167,12 +167,25 @@ class AudioTranscription(BaseProcessor):
             remote_file_path, local_clean_path)
 
         reason = None
-        
+
         try:
             transcript = transcription_client.generate_transcription(
                 language, local_clean_path)
             original_transcript = transcript
-            transcript = TranscriptionSanitizer().sanitize(transcript)
+
+            curr_language = self.audio_transcription_config.get(LANGUAGE)
+
+            LOGGER.info(f'Getting transacription sanitizer for the language {curr_language}')
+
+            all_transcription_sanitizers = get_transcription_sanitizers()
+            transcription_sanitizer = all_transcription_sanitizers.gest(curr_language)
+
+            if not transcription_sanitizer:
+                LOGGER.info(f'No transacription sanitizer found for the language {curr_language}, hence falling back to the default sanitizer')
+                transcription_sanitizer = all_transcription_sanitizers.get('defalt')
+
+
+            transcript = transcription_sanitizer.sanitize(transcript)
 
             if original_transcript != transcript:
                 old_file_name = get_file_name(transcription_file_name)
