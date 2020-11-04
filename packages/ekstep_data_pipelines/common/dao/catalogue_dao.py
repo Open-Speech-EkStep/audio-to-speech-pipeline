@@ -114,7 +114,7 @@ class CatalogueDao:
         self.postgres_client.execute_update(insert_query, **param_dict)
         return True
 
-    def update_utterance_speaker(self, utterance_file_names, speaker_name, was_noise=0):
+    def update_utterance_speaker(self, utterance_file_names, speaker_name, was_noise=False):
         update_query = "update media_speaker_mapping " \
                        "set speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name) " \
                        "was_noise=:was_noise " \

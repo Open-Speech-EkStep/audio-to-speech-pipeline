@@ -33,5 +33,7 @@ def analyse_speakers(embed_file_path, dir_pattern, local_audio_download_path, so
             to_file_name = lambda u: u[0]
             was_noise_utterances = list(map(to_file_name, (filter(lambda u: u[1] == 1, utterances))))
             fitted_utterances = list(map(to_file_name, (filter(lambda u: u[1] == 0, utterances))))
-            catalogue_dao.update_utterance_speaker(was_noise_utterances, speaker, 1)
-            catalogue_dao.update_utterance_speaker(fitted_utterances, speaker, 0)
+            if len(was_noise_utterances) > 0:
+                catalogue_dao.update_utterance_speaker(was_noise_utterances, speaker, True)
+            if len(fitted_utterances) > 0:
+                catalogue_dao.update_utterance_speaker(fitted_utterances, speaker, False)
