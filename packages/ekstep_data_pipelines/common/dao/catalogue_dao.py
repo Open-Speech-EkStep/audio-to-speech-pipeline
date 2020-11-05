@@ -117,7 +117,7 @@ class CatalogueDao:
     def update_utterance_speaker(self, utterance_file_names, speaker_name, was_noise=False):
         update_query = "update media_speaker_mapping " \
                        "set speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name) " \
-                       "was_noise=:was_noise " \
+                       ", was_noise=:was_noise " \
                        "where clipped_utterance_file_name in "
         utterance_names = list(map(lambda u: f'\'{u}\'', utterance_file_names))
         update_query = update_query + '(' + ','.join(utterance_names) + ')'
