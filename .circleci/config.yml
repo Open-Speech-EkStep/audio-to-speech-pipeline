@@ -150,7 +150,7 @@ jobs:
       - persist_to_workspace:
           root: ~/project
           paths:
-            - packages/<< parameters.package_name >>
+            - packages
   deploy:
     parameters:
       package_name:
