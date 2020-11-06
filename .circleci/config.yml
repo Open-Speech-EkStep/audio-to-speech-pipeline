@@ -153,8 +153,6 @@ jobs:
             - packages
   deploy:
     parameters:
-      package_name:
-        type: string
       package_version:
         type: string
       env_name:
@@ -162,7 +160,7 @@ jobs:
     #    executor: node
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/project/packages/<< parameters.package_name >>
+    working_directory: ~/project/packages
 
     steps:
       - attach_workspace:
@@ -178,15 +176,15 @@ jobs:
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GCP_PROJECT}
             if [[ << parameters.env_name >> == "test" ]]; then
-              echo "Build << parameters.package_name >> ..."
-              docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >> -t us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>_<< parameters.package_version >> .
+              echo "Build ..."
+              docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.package_version >> -t us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.env_name >>_<< parameters.package_version >> .
             else
-             echo "Pull << parameters.package_name >> ..."
-             gcloud docker -- pull us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >>
-             echo "Tag << parameters.package_name >> ... with << parameters.env_name >>"
-             docker tag us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.package_version >> us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>:<< parameters.env_name >>_<< parameters.package_version >>
+             echo "Pull ekstep_data_pipelines ..."
+             gcloud docker -- pull us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.package_version >>
+             echo "Tag ekstep_data_pipelines ... with << parameters.env_name >>"
+             docker tag us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.package_version >> us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.env_name >>_<< parameters.package_version >>
             fi
-            gcloud docker -- push us.gcr.io/${GCP_PROJECT}/<< parameters.package_name >>
+            gcloud docker -- push us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines
       - run:
           name: Remove account details
           command: rm ${HOME}/gcp-key.json ; ls
@@ -286,7 +284,6 @@ workflows:
           name: ekstep_data_pipelines
       - deploy:
           name: ekstep_data_pipelines_deploy_test
-          package_name: ekstep_data_pipelines
           env_name: test
           package_version: 1.0.0
           requires:
