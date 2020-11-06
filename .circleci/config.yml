@@ -15,7 +15,7 @@ parameters:
     default: false
   ekstep_data_pipelines:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:
@@ -107,20 +107,14 @@ jobs:
             - packages/<< parameters.package_name >>
 
   ekstep_build:
-    parameters:
-      package_name:
-        type: string
 
     executor: node
-    working_directory: ~/project/packages/<< parameters.package_name >>
+    working_directory: ~/project/packages
 
     steps:
       - checkout:
           path: ~/project
       # This step is added only to show that we are in the package directory
-      - run:
-          name: Sanity check to confirm correct package directory
-          command: echo "Current package directory is << parameters.package_name >> ..."
       - run:
           name: Setup Testing Environment
           command: |
@@ -138,7 +132,7 @@ jobs:
           command: |
             set +e
             mkdir -p linting_report
-            pylint `pwd`  --exit-zero > linting_report/linting_report_<< parameters.package_name >>.txt
+            pylint `pwd`  --exit-zero > linting_report/linting_report_.txt
       - store_artifacts:
           path: linting_report
       - run:
@@ -288,7 +282,6 @@ workflows:
     jobs:
       - ekstep_build:
           name: ekstep_data_pipelines_build
-          package_name: ekstep_data_pipelines
       - build_E2E:
           name: ekstep_data_pipelines
       - deploy:
