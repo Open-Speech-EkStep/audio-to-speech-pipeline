@@ -256,14 +256,12 @@ workflows:
           package_name: data_tagger
       - deploy:
           name: data_tagger_deploy_test
-          package_name: data_tagger
           package_version: 1.0.0
           env_name: test
           requires:
             - data_tagger_build
       - deploy:
           name: data_tagger_deploy_prod
-          package_name: data_tagger
           package_version: 1.0.0
           env_name: prod
           requires:
