@@ -215,7 +215,10 @@ jobs:
       - run :
           name: Setup proxy for psql
           command: |
-            GIT_SSH_COMMAND='ssh -i ~/.ssh/${RSA_FINGERPRINT}'
+            mkdir -p ~/.ssh
+
+            echo ${SSH} >> ~/.ssh/known_hosts
+
             git clone git@github.com:Open-Speech-EkStep/E2ETest.git
             cd ${HOME}
             wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-265.0.0-linux-x86_64.tar.gz
