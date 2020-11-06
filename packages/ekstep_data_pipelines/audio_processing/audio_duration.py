@@ -14,5 +14,4 @@ def calculate_duration(input_filepath):
 
 def calculate_duration_librosa(input_filepath):
     y, sr = librosa.load(input_filepath)
-    LOGGER.info(f'Duration for input_filepath:{input_filepath} : {str(librosa.get_duration(y))}')
     return librosa.get_duration(y)
