@@ -1,13 +1,10 @@
-import sys
 
-from common.utils import get_logger
+from ekstep_data_pipelines.common.utils import get_logger
 
-from audio_analysis.speaker_analysis.create_embeddings import encoder
-from audio_analysis.speaker_analysis.file_cluster_mapping import speaker_to_file_name_map
-from audio_analysis.speaker_analysis.speaker_clustering import create_speaker_clusters
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import encoder
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.file_cluster_mapping import speaker_to_file_name_map
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.speaker_clustering import create_speaker_clusters
 
-sys.path.insert(0, '..')
-sys.path.insert(0, '../..')
 
 Logger = get_logger("analyse_speakers")
 

@@ -1,6 +1,6 @@
 import hashlib
 
-from common.utils import get_logger
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger('hash_code')
 

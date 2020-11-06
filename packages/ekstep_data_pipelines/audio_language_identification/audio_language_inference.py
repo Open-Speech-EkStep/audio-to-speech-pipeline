@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import yaml
 
-from audio_language_identification.utils import utils
+from ekstep_data_pipelines.audio_language_identification.utils import utils
 
 # check cuda available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -49,7 +49,7 @@ def load_yaml_file(path):
     return read_dict
 
 
-def evaluation(audio_path, model_path='audio_language_identification/model/model.pt'):
+def evaluation(audio_path, model_path='ekstep_data_pipelines/audio_language_identification/model/model.pt'):
     model = load_model(model_path)
     model_output = forward(audio_path, model=model)
     sm = torch.nn.Softmax()
@@ -57,6 +57,6 @@ def evaluation(audio_path, model_path='audio_language_identification/model/model
     confidence_scores = ["{:.5f}".format(i.item()) for i in list(probabilities[0])]
     return confidence_scores
 
-def infer_language(audio_path, language_map_path='audio_language_identification/language_map.yml'):
+def infer_language(audio_path, language_map_path='ekstep_data_pipelines/audio_language_identification/language_map.yml'):
     return language_confidence_score_map(evaluation(audio_path), language_map_path)
 

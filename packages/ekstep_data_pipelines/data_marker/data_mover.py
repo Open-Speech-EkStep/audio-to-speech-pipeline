@@ -1,4 +1,4 @@
-from common.utils import get_logger
+from ekstep_data_pipelines.common.utils import get_logger
 from concurrent.futures import ThreadPoolExecutor
 
 Logger = get_logger("MediaFilesMover")

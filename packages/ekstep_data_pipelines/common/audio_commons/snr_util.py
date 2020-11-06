@@ -3,15 +3,13 @@ import sys
 from ekstep_data_pipelines.audio_processing.audio_duration import calculate_duration
 
 
-sys.path.insert(0, '..')
-sys.path.insert(0, '../..')
 
 import os
 import json
 import shutil
 import subprocess
 import pandas as pd
-import audio_language_identification.audio_language_inference
+from ekstep_data_pipelines.audio_language_identification.audio_language_inference import infer_language
 import librosa
 from ekstep_data_pipelines.common.utils import get_logger
 
@@ -40,7 +38,7 @@ class SNR:
         self.current_working_dir = os.getcwd()
 
     def get_command(self, current_working_dir, file_path):
-        return f'"{current_working_dir}/binaries/WadaSNR/Exe/WADASNR" -i "{file_path}" -t "{current_working_dir}/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
+        return f'"{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/WADASNR" -i "{file_path}" -t "{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
 
     def get_output_directories(self, output_dir, ensure_path=True):
         clean_path, rejected_path = f'{output_dir}/clean', f'{output_dir}/rejected'
@@ -120,7 +118,7 @@ class SNR:
             metadata["media_hash_code"] = hash_code
             
             if self.feat_language_identification:
-                language_confidence_score = audio_language_identification.audio_language_inference.infer_language(file_path)
+                language_confidence_score = infer_language(file_path)
             else:
                 language_confidence_score = None
             LOGGER.info("language_confidence_score:" + str(language_confidence_score))

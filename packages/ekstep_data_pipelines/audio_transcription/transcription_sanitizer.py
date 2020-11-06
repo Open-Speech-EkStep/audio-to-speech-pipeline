@@ -1,6 +1,6 @@
 import re
-from audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
-from common.utils import get_logger
+from ekstep_data_pipelines.audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger('TranscriptionSanitizer')
 

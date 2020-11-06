@@ -1,6 +1,6 @@
 import numpy as np
 
-from audio_language_identification.utils import utils
+from ekstep_data_pipelines.audio_language_identification.utils import utils
 
 
 class SpeechDataGenerator:

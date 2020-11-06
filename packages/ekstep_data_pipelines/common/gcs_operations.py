@@ -7,7 +7,7 @@ from os.path import isfile, join
 from google.cloud import storage
 from concurrent.futures import ThreadPoolExecutor
 import datetime
-from common.utils import get_logger
+from ekstep_data_pipelines.common.utils import get_logger
 
 Logger = get_logger('GCS Operations')
 

@@ -6,10 +6,6 @@ import os
 
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import GoogleTranscriptionClientError
 
-sys.path.append('./transcription')
-sys.path.insert(0, '..')
-sys.path.insert(0, '../..')
-sys.path.insert(0, '../../...')
 
 
 LOGGER = get_logger('GoogleTranscriptionClient')

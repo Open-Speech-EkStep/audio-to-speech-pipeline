@@ -1,10 +1,10 @@
 import yaml
 import json
-from common.postgres_db_client import PostgresClient
-from common.gcs_operations import CloudStorageOperations
-from .audio_commons import get_audio_commons
-from .infra_commons import get_infra_utils
-from .dao.catalogue_dao import CatalogueDao
+from ekstep_data_pipelines.common.postgres_db_client import PostgresClient
+from ekstep_data_pipelines.common.gcs_operations import CloudStorageOperations
+from ekstep_data_pipelines.common.audio_commons import get_audio_commons
+from ekstep_data_pipelines.common.infra_commons import get_infra_utils
+from ekstep_data_pipelines.common.dao.catalogue_dao import CatalogueDao
 
 class BaseProcessor:
 

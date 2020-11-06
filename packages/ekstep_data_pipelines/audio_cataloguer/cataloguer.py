@@ -1,8 +1,8 @@
 import json
-from common.utils import get_logger
-from common import BaseProcessor
+from ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.common import BaseProcessor
 
-from audio_cataloguer.constants import MAX_LOAD_DATE_FOR_MEDIA_QUERY,INSERT_INTO_MEDIA_TABLE_QUERY,INSERT_UNIQUE_SPEAKER_QUERY,GET_AUDIO_ID_QUERY,\
+from ekstep_data_pipelines.audio_cataloguer.constants import MAX_LOAD_DATE_FOR_MEDIA_QUERY,INSERT_INTO_MEDIA_TABLE_QUERY,INSERT_UNIQUE_SPEAKER_QUERY,GET_AUDIO_ID_QUERY,\
     DEFULT_QUERY_FOR_INSERT_INTO_MAPPING_TABLE,GET_SPEAKER_ID_QUERY,FETCH_QUERY_WHERE_SPEAKER_IS_NULL,DEFAULT_INSERT_QUERY,DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG,\
         GET_LOAD_TIME_FOR_AUDIO_QUERY,GET_UTTERANCES_LIST_OF_AUDIO_ID
 

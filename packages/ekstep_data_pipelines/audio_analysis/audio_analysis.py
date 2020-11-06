@@ -1,10 +1,10 @@
 import multiprocessing
 import os
 
-from audio_analysis.analyse_speaker import analyse_speakers
-from audio_processing.constants import CONFIG_NAME, REMOTE_PROCESSED_FILE_PATH
-from common.utils import get_logger
-from common import BaseProcessor, CatalogueDao
+from ekstep_data_pipelines.audio_analysis.analyse_speaker import analyse_speakers
+from ekstep_data_pipelines.audio_processing.constants import CONFIG_NAME, REMOTE_PROCESSED_FILE_PATH
+from ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
 
 MIN_SAMPLES = 1
 

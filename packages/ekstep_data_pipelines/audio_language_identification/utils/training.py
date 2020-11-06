@@ -9,7 +9,7 @@ from tqdm import tqdm
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
-from audio_language_identification.loaders.data_loader import SpeechDataGenerator
+from ekstep_data_pipelines.audio_language_identification.loaders.data_loader import SpeechDataGenerator
 
 
 

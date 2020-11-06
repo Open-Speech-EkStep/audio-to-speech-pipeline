@@ -2,10 +2,10 @@ import os
 from os import listdir
 from os.path import isfile, join
 from google.cloud import storage
-from . import BaseStorageInterface
+from ekstep_data_pipelines.common.infra_commons.storage import BaseStorageInterface
 from concurrent.futures import ThreadPoolExecutor
-from .exceptions import FileNotFoundException, PathDoesNotExist
-from common.utils import get_logger
+from ekstep_data_pipelines.common.infra_commons.storage.exceptions import FileNotFoundException, PathDoesNotExist
+from ekstep_data_pipelines.common.utils import get_logger
 from tqdm import tqdm
 
 Logger = get_logger("GoogleStorage")

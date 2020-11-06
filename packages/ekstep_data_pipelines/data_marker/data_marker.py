@@ -1,19 +1,17 @@
 import multiprocessing
 
-from common import CatalogueDao
-from common.file_system.gcp_file_systen import GCPFileSystem
-from common.utils import get_logger
-from common import BaseProcessor
+from ekstep_data_pipelines.common import CatalogueDao
+from ekstep_data_pipelines.common.file_system.gcp_file_systen import GCPFileSystem
+from ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.common import BaseProcessor
 
-import sys
 
-from data_marker.constants import CONFIG_NAME, FILTER_CRITERIA, LANDING_BASE_PATH, SOURCE_BASE_PATH
-from data_marker.data_filter import DataFilter
-from data_marker.data_mover import MediaFilesMover
+from ekstep_data_pipelines.data_marker.constants import CONFIG_NAME, FILTER_CRITERIA, LANDING_BASE_PATH, SOURCE_BASE_PATH
+from ekstep_data_pipelines.data_marker.data_filter import DataFilter
+from ekstep_data_pipelines.data_marker.data_mover import MediaFilesMover
 
 ESTIMATED_CPU_SHARE = .02
 
-sys.path.insert(0, '..')
 
 Logger = get_logger("Data marker")
 

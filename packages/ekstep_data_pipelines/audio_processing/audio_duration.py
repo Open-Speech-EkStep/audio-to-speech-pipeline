@@ -1,7 +1,7 @@
 import librosa
 import sox
 
-from common.utils import get_logger
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger('audio_duration')
 

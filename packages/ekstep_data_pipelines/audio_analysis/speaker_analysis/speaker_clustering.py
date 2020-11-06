@@ -1,7 +1,7 @@
-from audio_analysis.speaker_analysis.create_file_mappings import Map
-from audio_analysis.speaker_analysis.clustering import Clustering
-from audio_analysis.speaker_analysis.merging import Merge
-from audio_analysis.speaker_analysis.splitting import get_big_cluster_embeds
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_file_mappings import Map
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.clustering import Clustering
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.merging import Merge
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.splitting import get_big_cluster_embeds
 
 import numpy as np
 

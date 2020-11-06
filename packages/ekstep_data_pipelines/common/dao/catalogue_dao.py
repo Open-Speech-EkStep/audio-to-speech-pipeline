@@ -1,10 +1,10 @@
 import json
 
-from common.utils import get_logger
+from ekstep_data_pipelines.common.utils import get_logger
 
 from sqlalchemy import text
 
-from common.dao.constants import GET_UNIQUE_ID,IS_EXIST
+from ekstep_data_pipelines.common.dao.constants import GET_UNIQUE_ID,IS_EXIST
 
 LOGGER = get_logger('CatalogueDao')
 

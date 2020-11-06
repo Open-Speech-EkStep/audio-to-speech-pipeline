@@ -1,11 +1,11 @@
 import os
 import glob
 
-from audio_processing.generate_hash import get_hash_code_of_audio_file
-from audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG, SNR_CONFIG, REMOTE_PROCESSED_FILE_PATH,\
+from ekstep_data_pipelines.audio_processing.generate_hash import get_hash_code_of_audio_file
+from ekstep_data_pipelines.audio_processing.constants import CONFIG_NAME, REMOTE_RAW_FILE, CHUNKING_CONFIG, SNR_CONFIG, REMOTE_PROCESSED_FILE_PATH,\
     MASTER_META_DATA_FILE_PATH, SNR_DONE_FOLDER_PATH ,DUPLICATE_AUDIO_FOLDER_PATH
-from common.utils import get_logger
-from common import BaseProcessor
+from ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.common import BaseProcessor
 
 Logger = get_logger("Audio Processor")
 
