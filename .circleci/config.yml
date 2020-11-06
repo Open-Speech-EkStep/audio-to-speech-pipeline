@@ -179,7 +179,6 @@ jobs:
               echo "Build ..."
               docker build --rm=false -t us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.package_version >> -t us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.env_name >>_<< parameters.package_version >> .
             else
-             echo "Pull ekstep_data_pipelines ..."
              gcloud docker -- pull us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.package_version >>
              echo "Tag ekstep_data_pipelines ... with << parameters.env_name >>"
              docker tag us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.package_version >> us.gcr.io/${GCP_PROJECT}/ekstep_data_pipelines:<< parameters.env_name >>_<< parameters.package_version >>
