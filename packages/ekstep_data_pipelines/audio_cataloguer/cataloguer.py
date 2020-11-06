@@ -12,7 +12,7 @@ Logger = get_logger("Audio_cataloguer")
 
 class AudioCataloguer(BaseProcessor):
     """
-    docstring
+    docstring cataloguer
     """
     @staticmethod
     def get_instance(data_processor):
