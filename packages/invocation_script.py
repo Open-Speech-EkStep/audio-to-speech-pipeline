@@ -5,7 +5,6 @@ import argparse
 from google.cloud import storage
 from urllib.parse import urlparse
 
-
 from ekstep_data_pipelines.audio_analysis.audio_analysis import AudioAnalysis
 from ekstep_data_pipelines.audio_cataloguer.cataloguer import AudioCataloguer
 from ekstep_data_pipelines.data_marker.data_marker import DataMarker
