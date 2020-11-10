@@ -1,6 +1,4 @@
 from abc import ABCMeta, abstractmethod, abstractclassmethod
-from .hindi_sanitizer import HindiSanitizer
-from .gujrati_sanitizer import GujratiSanitizer
 
 class BaseTranscriptionSanitizer(metaclass=ABCMeta):
     """
@@ -14,7 +12,12 @@ class BaseTranscriptionSanitizer(metaclass=ABCMeta):
 
 
 def get_transcription_sanitizers(**kwargs):
+
+    # cyclic imports
+    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.hindi_sanitizer import HindiSanitizer
+    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.gujrati_sanitizer import GujratiSanitizer
+
     hindi_sanitizer = HindiSanitizer.get_instance(**kwargs)
     gujrati_sanitizer = GujratiSanitizer.get_instance(**kwargs)
 
-    return {'hindi_sanitizer': hindi_sanitizer, 'gujrati': gujrati_sanitizer,'default': hindi_sanitizer}
+    return {'hindi': hindi_sanitizer, 'gujrati': gujrati_sanitizer,'default': hindi_sanitizer}

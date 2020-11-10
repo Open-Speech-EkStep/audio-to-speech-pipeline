@@ -1,9 +1,6 @@
-import sys
-sys.path.insert(0, '..')
-
 import unittest
-from ekstep_data_pipelines.audio_transcription.transcription_sanitizer import TranscriptionSanitizer
-from ekstep_data_pipelines.audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
+from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import get_transcription_sanitizers
+from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import TranscriptionSanitizationError
 
 
 class TestTrancriptionSanitizer(unittest.TestCase):

@@ -1,14 +1,13 @@
 import traceback
 
 from ekstep_data_pipelines.audio_transcription.constants import CONFIG_NAME, CLEAN_AUDIO_PATH, LANGUAGE, SHOULD_SKIP_REJECTED
-from ekstep_data_pipelines.audio_transcription.transcription_sanitizer import TranscriptionSanitizer
-from ekstep_data_pipelines.audio_transcription.audio_transcription_errors import TranscriptionSanitizationError
+from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import TranscriptionSanitizationError
+from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import get_transcription_sanitizers
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import \
     AzureTranscriptionClientError, GoogleTranscriptionClientError
 from ekstep_data_pipelines.common.file_utils import get_file_name
 from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common import BaseProcessor
-
 import os
 
 LOGGER = get_logger('audio_transcription')
