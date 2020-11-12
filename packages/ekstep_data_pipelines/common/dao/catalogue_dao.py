@@ -1,10 +1,12 @@
 import json
 
+import pandas as pd
+
 from ekstep_data_pipelines.common.utils import get_logger
 
 from sqlalchemy import text
 
-from ekstep_data_pipelines.common.dao.constants import GET_UNIQUE_ID,IS_EXIST
+from ekstep_data_pipelines.common.dao.constants import GET_UNIQUE_ID,IS_EXIST,COMMAND_WITH_LICENSE,COMMAND_WITHOUT_LICENSE,LICENSE
 
 LOGGER = get_logger('CatalogueDao')
 
@@ -89,9 +91,13 @@ class CatalogueDao:
         db = self.postgres_client.db
 
         with open(meta_data_path, 'r') as f:
+            df = pd.read_csv(meta_data_path)
+            columns = df.columns
+            cmd = COMMAND_WITHOUT_LICENSE
+            if LICENSE in columns:
+                cmd = COMMAND_WITH_LICENSE
             conn = db.raw_connection()
             cursor = conn.cursor()
-            cmd = 'COPY media_metadata_staging(raw_file_name,duration,title,speaker_name,audio_id,cleaned_duration,num_of_speakers,language,has_other_audio_signature,type,source,experiment_use,utterances_files_list,source_url,speaker_gender,source_website,experiment_name,mother_tongue,age_group,recorded_state,recorded_district,recorded_place,recorded_date,purpose,media_hash_code) FROM STDIN WITH (FORMAT CSV, HEADER)'
             cursor.copy_expert(cmd, f)
             conn.commit()
 
