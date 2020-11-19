@@ -4,7 +4,6 @@ from ekstep_data_pipelines.common.utils import get_logger
 LOGGER = get_logger('GujratiTranscriptionSanitizer')
 
 
-
 class GujratiSanitizer(BaseTranscriptionSanitizer):
 
 

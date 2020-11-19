@@ -1,6 +1,6 @@
 import traceback
 
-from ekstep_data_pipelines.audio_transcription.constants import CONFIG_NAME, CLEAN_AUDIO_PATH, LANGUAGE, SHOULD_SKIP_REJECTED
+from ekstep_data_pipelines.audio_transcription.constants import CONFIG_NAME, CLEAN_AUDIO_PATH, LANGUAGE, SHOULD_SKIP_REJECTED,AUDIO_LANGUAGE
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import TranscriptionSanitizationError
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import get_transcription_sanitizers
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import \
@@ -38,7 +38,7 @@ class AudioTranscription(BaseProcessor):
         audio_ids = kwargs.get('audio_ids', [])
         stt_api = kwargs.get("speech_to_text_client")
 
-        language = self.audio_transcription_config.get(LANGUAGE)
+        stt_language = self.audio_transcription_config.get(LANGUAGE)
         remote_path_of_dir = self.audio_transcription_config.get(
             CLEAN_AUDIO_PATH)
 
@@ -70,7 +70,7 @@ class AudioTranscription(BaseProcessor):
                 LOGGER.info('listed all path in given id')
 
 
-                local_clean_dir_path, local_rejected_dir_path = self.generate_transcription_for_all_utterenaces(audio_id, all_files, language,
+                local_clean_dir_path, local_rejected_dir_path = self.generate_transcription_for_all_utterenaces(audio_id, all_files, stt_language,
                                                                                  transcription_client, utterances, should_skip_rejected, remote_dir_path_for_given_audio_id)
                 LOGGER.info('updating catalogue with updated utterances')
                 self.catalogue_dao.update_utterances(audio_id, utterances)
@@ -112,7 +112,7 @@ class AudioTranscription(BaseProcessor):
         with open(output_file_path, "w") as f:
             f.write(transcription)
 
-    def generate_transcription_for_all_utterenaces(self, audio_id, all_files, language, transcription_client, utterances, should_skip_rejected, remote_path):
+    def generate_transcription_for_all_utterenaces(self, audio_id, all_files, stt_language, transcription_client, utterances, should_skip_rejected, remote_path):
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
 
         local_clean_path = ''
@@ -151,12 +151,12 @@ class AudioTranscription(BaseProcessor):
 
             local_rejected_path = local_clean_folder.replace('clean', 'rejected')
 
-            self.generate_transcription_and_sanitize(audio_id, local_clean_path, local_rejected_path, file_name, language,
+            self.generate_transcription_and_sanitize(audio_id, local_clean_path, local_rejected_path, file_name, stt_language,
                                                      transcription_client, utterance_metadata)
 
         return local_clean_folder, local_rejected_path
 
-    def generate_transcription_and_sanitize(self, audio_id, local_clean_path, local_rejected_path, remote_file_path, language,
+    def generate_transcription_and_sanitize(self, audio_id, local_clean_path, local_rejected_path, remote_file_path, stt_language,
                                             transcription_client, utterance_metadata):
         if ".wav" not in remote_file_path:
             return
@@ -169,10 +169,10 @@ class AudioTranscription(BaseProcessor):
 
         try:
             transcript = transcription_client.generate_transcription(
-                language, local_clean_path)
+                stt_language, local_clean_path)
             original_transcript = transcript
 
-            curr_language = self.audio_transcription_config.get(LANGUAGE)
+            curr_language = self.audio_transcription_config.get(AUDIO_LANGUAGE)
 
             LOGGER.info(f'Getting transacription sanitizer for the language {curr_language}')
 

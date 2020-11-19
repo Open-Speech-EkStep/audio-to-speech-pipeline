@@ -7,7 +7,7 @@ from unittest.mock import Mock
 
 from ekstep_data_pipelines.audio_transcription.audio_transcription import AudioTranscription
 
-from ekstep_data_pipelines.audio_transcription.constants import LANGUAGE
+from ekstep_data_pipelines.audio_transcription.constants import LANGUAGE,AUDIO_LANGUAGE
 
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import \
     AzureTranscriptionClientError,GoogleTranscriptionClientError
@@ -75,7 +75,7 @@ class AudioTranscriptionTests(unittest.TestCase):
         transcription_client.generate_transcription.return_value = "अलग अलग होते है"
 
         self.audio_transcription.audio_transcription_config = {
-            LANGUAGE : "hindi"
+            AUDIO_LANGUAGE : "hindi"
         }
         metadata = {"status":"test_status","reason":"test_reason"}
 
