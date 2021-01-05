@@ -96,15 +96,17 @@ class AudioCataloguer(BaseProcessor):
                 Logger.info(audio_id)
                 continue
 
+
             for utterance in utterance_list:
-                
+                language_confidence_score = json.dumps(utterance.get('language_confidence_score', None))
+                Logger.info("inserting with language_confidence_score:" + str(language_confidence_score))
                 if str(utterance.get('snr_value')) == 'nan':
                     snr_value = 0.0
                 else:
                     snr_value = float(utterance.get('snr_value', 0))
 
                 insert_query_into_mapping_table.append(f"('{utterance['name']}',{utterance['duration']},\
-                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{load_datetime}')")
+                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{language_confidence_score}','{load_datetime}')")
 
         return insert_query_into_mapping_table, processed_audio_ids
 
@@ -199,5 +201,3 @@ class AudioCataloguer(BaseProcessor):
         Logger.info("inserting with language_confidence_score:" + str(language_confidence_score))
 
         return f"{defult_query} ({audio_id[0]},{speaker_id},'{file_name}',{duration},'{datetime}',{snr_value},'{status}','{fail_reason}','{language_confidence_score}'),"
-
-    
