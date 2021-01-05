@@ -1,4 +1,3 @@
 languages:
-  0: 'hi-IN'
-  1: 'en'
-  #2: 'ta-IN'
+  0: 'ta-IN'
+  1: 'others'

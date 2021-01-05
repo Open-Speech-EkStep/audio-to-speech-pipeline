@@ -15,7 +15,7 @@ class AudioLanguageIdentificationTests(unittest.TestCase):
         expected_score = ['0.00004', '0.99996']
         self.assertEquals(expected_score, confidence_score)
 
-
+    @unittest.skip
     def test_language_confidence_score_map(self):
         confidence_scores = ['0.00004', '0.99996']
         language_map_path = 'ekstep_pipelines_tests/audio_language_identification/language_map.yml'
