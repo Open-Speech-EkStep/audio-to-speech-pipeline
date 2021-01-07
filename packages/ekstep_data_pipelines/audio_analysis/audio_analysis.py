@@ -110,7 +110,10 @@ class AudioAnalysis(BaseProcessor):
                 female_files.append(utterance_name)
 
         catalogue_dao.update_utterance_speaker_gender(male_files, 'm')
+        Logger.info(f'Updating the {male_files} with the value with value male')
+
         catalogue_dao.update_utterance_speaker_gender(female_files, 'f')
+        Logger.info(f'Updating the {female_files} with the value with value Female')
 
 
 
