@@ -148,11 +148,7 @@ def validate_audio_analysis_config(arguments):
         raise argparse.ArgumentTypeError(
             f'Source is missing'
         )
-    if arguments.params is None:
-        raise argparse.ArgumentTypeError(
-            f'Parameters config is missing'
-        )
-    return {'source': arguments.audio_source, 'parameters': json.loads(arguments.params)}
+    return {'source': arguments.audio_source}
 
 def validate_audio_processing_input(arguments):
     LOGGER.info('validating input for audio processing')

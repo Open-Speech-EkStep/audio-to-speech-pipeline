@@ -136,3 +136,16 @@ class CatalogueDao:
         sql = 'select speaker_id from speaker where speaker_name=:speaker_name and source=:source'
         result = self.postgres_client.execute_query(sql, **param_dict)
         return result[0][0] if len(result) > 0 else -1
+
+    def update_utterance_speaker_gender(self, utterance_file_names, speaker_gender):
+        update_query = "update media_speaker_mapping " \
+                       "set speaker_gender=:speaker_gender " \
+                       " where clipped_utterance_file_name in "
+
+        utterance_names = list(map(lambda u: f'\'{u}\'', utterance_file_names))
+        update_query = update_query + '(' + ','.join(utterance_names) + ')'
+
+        param_dict = {'speaker_gender': speaker_gender}
+
+        self.postgres_client.execute_update(update_query, **param_dict)
+        return True
