@@ -1,3 +1,5 @@
+import signal
+import sys
 import multiprocessing
 import os
 
@@ -36,7 +38,17 @@ class AudioAnalysis(BaseProcessor):
         self.data_processor = data_processor
         self.audio_analysis_config = None
         self.catalogue_dao = CatalogueDao(self.data_processor)
+        
+        signal.signal(signal.SIGINT, self.handle_termination_gracefully)
+        signal.signal(signal.SIGTERM, self.handle_termination_gracefully)
+
         super().__init__(**kwargs)
+
+    def handle_termination_gracefully(self, signum, frame):
+        Logger.info(f'SIGINT/SIGTERM invoked with the following information {signum}/{frame}')
+        sys.exit(1)
+
+
 
     def process(self, **kwargs):
         """
