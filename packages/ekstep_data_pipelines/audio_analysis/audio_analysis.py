@@ -59,6 +59,7 @@ class AudioAnalysis(BaseProcessor):
         self.audio_analysis_config = self.data_processor.config_dict.get(
             CONFIG_NAME)
 
+        Logger.info(f'config file {self.data_processor.config_dict}')
         source = self.get_source_from_config(**kwargs)
         parameters = self.get_speaker_analysis_params()
 
