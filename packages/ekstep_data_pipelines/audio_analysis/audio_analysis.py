@@ -1,4 +1,4 @@
-import signal
+# import signal
 import sys
 import multiprocessing
 import os
@@ -39,9 +39,9 @@ class AudioAnalysis(BaseProcessor):
         self.audio_analysis_config = None
         self.catalogue_dao = CatalogueDao(self.data_processor)
 
-        signal.signal(signal.SIGINT, self.handle_termination_gracefully)
-        signal.signal(signal.SIGTERM, self.handle_termination_gracefully)
-        signal.signal(signal.SIGKILL, self.handle_termination_gracefully)
+        # signal.signal(signal.SIGINT, self.handle_termination_gracefully)
+        # signal.signal(signal.SIGTERM, self.handle_termination_gracefully)
+        # signal.signal(signal.SIGKILL, self.handle_termination_gracefully)
 
         super().__init__(**kwargs)
 
@@ -73,7 +73,7 @@ class AudioAnalysis(BaseProcessor):
         Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
         self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path,
-                                                      multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE)
+                                                      5)
 
         Logger.info('Running speaker clustering using parameters: ' + str(parameters))
         min_cluster_size = parameters.get('min_cluster_size', MIN_CLUSTER_SIZE)
