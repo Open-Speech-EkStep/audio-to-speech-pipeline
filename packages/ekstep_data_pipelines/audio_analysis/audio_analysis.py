@@ -8,6 +8,7 @@ from ekstep_data_pipelines.audio_analysis.analyse_gender import analyse_gender
 from ekstep_data_pipelines.audio_analysis.constants import CONFIG_NAME, REMOTE_PROCESSED_FILE_PATH, AUDIO_ANALYSIS_PARAMS, ANALYSIS_OPTIONS
 from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import encoder
 
 
 MIN_SAMPLES = 1
@@ -88,16 +89,31 @@ class AudioAnalysis(BaseProcessor):
         speaker_to_file_name = None
         file_to_speaker_gender_mapping = None
 
+        self.get_embeddings(local_audio_download_path,embed_file_path,npz_destination_path,source)
+
         if analysis_options.get("speaker_analysis") == 1:
-            speaker_to_file_name = analyse_speakers(embed_file_path, '*.wav', local_audio_download_path, source, self.catalogue_dao,
-                                   min_cluster_size, partial_set_size, min_samples, fit_noise_on_similarity,
-                                   self.fs_interface, npz_destination_path)
+            speaker_to_file_name = analyse_speakers(embed_file_path,source,
+                                   min_cluster_size, partial_set_size, min_samples, fit_noise_on_similarity)
 
         if analysis_options.get("gender_analysis") == 1:
-            file_to_speaker_gender_mapping = analyse_gender(embed_file_path, '*.wav', local_audio_download_path, source,self.catalogue_dao,
-                                             self.fs_interface, npz_destination_path)
+            file_to_speaker_gender_mapping = analyse_gender(embed_file_path)
 
         self.update_info_in_db(self.catalogue_dao, speaker_to_file_name, file_to_speaker_gender_mapping, source)
+
+    def get_embeddings(self,local_audio_download_path,embed_file_path,npz_bucket_destination_path,source,dir_pattern='*.wav'):
+
+        if self.fs_interface.path_exists(npz_bucket_destination_path):
+            
+            self.fs_interface.download_file_to_location(npz_bucket_destination_path,embed_file_path)
+            return
+
+        encoder(local_audio_download_path, dir_pattern, embed_file_path)
+
+        is_uploaded = self.fs_interface.upload_to_location(embed_file_path, npz_bucket_destination_path)
+        if is_uploaded:
+            Logger.info('npz file uploaded to :' + npz_bucket_destination_path)
+        else:
+            Logger.info('npz file could not be uploaded to :' + npz_bucket_destination_path)
 
 
     def update_info_in_db(self, catalogue_dao,speaker_to_file_name, file_to_speaker_gender_mapping, source):
