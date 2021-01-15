@@ -73,9 +73,6 @@ class AudioAnalysis(BaseProcessor):
         Logger.info(f'Downloading source to {local_audio_download_path} from {remote_download_path}')
         Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
-        self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path,
-                                                      5)
-
         Logger.info('Running speaker clustering using parameters: ' + str(parameters))
         min_cluster_size = parameters.get('min_cluster_size', MIN_CLUSTER_SIZE)
         partial_set_size = parameters.get('partial_set_size', PARTIAL_SET_SIZE)
@@ -89,10 +86,10 @@ class AudioAnalysis(BaseProcessor):
         speaker_to_file_name = None
         file_to_speaker_gender_mapping = None
 
-        self.get_embeddings(local_audio_download_path,embed_file_path,npz_destination_path,source)
+        self.create_or_fetch_embeddings(local_audio_download_path, remote_download_path, embed_file_path, npz_destination_path)
 
         if analysis_options.get("speaker_analysis") == 1:
-            speaker_to_file_name = analyse_speakers(embed_file_path,source,
+            speaker_to_file_name = analyse_speakers(embed_file_path, source,
                                    min_cluster_size, partial_set_size, min_samples, fit_noise_on_similarity)
 
         if analysis_options.get("gender_analysis") == 1:
@@ -100,21 +97,19 @@ class AudioAnalysis(BaseProcessor):
 
         self.update_info_in_db(self.catalogue_dao, speaker_to_file_name, file_to_speaker_gender_mapping, source)
 
-    def get_embeddings(self,local_audio_download_path,embed_file_path,npz_bucket_destination_path,source,dir_pattern='*.wav'):
-
+    def create_or_fetch_embeddings(self, local_audio_download_path, remote_download_path, embed_file_path,
+                                   npz_bucket_destination_path, dir_pattern='*.wav'):
         if self.fs_interface.path_exists(npz_bucket_destination_path):
-            
-            self.fs_interface.download_file_to_location(npz_bucket_destination_path,embed_file_path)
-            return
-
-        encoder(local_audio_download_path, dir_pattern, embed_file_path)
-
-        is_uploaded = self.fs_interface.upload_to_location(embed_file_path, npz_bucket_destination_path)
-        if is_uploaded:
-            Logger.info('npz file uploaded to :' + npz_bucket_destination_path)
+            self.fs_interface.download_file_to_location(npz_bucket_destination_path, embed_file_path)
         else:
-            Logger.info('npz file could not be uploaded to :' + npz_bucket_destination_path)
+            self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path, 5)
+            encoder(local_audio_download_path, dir_pattern, embed_file_path)
 
+            is_uploaded = self.fs_interface.upload_to_location(embed_file_path, npz_bucket_destination_path)
+            if is_uploaded:
+                Logger.info('npz file uploaded to :' + npz_bucket_destination_path)
+            else:
+                Logger.info('npz file could not be uploaded to :' + npz_bucket_destination_path)
 
     def update_info_in_db(self, catalogue_dao,speaker_to_file_name, file_to_speaker_gender_mapping, source):
 
@@ -123,7 +118,6 @@ class AudioAnalysis(BaseProcessor):
 
         if file_to_speaker_gender_mapping:
             self._update_speaker_gender_mapping(catalogue_dao, file_to_speaker_gender_mapping)
-
 
     def _update_speaker_gender_mapping(self, catalogue_dao, file_speaker_gender_mapping):
         male_files = []
