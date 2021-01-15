@@ -70,7 +70,6 @@ class AudioAnalysis(BaseProcessor):
         Logger.info(f'Ensured {local_audio_download_path} exists')
         remote_download_path = self.get_full_path(source)
 
-        Logger.info(f'Downloading source to {local_audio_download_path} from {remote_download_path}')
         Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
         Logger.info('Running speaker clustering using parameters: ' + str(parameters))
@@ -79,7 +78,6 @@ class AudioAnalysis(BaseProcessor):
         min_samples = parameters.get('min_samples', MIN_SAMPLES)
         fit_noise_on_similarity = parameters.get('fit_noise_on_similarity', FIT_NOISE_ON_SIMILARITY)
         npz_destination_path = f'{remote_download_path}/{source}_embed_file.npz'
-
 
         analysis_options = self.get_analysis_options()
 
@@ -102,6 +100,7 @@ class AudioAnalysis(BaseProcessor):
         if self.fs_interface.path_exists(npz_bucket_destination_path):
             self.fs_interface.download_file_to_location(npz_bucket_destination_path, embed_file_path)
         else:
+            Logger.info(f'Downloading source to {local_audio_download_path} from {remote_download_path}')
             self.fs_interface.download_folder_to_location(remote_download_path, local_audio_download_path, 5)
             encoder(local_audio_download_path, dir_pattern, embed_file_path)
 
