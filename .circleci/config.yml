@@ -295,7 +295,7 @@ workflows:
             - ekstep_data_pipelines_deploy_test
       - deploy:
           name: ekstep_data_pipelines_deploy_prod
-          env_name: approval_for_prod_deploy
+          env_name: prod
           package_version: 1.0.0
           requires:
             - ekstep_data_pipelines_build
