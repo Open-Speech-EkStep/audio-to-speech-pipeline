@@ -281,8 +281,8 @@ workflows:
     jobs:
       - ekstep_build:
           name: ekstep_data_pipelines_build
-      - build_E2E:
-          name: ekstep_data_pipelines
+      #- build_E2E:
+      #    name: ekstep_data_pipelines
       - deploy:
           name: ekstep_data_pipelines_deploy_test
           env_name: test
