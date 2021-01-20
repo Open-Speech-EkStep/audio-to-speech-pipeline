@@ -281,8 +281,6 @@ workflows:
     jobs:
       - ekstep_build:
           name: ekstep_data_pipelines_build
-      #- build_E2E:
-      #    name: ekstep_data_pipelines
       - deploy:
           name: ekstep_data_pipelines_deploy_test
           env_name: test
@@ -300,6 +298,8 @@ workflows:
           requires:
             - ekstep_data_pipelines_build
             - approval_for_prod_deploy
+      - build_E2E:
+          name: ekstep_data_pipelines_e2e_build
 
   pipeline_workflows:
     when: << pipeline.parameters.pipeline_workflows >>
