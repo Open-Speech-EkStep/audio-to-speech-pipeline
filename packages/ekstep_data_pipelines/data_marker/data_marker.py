@@ -49,8 +49,10 @@ class DataMarker(BaseProcessor):
         source, filter_criteria = self.get_config(**kwargs)
         Logger.info("Fetching utterances for source:" + source)
         utterances = self.catalogue_dao.get_utterances_by_source(source, 'Clean')
+
         filtered_utterances = self.data_filter.apply_filters(filter_criteria, utterances)
         Logger.info("updating utterances that need to be staged, count=" + str(len(filtered_utterances)))
+        
         if len(filtered_utterances) > 0 :
             rows_updated = self.catalogue_dao.update_utterances_staged_for_transcription(filtered_utterances, source)
             Logger.info('Rows updated:' + str(rows_updated))

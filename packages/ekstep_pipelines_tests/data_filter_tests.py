@@ -26,6 +26,27 @@ class DataMarkerTests(unittest.TestCase):
         ]
         self.assertEqual(expected_utterances, filtered)
 
+    def test__should_exclude_speaker_ids(self):
+        # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
+        utterances = [
+            (1, 'file_1.wav', 10, 202009112003117071, 13),
+            (2, 'file_2.wav', 11, 202009112003117073, 11),
+            (3, 'file_3.wav', 12, 202009112003117075, 45),
+            (4, 'file_4.wav', 13, 202009112003117071, 19),
+            (4, 'file_4.wav', 6, 202009112003117076, 21),
+            (4, 'file_4.wav', 13, 202009112003117077, 100)
+        ]
+        data_filter = DataFilter()
+        filtered = list(data_filter.exclude_speaker_ids(utterances,  [1,2]))
+        expected_utterances = [
+            (3, 'file_3.wav', 12, 202009112003117075, 45),
+            (4, 'file_4.wav', 13, 202009112003117071, 19),
+            (4, 'file_4.wav', 6, 202009112003117076, 21),
+            (4, 'file_4.wav', 13, 202009112003117077, 100)
+        ]
+        print(type(filtered[0][3]))
+        self.assertEqual(expected_utterances, filtered)
+
     def test__should_exclude_audio_ids(self):
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
         utterances = [
