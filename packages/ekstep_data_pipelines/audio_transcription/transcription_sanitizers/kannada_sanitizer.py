@@ -23,7 +23,7 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
     def sanitize(self, transcription):
         LOGGER.info("Sanitizing transcription:" + transcription)
         transcription = transcription.strip()
-        
+
         transcription = self.replace_bad_char(transcription)
 
         transcription = transcription.strip()
@@ -46,6 +46,8 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
         return False
 
     def replace_bad_char(self, transcription):
+
+        LOGGER.info("replace panctuation if present ")
 
         if '-' in transcription:
             transcription = transcription.replace('-', ' ')
