@@ -10,6 +10,7 @@ LOGGER = get_logger('KannadaTranscriptionSanitizer')
 class KannadaSanitizer(BaseTranscriptionSanitizer):
 
     VALID_CHARS = "[ ಂ-ಃಅ-ಋಎ-ಐಒ-ನಪ-ರಲ-ಳವ-ಹಾ-ೄೆ-ೈೊ-್ೲ]+"
+    PUNCTUATION = '!"#%&\'()*+,./;<=>?@[\\]^_`{|}~।'
 
     @staticmethod
     def get_instance(**kwargs):
@@ -21,6 +22,10 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
 
     def sanitize(self, transcription):
         LOGGER.info("Sanitizing transcription:" + transcription)
+        transcription = transcription.strip()
+        
+        transcription = self.replace_bad_char(transcription)
+
         transcription = transcription.strip()
 
         if len(transcription) == 0:
@@ -39,3 +44,11 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
             return True
 
         return False
+
+    def replace_bad_char(self, transcription):
+
+        if '-' in transcription:
+            transcription = transcription.replace('-', ' ')
+
+        table = str.maketrans(dict.fromkeys(KannadaSanitizer.PUNCTUATION))
+        return transcription.translate(table)
