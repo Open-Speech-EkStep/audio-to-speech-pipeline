@@ -1,0 +1,21 @@
+CREATE TABLE public.media (
+    audio_id bigint NOT NULL,
+    raw_file_name text,
+    total_duration double precision,
+    title text,
+    num_of_speakers text,
+    language text,
+    type text,
+    source text,
+    source_url text,
+    source_website text,
+    utterances_files_list text,
+    recorded_state text,
+    recorded_district text,
+    recorded_place text,
+    purpose text,
+    cleaned_duration double precision,
+    load_datetime timestamp without time zone,
+    has_other_audio_signature boolean,
+    recorded_date text
+);

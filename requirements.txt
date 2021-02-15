@@ -40,3 +40,4 @@ yaml~=0.1.7
 webrtcvad==2.0.10
 pandas==1.1.0
 azure-cognitiveservices-speech
+yoyo-migrations
