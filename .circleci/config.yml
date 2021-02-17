@@ -390,7 +390,7 @@ workflows:
           mode: 'apply'
           env_name: 'prod'
           requires:
-            - ekstep-database-migrations-test
+            - ekstep-database-migrations-apply-test
   database_migrations_rollback:
     when: << pipeline.parameters.database_migrations_rollback >>
     jobs:
