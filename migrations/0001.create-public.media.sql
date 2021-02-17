@@ -1,5 +1,5 @@
 CREATE TABLE public.media (
-    audio_id bigint NOT NULL,
+    audio_id bigint PRIMARY KEY,
     raw_file_name text,
     total_duration double precision,
     title text,

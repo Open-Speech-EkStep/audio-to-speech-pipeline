@@ -1,5 +1,5 @@
 CREATE TABLE public.media_metadata_staging (
-    raw_file_name text NOT NULL,
+    raw_file_name text NOT NULL CONSTRAINT raw_file_name_unique_constrain UNIQUE,
     title text,
     speaker_name text,
     language text,

@@ -1,0 +1,1 @@
+DROP INDEX ind_clipped_utterance_file_name;

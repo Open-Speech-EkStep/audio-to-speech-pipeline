@@ -1,0 +1,1 @@
+DROP INDEX idx_media_speaker_mapping_audio_id;
