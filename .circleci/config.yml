@@ -289,7 +289,7 @@ jobs:
           name: Apply migrations
           command: |
             ls ./migrations
-            yoyo apply --no-config-file --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/<< parameters.env_name >>_db ./migrations
+            yoyo apply --no-config-file --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/<< parameters.env_name >>_db --all ./migrations
 
 workflows:
   version: 2
