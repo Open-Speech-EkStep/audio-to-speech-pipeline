@@ -286,7 +286,7 @@ jobs:
       - run:
           name: Apply migrations
           command: |
-            yoyo apply --no-config-file --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/<< parameters.env_name >>_db ./migrations
+            yoyo apply --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/<< parameters.env_name >>_db ./migrations -n
 
 workflows:
   version: 2
