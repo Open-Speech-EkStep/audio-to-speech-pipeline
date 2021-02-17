@@ -15,6 +15,9 @@ parameters:
     default: false
   ekstep_data_pipelines:
     type: boolean
+    default: false
+  database_migrations:
+    type: boolean
     default: true
 
 executors:
@@ -195,15 +198,15 @@ jobs:
 
   build_E2E:
     working_directory: ~/E2E
-  
+
     docker:
       - image: circleci/openjdk:8-jdk-stretch
         environment:
           POSTGRES_USER: $POSTGRES_USER
           POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-  
+
     steps:
-      - run :
+      - run:
           name: Setup proxy for psql
           command: |
             mkdir -p ~/.ssh
@@ -236,7 +239,51 @@ jobs:
             mvn dependency:go-offline
             mvn package
 
-      
+  migrate-db:
+    parameters:
+      env_name:
+        type: string
+    working_directory: ~/project/
+
+    docker:
+      - image: circleci/openjdk:8-jdk-stretch
+        environment:
+          POSTGRES_USER: $POSTGRES_USER
+          POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+          POSTGRES_DB_TEST: $POSTGRES_DB
+          POSTGRES_DB_PROD: $POSTGRES_DB
+
+    steps:
+      - run:
+          name: Setup proxy for psql and environment
+          command: |
+            mkdir -p ~/.ssh
+
+            echo ${SSH} > ~/.ssh/known_hosts
+
+            cat ~/.ssh/known_hosts
+            pwd
+            cd ${HOME}
+            wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-265.0.0-linux-x86_64.tar.gz
+            tar -zxf google-cloud-sdk-*
+            cd google-cloud-sdk
+            pwd
+            ./install.sh --quiet
+            echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
+            ./bin/gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
+            ./bin/gcloud --quiet config set project ${GCP_PROJECT}
+            export GOOGLE_APPLICATION_CREDENTIALS=${HOME}/gcp-key.json
+            echo $GOOGLE_APPLICATION_CREDENTIALS
+            wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
+            chmod +x cloud_sql_proxy
+            nohup ./cloud_sql_proxy -dir=./cloudsql -instances=ekstepspeechrecognition:us-central1:crowdsourcedb=tcp:5432 &
+            sleep 25s
+            cat nohup.out
+            pip install yoyo-migrations
+      - run:
+          name: Apply migrations
+          command: |
+            yoyo apply --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_DB_<< parameters.env_name >>}/test_db ./migrations
 
 workflows:
   version: 2
@@ -315,3 +362,14 @@ workflows:
           requires:
             - pipeline-dag-build_test
 
+  database_migrations:
+    when: << pipeline.parameters.database_migrations >>
+    jobs:
+      - migrate-db:
+          name: ekstep-database-migrations-test
+          env_name: 'test'
+      - migrate-db:
+          name: ekstep-database-migrations-prod
+          env_name: 'prod'
+          requires:
+            - ekstep-database-migrations-test
