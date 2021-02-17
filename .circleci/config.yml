@@ -16,7 +16,10 @@ parameters:
   ekstep_data_pipelines:
     type: boolean
     default: false
-  database_migrations:
+  database_migrations_apply:
+    type: boolean
+    default: false
+  database_migrations_rollback:
     type: boolean
     default: true
 
@@ -239,8 +242,10 @@ jobs:
             mvn dependency:go-offline
             mvn package
 
-  migrate-db:
+  update-db:
     parameters:
+      mode:
+        type: string
       env_name:
         type: string
     working_directory: ~/project/
@@ -253,7 +258,7 @@ jobs:
 
     steps:
       - checkout:
-            path: ~/project
+          path: ~/project
       - run:
           name: Setup proxy for psql and environment
           command: |
@@ -284,12 +289,17 @@ jobs:
             cat nohup.out
             pip install yoyo-migrations
             pip install psycopg2
-            echo ${POSTGRES_USER}
       - run:
-          name: Apply migrations
+          name: Update migrations
           command: |
             ls ./migrations
-            yoyo apply --no-config-file --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/<< parameters.env_name >>_db --all -b ./migrations
+            echo " The mode is << parameters.mode >>"
+            export env_name=<< parameters.env_name >>
+            if [[ $env_name == "prod" ]]
+            then
+              export env_name=''
+            fi
+            yoyo << parameters.mode >> --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/${env_name}_db --all -b ./migrations
 
 workflows:
   version: 2
@@ -368,14 +378,29 @@ workflows:
           requires:
             - pipeline-dag-build_test
 
-  database_migrations:
-    when: << pipeline.parameters.database_migrations >>
+  database_migrations_apply:
+    when: << pipeline.parameters.database_migrations_apply >>
     jobs:
-      - migrate-db:
-          name: ekstep-database-migrations-test
+      - update-db:
+          name: ekstep-database-migrations-apply-test
+          mode: 'apply'
           env_name: 'test'
-      - migrate-db:
-          name: ekstep-database-migrations-prod
+      - update-db:
+          name: ekstep-database-migrations-apply-prod
+          mode: 'apply'
           env_name: 'prod'
           requires:
             - ekstep-database-migrations-test
+  database_migrations_rollback:
+    when: << pipeline.parameters.database_migrations_rollback >>
+    jobs:
+      - update-db:
+          name: ekstep-database-migrations-rollback-test
+          mode: 'rollback'
+          env_name: 'test'
+      - update-db:
+          name: ekstep-database-migrations-rollback-prod
+          mode: 'rollback'
+          env_name: 'prod'
+          requires:
+            - ekstep-database-migrations-rollback-test
