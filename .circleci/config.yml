@@ -252,6 +252,8 @@ jobs:
           POSTGRES_PASSWORD: $POSTGRES_PASSWORD
 
     steps:
+      - checkout:
+            path: ~/project
       - run:
           name: Setup proxy for psql and environment
           command: |
@@ -286,7 +288,8 @@ jobs:
       - run:
           name: Apply migrations
           command: |
-            yoyo apply --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/<< parameters.env_name >>_db ./migrations -n
+            ls ./migrations
+            yoyo apply --no-config-file --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/<< parameters.env_name >>_db ./migrations
 
 workflows:
   version: 2
