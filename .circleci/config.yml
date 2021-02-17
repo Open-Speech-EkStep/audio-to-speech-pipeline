@@ -281,6 +281,7 @@ jobs:
             sleep 25s
             cat nohup.out
             pip install yoyo-migrations
+            pip install psycopg2
       - run:
           name: Apply migrations
           command: |
