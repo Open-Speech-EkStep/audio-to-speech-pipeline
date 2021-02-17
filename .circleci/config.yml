@@ -246,12 +246,10 @@ jobs:
     working_directory: ~/project/
 
     docker:
-      - image: circleci/openjdk:8-jdk-stretch
+      - image: circleci/python:3.8.6
         environment:
           POSTGRES_USER: $POSTGRES_USER
           POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-          POSTGRES_DB_TEST: $POSTGRES_DB
-          POSTGRES_DB_PROD: $POSTGRES_DB
 
     steps:
       - run:
@@ -264,6 +262,9 @@ jobs:
             cat ~/.ssh/known_hosts
             pwd
             cd ${HOME}
+            python --version ; pip --version ; pwd ; ls
+            sudo apt-get update
+            sudo apt-get install wget
             wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-265.0.0-linux-x86_64.tar.gz
             tar -zxf google-cloud-sdk-*
             cd google-cloud-sdk
@@ -283,7 +284,7 @@ jobs:
       - run:
           name: Apply migrations
           command: |
-            yoyo apply --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_DB_<< parameters.env_name >>}/test_db ./migrations
+            yoyo apply --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/<< parameters.env >>_db ./migrations
 
 workflows:
   version: 2
