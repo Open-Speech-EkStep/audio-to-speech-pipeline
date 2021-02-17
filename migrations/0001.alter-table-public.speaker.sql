@@ -1,4 +1,4 @@
--- depends: 0001.create-public.speaker.sql
+-- depends: 0001.create-public.speaker
 
 ALTER TABLE public.speaker ALTER COLUMN speaker_id ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME public.speaker_speaker_id_seq
