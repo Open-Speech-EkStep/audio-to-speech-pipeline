@@ -18,10 +18,10 @@ parameters:
     default: false
   database_migrations_apply:
     type: boolean
-    default: true
+    default: false
   database_migrations_rollback:
     type: boolean
-    default: false
+    default: true
 
 executors:
   node:
@@ -385,12 +385,16 @@ workflows:
           name: ekstep-database-migrations-apply-test
           mode: 'apply'
           env_name: 'test'
+      - approval_for_prod_deploy:
+          type: approval
+          requires:
+            - ekstep-database-migrations-apply-test
       - update-db:
           name: ekstep-database-migrations-apply-prod
           mode: 'apply'
           env_name: 'prod'
           requires:
-            - ekstep-database-migrations-apply-test
+            - approval_for_prod_deploy
   database_migrations_rollback:
     when: << pipeline.parameters.database_migrations_rollback >>
     jobs:
@@ -398,9 +402,13 @@ workflows:
           name: ekstep-database-migrations-rollback-test
           mode: 'rollback'
           env_name: 'test'
+      - approval_for_prod_rollback:
+          type: approval
+          requires:
+            - ekstep-database-migrations-rollback-test
       - update-db:
           name: ekstep-database-migrations-rollback-prod
           mode: 'rollback'
           env_name: 'prod'
           requires:
-            - ekstep-database-migrations-rollback-test
+            - approval_for_prod_rollback
