@@ -11,9 +11,6 @@ This will hold the data pipeline to convert raw audio data to speech which will 
 If you like Vakyansh, ⭐ the project to support its development!_
 
 
-Please follow the documentation for Intelligent Data Pipeline [here](https://open-speech-ekstep.github.io/mkdocs/intelligent_data_pipelines/)
-
-
 ## Key Highlights
 
 - **Automated**: Vakyansh's pipelines are fully automated and no human intervention is required to process 
@@ -23,3 +20,13 @@ Please follow the documentation for Intelligent Data Pipeline [here](https://ope
   For scalability it is recommended to run on Kubernetes
 - **Quality**: Vakyansh lays strong emphasis on code quality and high test
   coverage to ensure its seamless use and continued maintenance.
+  
+  
+## Documentation
+
+Please follow the documentation for Intelligent Data Pipeline [here](https://open-speech-ekstep.github.io/mkdocs/intelligent_data_pipelines/)
+
+You can improve it by sending pull requests to the
+[documentation repository](https://github.com/Open-Speech-EkStep/mkdocs).
+
+## License
