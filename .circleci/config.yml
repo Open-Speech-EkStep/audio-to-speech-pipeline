@@ -341,16 +341,6 @@ workflows:
           name: ekstep-database-migrations-apply-test
           mode: 'apply'
           env_name: 'test'
-      - approval_for_prod_deploy:
-          type: approval
-          requires:
-            - ekstep-database-migrations-apply-test
-      - deploy-db:
-          name: ekstep-database-migrations-apply-prod
-          mode: 'apply'
-          env_name: 'prod'
-          requires:
-            - approval_for_prod_deploy
       - ekstep_build:
           name: ekstep_data_pipelines_build
       - deploy:
@@ -362,7 +352,14 @@ workflows:
       - approval_for_prod_deploy:
           type: approval
           requires:
+            - ekstep-database-migrations-apply-test
             - ekstep_data_pipelines_deploy_test
+      - deploy-db:
+          name: ekstep-database-migrations-apply-prod
+          mode: 'apply'
+          env_name: 'prod'
+          requires:
+            - approval_for_prod_deploy
       - deploy:
           name: ekstep_data_pipelines_deploy_prod
           env_name: prod
