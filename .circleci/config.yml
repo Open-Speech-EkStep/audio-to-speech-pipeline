@@ -18,10 +18,10 @@ parameters:
     default: false
   database_migrations_apply:
     type: boolean
-    default: false
+    default: true
   database_migrations_rollback:
     type: boolean
-    default: true
+    default: false
 
 executors:
   node:
