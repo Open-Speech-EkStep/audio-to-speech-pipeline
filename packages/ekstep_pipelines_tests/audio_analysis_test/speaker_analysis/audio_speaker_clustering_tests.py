@@ -5,7 +5,7 @@ from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings imp
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.speaker_clustering import create_speaker_clusters
 from os import path
 
-sys.path.insert(0, '..')
+# sys.path.insert(0, '..')
 
 
 class AudioSpeakerClusteringTests(unittest.TestCase):
