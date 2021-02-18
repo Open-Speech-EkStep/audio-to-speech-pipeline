@@ -12,3 +12,14 @@ If you like Vakyansh, ⭐ the project to support its development!_
 
 
 Please follow the documentation for Intelligent Data Pipeline [here](https://open-speech-ekstep.github.io/mkdocs/intelligent_data_pipelines/)
+
+
+## Key Highlights
+
+- **Automated**: Vakyansh's pipelines are fully automated and no human intervention is required to process 
+  the audio pipelines. It uses pre trained models to identify language, gender and speakers in the audio.
+- **Scalable**: Process thousands of hours of data in 2-3 days leveraging K8s capabilities. Allows faster time to market.
+- **Versatile**: Vakyansh's pipelines can run on any VM's or Kubernetes cluster on any cloud. 
+  For scalability it is recommended to run on Kubernetes
+- **Quality**: Vakyansh lays strong emphasis on code quality and high test
+  coverage to ensure its seamless use and continued maintenance.
