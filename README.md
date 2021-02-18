@@ -3,12 +3,15 @@
 
 Pipelines to transform raw data and prepare data for model training. They clean, process and balance data for model training
 
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](code-of-conduct.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Vakyansh](https://circleci.com/gh/Open-Speech-EkStep/audio-to-speech-pipeline.svg?style=shield&circle-token=16ad24d15c781f8e416ffcdaffcd0c2651e0ff4a)](https://app.circleci.com/pipelines/github/Open-Speech-EkStep/audio-to-speech-pipeline)
+[![Coverage](https://img.shields.io/badge/coverage-90%25-green)](https://app.circleci.com/pipelines/github/Open-Speech-EkStep/audio-to-speech-pipeline)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 
 If you like Vakyansh, ⭐ the project to support its development!_

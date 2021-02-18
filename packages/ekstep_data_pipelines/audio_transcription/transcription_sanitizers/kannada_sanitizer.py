@@ -1,16 +1,20 @@
-from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import BaseTranscriptionSanitizer
-from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import TranscriptionSanitizationError
+from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
+    BaseTranscriptionSanitizer,
+)
+from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
+    TranscriptionSanitizationError,
+)
 
 from ekstep_data_pipelines.common.utils import get_logger
 import re
 
-LOGGER = get_logger('KannadaTranscriptionSanitizer')
+LOGGER = get_logger("KannadaTranscriptionSanitizer")
 
 
 class KannadaSanitizer(BaseTranscriptionSanitizer):
 
     VALID_CHARS = "[ ಂ-ಃಅ-ಋಎ-ಐಒ-ನಪ-ರಲ-ಳವ-ಹಾ-ೄೆ-ೈೊ-್ೲ]+"
-    PUNCTUATION = '!"#%&\'()*+,./;<=>?@[\\]^_`{|}~।'
+    PUNCTUATION = "!\"#%&'()*+,./;<=>?@[\\]^_`{|}~।"
 
     @staticmethod
     def get_instance(**kwargs):
@@ -18,7 +22,6 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
 
     def __init__(self, *args, **kwargs):
         pass
-
 
     def sanitize(self, transcription):
         LOGGER.info("Sanitizing transcription:" + transcription)
@@ -29,17 +32,20 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
         transcription = transcription.strip()
 
         if len(transcription) == 0:
-            raise TranscriptionSanitizationError('transcription is empty')
+            raise TranscriptionSanitizationError("transcription is empty")
 
         if self.shouldReject(transcription):
             raise TranscriptionSanitizationError(
-                'transcription has char which is not in  ಂ-ಃಅ-ಋಎ-ಐಒ-ನಪ-ರಲ-ಳವ-ಹಾ-ೄೆ-ೈೊ-್ೲ')
+                "transcription has char which is not in  ಂ-ಃಅ-ಋಎ-ಐಒ-ನಪ-ರಲ-ಳವ-ಹಾ-ೄೆ-ೈೊ-್ೲ"
+            )
 
         return transcription
 
     def shouldReject(self, transcription):
-        rejected_string = re.sub(pattern=KannadaSanitizer.VALID_CHARS, repl='', string=transcription)
-        
+        rejected_string = re.sub(
+            pattern=KannadaSanitizer.VALID_CHARS, repl="", string=transcription
+        )
+
         if len(rejected_string.strip()) > 0:
             return True
 
@@ -49,8 +55,8 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
 
         LOGGER.info("replace panctuation if present ")
 
-        if '-' in transcription:
-            transcription = transcription.replace('-', ' ')
+        if "-" in transcription:
+            transcription = transcription.replace("-", " ")
 
         table = str.maketrans(dict.fromkeys(KannadaSanitizer.PUNCTUATION))
         return transcription.translate(table)

@@ -3,8 +3,16 @@ import json
 import re
 import os
 import pandas as pd
-from gcs_utils import list_blobs_in_a_path, copy_blob, check_blob, \
-    move_blob, upload_blob, read_blob, move_directory, download_blob
+from gcs_utils import (
+    list_blobs_in_a_path,
+    copy_blob,
+    check_blob,
+    move_blob,
+    upload_blob,
+    read_blob,
+    move_directory,
+    download_blob,
+)
 
 from airflow.models import Variable
 
@@ -33,7 +41,7 @@ def count_utterances_file_chunks(**kwargs):
     all_blobs = list_blobs_in_a_path(bucket_name, source_chunk_path)
     list_of_blobs = []
     for blob in all_blobs:
-        if blob.name.endswith('.csv'):
+        if blob.name.endswith(".csv"):
             list_of_blobs.append(str(blob.name))
     print("***The utterances file chunks***", list_of_blobs)
     utterances_names["utteranceschunkslist"] = list_of_blobs
@@ -43,16 +51,20 @@ def count_utterances_file_chunks(**kwargs):
 
 def move_utterance_chunk(bucket_name, source_file_name, experiment_name):
     get_variables()
-    archive_utterances_file_name = archive_utterances_path + experiment_name + "/" + source_file_name.split('/')[
-        -1]
+    archive_utterances_file_name = (
+        archive_utterances_path
+        + experiment_name
+        + "/"
+        + source_file_name.split("/")[-1]
+    )
     move_blob(bucket_name, source_file_name, bucket_name, archive_utterances_file_name)
     # os.remove(local_file_name)
 
 
 def copy_utterances(src_file_name, **kwargs):
     get_variables()
-    extn_list = ['wav', 'txt']
-    local_file_name = bucket_name.split('/')[-1]
+    extn_list = ["wav", "txt"]
+    local_file_name = bucket_name.split("/")[-1]
     download_blob(bucket_name, src_file_name, local_file_name)
     df = pd.read_csv(local_file_name)
     for i, row in df.iterrows():
@@ -63,10 +75,26 @@ def copy_utterances(src_file_name, **kwargs):
         utterance_file_name = str(file_name).split(".")[0]
         print(file_name, utterance_file_name, audio_id)
         for extn in extn_list:
-            source_blob_name = integration_processed_path + source.lower() + "/" + str(
-                audio_id) + "/clean/" + utterance_file_name + "." + extn
-            destination_blob_name = experiment_output + experiment_name + "/" + str(
-                audio_id) + "/" + utterance_file_name + "." + extn
+            source_blob_name = (
+                integration_processed_path
+                + source.lower()
+                + "/"
+                + str(audio_id)
+                + "/clean/"
+                + utterance_file_name
+                + "."
+                + extn
+            )
+            destination_blob_name = (
+                experiment_output
+                + experiment_name
+                + "/"
+                + str(audio_id)
+                + "/"
+                + utterance_file_name
+                + "."
+                + extn
+            )
             copy_blob(
                 bucket_name=bucket_name,
                 blob_name=source_blob_name,
@@ -74,8 +102,6 @@ def copy_utterances(src_file_name, **kwargs):
                 destination_blob_name=destination_blob_name,
             )
     move_utterance_chunk(bucket_name, src_file_name, experiment_name)
-
-
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ def load_model(model_path):
     return model
 
 
-def forward(audio, model, mode='train'):
+def forward(audio, model, mode="train"):
     try:
         model.eval()
         spec = utils.load_data(audio, mode=mode)[np.newaxis, ...]
@@ -38,18 +38,22 @@ def forward(audio, model, mode='train'):
 
 def language_confidence_score_map(confidence_scores, language_map_path):
     output_dictionary = {}
-    language_map = load_yaml_file(language_map_path)['languages']
+    language_map = load_yaml_file(language_map_path)["languages"]
     for key in language_map:
         output_dictionary[language_map[key]] = confidence_scores[key]
     return output_dictionary
 
+
 def load_yaml_file(path):
-    with open(path, 'r') as file:
+    with open(path, "r") as file:
         read_dict = yaml.safe_load(file)
     return read_dict
 
 
-def evaluation(audio_path, model_path='ekstep_data_pipelines/audio_language_identification/model/model.pt'):
+def evaluation(
+    audio_path,
+    model_path="ekstep_data_pipelines/audio_language_identification/model/model.pt",
+):
     model = load_model(model_path)
     model_output = forward(audio_path, model=model)
     sm = torch.nn.Softmax()
@@ -57,6 +61,9 @@ def evaluation(audio_path, model_path='ekstep_data_pipelines/audio_language_iden
     confidence_scores = ["{:.5f}".format(i.item()) for i in list(probabilities[0])]
     return confidence_scores
 
-def infer_language(audio_path, language_map_path='ekstep_data_pipelines/audio_language_identification/language_map.yml'):
-    return language_confidence_score_map(evaluation(audio_path), language_map_path)
 
+def infer_language(
+    audio_path,
+    language_map_path="ekstep_data_pipelines/audio_language_identification/language_map.yml",
+):
+    return language_confidence_score_map(evaluation(audio_path), language_map_path)

@@ -19,17 +19,21 @@ DEFULT_QUERY_FOR_INSERT_INTO_MAPPING_TABLE = "insert into media_speaker_mapping(
 GET_SPEAKER_ID_QUERY = "select speaker_id from speaker s JOIN media_metadata_staging b on s.speaker_name = b.speaker_name \
 where b.audio_id = :audio_id;"
 
-FETCH_QUERY_WHERE_SPEAKER_IS_NULL = 'select audio_id ,utterances_files_list,load_datetime from media_metadata_staging where is_normalized = false and speaker_name is null'
+FETCH_QUERY_WHERE_SPEAKER_IS_NULL = "select audio_id ,utterances_files_list,load_datetime from media_metadata_staging where is_normalized = false and speaker_name is null"
 
-DEFAULT_INSERT_QUERY = "insert into media_speaker_mapping(clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr, status," \
-                       "fail_reason, language_confidence_score, load_datetime) values "
+DEFAULT_INSERT_QUERY = (
+    "insert into media_speaker_mapping(clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr, status,"
+    "fail_reason, language_confidence_score, load_datetime) values "
+)
 
-DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG = "update media_metadata_staging set is_normalized = true where audio_id in "
+DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG = (
+    "update media_metadata_staging set is_normalized = true where audio_id in "
+)
 
-GET_LOAD_TIME_FOR_AUDIO_QUERY = "select load_datetime from media where audio_id = :audio_id;"
+GET_LOAD_TIME_FOR_AUDIO_QUERY = (
+    "select load_datetime from media where audio_id = :audio_id;"
+)
 
-GET_UTTERANCES_LIST_OF_AUDIO_ID = "select utterances_files_list from media where audio_id = :audio_id"
-
-
-
-
+GET_UTTERANCES_LIST_OF_AUDIO_ID = (
+    "select utterances_files_list from media where audio_id = :audio_id"
+)

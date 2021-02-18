@@ -5,6 +5,7 @@ import os
 from os import listdir
 from os.path import isfile, join
 import gswrap
+
 # [START storage_upload_file]
 from google.cloud import storage
 
@@ -87,20 +88,22 @@ def rename_blob(bucket_name, blob_name, new_name):
 
     new_blob = bucket.rename_blob(blob, new_name)
 
-    print("Blob {}/{} has been renamed to {}".format(bucket_name, blob.name, new_blob.name))
+    print(
+        "Blob {}/{} has been renamed to {}".format(
+            bucket_name, blob.name, new_blob.name
+        )
+    )
 
 
-def move_blob(
+def move_blob(bucket_name, blob_name, destination_bucket_name, destination_blob_name):
+    source_blob = copy_blob(
         bucket_name, blob_name, destination_bucket_name, destination_blob_name
-):
-    source_blob = copy_blob(bucket_name, blob_name, destination_bucket_name, destination_blob_name)
+    )
     source_blob.delete()
     print("Blob {} deleted.".format(source_blob))
 
 
-def copy_blob(
-        bucket_name, blob_name, destination_bucket_name, destination_blob_name
-):
+def copy_blob(bucket_name, blob_name, destination_bucket_name, destination_blob_name):
     """Copies a blob from one bucket to another with a new name."""
     # bucket_name = "your-bucket-name"
     # blob_name = "your-object-name"
@@ -135,7 +138,9 @@ def list_blobs_in_a_path(bucket_name, file_prefix, delimiter=None):
     storage_client = storage.Client()
 
     # Note: Client.list_blobs requires at least package version 1.17.0.
-    blobs = storage_client.list_blobs(bucket_name, prefix=file_prefix, delimiter=delimiter)
+    blobs = storage_client.list_blobs(
+        bucket_name, prefix=file_prefix, delimiter=delimiter
+    )
     return blobs
 
 
@@ -156,10 +161,11 @@ def read_blob(bucket_name, file_prefix):
 def move_directory(bucket_name, source_path, destination_path):
     client = gswrap.Client()
     client.cp(
-        src="gs://" + bucket_name + '/' + source_path,
-        dst="gs://" + bucket_name + '/' + destination_path,
-        recursive=True)
-    client.rm("gs://" + bucket_name + '/' + source_path, recursive=True)
+        src="gs://" + bucket_name + "/" + source_path,
+        dst="gs://" + bucket_name + "/" + destination_path,
+        recursive=True,
+    )
+    client.rm("gs://" + bucket_name + "/" + source_path, recursive=True)
     return "Source " + source_path + " has been move to " + destination_path
 
 

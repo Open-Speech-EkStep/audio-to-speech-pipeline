@@ -2,7 +2,7 @@ import hashlib
 
 from ekstep_data_pipelines.common.utils import get_logger
 
-LOGGER = get_logger('hash_code')
+LOGGER = get_logger("hash_code")
 
 
 def get_hash_code_of_audio_file(file_path):

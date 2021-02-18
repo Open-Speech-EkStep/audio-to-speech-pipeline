@@ -4,7 +4,10 @@ from os.path import isfile, join
 from google.cloud import storage
 from ekstep_data_pipelines.common.infra_commons.storage import BaseStorageInterface
 from concurrent.futures import ThreadPoolExecutor
-from ekstep_data_pipelines.common.infra_commons.storage.exceptions import FileNotFoundException, PathDoesNotExist
+from ekstep_data_pipelines.common.infra_commons.storage.exceptions import (
+    FileNotFoundException,
+    PathDoesNotExist,
+)
 from ekstep_data_pipelines.common.utils import get_logger
 from tqdm import tqdm
 
@@ -12,7 +15,6 @@ Logger = get_logger("GoogleStorage")
 
 
 class GoogleStorage(BaseStorageInterface):
-
     def __init__(self, **kwargs):
         self._client = None
 
@@ -20,7 +22,7 @@ class GoogleStorage(BaseStorageInterface):
         if not path:
             return None
 
-        splitted_path = list(filter(None, path.split('/')))
+        splitted_path = list(filter(None, path.split("/")))
 
         if len(splitted_path) < 1:
             return None
@@ -31,12 +33,12 @@ class GoogleStorage(BaseStorageInterface):
         if not path_with_bucket:
             return None
 
-        splitted_path = list(filter(None, path_with_bucket.split('/')))
+        splitted_path = list(filter(None, path_with_bucket.split("/")))
 
         if len(splitted_path) < 1:
             return None
 
-        return '/'.join(splitted_path[1:])
+        return "/".join(splitted_path[1:])
 
     @property
     def client(self):
@@ -50,29 +52,29 @@ class GoogleStorage(BaseStorageInterface):
         bucket_name = self.get_bucket_from_path(source_path)
         actual_path = self.get_path_without_bucket(source_path)
 
-        if actual_path and actual_path[-1] != '/':
-            actual_path = actual_path + '/'
+        if actual_path and actual_path[-1] != "/":
+            actual_path = actual_path + "/"
 
         blob_name_set = set()
         is_folder = False
         for blob in self.client.list_blobs(bucket_name, prefix=actual_path):
-            content = blob.name.replace(actual_path, '')
+            content = blob.name.replace(actual_path, "")
 
             if not content:
                 continue
 
-            if '/' in content[:-1]:
+            if "/" in content[:-1]:
                 if include_folders:
-                    content = content.split('/')[0] + '/'
+                    content = content.split("/")[0] + "/"
                     is_folder = True
                 else:
                     continue
 
             if not is_folder:
-                content = content.replace('/', '')
+                content = content.replace("/", "")
 
-            if content.replace('/', '') in blob_name_set:
-                blob_name_set.remove(content.replace('/', ''))
+            if content.replace("/", "") in blob_name_set:
+                blob_name_set.remove(content.replace("/", ""))
 
             blob_name_set.add(content)
 
@@ -81,23 +83,29 @@ class GoogleStorage(BaseStorageInterface):
     def download_to_location(self, source_path: str, destination_path: str):
         return self.download_file_to_location(source_path, destination_path)
 
-    def download_folder_to_location(self, source_path: str, destination_path: str, max_workers=5):
+    def download_folder_to_location(
+        self, source_path: str, destination_path: str, max_workers=5
+    ):
         bucket = self.get_bucket_from_path(source_path)
-        source = '/'.join(source_path.split('/')[1:])
-        Logger.info('bucket:' + bucket)
-        Logger.info('source:' + source)
+        source = "/".join(source_path.split("/")[1:])
+        Logger.info("bucket:" + bucket)
+        Logger.info("source:" + source)
         source_files = self._list_blobs_in_a_path(bucket, source)
-        Logger.info('file:' + str(source_files))
+        Logger.info("file:" + str(source_files))
         curr_executor = ThreadPoolExecutor(max_workers)
 
         for remote_file in tqdm(source_files):
             remote_file_path = remote_file.name
-            remote_file_name = remote_file_path.split('/')[-1]
+            remote_file_name = remote_file_path.split("/")[-1]
 
-            if remote_file_name == '' or remote_file.size <= 0:
+            if remote_file_name == "" or remote_file.size <= 0:
                 continue
 
-            curr_executor.submit(self.download_to_location, f'{bucket}/{remote_file_path}', f'{destination_path}/{remote_file_name}')
+            curr_executor.submit(
+                self.download_to_location,
+                f"{bucket}/{remote_file_path}",
+                f"{destination_path}/{remote_file_name}",
+            )
 
         curr_executor.shutdown(wait=True)
 
@@ -114,12 +122,18 @@ class GoogleStorage(BaseStorageInterface):
         return True
 
     def upload_folder_to_location(self, source_path: str, destination_path: str):
-        files_for_upload = [f for f in listdir(source_path) if isfile(join(source_path, f))]
+        files_for_upload = [
+            f for f in listdir(source_path) if isfile(join(source_path, f))
+        ]
 
         curr_executor = ThreadPoolExecutor(max_workers=5)
 
         for upload_file in files_for_upload:
-            curr_executor.submit(self.upload_to_location, f'{source_path}/{upload_file}', f'{destination_path}/{upload_file}')
+            curr_executor.submit(
+                self.upload_to_location,
+                f"{source_path}/{upload_file}",
+                f"{destination_path}/{upload_file}",
+            )
 
         curr_executor.shutdown(wait=True)
         # Todo: check all the futures for exceptions and then send back true
@@ -142,25 +156,29 @@ class GoogleStorage(BaseStorageInterface):
     def copy(self, source_path: str, destination_path: str) -> bool:
 
         if not self.path_exists(source_path):
-            raise FileNotFoundException(f'File at {source_path} not found')
+            raise FileNotFoundException(f"File at {source_path} not found")
 
         source_bucket = self.client.bucket(self.get_bucket_from_path(source_path))
         source_actual_path = self.get_path_without_bucket(source_path)
         source_blob = source_bucket.blob(source_actual_path)
 
-        destination_bucket = self.client.bucket(self.get_bucket_from_path(destination_path))
+        destination_bucket = self.client.bucket(
+            self.get_bucket_from_path(destination_path)
+        )
         destination_actual_path = self.get_path_without_bucket(destination_path)
 
-        source_bucket.copy_blob(source_blob, destination_bucket, destination_actual_path)
+        source_bucket.copy_blob(
+            source_blob, destination_bucket, destination_actual_path
+        )
         return True
 
     def delete(self, path: str) -> bool:
         bucket_name = self.get_bucket_from_path(path)
-            
+
         bucket = self.client.bucket(bucket_name)
         actual_path = self.get_path_without_bucket(path)
 
-        all_file = self._list_blobs_in_a_path(bucket_name,actual_path)
+        all_file = self._list_blobs_in_a_path(bucket_name, actual_path)
 
         for file in all_file:
             blob = bucket.blob(file.name)
@@ -173,11 +191,13 @@ class GoogleStorage(BaseStorageInterface):
         bucket = self.client.bucket(self.get_bucket_from_path(path))
         actual_path = self.get_path_without_bucket(path)
         try:
-            path_exists = storage.Blob(bucket=bucket, name=actual_path).exists(self.client)
+            path_exists = storage.Blob(bucket=bucket, name=actual_path).exists(
+                self.client
+            )
         except:
             return False
         return path_exists
 
-    def _list_blobs_in_a_path(self, bucket ,file_prefix, delimiter=None):
+    def _list_blobs_in_a_path(self, bucket, file_prefix, delimiter=None):
         blobs = self.client.list_blobs(bucket, prefix=file_prefix, delimiter=delimiter)
         return blobs

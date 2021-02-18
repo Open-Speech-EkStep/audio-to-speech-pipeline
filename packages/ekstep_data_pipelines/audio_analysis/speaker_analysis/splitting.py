@@ -3,11 +3,11 @@ import math
 
 
 def get_big_cluster_size_threshold(all_cluster_embeds):
-    '''
+    """
     Takes all_cluster_embeds
     Returns: threshold value defining big cluster size in the dataset
     (any cluster with size >= this threshold will be treated as a big cluster)
-    '''
+    """
 
     cl_sizes = []
     thresholds_wrt_multipliers = []
@@ -34,17 +34,25 @@ def get_big_cluster_embeds(all_cluster_embeds):
     if threshold:
         # indices of big clusters
         big_clusters_indices = []
-        print('Clusters larger than {} points have sizes:'.format(threshold))
+        print("Clusters larger than {} points have sizes:".format(threshold))
         for ind, cluster in enumerate(all_cluster_embeds):
             if len(cluster) >= threshold:
                 print(len(cluster))
                 big_clusters_indices.append(ind)
 
         # embeds of big clusters and their speakers
-        big_cluster_embeds = [cl for ind, cl in enumerate(all_cluster_embeds) if ind in big_clusters_indices]
+        big_cluster_embeds = [
+            cl
+            for ind, cl in enumerate(all_cluster_embeds)
+            if ind in big_clusters_indices
+        ]
 
-        flat_embeddings_big_clusters = [item for sublist in big_cluster_embeds for item in sublist]
+        flat_embeddings_big_clusters = [
+            item for sublist in big_cluster_embeds for item in sublist
+        ]
 
-        print('total points in big clusters: {}'.format(len(flat_embeddings_big_clusters)))
+        print(
+            "total points in big clusters: {}".format(len(flat_embeddings_big_clusters))
+        )
         flat_embeddings_big_clusters = np.array(flat_embeddings_big_clusters)
     return flat_embeddings_big_clusters, big_clusters_indices

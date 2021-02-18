@@ -1,41 +1,41 @@
 from abc import ABC, abstractmethod
 
+
 class BaseStorageInterface(ABC):
-
     @abstractmethod
-    def list_files(self, source_path:str):
+    def list_files(self, source_path: str):
         pass
 
     @abstractmethod
-    def download_to_location(self, source_path:str, destination_path:str):
+    def download_to_location(self, source_path: str, destination_path: str):
         pass
 
     @abstractmethod
-    def download_folder_to_location(self, source_path:str, destination_path:str):
+    def download_folder_to_location(self, source_path: str, destination_path: str):
         pass
 
     @abstractmethod
-    def upload_to_location(self, source_path:str, destination_path:str):
+    def upload_to_location(self, source_path: str, destination_path: str):
         pass
 
     @abstractmethod
-    def upload_folder_to_location(self, source_path:str, destination_path:str):
+    def upload_folder_to_location(self, source_path: str, destination_path: str):
         pass
 
     @abstractmethod
-    def move(self, source_path:str,destination:str) -> bool:
+    def move(self, source_path: str, destination: str) -> bool:
         pass
 
     @abstractmethod
-    def copy(self, source_path:str, destination:str) ->bool:
+    def copy(self, source_path: str, destination: str) -> bool:
         pass
 
     @abstractmethod
-    def delete(self, path:str) -> bool:
+    def delete(self, path: str) -> bool:
         pass
 
     @abstractmethod
-    def path_exists(self, path:str) -> bool:
+    def path_exists(self, path: str) -> bool:
         pass
 
 
@@ -46,7 +46,7 @@ def get_storage_clients(initlization_dict):
 
     storage_clients = {}
 
-    storage_clients['local'] = LocalStorage()
-    storage_clients['google'] = GoogleStorage()
+    storage_clients["local"] = LocalStorage()
+    storage_clients["google"] = GoogleStorage()
 
     return storage_clients

@@ -5,6 +5,7 @@ import numpy as np
 from psycopg2._json import Json
 from psycopg2.extensions import register_adapter, AsIs
 
+
 def addapt_numpy_float64(numpy_float64):
     return AsIs(numpy_float64)
 
@@ -32,6 +33,7 @@ register_adapter(np.int32, addapt_numpy_int32)
 register_adapter(np.ndarray, addapt_numpy_array)
 register_adapter(dict, Json)
 
+
 class PostgresClient:
     """
     PostgresClient for DB related operations
@@ -40,16 +42,17 @@ class PostgresClient:
     3. execute update
     4. execute batch updates
     """
+
     GET_UNIQUE_ID = "SELECT nextval('audio_id_seq');"
     IS_EXIST = "select exists(select 1 from media_metadata_staging where raw_file_name= :file_name or media_hash_code = :hash_code);"
 
     @staticmethod
-    def get_instance(config_dict,**kwargs):
-        data_processor = PostgresClient(config_dict,**kwargs)
+    def get_instance(config_dict, **kwargs):
+        data_processor = PostgresClient(config_dict, **kwargs)
         data_processor.setup_peripherals()
         return data_processor
 
-    def __init__(self, config_dict,**kwargs):
+    def __init__(self, config_dict, **kwargs):
         self.config_dict = config_dict
         self.db = None
         self._connection = None
@@ -72,11 +75,13 @@ class PostgresClient:
         """
         Function for setting up the database access
         """
-        db_configuration = self.config_dict.get('common', {}).get('db_configuration', {})
-        db_name = db_configuration.get('db_name')
-        db_user = db_configuration.get('db_user')
-        db_pass = db_configuration.get('db_pass')
-        cloud_sql_connection_name = db_configuration.get('cloud_sql_connection_name')
+        db_configuration = self.config_dict.get("common", {}).get(
+            "db_configuration", {}
+        )
+        db_name = db_configuration.get("db_name")
+        db_user = db_configuration.get("db_user")
+        db_pass = db_configuration.get("db_pass")
+        cloud_sql_connection_name = db_configuration.get("cloud_sql_connection_name")
 
         valid_config = all([db_name, db_user, db_pass, cloud_sql_connection_name])
 
@@ -85,7 +90,8 @@ class PostgresClient:
             pass
 
         self.db = create_engine(
-            f'postgresql://{db_user}:{db_pass}@{cloud_sql_connection_name}/{db_name}')
+            f"postgresql://{db_user}:{db_pass}@{cloud_sql_connection_name}/{db_name}"
+        )
 
     def execute_query(self, query, **parm_dict):
         return self.connection.execute(text(query), **parm_dict).fetchall()
@@ -105,6 +111,7 @@ class PostgresClient:
     def get_unique_id(self):
         return self.connection.execute(self.GET_UNIQUE_ID).fetchall()[0][0]
 
-    def check_file_exist_in_db(self,file_name,hash_code):
-        return self.connection.execute(text(self.IS_EXIST),file_name=file_name,hash_code=hash_code).fetchall()[0][0]
-
+    def check_file_exist_in_db(self, file_name, hash_code):
+        return self.connection.execute(
+            text(self.IS_EXIST), file_name=file_name, hash_code=hash_code
+        ).fetchall()[0][0]
