@@ -13,7 +13,7 @@ torchvision==0.7.0
 matplotlib==3.1.1
 seaborn~=0.10.1
 resemblyzer~=0.1.1.dev0
-hdbscan
+hdbscan==0.8.26
 azure-cognitiveservices-speech==1.13.0
 Babel==2.8.0
 cached-property==1.5.1
