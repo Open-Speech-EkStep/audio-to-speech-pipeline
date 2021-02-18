@@ -15,13 +15,8 @@ parameters:
     default: false
   ekstep_data_pipelines:
     type: boolean
-    default: false
-  database_migrations_apply:
-    type: boolean
     default: true
-  database_migrations_rollback:
-    type: boolean
-    default: false
+
 
 executors:
   node:
@@ -242,7 +237,7 @@ jobs:
             mvn dependency:go-offline
             mvn package
 
-  update-db:
+  deploy-db:
     parameters:
       mode:
         type: string
@@ -342,6 +337,20 @@ workflows:
   ekstep_data_pipelines:
     when: << pipeline.parameters.ekstep_data_pipelines >>
     jobs:
+      - deploy-db:
+          name: ekstep-database-migrations-apply-test
+          mode: 'apply'
+          env_name: 'test'
+      - approval_for_prod_deploy:
+          type: approval
+          requires:
+            - ekstep-database-migrations-apply-test
+      - deploy-db:
+          name: ekstep-database-migrations-apply-prod
+          mode: 'apply'
+          env_name: 'prod'
+          requires:
+            - approval_for_prod_deploy
       - ekstep_build:
           name: ekstep_data_pipelines_build
       - deploy:
@@ -378,37 +387,4 @@ workflows:
           requires:
             - pipeline-dag-build_test
 
-  database_migrations_apply:
-    when: << pipeline.parameters.database_migrations_apply >>
-    jobs:
-      - update-db:
-          name: ekstep-database-migrations-apply-test
-          mode: 'apply'
-          env_name: 'test'
-      - approval_for_prod_deploy:
-          type: approval
-          requires:
-            - ekstep-database-migrations-apply-test
-      - update-db:
-          name: ekstep-database-migrations-apply-prod
-          mode: 'apply'
-          env_name: 'prod'
-          requires:
-            - approval_for_prod_deploy
-  database_migrations_rollback:
-    when: << pipeline.parameters.database_migrations_rollback >>
-    jobs:
-      - update-db:
-          name: ekstep-database-migrations-rollback-test
-          mode: 'rollback'
-          env_name: 'test'
-      - approval_for_prod_rollback:
-          type: approval
-          requires:
-            - ekstep-database-migrations-rollback-test
-      - update-db:
-          name: ekstep-database-migrations-rollback-prod
-          mode: 'rollback'
-          env_name: 'prod'
-          requires:
-            - approval_for_prod_rollback
+
