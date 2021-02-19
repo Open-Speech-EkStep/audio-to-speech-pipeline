@@ -23,3 +23,10 @@ format:
 
 deploy_dags:
 	echo 'deploying dags'
+
+tests:
+	coverage run -m unittest discover -s ekstep_pipelines_tests/ -p "*_tests.py" -v
+	coverage report --fail-under 65
+	coverage html
+	echo 'open htmlcov/index.html'
+	open htmlcov/index.html
