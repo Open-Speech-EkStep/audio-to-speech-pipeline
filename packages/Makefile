@@ -1,11 +1,25 @@
-tests:
-	python -m unittest discover -s ekstep_pipelines_tests/ -p "*_tests.py" -v
+python_setup:
+	pyenv install 3.8.6
+	pyenv local 3.8.6
+	eval "$(pyenv init -)"
+	python --version ; pip --version
 
-util_tests:
-	python3 -m unittest discover -s ekstep_pipelines_tests/common/audio_commons/ -p "*_tests.py" -v
-
-trans_client_test:
-	python3 -m unittest discover -s ekstep_pipelines_tests/common/audio_commons/transcription_clients_tests -p "*_tests.py" -v
+mac_setup:
+	brew update
+	brew install pyenv
 
 
-all-tests: tests util_tests trans_client_test
+dev_setup:
+	pip install --upgrade pip
+	pip install -r requirements.txt
+	cp ../lib/wada_snr.tar.gz . && tar -xzvf wada_snr.tar.gz && mv WadaSNR ekstep_data_pipelines/binaries
+	rm wada_snr.tar.gz
+
+apply_dev_policy:
+	sh development_policy_setup
+
+format:
+	black .
+
+deploy_dags:
+	echo 'deploying dags'
