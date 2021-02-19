@@ -28,7 +28,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -125,3 +124,5 @@ venv.bak/
 dmypy.json
 
 src/resources/cluster/*
+
+packages/ekstep_data_pipelines/binaries
