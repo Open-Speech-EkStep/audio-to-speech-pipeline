@@ -1,6 +1,6 @@
 python_setup:
-	pyenv install 3.8.6
-	pyenv local 3.8.6
+	pyenv install 3.7.7
+	pyenv local 3.7.7
 	eval "$(pyenv init -)"
 	python --version ; pip --version
 
@@ -8,10 +8,10 @@ mac_setup:
 	brew update
 	brew install pyenv
 
-
 dev_setup:
-	pip install --upgrade pip
+	python -m pip install pip==20.0.2
 	pip install -r requirements.txt
+	rm -rf ekstep_data_pipelines/binaries
 	cp ../lib/wada_snr.tar.gz . && tar -xzvf wada_snr.tar.gz && mv WadaSNR ekstep_data_pipelines/binaries
 	rm wada_snr.tar.gz
 
