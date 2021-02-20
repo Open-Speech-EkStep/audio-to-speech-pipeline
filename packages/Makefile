@@ -6,7 +6,7 @@ python_setup:
 	python -m pip install pip==20.0.2
 
 install_dependencies:
-	echo 'installing dependencies...'
+	echo '>> installing dependencies...'
 	pip install -r requirements.txt
 	rm -rf ekstep_data_pipelines/binaries
 	cp ../lib/wada_snr.tar.gz .
@@ -15,7 +15,7 @@ install_dependencies:
 	rm wada_snr.tar.gz
 
 mac_setup:
-	echo 'setting up project on mac...'
+	echo '>> setting up project on mac...'
 	brew update
 	brew install pyenv
 	make python_setup
@@ -24,7 +24,7 @@ mac_setup:
 
 
 linux_setup:
-	echo 'setting up project..'
+	echo '>>setting up project..'
 	sudo apt-get update
 	sudo apt-get install -y ffmpeg
 	sudo apt-get install -y sox
@@ -50,3 +50,6 @@ tests:
 	coverage html
 	echo 'open htmlcov/index.html'
 	open htmlcov/index.html
+
+lint:
+	find . -type f -name "*.py" | xargs pylint
