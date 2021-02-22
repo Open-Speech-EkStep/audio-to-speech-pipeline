@@ -49,7 +49,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
-htmlcov/
+htmlcov*/
 .tox/
 .nox/
 .coverage
@@ -126,3 +126,5 @@ dmypy.json
 src/resources/cluster/*
 
 packages/ekstep_data_pipelines/binaries
+packages/.workspace
+packages/reports
