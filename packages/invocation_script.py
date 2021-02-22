@@ -3,7 +3,6 @@ import os
 import uuid
 import argparse
 from google.cloud import storage
-from urllib.parse import urlparse
 
 from ekstep_data_pipelines.audio_analysis.audio_analysis import AudioAnalysis
 from ekstep_data_pipelines.audio_cataloguer.cataloguer import AudioCataloguer
@@ -383,6 +382,6 @@ def perform_action(arguments, **kwargs):
 
 if __name__ == "__main__":
     config_file_path = process_config_input(processor_args)
-    LOGGER.info("Loaded configeration file path, performing action")
+    LOGGER.info("Loaded configuration file path, performing action")
     action_kwargs = {"config_file_path": config_file_path}
     perform_action(processor_args, **action_kwargs)

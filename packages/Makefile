@@ -7,6 +7,7 @@ python_setup:
 
 install_dependencies:
 	echo '>> installing dependencies...'
+	eval "$(pyenv init -)"
 	pip install -r requirements.txt
 	rm -rf ekstep_data_pipelines/binaries
 	cp ../lib/wada_snr.tar.gz .
@@ -41,8 +42,11 @@ apply_dev_policy:
 format:
 	black .
 
-deploy_dags:
-	echo 'deploying dags'
+build:
+	echo 'building...'
+
+lint:
+	find . -type f -name "*.py" | xargs pylint --disable=C0330, C0114, C0116 | cat > reports/lint.txt
 
 tests:
 	coverage run -m unittest discover -s ekstep_pipelines_tests/ -p "*_tests.py" -v
@@ -51,5 +55,7 @@ tests:
 	echo 'open htmlcov/index.html'
 	open htmlcov/index.html
 
-lint:
-	find . -type f -name "*.py" | xargs pylint
+deploy:
+	echo 'deploying...'
+
+

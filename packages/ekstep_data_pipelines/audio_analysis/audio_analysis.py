@@ -28,7 +28,7 @@ FIT_NOISE_ON_SIMILARITY = 0.80
 
 ESTIMATED_CPU_SHARE = 0.1
 
-Logger = get_logger("AudioSpeakerClusteringProcessor")
+LOGGER = get_logger("AudioSpeakerClusteringProcessor")
 
 
 class AudioAnalysis(BaseProcessor):
@@ -54,7 +54,7 @@ class AudioAnalysis(BaseProcessor):
         super().__init__(**kwargs)
 
     def handle_termination_gracefully(self, signum, frame):
-        Logger.info(
+        LOGGER.info(
             f"SIGINT/SIGTERM invoked with the following information {signum}/{frame}"
         )
         sys.exit(1)
@@ -75,12 +75,12 @@ class AudioAnalysis(BaseProcessor):
         local_audio_download_path = f"{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}/"
         self.ensure_path(local_audio_download_path)
 
-        Logger.info(f"Ensured {local_audio_download_path} exists")
+        LOGGER.info(f"Ensured {local_audio_download_path} exists")
         remote_download_path = self.get_full_path(source)
 
-        Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
+        LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
-        Logger.info("Running speaker clustering using parameters: " + str(parameters))
+        LOGGER.info("Running speaker clustering using parameters: " + str(parameters))
         min_cluster_size = parameters.get("min_cluster_size", MIN_CLUSTER_SIZE)
         partial_set_size = parameters.get("partial_set_size", PARTIAL_SET_SIZE)
         min_samples = parameters.get("min_samples", MIN_SAMPLES)
@@ -134,7 +134,7 @@ class AudioAnalysis(BaseProcessor):
                 npz_bucket_destination_path, embed_file_path
             )
         else:
-            Logger.info(
+            LOGGER.info(
                 f"Downloading source to {local_audio_download_path} from {remote_download_path}"
             )
             self.fs_interface.download_folder_to_location(
@@ -146,9 +146,9 @@ class AudioAnalysis(BaseProcessor):
                 embed_file_path, npz_bucket_destination_path
             )
             if is_uploaded:
-                Logger.info("npz file uploaded to :" + npz_bucket_destination_path)
+                LOGGER.info("npz file uploaded to :" + npz_bucket_destination_path)
             else:
-                Logger.info(
+                LOGGER.info(
                     "npz file could not be uploaded to :" + npz_bucket_destination_path
                 )
 
@@ -184,10 +184,10 @@ class AudioAnalysis(BaseProcessor):
                 female_files.append(utterance_name)
 
         catalogue_dao.update_utterance_speaker_gender(male_files, "m")
-        Logger.info(f"Updating the {male_files} with the value with value male")
+        LOGGER.info(f"Updating the {male_files} with the value with value male")
 
         catalogue_dao.update_utterance_speaker_gender(female_files, "f")
-        Logger.info(f"Updating the {female_files} with the value with value Female")
+        LOGGER.info(f"Updating the {female_files} with the value with value Female")
 
     def _update_speaker_count_info(self, catalogue_dao, speaker_to_file_name, source):
         for speaker in speaker_to_file_name:
@@ -196,16 +196,16 @@ class AudioAnalysis(BaseProcessor):
             if speaker_id == -1:
                 speaker_inserted = catalogue_dao.insert_speaker(source, speaker)
             else:
-                Logger.info("Speaker already exists:" + speaker)
+                LOGGER.info("Speaker already exists:" + speaker)
                 speaker_inserted = True
 
             if not speaker_inserted:
                 # do nothing incase the speaker_inserted is false
                 continue
 
-            Logger.info("updating utterances for speaker:" + speaker)
+            LOGGER.info("updating utterances for speaker:" + speaker)
             utterances = speaker_to_file_name.get(speaker)
-            Logger.info("utterances:" + str(utterances))
+            LOGGER.info("utterances:" + str(utterances))
             to_file_name = lambda u: u[0]
             was_noise_utterances = list(
                 map(to_file_name, (filter(lambda u: u[1] == 1, utterances)))
