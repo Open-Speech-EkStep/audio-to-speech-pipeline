@@ -256,7 +256,7 @@ class AudioTranscription(BaseProcessor):
 
             if not transcription_sanitizer:
                 LOGGER.info(
-                    f"No transacription sanitizer found for the language {curr_language}, hence falling back to the default sanitizer"
+                    f"No transacription sanitizer found for the language {curr_language}, hence falling back to the default sanitizer."
                 )
                 transcription_sanitizer = all_transcription_sanitizers.get("defalt")
 
