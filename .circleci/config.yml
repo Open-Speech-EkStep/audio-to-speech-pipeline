@@ -292,7 +292,7 @@ workflows:
       - E2E:
           name: ekstep_data_pipelines_e2e_build
           requires:
-            - ekstep-database-migrations-apply-test
+            - pipeline-dag-build_test
       - approval_for_prod_deploy:
           type: approval
           requires:
