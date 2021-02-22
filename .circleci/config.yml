@@ -229,7 +229,7 @@ jobs:
       - run:
           name: Setup proxy for psql and environment
           command: |
-            sh db_proxy_setup.sh
+            sh db_proxy_setup.sh ${GOOGLE_AUTH}
             pip install yoyo-migrations
             pip install psycopg2
       - run:
@@ -264,8 +264,8 @@ workflows:
           name: ekstep-database-migrations-apply-test
           mode: 'apply'
           env_name: 'test'
-          requires:
-            - ekstep_data_pipelines_deploy_test
+#          requires:
+#            - ekstep_data_pipelines_deploy_test
       - E2E:
           name: ekstep_data_pipelines_e2e_build
           requires:
