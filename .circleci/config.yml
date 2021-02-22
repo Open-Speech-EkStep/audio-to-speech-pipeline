@@ -280,31 +280,6 @@ workflows:
 
   # Workflows defined for each package.
 
-  data_tagger:
-    when: << pipeline.parameters.data_tagger >>
-    jobs:
-      - build:
-          name: data_tagger_build
-          package_name: data_tagger
-      - deploy:
-          name: data_tagger_deploy_test
-          package_version: 1.0.0
-          env_name: test
-          requires:
-            - data_tagger_build
-      - deploy:
-          name: data_tagger_deploy_prod
-          package_version: 1.0.0
-          env_name: prod
-          requires:
-            - data_tagger_build
-            - data_tagger_deploy_test
-
-          # filters:
-          #   branches:
-          #     only:
-          #       - master
-
   ekstep_data_pipelines:
     when: << pipeline.parameters.ekstep_data_pipelines >>
     jobs:
