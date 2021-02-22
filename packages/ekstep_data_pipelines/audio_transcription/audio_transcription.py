@@ -182,9 +182,9 @@ class AudioTranscription(BaseProcessor):
                 if should_skip_rejected:
                     LOGGER.info("Skipping rejected file_name: " + file_name)
                     continue
-
+                
                 LOGGER.info(
-                    "Marking rejected file as clean, as this will be transcribed:"
+                    "Marking rejected file as clean, as this will be transcribed: "
                     + file_name
                 )
                 utterance_metadata["status"] = "Clean"
