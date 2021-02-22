@@ -282,7 +282,7 @@ workflows:
             - approval_for_prod_deploy
       - deploy-db:
           name: ekstep-database-migrations-apply-prod
-          mode: 'apply'`
+          mode: 'apply'
           env_name: 'prod'
           requires:
             - ekstep_data_pipelines_deploy_prod
