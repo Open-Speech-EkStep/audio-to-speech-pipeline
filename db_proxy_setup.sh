@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-mkdir -p ~/.ssh
-
-echo ${SSH} > ~/.ssh/known_hosts
-
-cat ~/.ssh/known_hosts
 
 git clone git@github.com:Open-Speech-EkStep/E2ETest.git
 pwd
