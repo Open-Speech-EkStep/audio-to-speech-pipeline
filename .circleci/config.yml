@@ -1,11 +1,6 @@
 version: 2.1
 
 parameters:
-  # This parameter is used to trigger the main workflow
-  trigger:
-    type: boolean
-    default: false
-
   # A parameter per package
   pipeline_workflows:
     type: boolean
@@ -20,14 +15,6 @@ executors:
       - image: circleci/python:3.8.6
 
 jobs:
-  trigger-workflows:
-    executor: node
-    steps:
-      - checkout
-      - run:
-          name: Trigger workflows
-          command: chmod +x .circleci/circle_trigger.sh && .circleci/circle_trigger.sh
-
   build-dags:
     parameters:
       package_name:
@@ -44,16 +31,6 @@ jobs:
           name: Build Image
           command: |
             ls -ltr . ; pwd
-      #            export DOCKER_BUILDKIT=1
-      #            docker build --rm=false -t img-pipeline_workflows:latest .
-      #            - run:
-      #                name: Save Docker image
-      #                command: |
-      #                  docker save -o img-pipeline_workflows
-      #      - run:
-      #          name: Test Pipeline Workflow DAG
-      #          command: |
-      #            docker run -ti -v ~/project/packages/<< parameters.package_name >>:/opt/pipeline_workflows --entrypoint /mnt/entrypoint.sh img-pipeline_workflows run_unit_tests
       - run:
           name: Deploy Pipeline Workflow DAG
           command: |
@@ -269,14 +246,6 @@ jobs:
 
 workflows:
   version: 2
-
-  # The main workflow responsible for triggering all other workflows
-  # in which changes are detected.
-  ci:
-    when: << pipeline.parameters.trigger >>
-    jobs:
-      - trigger-workflows
-
 
   # Workflows defined for each package.
 
