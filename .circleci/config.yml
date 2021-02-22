@@ -187,7 +187,7 @@ jobs:
     steps:
       - run: echo "Hold for approval"
 
-  build_E2E:
+  E2E:
     working_directory: ~/E2E
 
     docker:
@@ -283,10 +283,6 @@ workflows:
   ekstep_data_pipelines:
     when: << pipeline.parameters.ekstep_data_pipelines >>
     jobs:
-      - deploy-db:
-          name: ekstep-database-migrations-apply-test
-          mode: 'apply'
-          env_name: 'test'
       - ekstep_build:
           name: ekstep_data_pipelines_build
       - deploy:
@@ -295,26 +291,33 @@ workflows:
           package_version: 1.0.0
           requires:
             - ekstep_data_pipelines_build
+      - deploy-db:
+          name: ekstep-database-migrations-apply-test
+          mode: 'apply'
+          env_name: 'test'
+          requires:
+            - ekstep_data_pipelines_deploy_test
+      - E2E:
+          name: ekstep_data_pipelines_e2e_build
+          requires:
+            - ekstep-database-migrations-apply-test
       - approval_for_prod_deploy:
           type: approval
           requires:
-            - ekstep-database-migrations-apply-test
-            - ekstep_data_pipelines_deploy_test
-      - deploy-db:
-          name: ekstep-database-migrations-apply-prod
-          mode: 'apply'
-          env_name: 'prod'
-          requires:
-            - approval_for_prod_deploy
+            - ekstep_data_pipelines_e2e_build
       - deploy:
           name: ekstep_data_pipelines_deploy_prod
           env_name: prod
           package_version: 1.0.0
           requires:
-            - ekstep_data_pipelines_build
             - approval_for_prod_deploy
-      - build_E2E:
-          name: ekstep_data_pipelines_e2e_build
+      - deploy-db:
+          name: ekstep-database-migrations-apply-prod
+          mode: 'apply'`
+          env_name: 'prod'
+          requires:
+            - ekstep_data_pipelines_deploy_prod
+
 
   pipeline_workflows:
     when: << pipeline.parameters.pipeline_workflows >>
