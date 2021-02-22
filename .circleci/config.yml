@@ -177,7 +177,7 @@ jobs:
       - checkout:
           path: ~/project
       - run:
-          name: Setup proxy for psql
+          name: E2E Tests
           command: |
             mkdir -p ~/.ssh
 
