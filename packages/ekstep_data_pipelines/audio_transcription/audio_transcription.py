@@ -184,7 +184,7 @@ class AudioTranscription(BaseProcessor):
                     continue
                 
                 LOGGER.info(
-                    "Marking rejected file as clean, as this will be transcribed: "
+                    "Marking rejected file as clean, as  this will be transcribed: "
                     + file_name
                 )
                 utterance_metadata["status"] = "Clean"
@@ -194,7 +194,7 @@ class AudioTranscription(BaseProcessor):
                 float(utterance_metadata["duration"]) < 0.5
                 or float(utterance_metadata["duration"]) > 15
             ):
-                LOGGER.error("skipping audio file as duration > 15 or < .5")
+                LOGGER.error("skipping audio file as duration > 15 or  < .5")
                 continue
 
             LOGGER.info(
