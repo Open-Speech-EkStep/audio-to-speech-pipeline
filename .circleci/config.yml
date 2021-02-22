@@ -23,7 +23,7 @@ jobs:
         type: string
     machine:
       image: ubuntu-1604:201903-01
-    working_directory: ~/project/packages/<< parameters.package_name >>
+    working_directory: ~/project/packages/pipeline_workflows
     steps:
       - checkout:
           path: ~/project
@@ -37,7 +37,7 @@ jobs:
             echo ${GOOGLE_AUTH} > ${HOME}/gcp-key.json
             gcloud auth activate-service-account --key-file ${HOME}/gcp-key.json
             gcloud --quiet config set project ${GCP_PROJECT}
-            sh ~/project/packages/<< parameters.package_name >>/deployDAG.sh << parameters.env_name >>
+            sh ~/project/packages/pipeline_workflows/deployDAG.sh << parameters.env_name >>
             rm ${HOME}/gcp-key.json
 
   build:
@@ -268,7 +268,6 @@ workflows:
   # Workflows defined for each package.
 
   ekstep_data_pipelines:
-    when: << pipeline.parameters.ekstep_data_pipelines >>
     jobs:
       - ekstep_build:
           name: ekstep_data_pipelines_build
@@ -282,8 +281,14 @@ workflows:
           name: ekstep-database-migrations-apply-test
           mode: 'apply'
           env_name: 'test'
-#          requires:
-#            - ekstep_data_pipelines_deploy_test
+          requires:
+            - ekstep_data_pipelines_deploy_test
+      - build-dags:
+          name: pipeline-dag-build_test
+          package_name: pipeline_workflows
+          env_name: 'test'
+          requires:
+            - ekstep-database-migrations-apply-test
       - E2E:
           name: ekstep_data_pipelines_e2e_build
           requires:
@@ -304,20 +309,11 @@ workflows:
           env_name: 'prod'
           requires:
             - ekstep_data_pipelines_deploy_prod
-
-
-  pipeline_workflows:
-    when: << pipeline.parameters.pipeline_workflows >>
-    jobs:
-      - build-dags:
-          name: pipeline-dag-build_test
-          package_name: pipeline_workflows
-          env_name: 'test'
       - build-dags:
           name: pipeline-dag-build_prod
           package_name: pipeline_workflows
           env_name: 'prod'
           requires:
-            - pipeline-dag-build_test
+            - ekstep-database-migrations-apply-prod
 
 
