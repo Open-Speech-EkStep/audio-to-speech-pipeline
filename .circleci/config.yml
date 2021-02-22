@@ -232,7 +232,6 @@ jobs:
             mkdir -p ~/.ssh
             echo ${SSH} > ~/.ssh/known_hosts
             cat ~/.ssh/known_hosts
-
             cd ${HOME}
             wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-265.0.0-linux-x86_64.tar.gz
             tar -zxf google-cloud-sdk-*
