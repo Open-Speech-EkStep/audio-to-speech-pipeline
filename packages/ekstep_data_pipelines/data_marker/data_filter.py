@@ -125,7 +125,7 @@ class DataFilter(object):
             )
 
         if by_duration is not None:
-            Logger.info("Filtering by duration:" + str(by_duration))
+            Logger.info("Filtering by duration: " + str(by_duration))
             filtered_utterances = self.by_duration(
                 filtered_utterances, by_duration, with_randomness, with_fraction
             )
