@@ -110,7 +110,7 @@ class DataFilter(object):
 
         if by_utterance_duration is not None:
             Logger.info(
-                "Filtering by_utterance_duration:" + str(by_utterance_duration)
+                "Filtering by_utterance_duration: " + str(by_utterance_duration)
             )
             filtered_utterances = self.by_utterance_duration(
                 filtered_utterances, by_utterance_duration
