@@ -118,6 +118,7 @@ class DataFilter(object):
         if by_snr is not None:
             Logger.info("Filtering by snr:" + str(by_snr))
             filtered_utterances = self.by_snr(filtered_utterances, by_snr)
+            
         if by_speaker is not None:
             Logger.info("Filtering by speaker:" + str(by_speaker))
             filtered_utterances = self.by_per_speaker_duration(
