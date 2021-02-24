@@ -1,4 +1,4 @@
-CREATE TABLE public.speaker (
+CREATE TABLE IF NOT EXISTS public.speaker (
     source text,
     gender text,
     mother_tongue text,
