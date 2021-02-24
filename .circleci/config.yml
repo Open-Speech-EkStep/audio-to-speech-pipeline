@@ -255,12 +255,12 @@ jobs:
           command: |
             ls ./migrations
             echo " The mode is << parameters.mode >>"
-            export env_name=<< parameters.env_name >>
-            if [[ $env_name == "prod" ]]
+            export env_name=_<< parameters.env_name >>
+            if [[ $env_name == "_prod" ]]
             then
               export env_name=''
             fi
-            yoyo << parameters.mode >> --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/${env_name}_db --all -b ./migrations
+            yoyo << parameters.mode >> --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/speech_recognition_data_catalog${env_name} --all -b ./migrations
 
 workflows:
   version: 2
