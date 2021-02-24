@@ -1,4 +1,4 @@
-CREATE SEQUENCE public.audio_id_seq
+CREATE SEQUENCE IF NOT EXISTS public.audio_id_seq
     START WITH 101
     INCREMENT BY 1
     NO MINVALUE
