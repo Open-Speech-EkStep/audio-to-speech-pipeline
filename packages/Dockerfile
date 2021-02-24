@@ -18,6 +18,6 @@ COPY invocation_script.py /opt/ekstep_data_pipelines
 
 COPY lib/wada_snr.tar.gz .
 RUN tar -xzvf wada_snr.tar.gz
-RUN mv WadaSNR /opt/ekstep_data_pipelines/ekstep_data_pipelines/binaries
+RUN mv WadaSNR /opt/ekstep_data_pipelines/ekstep_data_pipelines/binaries/WadaSNR
 RUN ls /opt/ekstep_data_pipelines/ekstep_data_pipelines/binaries/
 RUN rm wada_snr.tar.gz
