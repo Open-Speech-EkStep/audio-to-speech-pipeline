@@ -260,7 +260,7 @@ jobs:
             then
               export env_name=''
             fi
-            yoyo << parameters.mode >> --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/speech_recognition_data_catalog_${env_name} --all -b ./migrations
+            yoyo << parameters.mode >> --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/${env_name}_db --all -b ./migrations
 
 workflows:
   version: 2

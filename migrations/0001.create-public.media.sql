@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.media (
+CREATE TABLE public.media (
     audio_id bigint PRIMARY KEY,
     raw_file_name text,
     total_duration double precision,

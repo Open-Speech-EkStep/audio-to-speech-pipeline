@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS public.media_speaker_mapping (
+CREATE TABLE public.media_speaker_mapping (
     speaker_id integer,
     clipped_utterance_file_name text,
     clipped_utterance_duration double precision,
