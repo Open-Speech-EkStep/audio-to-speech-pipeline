@@ -105,7 +105,7 @@ class DataFilter(object):
             )
 
         if len(exclude_audio_ids) > 0:
-            Logger.info("Excluding audio_ids:" + str(exclude_audio_ids))
+            Logger.info("Excluding audio_ids: " + str(exclude_audio_ids))
             filtered_utterances = self.exclude_audio_ids(utterances, exclude_audio_ids)
 
         if by_utterance_duration is not None:
