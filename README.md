@@ -1,5 +1,5 @@
 # Intelligent Data Pipeline
-### It is a part of [Vakyansh's](https://open-speech-ekstep.github.io/mkdocs/) recipes to build state of the art Speech Recogniition Model
+### It is a part of [Vakyansh's](https://open-speech-ekstep.github.io) recipes to build state of the art Speech Recogniition Model
 
 Pipelines to transform raw data and prepare data for model training. They clean, process and balance data for model training
 
@@ -33,10 +33,10 @@ If you like Vakyansh, ⭐ the project to support its development!_
   
 ## Documentation
 
-Please follow the documentation for Intelligent Data Pipeline [here](https://open-speech-ekstep.github.io/mkdocs/intelligent_data_pipelines/)
+Please follow the documentation for Intelligent Data Pipeline [here](https://open-speech-ekstep.github.io/intelligent_data_pipelines/)
 
 You can improve it by sending pull requests to the
-[documentation repository](https://github.com/Open-Speech-EkStep/mkdocs).
+[documentation repository](https://github.com/Open-Speech-EkStep/open-speech-ekstep.github.io).
 
 ## License
 [MIT License](LICENSE)
