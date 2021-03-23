@@ -297,9 +297,6 @@ workflows:
           type: approval
           requires:
             - ekstep_data_pipelines_e2e_build
-          filters:
-            branches:
-              only: release
       - deploy:
           name: ekstep_data_pipelines_deploy_prod
           env_name: prod
