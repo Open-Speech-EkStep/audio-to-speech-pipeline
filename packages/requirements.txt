@@ -95,7 +95,7 @@ pyrsistent==0.16.0
 PyYAML==5.3.1
 requests==2.24.0
 resampy==0.2.2
-rsa==4.6
+rsa==4.1
 six==1.15.0
 srt==3.0.0
 tenacity==4.12.0
