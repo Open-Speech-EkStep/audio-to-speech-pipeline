@@ -14,7 +14,7 @@ from ekstep_data_pipelines.audio_analysis.constants import (
 from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import (
-    encoder,
+    encode_on_partial_sets,
 )
 
 
@@ -99,6 +99,7 @@ class AudioAnalysis(BaseProcessor):
             remote_download_path,
             embed_file_path,
             npz_destination_path,
+            partial_set_size
         )
 
         if analysis_options.get("speaker_analysis") == 1:
@@ -127,7 +128,8 @@ class AudioAnalysis(BaseProcessor):
         remote_download_path,
         embed_file_path,
         npz_bucket_destination_path,
-        dir_pattern="*.wav",
+        partial_set_size,
+        dir_pattern="*.wav"
     ):
         if self.fs_interface.path_exists(npz_bucket_destination_path):
             self.fs_interface.download_file_to_location(
@@ -140,8 +142,8 @@ class AudioAnalysis(BaseProcessor):
             self.fs_interface.download_folder_to_location(
                 remote_download_path, local_audio_download_path, 5
             )
-            encoder(local_audio_download_path, dir_pattern, embed_file_path)
-
+            # encoder(local_audio_download_path, dir_pattern, embed_file_path)
+            encode_on_partial_sets(local_audio_download_path, dir_pattern, embed_file_path, partial_set_size)
             is_uploaded = self.fs_interface.upload_to_location(
                 embed_file_path, npz_bucket_destination_path
             )
