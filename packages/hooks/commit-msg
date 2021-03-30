@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import sys,re
+import sys
+import re
 from subprocess import check_output
 
 # Collect the parameters
@@ -9,14 +10,24 @@ commit_typ_and_scope, description = None, None
 
 # Figure out which branch we're on
 branch = check_output(['git', 'symbolic-ref', '--short', 'HEAD']).strip()
-print("commit-msg: On branch ",branch)
+print("commit-msg: On branch ", branch)
 
-with open(commit_msg_filepath,'r') as commit_msg_file:
-        commit_msg = commit_msg_file.read()
-        commit_msg_file.close()
-print('commit-msg-hook: ',commit_msg)
+with open(commit_msg_filepath, 'r') as commit_msg_file:
+    commit_msg = commit_msg_file.read()
+    commit_msg_file.close()
+print('commit-msg-hook: ', commit_msg)
 
-all_commit_type =  ['fix','feat','build','chore','ci','docs','style','refactor','perf','test']
+all_commit_type = [
+    'fix',
+    'feat',
+    'build',
+    'chore',
+    'ci',
+    'docs',
+    'style',
+    'refactor',
+    'perf',
+    'test']
 
 if ':' not in commit_msg:
     print('please refer : https://www.conventionalcommits.org/en/v1.0.0/')
@@ -32,9 +43,9 @@ if not bool(commit_typ_and_scope) and not bool(description):
     print('Error : commit message format is not correct')
     sys.exit(1)
 
-#capturing commit_type and source
+# capturing commit_type and source
 reg_pattern = r'(.*)\((.*?)\)'
-type_and_scope_match = re.match(reg_pattern,commit_typ_and_scope)
+type_and_scope_match = re.match(reg_pattern, commit_typ_and_scope)
 
 if not bool(type_and_scope_match):
     print('please refer : https://www.conventionalcommits.org/en/v1.0.0/')

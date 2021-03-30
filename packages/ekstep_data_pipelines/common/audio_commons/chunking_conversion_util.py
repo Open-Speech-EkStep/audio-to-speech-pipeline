@@ -32,7 +32,8 @@ class ChunkingConversionUtil:
             return None, False
 
         input_file_name = audio_paths[0]
-        output_file_name = input_file_name.split("/")[-1].split(".")[0] + ".wav"
+        output_file_name = input_file_name.split(
+            "/")[-1].split(".")[0] + ".wav"
 
         if output_dir is None:
             output_file_path = (
@@ -41,20 +42,24 @@ class ChunkingConversionUtil:
         else:
             output_file_path = output_dir + "/" + output_file_name
 
-        Logger.info(f"Output path for converted wav file is: {output_file_name}")
+        Logger.info(
+            f"Output path for converted wav file is: {output_file_name}")
 
-        if os.path.exists(output_file_path) and os.path.isfile(output_file_path):
+        if os.path.exists(output_file_path) and os.path.isfile(
+                output_file_path):
             Logger.info(
                 f"WAV file at {output_file_name} already exists, not doing anything"
             )
             return output_file_path, True
 
-        Logger.info(f"No file exists on {output_file_name}, running the command")
+        Logger.info(
+            f"No file exists on {output_file_name}, running the command")
 
         command = f"ffmpeg -i {input_file_name} -ar 16000 -ac 1 -bits_per_raw_sample 16 -vn {output_file_path}"
         subprocess.call(command, shell=True)
 
-        Logger.info(f"No file exists on {output_file_name}, running the command")
+        Logger.info(
+            f"No file exists on {output_file_name}, running the command")
         return output_file_path, True
 
     def create_audio_clips(
@@ -118,7 +123,8 @@ class ChunkingConversionUtil:
 
     def calculate_duration(self, input_filepath):
         duration = sox.file_info.duration(input_filepath)
-        Logger.info(f"Duration for input_filepath:{input_filepath} : {str(duration)}")
+        Logger.info(
+            f"Duration for input_filepath:{input_filepath} : {str(duration)}")
         return duration
 
     def read_wave(self, path):
@@ -159,7 +165,7 @@ class ChunkingConversionUtil:
             #         print("offset, offset+n: ", offset, offset+n)
             #         print("timestamp:", timestamp)
             #         print("duration:", duration)
-            yield Frame(audio[offset : offset + n], timestamp, duration)
+            yield Frame(audio[offset: offset + n], timestamp, duration)
             timestamp += duration
             offset += n
 
@@ -227,12 +233,15 @@ class ChunkingConversionUtil:
                 # and add it to the ring buffer.
                 voiced_frames.append(frame)
                 ring_buffer.append((frame, is_speech))
-                num_unvoiced = len([f for f, speech in ring_buffer if not speech])
+                num_unvoiced = len(
+                    [f for f, speech in ring_buffer if not speech])
                 # If more than 90% of the frames in the ring buffer are
                 # unvoiced, then enter NOTTRIGGERED and yield whatever
                 # audio we've collected.
                 if num_unvoiced > 0.9 * ring_buffer.maxlen:
-                    sys.stdout.write("-(%s)" % (frame.timestamp + frame.duration))
+                    sys.stdout.write(
+                        "-(%s)" %
+                        (frame.timestamp + frame.duration))
                     file.write("-(%s)" % (frame.timestamp + frame.duration))
 
                     # file.write('\n')

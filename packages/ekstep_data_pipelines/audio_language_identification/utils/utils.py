@@ -72,7 +72,7 @@ def load_data(
 
     if mode == "train":
         randtime = np.random.randint(0, mag_T.shape[1] - spec_len)
-        spec_mag = mag_T[:, randtime : randtime + spec_len]
+        spec_mag = mag_T[:, randtime: randtime + spec_len]
     else:
         spec_mag = mag_T
 

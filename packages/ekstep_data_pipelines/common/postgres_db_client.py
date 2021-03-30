@@ -81,9 +81,11 @@ class PostgresClient:
         db_name = db_configuration.get("db_name")
         db_user = db_configuration.get("db_user")
         db_pass = db_configuration.get("db_pass")
-        cloud_sql_connection_name = db_configuration.get("cloud_sql_connection_name")
+        cloud_sql_connection_name = db_configuration.get(
+            "cloud_sql_connection_name")
 
-        valid_config = all([db_name, db_user, db_pass, cloud_sql_connection_name])
+        valid_config = all(
+            [db_name, db_user, db_pass, cloud_sql_connection_name])
 
         if not valid_config:
             # TODO: Raise DB config missing exception

@@ -13,7 +13,10 @@ def audio_paths(directory, pattern):
 
 
 def save_embeddings(embed_file_path, embeddings, file_paths):
-    np.savez_compressed(embed_file_path, embeds=embeddings, file_paths=file_paths)
+    np.savez_compressed(
+        embed_file_path,
+        embeds=embeddings,
+        file_paths=file_paths)
     print('Embeddings mapped to filepaths have been saved at {}'.format(embed_file_path))
     return
 
@@ -42,8 +45,10 @@ def concatenate_embed_files(embed_file_dest):
         for file in npz_files_to_concat:
             list_of_loaded_files.append(np.load(file))
 
-        final_embeds = np.concatenate([file['embeds'] for file in list_of_loaded_files])
-        final_file_paths = np.concatenate([file['file_paths'] for file in list_of_loaded_files])
+        final_embeds = np.concatenate(
+            [file['embeds'] for file in list_of_loaded_files])
+        final_file_paths = np.concatenate(
+            [file['file_paths'] for file in list_of_loaded_files])
         print(f'Final length of concatenated embeds', len(final_embeds))
         save_embeddings(embed_file_dest, embeddings=final_embeds,
                         file_paths=final_file_paths)
@@ -58,20 +63,24 @@ def encode_on_partial_sets(source_dir, source_dir_pattern, embed_file_path,
         embeddings = encoder(file_paths=file_paths, vocoder=vocoder)
         save_embeddings(embed_file_path, embeddings, file_paths)
     else:
-        for batch_no in range(math.ceil(len(file_paths) / partial_set_size_for_embedding)):
+        for batch_no in range(
+            math.ceil(
+                len(file_paths) /
+                partial_set_size_for_embedding)):
             start_index = batch_no * partial_set_size_for_embedding
             stop_index = partial_set_size_for_embedding * (batch_no + 1)
             batch_file_paths = file_paths[start_index:stop_index]
             embeddings = encoder(file_paths=batch_file_paths, vocoder=vocoder)
-            new_embed_file_path = embed_file_path[:-4] + '_' + str(batch_no + 1) + '.npz'
+            new_embed_file_path = embed_file_path[:- \
+                4] + '_' + str(batch_no + 1) + '.npz'
             save_embeddings(new_embed_file_path, embeddings, batch_file_paths)
 
     concatenate_embed_files(embed_file_dest=embed_file_path)
 
 
 if __name__ == "__main__":
-    encode_on_partial_sets(source_dir='/Users/neerajchhimwal/sdb/SOURCE/',
-                           source_dir_pattern='**/*.wav',
-                           embed_file_path='/Users/neerajchhimwal/sdb/SOURCE/source_embed_file.npz',
-                           partial_set_size_for_embedding=100)
-
+    encode_on_partial_sets(
+        source_dir='/Users/neerajchhimwal/sdb/SOURCE/',
+        source_dir_pattern='**/*.wav',
+        embed_file_path='/Users/neerajchhimwal/sdb/SOURCE/source_embed_file.npz',
+        partial_set_size_for_embedding=100)

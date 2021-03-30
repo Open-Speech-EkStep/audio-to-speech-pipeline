@@ -1,6 +1,5 @@
 from ekstep_data_pipelines.common.audio_commons.chunking_conversion_util import (
-    ChunkingConversionUtil,
-)
+    ChunkingConversionUtil, )
 from ekstep_data_pipelines.common.audio_commons.snr_util import SNR
 from ekstep_data_pipelines.common.audio_commons.transcription_clients import (
     get_transcription_clients,

@@ -1,10 +1,8 @@
 from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.speaker_clustering import (
-    create_speaker_clusters,
-)
+    create_speaker_clusters, )
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.file_cluster_mapping import (
-    speaker_to_file_name_map,
-)
+    speaker_to_file_name_map, )
 
 Logger = get_logger("AudioSpeakerClusteringProcessor")
 
@@ -23,7 +21,9 @@ def create_embeddings(
     if is_uploaded:
         Logger.info("npz file uploaded to :" + npz_bucket_destination_path)
     else:
-        Logger.info("npz file could not be uploaded to :" + npz_bucket_destination_path)
+        Logger.info(
+            "npz file could not be uploaded to :" +
+            npz_bucket_destination_path)
     file_map_dict, noise_file_map_dict = create_speaker_clusters(
         embed_file_path, source_name
     )

@@ -92,7 +92,8 @@ class AudioCataloguer(BaseProcessor):
 
     def update_utterance_in_mapping_table(self):
 
-        all_data = self.data_processor.execute_query(FETCH_QUERY_WHERE_SPEAKER_IS_NULL)
+        all_data = self.data_processor.execute_query(
+            FETCH_QUERY_WHERE_SPEAKER_IS_NULL)
 
         processed_audio_ids = []
 
@@ -106,7 +107,7 @@ class AudioCataloguer(BaseProcessor):
 
             processed_audio_ids.append(audio_id)
 
-            if utterance_list == None:
+            if utterance_list is None:
                 Logger.info(audio_id)
                 continue
 
@@ -234,7 +235,7 @@ class AudioCataloguer(BaseProcessor):
             snr_value = float(utterance.get("snr_value", 0))
 
         Logger.info(
-            "inserting with language_confidence_score:" + str(language_confidence_score)
-        )
+            "inserting with language_confidence_score:" +
+            str(language_confidence_score))
 
         return f"{defult_query} ({audio_id[0]},{speaker_id},'{file_name}',{duration},'{datetime}',{snr_value},'{status}','{fail_reason}','{language_confidence_score}'),"

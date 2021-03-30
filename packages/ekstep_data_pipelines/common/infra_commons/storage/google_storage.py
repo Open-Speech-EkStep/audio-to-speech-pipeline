@@ -109,8 +109,12 @@ class GoogleStorage(BaseStorageInterface):
 
         curr_executor.shutdown(wait=True)
 
-    def upload_to_location(self, local_source_path: str, destination_path: str):
-        bucket = self.client.bucket(self.get_bucket_from_path(destination_path))
+    def upload_to_location(
+            self,
+            local_source_path: str,
+            destination_path: str):
+        bucket = self.client.bucket(
+            self.get_bucket_from_path(destination_path))
         remote_file_path = self.get_path_without_bucket(destination_path)
         blob = bucket.blob(remote_file_path)
 
@@ -121,7 +125,10 @@ class GoogleStorage(BaseStorageInterface):
 
         return True
 
-    def upload_folder_to_location(self, source_path: str, destination_path: str):
+    def upload_folder_to_location(
+            self,
+            source_path: str,
+            destination_path: str):
         files_for_upload = [
             f for f in listdir(source_path) if isfile(join(source_path, f))
         ]
@@ -139,7 +146,10 @@ class GoogleStorage(BaseStorageInterface):
         # Todo: check all the futures for exceptions and then send back true
         return True
 
-    def download_file_to_location(self, source_path: str, download_location: str):
+    def download_file_to_location(
+            self,
+            source_path: str,
+            download_location: str):
         bucket = self.client.bucket(self.get_bucket_from_path(source_path))
         file_path = self.get_path_without_bucket(source_path)
         source_blob = bucket.blob(file_path)
@@ -158,14 +168,16 @@ class GoogleStorage(BaseStorageInterface):
         if not self.path_exists(source_path):
             raise FileNotFoundException(f"File at {source_path} not found")
 
-        source_bucket = self.client.bucket(self.get_bucket_from_path(source_path))
+        source_bucket = self.client.bucket(
+            self.get_bucket_from_path(source_path))
         source_actual_path = self.get_path_without_bucket(source_path)
         source_blob = source_bucket.blob(source_actual_path)
 
         destination_bucket = self.client.bucket(
             self.get_bucket_from_path(destination_path)
         )
-        destination_actual_path = self.get_path_without_bucket(destination_path)
+        destination_actual_path = self.get_path_without_bucket(
+            destination_path)
 
         source_bucket.copy_blob(
             source_blob, destination_bucket, destination_actual_path
@@ -194,10 +206,11 @@ class GoogleStorage(BaseStorageInterface):
             path_exists = storage.Blob(bucket=bucket, name=actual_path).exists(
                 self.client
             )
-        except:
+        except BaseException:
             return False
         return path_exists
 
     def _list_blobs_in_a_path(self, bucket, file_prefix, delimiter=None):
-        blobs = self.client.list_blobs(bucket, prefix=file_prefix, delimiter=delimiter)
+        blobs = self.client.list_blobs(
+            bucket, prefix=file_prefix, delimiter=delimiter)
         return blobs

@@ -100,7 +100,9 @@ class DataMarkerTests(unittest.TestCase):
         ]
         data_filter = DataFilter()
         utterance_filter = {"lte": 4, "gte": 2}
-        filtered = list(data_filter.by_utterance_duration(utterances, utterance_filter))
+        filtered = list(
+            data_filter.by_utterance_duration(
+                utterances, utterance_filter))
         expected_utterances = [
             (2, "file_2.wav", 2, "2010124", 11),
             (3, "file_3.wav", 4, "2010125", 18),
@@ -354,7 +356,8 @@ class DataMarkerTests(unittest.TestCase):
         )  # check they are the same length
         self.assertEqual(expected_utterances, filtered)
 
-    def test__should_apply_filters_with_by_snr_then_by_speaker_then_by_duration(self):
+    def test__should_apply_filters_with_by_snr_then_by_speaker_then_by_duration(
+            self):
         utterances = [
             (1, "file_10.wav", 4, "1", 13),
             (1, "file_11.wav", 1, "2", 13),
@@ -450,7 +453,8 @@ class DataMarkerTests(unittest.TestCase):
         )  # check they are the same length
         self.assertEqual(expected_utterances, filtered)
 
-    def test__should_apply_filters_with_by_snr_then_by_duration_randomness(self):
+    def test__should_apply_filters_with_by_snr_then_by_duration_randomness(
+            self):
         utterances = [
             (1, "file_10.wav", 4, "1", 13),
             (1, "file_11.wav", 1, "2", 13),

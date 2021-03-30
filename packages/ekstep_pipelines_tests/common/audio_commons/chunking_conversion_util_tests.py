@@ -9,8 +9,7 @@ from unittest import mock
 
 
 from ekstep_data_pipelines.common.audio_commons.chunking_conversion_util import (
-    ChunkingConversionUtil,
-)
+    ChunkingConversionUtil, )
 
 
 class SNRTests(unittest.TestCase):
@@ -82,8 +81,7 @@ class SNRTests(unittest.TestCase):
 
     @mock.patch("subprocess.call")
     def test_convert_to_wav_should_call_the_subprocess_to_convert_mp4_to_wav_for_every_input_file(
-        self, mock_subprocess_call
-    ):
+            self, mock_subprocess_call):
         self.chunking_conversion_util.convert_to_wav(
             self.input_file_dir, self.output_file_dir
         )

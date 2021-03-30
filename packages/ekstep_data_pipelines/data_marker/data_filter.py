@@ -7,11 +7,13 @@ Logger = get_logger("DataFilter")
 
 class DataFilter(object):
     def exclude_audio_ids(self, utterances, audio_ids):
-        excluding_audio_ids = filter(lambda t: t[0] not in audio_ids, utterances)
+        excluding_audio_ids = filter(
+            lambda t: t[0] not in audio_ids, utterances)
         return excluding_audio_ids
 
     def exclude_speaker_ids(self, utterances, speaker_ids):
-        excluding_speaker_ids = filter(lambda t: t[0] not in speaker_ids, utterances)
+        excluding_speaker_ids = filter(
+            lambda t: t[0] not in speaker_ids, utterances)
         return excluding_speaker_ids
 
     def by_utterance_duration(self, utterances, filters):
@@ -71,15 +73,8 @@ class DataFilter(object):
         df["cum_hours"] = df.groupby(["speaker_id"])[
             "clipped_utterance_duration"
         ].cumsum()
-        df = df[
-            df["speaker_id"].isin(
-                list(
-                    df[(df.cum_hours <= upper_bound) & (df.cum_hours >= lower_bound)][
-                        "speaker_id"
-                    ]
-                )
-            )
-        ]
+        df = df[df["speaker_id"].isin(list(df[(df.cum_hours <= upper_bound) & (
+            df.cum_hours >= lower_bound)]["speaker_id"]))]
         df = df[(df.cum_hours <= upper_bound)].drop(columns="cum_hours")
         return self.to_tuples(df)
 
@@ -106,7 +101,8 @@ class DataFilter(object):
 
         if len(exclude_audio_ids) > 0:
             Logger.info("Excluding audio_ids: " + str(exclude_audio_ids))
-            filtered_utterances = self.exclude_audio_ids(utterances, exclude_audio_ids)
+            filtered_utterances = self.exclude_audio_ids(
+                utterances, exclude_audio_ids)
 
         if by_utterance_duration is not None:
             Logger.info(
@@ -118,7 +114,7 @@ class DataFilter(object):
         if by_snr is not None:
             Logger.info("Filtering by snr:" + str(by_snr))
             filtered_utterances = self.by_snr(filtered_utterances, by_snr)
-            
+
         if by_speaker is not None:
             Logger.info("Filtering by speaker:" + str(by_speaker))
             filtered_utterances = self.by_per_speaker_duration(
@@ -128,7 +124,6 @@ class DataFilter(object):
         if by_duration is not None:
             Logger.info("Filtering by duration: " + str(by_duration))
             filtered_utterances = self.by_duration(
-                filtered_utterances, by_duration, with_randomness, with_fraction
-            )
+                filtered_utterances, by_duration, with_randomness, with_fraction)
 
         return list(filtered_utterances)

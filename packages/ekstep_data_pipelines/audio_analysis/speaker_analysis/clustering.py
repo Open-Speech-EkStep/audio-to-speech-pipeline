@@ -40,7 +40,9 @@ class Clustering:
         if -1 in labels:
             start = -1
         for cluster in range(start, number_of_clusters + 1):
-            cluster_indices = [index for index, _ in enumerate(labels) if _ == cluster]
+            cluster_indices = [
+                index for index,
+                _ in enumerate(labels) if _ == cluster]
             cluster_vs_embeds[cluster] = embeddings[cluster_indices]
         return cluster_vs_embeds
 
@@ -117,17 +119,22 @@ class Clustering:
                 )
             )
 
-            # mapping contains cluster label as key and cluster embeddings as values
-            mapping = self.get_cluster_embeddings(partial_set, partial_set_labels)
+            # mapping contains cluster label as key and cluster embeddings as
+            # values
+            mapping = self.get_cluster_embeddings(
+                partial_set, partial_set_labels)
 
-            # logic for calculating mean embedding of the cluster if cluster-label != -1 (noise)
+            # logic for calculating mean embedding of the cluster if
+            # cluster-label != -1 (noise)
             for i in mapping.items():
                 if i[0] != -1:
                     raw_embed = np.mean(i[1], axis=0)
-                    mean_embeddings.append(raw_embed / np.linalg.norm(raw_embed, 2))
+                    mean_embeddings.append(
+                        raw_embed / np.linalg.norm(raw_embed, 2))
                     all_cluster_embeds.append(list(i[1]))
 
-        # getting flat noise embeds -> noise contains a list of numpy arrays : len(noise) = num_partial_sets
+        # getting flat noise embeds -> noise contains a list of numpy arrays :
+        # len(noise) = num_partial_sets
         flat_noise_embeds = [item for sublist in noise for item in sublist]
 
         return (

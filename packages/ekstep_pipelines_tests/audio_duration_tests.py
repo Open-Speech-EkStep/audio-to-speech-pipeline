@@ -16,6 +16,7 @@ class AudioDurationTests(unittest.TestCase):
         self.assertEquals(6.690022675736961, duration)
 
     def test_sox(self):
-        duration_sox = calculate_duration("ekstep_pipelines_tests/resources/chunk.wav")
+        duration_sox = calculate_duration(
+            "ekstep_pipelines_tests/resources/chunk.wav")
         print(duration_sox)
         self.assertEqual(6.69, duration_sox)

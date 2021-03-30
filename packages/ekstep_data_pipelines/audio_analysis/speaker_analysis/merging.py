@@ -35,11 +35,13 @@ class Merge:
 
         for index, row in enumerate(distances):
             closest_clusters_dist = [
-                dist for ind, dist in enumerate(row) if dist <= 1 - similarity_allowed
-            ]
+                dist for ind,
+                dist in enumerate(row) if dist <= 1 -
+                similarity_allowed]
             closest_clusters_index = [
-                ind for ind, dist in enumerate(row) if dist <= 1 - similarity_allowed
-            ]
+                ind for ind,
+                dist in enumerate(row) if dist <= 1 -
+                similarity_allowed]
 
             if closest_clusters_dist:
                 possible_mergers[index] = [i for i in closest_clusters_index]
@@ -50,9 +52,8 @@ class Merge:
             if key not in list_of_indices_covered:
                 values = possible_mergers[key]
                 for v in values:
-                    new_vals = [
-                        i for i in possible_mergers[v] if i not in values if i != key
-                    ]
+                    new_vals = [i for i in possible_mergers[v]
+                                if i not in values if i != key]
                     values.extend(new_vals)
                 list_of_indices_covered.extend(values + [key])
 
@@ -67,7 +68,8 @@ class Merge:
                         for i, dis in enumerate(cos_dis_wrt_main_cluster)
                         if dis <= distance_allowed
                     ]
-                    values = [val for ind, val in enumerate(values) if ind in pos]
+                    values = [val for ind,
+                              val in enumerate(values) if ind in pos]
 
                 final_mergers[key] = values
 
@@ -87,11 +89,12 @@ class Merge:
         self, final_pairs_to_merge, all_cluster_embeds_to_merge
     ):
         final_mean_embeds = []
-        all_cluster_embeds_to_merge_copy = deepcopy(all_cluster_embeds_to_merge)
+        all_cluster_embeds_to_merge_copy = deepcopy(
+            all_cluster_embeds_to_merge)
 
         print(
-            "Total clusters before merging: {}".format(len(all_cluster_embeds_to_merge))
-        )
+            "Total clusters before merging: {}".format(
+                len(all_cluster_embeds_to_merge)))
         for item in final_pairs_to_merge.items():
             main_cluster_index = item[0]
             clusters_to_add_indices = item[1]
@@ -100,9 +103,8 @@ class Merge:
                     all_cluster_embeds_to_merge[ind]
                 )
 
-        clusters_lost_indices = [
-            item for sublist in list(final_pairs_to_merge.values()) for item in sublist
-        ]
+        clusters_lost_indices = [item for sublist in list(
+            final_pairs_to_merge.values()) for item in sublist]
         final_all_clusters_embeds = [
             val
             for i, val in enumerate(all_cluster_embeds_to_merge_copy)
@@ -137,8 +139,7 @@ class Merge:
 
         if possible_mergers:
             all_embeds_merged, mean_embeds_merged = self.get_clusters_after_merging(
-                possible_mergers, all_cluster_embeds
-            )
+                possible_mergers, all_cluster_embeds)
             backup["all_cluster_embeds"] = all_embeds_merged
             backup["mean_embeddings"] = mean_embeds_merged
 
@@ -162,8 +163,7 @@ class Merge:
             )
             if possible_mergers:
                 all_embeds_merged, mean_embeds_merged = self.get_clusters_after_merging(
-                    possible_mergers, all_cluster_embeds
-                )
+                    possible_mergers, all_cluster_embeds)
                 # print(len(all_embeds_merged))
                 # print('-' * 100)
 
@@ -219,8 +219,11 @@ class Merge:
         return all_cluster_embeds_to_merge, mean_embeddings_to_merge, noise_embeds_final
 
     def fit_noise_points(
-        self, mean_embeds, noise_embeds, all_cluster_embeds, max_sim_allowed=0.80
-    ):
+            self,
+            mean_embeds,
+            noise_embeds,
+            all_cluster_embeds,
+            max_sim_allowed=0.80):
         """
         1. Calculate cos dis for each noise point wrt all mean embeds
         2. select cluster whose cosine dis with noise is the least (or less than a set threshold)
@@ -234,7 +237,8 @@ class Merge:
         max_distance_allowed = 1 - max_sim_allowed
         all_cluster_embeds_copy = deepcopy(all_cluster_embeds)
 
-        was_noise_flag = [[0] * len(cluster) for cluster in all_cluster_embeds_copy]
+        was_noise_flag = [[0] * len(cluster)
+                          for cluster in all_cluster_embeds_copy]
 
         allocated_noise_point_index = []
         print(
@@ -243,7 +247,8 @@ class Merge:
             )
         )
         # distances is a matrix of shape (num_noise_points, num_mean_embeds)
-        # with cosine dist of each noise embed with all mean embeds present in rows
+        # with cosine dist of each noise embed with all mean embeds present in
+        # rows
         distances = cosine_distances(noise_embeds, mean_embeds)
         closest_cluster_index = np.argmin(distances, axis=1)
         closest_cluster_dist = np.min(distances, axis=1)
@@ -252,8 +257,7 @@ class Merge:
             for index, dist in enumerate(closest_cluster_dist):
                 if dist <= max_distance_allowed:
                     all_cluster_embeds_copy[closest_cluster_index[index]].append(
-                        noise_embeds[index]
-                    )
+                        noise_embeds[index])
                     was_noise_flag[closest_cluster_index[index]].append(1)
                     allocated_noise_point_index.append(index)
 

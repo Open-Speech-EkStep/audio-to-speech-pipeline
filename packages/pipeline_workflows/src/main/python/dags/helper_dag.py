@@ -34,7 +34,10 @@ def get_metadata_file_name(file_name, meta_file_extension):
     return ".".join(file_name.split(".")[:-1]) + meta_file_extension
 
 
-def check_if_meta_data_present(full_source_path, metadata_file_name, bucket_name):
+def check_if_meta_data_present(
+        full_source_path,
+        metadata_file_name,
+        bucket_name):
     return check_blob(bucket_name, full_source_path + "/" + metadata_file_name)
 
 
@@ -86,7 +89,8 @@ def get_file_path_from_bucket(
             expected_file_extension,
             expected_file_extension.swapcase(),
         ]:
-            metadata_file_name = get_metadata_file_name(file_name, meta_file_extension)
+            metadata_file_name = get_metadata_file_name(
+                file_name, meta_file_extension)
             print("File is {}".format(file_name))
             print("Meta File is {}".format(metadata_file_name))
 

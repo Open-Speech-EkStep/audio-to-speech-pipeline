@@ -5,8 +5,7 @@ import sys
 import os
 
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
-    GoogleTranscriptionClientError,
-)
+    GoogleTranscriptionClientError, )
 
 
 LOGGER = get_logger("GoogleTranscriptionClient")
@@ -70,7 +69,8 @@ class GoogleTranscriptionClient(object):
             self.config, {"uri": input_file_path}
         )
 
-        LOGGER.info(f"Waiting for {operation} to complete on GCP for {input_file_path}")
+        LOGGER.info(
+            f"Waiting for {operation} to complete on GCP for {input_file_path}")
         response = operation.result()
 
         return response

@@ -15,14 +15,11 @@ def get_transcription_sanitizers(**kwargs):
 
     # cyclic imports
     from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.hindi_sanitizer import (
-        HindiSanitizer,
-    )
+        HindiSanitizer, )
     from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.gujrati_sanitizer import (
-        GujratiSanitizer,
-    )
+        GujratiSanitizer, )
     from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.kannada_sanitizer import (
-        KannadaSanitizer,
-    )
+        KannadaSanitizer, )
 
     hindi_sanitizer = HindiSanitizer.get_instance(**kwargs)
     gujrati_sanitizer = GujratiSanitizer.get_instance(**kwargs)

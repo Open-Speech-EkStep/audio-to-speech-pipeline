@@ -1,7 +1,6 @@
 import re
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
-    TranscriptionSanitizationError,
-)
+    TranscriptionSanitizationError, )
 from ekstep_data_pipelines.common.utils import get_logger
 
 
@@ -32,7 +31,10 @@ class TranscriptionSanitizer(object):
 
     def shouldReject(self, transcription):
         valid_char = "[ ँ-ःअ-ऋए-ऑओ-नप-रलव-ह़ा-ृे-ॉो-्0-9क़-य़ ॅ]"
-        rejected_string = re.sub(pattern=valid_char, repl="", string=transcription)
+        rejected_string = re.sub(
+            pattern=valid_char,
+            repl="",
+            string=transcription)
         if len(rejected_string.strip()) > 0:
             return True
 

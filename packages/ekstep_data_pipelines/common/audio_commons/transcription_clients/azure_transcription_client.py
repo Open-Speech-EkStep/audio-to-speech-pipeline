@@ -1,8 +1,7 @@
 from azure.cognitiveservices import speech
 from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
-    AzureTranscriptionClientError,
-)
+    AzureTranscriptionClientError, )
 
 LOGGER = get_logger("AzureTranscriptionClient")
 
@@ -47,10 +46,12 @@ class AzureTranscriptionClient(object):
             LOGGER.info("Recognized: {}".format(result.text))
             return result
         elif result.reason == speech.ResultReason.NoMatch:
-            msg = "No speech could be recognized: {}".format(result.no_match_details)
+            msg = "No speech could be recognized: {}".format(
+                result.no_match_details)
             raise RuntimeError(msg)
         elif result.reason == speech.ResultReason.Canceled:
             cancellation_details = result.cancellation_details
-            msg = "Speech Recognition canceled: {}".format(cancellation_details.reason)
+            msg = "Speech Recognition canceled: {}".format(
+                cancellation_details.reason)
             raise RuntimeError(msg)
         LOGGER.info("done..")

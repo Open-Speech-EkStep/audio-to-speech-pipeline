@@ -9,8 +9,7 @@ import shutil
 import subprocess
 import pandas as pd
 from ekstep_data_pipelines.audio_language_identification.audio_language_inference import (
-    infer_language,
-)
+    infer_language, )
 import librosa
 from ekstep_data_pipelines.common.utils import get_logger
 
@@ -84,7 +83,8 @@ class SNR:
 
     def process_files_list(self, input_file_list):
 
-        LOGGER.info(f"Processing all the file in the directory {input_file_list}")
+        LOGGER.info(
+            f"Processing all the file in the directory {input_file_list}")
 
         file_snrs = {}
 
@@ -114,7 +114,8 @@ class SNR:
         processed_file_snr_dict = self.process_files_list(input_file_list)
 
         LOGGER.info(f"Getting the clean and reject folders")
-        clean_dir_path, rejected_dir_path = self.get_output_directories(output_dir_path)
+        clean_dir_path, rejected_dir_path = self.get_output_directories(
+            output_dir_path)
         LOGGER.info(
             f"Got the clean and reject folders, clean/{clean_dir_path} and rejected/{rejected_dir_path}"
         )
@@ -136,7 +137,9 @@ class SNR:
                 language_confidence_score = infer_language(file_path)
             else:
                 language_confidence_score = None
-            LOGGER.info("language_confidence_score:" + str(language_confidence_score))
+            LOGGER.info(
+                "language_confidence_score:" +
+                str(language_confidence_score))
             clip_duration = calculate_duration(file_path)
             if snr_value < threshold:
                 self.move_file_locally(
@@ -189,7 +192,8 @@ class SNR:
                 continue
 
             clean_audio_duration.append(clip_duration)
-            self.move_file_locally(file_path, f"{clean_dir_path}/{audio_file_name}")
+            self.move_file_locally(
+                file_path, f"{clean_dir_path}/{audio_file_name}")
             list_file_utterances_with_duration.append(
                 {
                     "name": audio_file_name,
@@ -200,7 +204,8 @@ class SNR:
                 }
             )
 
-            metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60), 2)
+            metadata["cleaned_duration"] = round(
+                (sum(clean_audio_duration) / 60), 2)
             metadata["utterances_files_list"] = json.dumps(
                 list_file_utterances_with_duration
             )

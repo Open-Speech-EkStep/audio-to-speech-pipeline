@@ -41,7 +41,8 @@ ACTIONS_LIST = [
 FILES_SYSTEMS_LIST = [FILE_SYSTEMS.GOOGLE, FILE_SYSTEMS.LOCAL]
 # config_bucket = 'ekstepspeechrecognition-dev'
 
-parser = argparse.ArgumentParser(description="Util for data processing for EkStep")
+parser = argparse.ArgumentParser(
+    description="Util for data processing for EkStep")
 
 parser.add_argument(
     "-b",
@@ -144,8 +145,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-l", "--language", dest="language", default="hindi", help="Specify the language"
-)
+    "-l",
+    "--language",
+    dest="language",
+    default="hindi",
+    help="Specify the language")
 
 processor_args = parser.parse_args()
 
@@ -173,10 +177,10 @@ def process_config_input(arguments):
     LOGGER.info("Checking configeration file path")
     config_file_path = None
 
-    if arguments.local_config == None and arguments.remote_config == None:
+    if arguments.local_config is None and arguments.remote_config is None:
         raise argparse.ArgumentTypeError(f"No config specified")
 
-    if arguments.local_config != None and arguments.remote_config != None:
+    if arguments.local_config is not None and arguments.remote_config is not None:
         raise argparse.ArgumentTypeError(
             f"mulitple configs specified, specify only local_config or remote_config but not both"
         )
@@ -211,7 +215,10 @@ def validate_data_filter_config(arguments):
     if arguments.filter_by is None:
         raise argparse.ArgumentTypeError(f"Filter config is missing")
 
-    return {"filter": json.loads(arguments.filter_by), "source": arguments.audio_source}
+    return {
+        "filter": json.loads(
+            arguments.filter_by),
+        "source": arguments.audio_source}
 
 
 def validate_audio_analysis_config(arguments):
@@ -231,8 +238,10 @@ def validate_audio_processing_input(arguments):
         )
 
     file_name_list = [
-        i.strip() for i in list(filter(None, arguments.file_name_list.split(",")))
-    ]
+        i.strip() for i in list(
+            filter(
+                None,
+                arguments.file_name_list.split(",")))]
 
     if file_name_list == []:
         raise argparse.ArgumentTypeError(
@@ -266,7 +275,11 @@ def validate_audio_transcription_input(arguments):
             f"Audio Id list missing. Please audio ID for processing"
         )
 
-    audio_ids = [i.strip() for i in list(filter(None, arguments.audio_ids.split(",")))]
+    audio_ids = [
+        i.strip() for i in list(
+            filter(
+                None,
+                arguments.audio_ids.split(",")))]
 
     if arguments.speech_to_text_client not in STT_CLIENT:
         raise argparse.ArgumentTypeError(f"Stt client must be google or azure")

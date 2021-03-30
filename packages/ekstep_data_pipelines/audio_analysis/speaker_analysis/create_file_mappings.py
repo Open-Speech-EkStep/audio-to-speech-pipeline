@@ -4,7 +4,9 @@ class Map:
         self.file_paths = file_paths
 
     def find_index(self, cluster):
-        cluster_indices = [self.list_em.index(list(embed)) for embed in cluster]
+        cluster_indices = [
+            self.list_em.index(
+                list(embed)) for embed in cluster]
         return cluster_indices
 
     def find_file(self, row):

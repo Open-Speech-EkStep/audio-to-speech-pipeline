@@ -15,7 +15,8 @@ class AudioCataloguerTests(unittest.TestCase):
         self.postgres_client = Mock()
         self.cataloguer = AudioCataloguer(self.postgres_client)
 
-    def test__get_utterance_list_should_call_execuete_query_return_utterence_list(self):
+    def test__get_utterance_list_should_call_execuete_query_return_utterence_list(
+            self):
         dummy_audio_id = ["1234"]
         self.postgres_client.execute_query.return_value = [['["1234"]']]
 
@@ -35,7 +36,8 @@ class AudioCataloguerTests(unittest.TestCase):
 
         self.assertEqual(actual_value, ["12345"])
 
-    def test__create_insert_query_should_return_query_for_given_utterance(self):
+    def test__create_insert_query_should_return_query_for_given_utterance(
+            self):
         defult_query = "dummy_query"
         audio_id = ["121"]
         speaker_id = "dummy_speaker_id"

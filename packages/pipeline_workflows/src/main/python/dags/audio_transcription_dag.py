@@ -70,7 +70,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
         if len(audio_file_ids) > 0:
             chunk_size = math.ceil(len(audio_file_ids) / parallelism)
             batches = [
-                audio_file_ids[i : i + chunk_size]
+                audio_file_ids[i: i + chunk_size]
                 for i in range(0, len(audio_file_ids), chunk_size)
             ]
 
@@ -127,4 +127,5 @@ for source in sourceinfo.keys():
 
     dag_number = dag_id + str(batch_count)
 
-    globals()[dag_id] = create_dag(dag_id, dag_number, dag_args, args, batch_count)
+    globals()[dag_id] = create_dag(
+        dag_id, dag_number, dag_args, args, batch_count)

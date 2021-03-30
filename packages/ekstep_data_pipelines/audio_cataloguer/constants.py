@@ -23,8 +23,7 @@ FETCH_QUERY_WHERE_SPEAKER_IS_NULL = "select audio_id ,utterances_files_list,load
 
 DEFAULT_INSERT_QUERY = (
     "insert into media_speaker_mapping(clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr, status,"
-    "fail_reason, language_confidence_score, load_datetime) values "
-)
+    "fail_reason, language_confidence_score, load_datetime) values ")
 
 DEFAULT_UPDATE_QUERY_FOR_NORMALIZED_FLAG = (
     "update media_metadata_staging set is_normalized = true where audio_id in "

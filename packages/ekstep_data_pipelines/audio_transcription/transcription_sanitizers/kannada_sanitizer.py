@@ -1,9 +1,7 @@
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
-    BaseTranscriptionSanitizer,
-)
+    BaseTranscriptionSanitizer, )
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
-    TranscriptionSanitizationError,
-)
+    TranscriptionSanitizationError, )
 
 from ekstep_data_pipelines.common.utils import get_logger
 import re

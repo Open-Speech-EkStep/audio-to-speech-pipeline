@@ -20,7 +20,10 @@ class LocalStorage(BaseStorageInterface):
             paths.append(path)
         return path
 
-    def download_folder_to_location(self, source_path: str, destination_path: str):
+    def download_folder_to_location(
+            self,
+            source_path: str,
+            destination_path: str):
         os.system(f"cp -r {source_path} {destination_path}")
 
     def download_to_location(self, source_path: str, destination_path: str):
@@ -29,7 +32,10 @@ class LocalStorage(BaseStorageInterface):
     def upload_to_location(self, source_path: str, destination_path: str):
         os.system(f"cp {source_path} {destination_path}")
 
-    def upload_folder_to_location(self, source_path: str, destination_path: str):
+    def upload_folder_to_location(
+            self,
+            source_path: str,
+            destination_path: str):
         path_to_create = destination_path.split("/")
         path_to_create.pop()
         path_to_create = "/".join(path_to_create)
@@ -37,7 +43,10 @@ class LocalStorage(BaseStorageInterface):
             os.makedirs(path_to_create)
         os.system(f"cp -r {source_path} {destination_path}")
 
-    def download_file_to_location(self, source_path: str, download_location: str):
+    def download_file_to_location(
+            self,
+            source_path: str,
+            download_location: str):
         self.copy(source_path, download_location)
 
     def move(self, source_path: str, destination_path: str) -> bool:

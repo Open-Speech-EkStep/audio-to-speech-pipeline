@@ -35,12 +35,19 @@ class AudioProcessor(BaseProcessor):
         data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
     ):
         return AudioProcessor(
-            data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
-        )
+            data_processor,
+            gcs_instance,
+            audio_commons,
+            catalogue_dao,
+            **kwargs)
 
     def __init__(
-        self, data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
-    ):
+            self,
+            data_processor,
+            gcs_instance,
+            audio_commons,
+            catalogue_dao,
+            **kwargs):
         self.data_processor = data_processor
         self.gcs_instance = gcs_instance
         self.catalogue_dao = catalogue_dao
@@ -57,7 +64,8 @@ class AudioProcessor(BaseProcessor):
         Function for breaking an audio file into smaller chunks and then
         accepting/rejecting them basis the SNR ratio.
         """
-        self.audio_processor_config = self.data_processor.config_dict.get(CONFIG_NAME)
+        self.audio_processor_config = self.data_processor.config_dict.get(
+            CONFIG_NAME)
 
         file_name_list = kwargs.get("file_name_list", [])
         source = kwargs.get("source")
@@ -94,8 +102,7 @@ class AudioProcessor(BaseProcessor):
         Logger.info(f"Ensured {local_audio_download_path} exists")
 
         remote_download_path, remote_download_path_of_metadata = self.get_full_path(
-            source, file_name, meta_data_file
-        )
+            source, file_name, meta_data_file)
 
         Logger.info(
             f"Downloading audio file and metadat file from {remote_download_path},{remote_download_path_of_metadata} to {local_audio_download_path}"
@@ -113,11 +120,13 @@ class AudioProcessor(BaseProcessor):
             f"{local_audio_download_path}/{file_name}"
         )
 
-        is_file_exist = self.catalogue_dao.check_file_exist_in_db(file_name, hash_code)
+        is_file_exist = self.catalogue_dao.check_file_exist_in_db(
+            file_name, hash_code)
 
         if is_file_exist:
 
-            Logger.info("file is already exist in db moving to duplicate folder")
+            Logger.info(
+                "file is already exist in db moving to duplicate folder")
             base_path_for_duplicate_audio = f"{self.audio_processor_config.get(DUPLICATE_AUDIO_FOLDER_PATH)}/{source}"
 
             self.move_file_to_done_folder(
@@ -207,7 +216,9 @@ class AudioProcessor(BaseProcessor):
         )
 
         self.fs_interface.move(audio_file_path, snr_done_path_audio_file_path)
-        self.fs_interface.move(meta_data_file_path, snr_done_path_metadata_file_path)
+        self.fs_interface.move(
+            meta_data_file_path,
+            snr_done_path_metadata_file_path)
 
     def get_full_path(self, source, file_name, meta_data_file):
         remote_file_path = self.audio_processor_config.get(REMOTE_RAW_FILE)
@@ -248,18 +259,22 @@ class AudioProcessor(BaseProcessor):
         local_output_directory = f"{source_file_directory}/wav"
 
         self.ensure_path(local_output_directory)
-        Logger.info(f"Output initialized to local path {local_output_directory}")
+        Logger.info(
+            f"Output initialized to local path {local_output_directory}")
 
         output_file_path, converted = self.chunking_processor.convert_to_wav(
-            source_file_directory, output_dir=local_output_directory, ext=extension
-        )
+            source_file_directory, output_dir=local_output_directory, ext=extension)
 
         if not converted:
             return None
 
         return output_file_path
 
-    def _break_files_into_chunks(self, audio_id, local_download_path, wav_file_path):
+    def _break_files_into_chunks(
+            self,
+            audio_id,
+            local_download_path,
+            wav_file_path):
 
         Logger.info(f"Chunking audio file at {wav_file_path}")
         local_chunk_output_path = f"{local_download_path}/chunks"
@@ -270,7 +285,8 @@ class AudioProcessor(BaseProcessor):
         )
 
         if not isinstance(aggressivness_dict.get("aggressiveness"), int):
-            raise Exception(f"Aggressiveness must be an int, not {aggressivness_dict}")
+            raise Exception(
+                f"Aggressiveness must be an int, not {aggressivness_dict}")
 
         self.ensure_path(local_chunk_output_path)
         Logger.info(f"Ensuring path {local_chunk_output_path}")
@@ -291,8 +307,12 @@ class AudioProcessor(BaseProcessor):
         return local_chunk_output_path
 
     def _process_snr(
-        self, input_file_path, meta_data_file_path, local_path, audio_id, hash_code
-    ):
+            self,
+            input_file_path,
+            meta_data_file_path,
+            local_path,
+            audio_id,
+            hash_code):
         snr_config = self.audio_processor_config.get(SNR_CONFIG)
 
         self.snr_processor.fit_and_move(
