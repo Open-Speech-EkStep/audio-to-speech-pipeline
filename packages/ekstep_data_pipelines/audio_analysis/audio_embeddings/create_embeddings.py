@@ -8,8 +8,6 @@ Logger = get_logger("AudioSpeakerClusteringProcessor")
 
 
 def create_embeddings(
-    local_audio_download_path,
-    dir_pattern,
     embed_file_path,
     fs_interface,
     npz_bucket_destination_path,

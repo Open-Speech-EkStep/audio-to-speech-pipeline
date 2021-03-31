@@ -1,13 +1,10 @@
-import sys
 import unittest
+from os import path
 
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import (
     encode_on_partial_sets, )
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.speaker_clustering import (
     create_speaker_clusters, )
-from os import path
-
-# sys.path.insert(0, '..')
 
 
 class AudioSpeakerClusteringTests(unittest.TestCase):

@@ -2,8 +2,6 @@ import unittest
 from unittest import mock
 
 from ekstep_data_pipelines.audio_analysis.analyse_speaker import analyse_speakers
-from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import (
-    encoder, )
 
 
 class AnalyseSpeakersTests(unittest.TestCase):

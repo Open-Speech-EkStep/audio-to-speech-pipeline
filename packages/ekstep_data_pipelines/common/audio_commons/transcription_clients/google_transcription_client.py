@@ -1,12 +1,10 @@
-from ekstep_data_pipelines.common.utils import get_logger
-from google.cloud.speech_v1 import enums
-from google.cloud import speech_v1
-import sys
 import os
 
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
     GoogleTranscriptionClientError, )
-
+from ekstep_data_pipelines.common.utils import get_logger
+from google.cloud import speech_v1
+from google.cloud.speech_v1 import enums
 
 LOGGER = get_logger("GoogleTranscriptionClient")
 

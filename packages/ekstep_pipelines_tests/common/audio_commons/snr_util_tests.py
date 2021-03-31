@@ -1,13 +1,8 @@
-import sys
-import unittest
-from unittest.mock import call
-
-# from audio_processing import constants
-from unittest.mock import Mock
 import subprocess
+import unittest
 from unittest import mock
-import pandas as pd
-
+from unittest.mock import Mock
+from unittest.mock import call
 
 from ekstep_data_pipelines.common.audio_commons.snr_util import SNR
 
@@ -148,7 +143,6 @@ class SNRTests(unittest.TestCase):
         self.assertEqual(mock_subprocess_check_output.call_count, 3)
 
         # check the metadata file for information
-        meta_data_contents = ""
         with open(meta_data_file_name) as f:
             meta_data_contents = f.read()
 
@@ -203,7 +197,6 @@ class SNRTests(unittest.TestCase):
         self.assertEqual(mock_subprocess_check_output.call_count, 3)
 
         # check the metadata file for information
-        meta_data_contents = ""
         with open(meta_data_file_name) as f:
             meta_data_contents = f.read()
         expected_file_content = 'audio_id,cleaned_duration,utterances_files_list,media_hash_code\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}]",dummy_hash\n'

@@ -1,9 +1,7 @@
-import psycopg2
-import yaml
-from sqlalchemy import create_engine, select, MetaData, Table, text
 import numpy as np
 from psycopg2._json import Json
 from psycopg2.extensions import register_adapter, AsIs
+from sqlalchemy import create_engine, text
 
 
 def addapt_numpy_float64(numpy_float64):

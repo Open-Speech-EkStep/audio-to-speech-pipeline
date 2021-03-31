@@ -1,10 +1,9 @@
+import glob
+import math
+
+import numpy as np
 from resemblyzer import preprocess_wav, VoiceEncoder
 from tqdm import tqdm
-import glob
-# from joblib import Parallel, delayed
-import numpy as np
-import math
-import os
 
 
 def audio_paths(directory, pattern):
@@ -24,10 +23,8 @@ def save_embeddings(embed_file_path, embeddings, file_paths):
 def encoder(file_paths, vocoder):
     print('Number of files in batch: {}'.format(len(file_paths)))
 
-    # processed_wavs = Parallel(n_jobs=-1)(delayed(preprocess_wav)(i) for i in tqdm(file_paths))
     processed_wavs = [preprocess_wav(i) for i in tqdm(file_paths)]
 
-    # encodings = Parallel(n_jobs=-1)(delayed(vocoder.embed_utterance)(i) for i in tqdm(processed_wavs))
     encodings = [vocoder.embed_utterance(i) for i in tqdm(processed_wavs)]
     print('Creating embeddings')
     encodings = np.array(encodings)
@@ -64,9 +61,9 @@ def encode_on_partial_sets(source_dir, source_dir_pattern, embed_file_path,
         save_embeddings(embed_file_path, embeddings, file_paths)
     else:
         for batch_no in range(
-            math.ceil(
-                len(file_paths) /
-                partial_set_size_for_embedding)):
+                math.ceil(
+                    len(file_paths) /
+                    partial_set_size_for_embedding)):
             start_index = batch_no * partial_set_size_for_embedding
             stop_index = partial_set_size_for_embedding * (batch_no + 1)
             batch_file_paths = file_paths[start_index:stop_index]

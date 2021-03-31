@@ -1,13 +1,10 @@
-import sys
 import unittest
+from unittest.mock import Mock
+
+from ekstep_data_pipelines.audio_cataloguer.cataloguer import AudioCataloguer
 from ekstep_data_pipelines.audio_cataloguer.cataloguer import (
     INSERT_UNIQUE_SPEAKER_QUERY,
 )
-from unittest.mock import Mock
-from unittest import mock
-
-
-from ekstep_data_pipelines.audio_cataloguer.cataloguer import AudioCataloguer
 
 
 class AudioCataloguerTests(unittest.TestCase):

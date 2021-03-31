@@ -1,26 +1,20 @@
+import numpy as np
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.clustering import Clustering
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_file_mappings import (
     Map, )
-from ekstep_data_pipelines.audio_analysis.speaker_analysis.clustering import Clustering
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.merging import Merge
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.splitting import (
     get_big_cluster_embeds,
 )
 
-import numpy as np
-
-# from clustering import Clustering
-# from create_file_mappings import Map
-# from merging import Merge
-# from splitting import get_big_cluster_embeds
-
 
 def create_speaker_clusters(
-    embed_filename_map_path,
-    source_name,
-    min_cluster_size=4,
-    partial_set_size=11112,
-    min_samples=1,
-    fit_noise_on_similarity=0.80,
+        embed_filename_map_path,
+        source_name,
+        min_cluster_size=4,
+        partial_set_size=11112,
+        min_samples=1,
+        fit_noise_on_similarity=0.80,
 ):
     # step:1 -> ENCODING AND SAVING : done by create_embeddings.py
 
@@ -166,7 +160,8 @@ def create_speaker_clusters(
             for cluster in all_cluster_embeds_after_noise_fit
         ]
         files_in_clusters = [map_obj.find_file(row) for row in indices]
-        # files_in_clusters_with_noise_flag = [(file, was_noise_flag[ind]) for ind, file in enumerate(files_in_clusters)]
+        # files_in_clusters_with_noise_flag = [(file, was_noise_flag[ind]) for ind, file in enumerate(
+        # files_in_clusters)]
         files_in_clusters_with_noise_flag = []
         for ind, list_of_files in enumerate(files_in_clusters):
             cluster = []

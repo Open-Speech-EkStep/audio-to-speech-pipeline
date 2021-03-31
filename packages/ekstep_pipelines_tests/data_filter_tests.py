@@ -1,5 +1,4 @@
 import unittest
-import sys
 
 from ekstep_data_pipelines.data_marker.data_filter import DataFilter
 

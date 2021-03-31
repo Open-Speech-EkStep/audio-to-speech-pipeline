@@ -1,7 +1,7 @@
 from azure.cognitiveservices import speech
-from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
     AzureTranscriptionClientError, )
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger("AzureTranscriptionClient")
 

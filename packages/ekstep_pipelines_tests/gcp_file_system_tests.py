@@ -1,5 +1,4 @@
 import unittest
-import sys
 from unittest.mock import Mock
 
 from ekstep_data_pipelines.common.file_system.gcp_file_systen import GCPFileSystem

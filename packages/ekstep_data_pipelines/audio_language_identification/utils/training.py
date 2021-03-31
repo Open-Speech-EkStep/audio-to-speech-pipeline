@@ -1,16 +1,15 @@
 import os
-import yaml
 import shutil
+
 import numpy as np
-
-from sklearn.metrics import accuracy_score
-from tqdm import tqdm
-
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.utils.data import DataLoader
+import yaml
 from ekstep_data_pipelines.audio_language_identification.loaders.data_loader import (
     SpeechDataGenerator, )
+from sklearn.metrics import accuracy_score
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 
 def load_yaml_file(path):

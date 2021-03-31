@@ -62,7 +62,6 @@ def load_data(
     mode="train",
 ):
     audio_data = load_wav(filepath, sr=sr, min_dur_sec=min_dur_sec)
-    # linear_spect = lin_spectogram_from_wav(audio_data, hop_length, win_length, n_mels)
     linear_spect = lin_spectogram_from_wav(
         audio_data, hop_length, win_length, n_fft=512
     )

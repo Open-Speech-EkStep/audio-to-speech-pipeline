@@ -1,12 +1,13 @@
-import os
-import pandas as pd
-import numpy as np
 import argparse
+import os
 import time
+
 import joblib
+import numpy as np
+import pandas as pd
 from joblib import Parallel, delayed
-from tqdm import tqdm
 from resemblyzer import VoiceEncoder, preprocess_wav
+from tqdm import tqdm
 
 
 def get_parser():

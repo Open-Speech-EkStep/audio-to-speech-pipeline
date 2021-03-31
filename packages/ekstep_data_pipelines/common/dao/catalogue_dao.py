@@ -1,11 +1,6 @@
 import json
 
 import pandas as pd
-
-from ekstep_data_pipelines.common.utils import get_logger
-
-from sqlalchemy import text
-
 from ekstep_data_pipelines.common.dao.constants import (
     GET_UNIQUE_ID,
     IS_EXIST,
@@ -13,6 +8,7 @@ from ekstep_data_pipelines.common.dao.constants import (
     COMMAND_WITHOUT_LICENSE,
     LICENSE,
 )
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger("CatalogueDao")
 

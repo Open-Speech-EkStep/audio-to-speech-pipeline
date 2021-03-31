@@ -1,12 +1,8 @@
-import sys
-import unittest
-from unittest.mock import Mock
 import glob
 import os
 import shutil
-import subprocess
+import unittest
 from unittest import mock
-
 
 from ekstep_data_pipelines.common.audio_commons.chunking_conversion_util import (
     ChunkingConversionUtil, )

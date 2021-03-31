@@ -1,7 +1,7 @@
 import json
-import sys
 import unittest
 from unittest import mock
+
 from ekstep_data_pipelines.common.dao.catalogue_dao import CatalogueDao
 
 

@@ -1,11 +1,9 @@
 import multiprocessing
 
+from ekstep_data_pipelines.common import BaseProcessor
 from ekstep_data_pipelines.common import CatalogueDao
 from ekstep_data_pipelines.common.file_system.gcp_file_systen import GCPFileSystem
 from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.common import BaseProcessor
-
-
 from ekstep_data_pipelines.data_marker.constants import (
     CONFIG_NAME,
     FILTER_CRITERIA,

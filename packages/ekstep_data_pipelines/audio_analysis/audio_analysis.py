@@ -1,21 +1,19 @@
-# import signal
-import sys
 import multiprocessing
 import os
+import sys
 
-from ekstep_data_pipelines.audio_analysis.analyse_speaker import analyse_speakers
 from ekstep_data_pipelines.audio_analysis.analyse_gender import analyse_gender
+from ekstep_data_pipelines.audio_analysis.analyse_speaker import analyse_speakers
 from ekstep_data_pipelines.audio_analysis.constants import (
     CONFIG_NAME,
     REMOTE_PROCESSED_FILE_PATH,
     AUDIO_ANALYSIS_PARAMS,
     ANALYSIS_OPTIONS,
 )
-from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import (
     encode_on_partial_sets, )
-
+from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
+from ekstep_data_pipelines.common.utils import get_logger
 
 MIN_SAMPLES = 1
 

@@ -1,5 +1,4 @@
 import unittest
-import sys
 from unittest.mock import Mock
 
 from ekstep_data_pipelines.data_marker.data_mover import MediaFilesMover

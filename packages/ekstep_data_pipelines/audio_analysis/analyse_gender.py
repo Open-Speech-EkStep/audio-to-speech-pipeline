@@ -1,8 +1,6 @@
-from ekstep_data_pipelines.common.utils import get_logger
-
 from ekstep_data_pipelines.audio_analysis.audio_embeddings.gender_inference import (
     load_model, get_prediction_from_npz_file, )
-
+from ekstep_data_pipelines.common.utils import get_logger
 
 Logger = get_logger("analyse_speakers")
 

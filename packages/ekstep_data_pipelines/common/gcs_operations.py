@@ -1,14 +1,14 @@
+import datetime
+import glob
 import multiprocessing
 import os
-import yaml
 import shutil
-import glob
+from concurrent.futures import ThreadPoolExecutor
 from os import listdir
 from os.path import isfile, join
-from google.cloud import storage
-from concurrent.futures import ThreadPoolExecutor
-import datetime
+
 from ekstep_data_pipelines.common.utils import get_logger
+from google.cloud import storage
 
 Logger = get_logger("GCS Operations")
 

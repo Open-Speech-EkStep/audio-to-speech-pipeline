@@ -1,4 +1,3 @@
-import sys
 import unittest
 
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.file_cluster_mapping import (

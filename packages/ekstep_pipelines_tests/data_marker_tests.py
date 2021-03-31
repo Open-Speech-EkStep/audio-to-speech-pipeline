@@ -1,7 +1,7 @@
 import json
 import unittest
-import sys
 from unittest.mock import Mock
+
 from ekstep_data_pipelines.data_marker.data_marker import DataMarker
 
 

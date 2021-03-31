@@ -1,6 +1,4 @@
 import json
-from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.common import BaseProcessor
 
 from ekstep_data_pipelines.audio_cataloguer.constants import (
     MAX_LOAD_DATE_FOR_MEDIA_QUERY,
@@ -15,7 +13,8 @@ from ekstep_data_pipelines.audio_cataloguer.constants import (
     GET_LOAD_TIME_FOR_AUDIO_QUERY,
     GET_UTTERANCES_LIST_OF_AUDIO_ID,
 )
-
+from ekstep_data_pipelines.common import BaseProcessor
+from ekstep_data_pipelines.common.utils import get_logger
 
 Logger = get_logger("Audio_cataloguer")
 
@@ -158,7 +157,6 @@ class AudioCataloguer(BaseProcessor):
 
         if len(results) <= 0:
             Logger.info("No sperakr id found in given audio_id")
-            pass
 
         speaker_id = results[0][0]
         return speaker_id

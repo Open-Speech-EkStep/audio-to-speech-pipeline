@@ -1,9 +1,6 @@
-import os
 import glob
+import os
 
-from ekstep_data_pipelines.audio_processing.generate_hash import (
-    get_hash_code_of_audio_file,
-)
 from ekstep_data_pipelines.audio_processing.constants import (
     CONFIG_NAME,
     REMOTE_RAW_FILE,
@@ -14,8 +11,11 @@ from ekstep_data_pipelines.audio_processing.constants import (
     SNR_DONE_FOLDER_PATH,
     DUPLICATE_AUDIO_FOLDER_PATH,
 )
-from ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.audio_processing.generate_hash import (
+    get_hash_code_of_audio_file,
+)
 from ekstep_data_pipelines.common import BaseProcessor
+from ekstep_data_pipelines.common.utils import get_logger
 
 Logger = get_logger("Audio Processor")
 
@@ -206,7 +206,6 @@ class AudioProcessor(BaseProcessor):
         file_name,
         meta_data_file,
     ):
-        # snr_done_path = f'{self.audio_processor_config.get(SNR_DONE_FOLDER_PATH)}/{source}'
 
         snr_done_path_audio_file_path = f"{base_path_with_source}/{file_name}"
         snr_done_path_metadata_file_path = f"{base_path_with_source}/{meta_data_file}"

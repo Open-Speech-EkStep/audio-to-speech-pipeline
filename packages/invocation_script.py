@@ -1,18 +1,19 @@
+import argparse
 import json
 import os
 import uuid
-import argparse
+
 from google.cloud import storage
 
 from ekstep_data_pipelines.audio_analysis.audio_analysis import AudioAnalysis
 from ekstep_data_pipelines.audio_cataloguer.cataloguer import AudioCataloguer
-from ekstep_data_pipelines.data_marker.data_marker import DataMarker
 from ekstep_data_pipelines.audio_processing.audio_processer import AudioProcessor
 from ekstep_data_pipelines.audio_transcription.audio_transcription import (
     AudioTranscription,
 )
-from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common import get_periperhals
+from ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.data_marker.data_marker import DataMarker
 
 STT_CLIENT = ["google", "azure"]
 
