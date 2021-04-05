@@ -289,14 +289,10 @@ workflows:
           env_name: 'test'
           requires:
             - ekstep-database-migrations-apply-test
-      - E2E:
-          name: ekstep_data_pipelines_e2e_build
-          requires:
-            - pipeline-dag-build_test
       - approval_for_prod_deploy:
           type: approval
           requires:
-            - ekstep_data_pipelines_e2e_build
+            - pipeline-dag-build_test
       - deploy:
           name: ekstep_data_pipelines_deploy_prod
           env_name: prod
