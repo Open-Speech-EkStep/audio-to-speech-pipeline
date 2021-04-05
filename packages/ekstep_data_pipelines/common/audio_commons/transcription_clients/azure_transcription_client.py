@@ -18,25 +18,25 @@ class AzureTranscriptionClient(object):
     def __init__(self, **kwargs):
         self.speech_key = kwargs.get("speech_key")
         self.service_region = kwargs.get("service_region")
-
+        self.language = kwargs.get("language", "hi-IN")
         self.speech_config = speech.SpeechConfig(
             subscription=self.speech_key, region=self.service_region
         )
 
     def generate_transcription(self, language, source_file_path):
         try:
-            result = self.speech_to_text(source_file_path, language)
+            result = self.speech_to_text(source_file_path)
         except RuntimeError as e:
             raise AzureTranscriptionClientError(e)
         return result.text
 
-    def speech_to_text(self, audio_file_path, language):
+    def speech_to_text(self, audio_file_path):
         audio_input = speech.audio.AudioConfig(filename=audio_file_path)
 
         LOGGER.info(f"calling azure stt API for file: {audio_file_path}")
         speech_recognizer = speech.SpeechRecognizer(
             speech_config=self.speech_config,
-            language=language,
+            language=self.language,
             audio_config=audio_input,
         )
         LOGGER.info("Recognizing first result...")
