@@ -13,8 +13,8 @@ LOGGER = get_logger("IndianEnglishSanitizer")
 
 class IndianEnglishSanitizer(BaseTranscriptionSanitizer):
 
-    VALID_CHARS = ""
-    PUNCTUATION = ""
+    VALID_CHARS = "[ a-zA-Z0-9']"
+    PUNCTUATION = "!\"#%&()*+,./;<=>?@[\\]^_`{|}~।"
 
     @staticmethod
     def get_instance(**kwargs):
@@ -36,7 +36,7 @@ class IndianEnglishSanitizer(BaseTranscriptionSanitizer):
 
         if self.shouldReject(transcription):
             raise TranscriptionSanitizationError(
-                "transcription has char which is not in  "
+                "transcription has char which is not in a-zA-Z0-9'"
             )
 
         return transcription
