@@ -4,12 +4,12 @@ import shutil
 import numpy as np
 import torch
 import yaml
-from ekstep_data_pipelines.audio_language_identification.loaders.data_loader import (
-    SpeechDataGenerator, )
 from sklearn.metrics import accuracy_score
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from ekstep_data_pipelines.audio_language_identification.loaders.data_loader import (
+    SpeechDataGenerator, )
 
 
 def load_yaml_file(path):
@@ -206,7 +206,8 @@ def train(
 
         # print training/validation statistics
         print(
-            "Epoch: {} \tTraining Loss: {:.10f} \tTraining Accuracy: {:.6f} \tValidation Loss: {:.10f} \tValidation  Accuracy: {:.6f} ".format(
+            "Epoch: {} \tTraining Loss: {:.10f} \tTraining Accuracy: {:.6f} \tValidation "
+            "Loss: {:.10f} \tValidation  Accuracy: {:.6f} ".format(
                 epoch,
                 train_loss,
                 train_acc,

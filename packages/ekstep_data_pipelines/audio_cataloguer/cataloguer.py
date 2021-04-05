@@ -125,7 +125,8 @@ class AudioCataloguer(BaseProcessor):
 
                 insert_query_into_mapping_table.append(
                     f"('{utterance['name']}',{utterance['duration']},\
-                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{language_confidence_score}','{load_datetime}')"
+                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason', '')}'"
+                    f",'{language_confidence_score}','{load_datetime}')"
                 )
 
         return insert_query_into_mapping_table, processed_audio_ids
@@ -194,7 +195,6 @@ class AudioCataloguer(BaseProcessor):
             utterance_list = self.get_utterance_list(audio_id)
 
             for utterance_name_diration in utterance_list:
-
                 updated_query = self.create_insert_query(
                     utterance_name_diration,
                     speaker_id,
@@ -216,7 +216,7 @@ class AudioCataloguer(BaseProcessor):
         self.set_isnormalized_flag(audio_ids, True)
 
     def create_insert_query(
-        self, utterance, speaker_id, audio_id, datetime, defult_query
+            self, utterance, speaker_id, audio_id, datetime, defult_query
     ):
 
         file_name = utterance["name"]
@@ -236,4 +236,5 @@ class AudioCataloguer(BaseProcessor):
             "inserting with language_confidence_score:" +
             str(language_confidence_score))
 
-        return f"{defult_query} ({audio_id[0]},{speaker_id},'{file_name}',{duration},'{datetime}',{snr_value},'{status}','{fail_reason}','{language_confidence_score}'),"
+        return f"{defult_query} ({audio_id[0]},{speaker_id},'{file_name}',{duration},'{datetime}" \
+               f"',{snr_value},'{status}','{fail_reason}','{language_confidence_score}'),"

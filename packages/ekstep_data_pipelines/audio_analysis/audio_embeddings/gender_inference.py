@@ -88,7 +88,7 @@ def get_prediction_csv_mode(voice_enc, model, csv_path, save_dir):
             "predictions.csv"),
         header=False,
         index=False)
-    print(f"Inference Completed")
+    print("Inference Completed")
 
 
 def get_prediction_from_npz_file(model, npz_file_path):

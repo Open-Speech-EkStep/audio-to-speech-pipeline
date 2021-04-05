@@ -12,13 +12,15 @@ class BaseTranscriptionSanitizer(metaclass=ABCMeta):
 
 
 def get_transcription_sanitizers(**kwargs):
-
     # cyclic imports
-    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.hindi_sanitizer import (
+    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.hindi_sanitizer \
+        import (
         HindiSanitizer, )
-    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.gujrati_sanitizer import (
+    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.gujrati_sanitizer \
+        import (
         GujratiSanitizer, )
-    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.kannada_sanitizer import (
+    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.kannada_sanitizer \
+        import (
         KannadaSanitizer, )
 
     hindi_sanitizer = HindiSanitizer.get_instance(**kwargs)

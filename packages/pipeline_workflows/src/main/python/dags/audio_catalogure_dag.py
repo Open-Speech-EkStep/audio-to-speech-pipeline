@@ -42,7 +42,7 @@ with models.DAG(
             "-a",
             "audio_cataloguer",
             "-rc",
-            f"data/audiotospeech/config/config.yaml",
+            "data/audiotospeech/config/config.yaml",
         ],
         namespace=composer_namespace,
         startup_timeout_seconds=300,

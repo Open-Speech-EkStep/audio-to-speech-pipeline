@@ -14,7 +14,6 @@ Logger = get_logger("Chunking Util")
 
 
 class ChunkingConversionUtil:
-
     re_chunking_aggressiveness = 3
 
     @staticmethod
@@ -37,7 +36,7 @@ class ChunkingConversionUtil:
 
         if output_dir is None:
             output_file_path = (
-                "/".join(input_file_name.split("/")[:-1]) + "/" + output_file_name
+                    "/".join(input_file_name.split("/")[:-1]) + "/" + output_file_name
             )
         else:
             output_file_path = output_dir + "/" + output_file_name
@@ -55,7 +54,8 @@ class ChunkingConversionUtil:
         Logger.info(
             f"No file exists on {output_file_name}, running the command")
 
-        command = f"ffmpeg -i {input_file_name} -ar 16000 -ac 1 -bits_per_raw_sample 16 -vn {output_file_path}"
+        command = f"ffmpeg -i {input_file_name} -ar 16000 -ac 1 -bits_per_raw_sample 16 -vn " \
+                  f"{output_file_path}"
         subprocess.call(command, shell=True)
 
         Logger.info(
@@ -63,14 +63,14 @@ class ChunkingConversionUtil:
         return output_file_path, True
 
     def create_audio_clips(
-        self,
-        aggressiveness,
-        max_duration,
-        wav_file_path,
-        dir_to_save_chunks,
-        vad_output_file_path,
-        base_chunk_name,
-        is_rechunking=True,
+            self,
+            aggressiveness,
+            max_duration,
+            wav_file_path,
+            dir_to_save_chunks,
+            vad_output_file_path,
+            base_chunk_name,
+            is_rechunking=True,
     ):
         audio, sample_rate = self.read_wave(wav_file_path)
         vad = webrtcvad.Vad(int(aggressiveness))
@@ -95,7 +95,7 @@ class ChunkingConversionUtil:
             )
 
     def rechunking_acc_to_duration(
-        self, max_duration, dir_of_chunks, vad_output_file_path
+            self, max_duration, dir_of_chunks, vad_output_file_path
     ):
 
         file_list = glob.glob(dir_of_chunks + "/*.wav")
@@ -170,14 +170,14 @@ class ChunkingConversionUtil:
             offset += n
 
     def vad_collector(
-        self,
-        sample_rate,
-        frame_duration_ms,
-        padding_duration_ms,
-        vad,
-        frames,
-        vad_output_file_path,
-        file,
+            self,
+            sample_rate,
+            frame_duration_ms,
+            padding_duration_ms,
+            vad,
+            frames,
+            vad_output_file_path,
+            file,
     ):
         """Filters out non-voiced audio frames.
         Given a webrtcvad.Vad and a source of audio frames, yields only

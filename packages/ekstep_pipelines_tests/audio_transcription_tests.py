@@ -6,7 +6,8 @@ from ekstep_data_pipelines.audio_transcription.audio_transcription import (
     AudioTranscription,
 )
 from ekstep_data_pipelines.audio_transcription.constants import AUDIO_LANGUAGE
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors \
+    import (
     GoogleTranscriptionClientError, )
 
 

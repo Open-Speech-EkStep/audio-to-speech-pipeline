@@ -1,13 +1,9 @@
-import re
-import sys
-import pandas as pd
-import os
 from os import listdir
 from os.path import isfile, join
-import gswrap
 
 # [START storage_upload_file]
 from google.cloud import storage
+import gswrap
 
 
 def upload_files(bucket_name, srcFolderPath, bucketFolder):

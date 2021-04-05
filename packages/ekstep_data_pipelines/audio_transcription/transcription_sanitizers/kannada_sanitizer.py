@@ -2,7 +2,8 @@ import re
 
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
     BaseTranscriptionSanitizer, )
-from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
+from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors \
+    import (
     TranscriptionSanitizationError, )
 from ekstep_data_pipelines.common.utils import get_logger
 
@@ -10,7 +11,6 @@ LOGGER = get_logger("KannadaTranscriptionSanitizer")
 
 
 class KannadaSanitizer(BaseTranscriptionSanitizer):
-
     VALID_CHARS = "[ ಂ-ಃಅ-ಋಎ-ಐಒ-ನಪ-ರಲ-ಳವ-ಹಾ-ೄೆ-ೈೊ-್ೲ]+"
     PUNCTUATION = "!\"#%&'()*+,./;<=>?@[\\]^_`{|}~।"
 

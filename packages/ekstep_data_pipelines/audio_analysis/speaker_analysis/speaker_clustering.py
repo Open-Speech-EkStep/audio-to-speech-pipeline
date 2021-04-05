@@ -160,7 +160,8 @@ def create_speaker_clusters(
             for cluster in all_cluster_embeds_after_noise_fit
         ]
         files_in_clusters = [map_obj.find_file(row) for row in indices]
-        # files_in_clusters_with_noise_flag = [(file, was_noise_flag[ind]) for ind, file in enumerate(
+        # files_in_clusters_with_noise_flag = [(file, was_noise_flag[ind])
+        # for ind, file in enumerate(
         # files_in_clusters)]
         files_in_clusters_with_noise_flag = []
         for ind, list_of_files in enumerate(files_in_clusters):

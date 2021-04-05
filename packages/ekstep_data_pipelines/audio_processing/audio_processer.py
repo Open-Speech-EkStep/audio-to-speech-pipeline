@@ -82,7 +82,8 @@ class AudioProcessor(BaseProcessor):
         if not process_master_csv:
             return
 
-        master_metadata_file_path = f"{self.audio_processor_config.get(MASTER_META_DATA_FILE_PATH)}/{source}/{source}_master.csv"
+        master_metadata_file_path = f"{self.audio_processor_config.get(MASTER_META_DATA_FILE_PATH)}/{source}/{source}" \
+                                    f"_master.csv"
 
         if self.fs_interface.path_exists(master_metadata_file_path):
             self.upload_and_move(master_metadata_file_path, source)
@@ -105,7 +106,8 @@ class AudioProcessor(BaseProcessor):
             source, file_name, meta_data_file)
 
         Logger.info(
-            f"Downloading audio file and metadat file from {remote_download_path},{remote_download_path_of_metadata} to {local_audio_download_path}"
+            f"Downloading audio file and metadat file from {remote_download_path},"
+            f"{remote_download_path_of_metadata} to {local_audio_download_path}"
         )
 
         self.fs_interface.download_file_to_location(
@@ -127,7 +129,8 @@ class AudioProcessor(BaseProcessor):
 
             Logger.info(
                 "file is already exist in db moving to duplicate folder")
-            base_path_for_duplicate_audio = f"{self.audio_processor_config.get(DUPLICATE_AUDIO_FOLDER_PATH)}/{source}"
+            base_path_for_duplicate_audio = f"{self.audio_processor_config.get(DUPLICATE_AUDIO_FOLDER_PATH)}" \
+                                            f"/{source}"
 
             self.move_file_to_done_folder(
                 remote_download_path,
@@ -211,7 +214,8 @@ class AudioProcessor(BaseProcessor):
         snr_done_path_metadata_file_path = f"{base_path_with_source}/{meta_data_file}"
 
         Logger.info(
-            f"moving {audio_file_path},{meta_data_file_path} to snr done path {base_path_with_source}"
+            f"moving {audio_file_path},{meta_data_file_path} to snr done path"
+            f" {base_path_with_source}"
         )
 
         self.fs_interface.move(audio_file_path, snr_done_path_audio_file_path)

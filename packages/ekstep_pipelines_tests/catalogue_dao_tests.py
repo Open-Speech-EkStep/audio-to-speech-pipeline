@@ -9,7 +9,8 @@ class CatalogueTests(unittest.TestCase):
     @mock.patch("ekstep_data_pipelines.common.postgres_db_client.PostgresClient")
     def test_get_utterances(self, mock_postgres_client):
         mock_postgres_client.execute_query.return_value = [
-            ('[{"name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav", "duration": "13.38", "snr_value": 38.432806, "status": "Clean"}]', )]
+            ('[{"name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav", '
+             '"duration": "13.38", "snr_value": 38.432806, "status": "Clean"}]', )]
         catalogueDao = CatalogueDao(mock_postgres_client)
         audio_id = "2020"
         actual_utterances = catalogueDao.get_utterances(audio_id)
@@ -52,7 +53,8 @@ class CatalogueTests(unittest.TestCase):
             "utterances": json.dumps(utterances),
             "audio_id": audio_id,
         }
-        called_with_sql = "update media_metadata_staging set utterances_files_list = :utterances where audio_id = :audio_id"
+        called_with_sql = "update media_metadata_staging set utterances_files_list " \
+                          "= :utterances where audio_id = :audio_id"
         self.assertEqual(rows_updated, True)
         self.assertEqual(called_with_sql, args[0][0][0])
         self.assertEqual(called_with_params, args[0][1])
@@ -153,7 +155,8 @@ class CatalogueTests(unittest.TestCase):
             (4, "file_4.wav", "13", "2010126", 19),
         ]
         called_with_sql = (
-            "select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr "
+            "select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, "
+            "audio_id, snr "
             "from media_speaker_mapping "
             "where audio_id in "
             "(select audio_id from media_metadata_staging "
@@ -184,7 +187,8 @@ class CatalogueTests(unittest.TestCase):
         called_with_query = (
             "update media_speaker_mapping set staged_for_transcription = true "
             "where audio_id in (select audio_id from media_metadata_staging "
-            "where \"source\" = :source) and clipped_utterance_file_name in ('file_1.wav','file_2.wav')")
+            "where \"source\" = :source) and clipped_utterance_file_name in ('file_1.wav',"
+            "'file_2.wav')")
 
         called_with_args = {"source": "test_source"}
         args = mock_postgres_client.execute_update.call_args
@@ -235,7 +239,8 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(actul_value, True)
 
         self.assertEqual(
-            "select exists(select 1 from media_metadata_staging where raw_file_name= :file_name or media_hash_code = :hash_code);",
+            "select exists(select 1 from media_metadata_staging where raw_file_name="
+            " :file_name or media_hash_code = :hash_code);",
             args[0][0][0],
         )
 

@@ -2,13 +2,13 @@ from concurrent.futures import ThreadPoolExecutor
 from os import listdir
 from os.path import isfile, join
 
+from google.cloud import storage
+from tqdm import tqdm
 from ekstep_data_pipelines.common.infra_commons.storage import BaseStorageInterface
 from ekstep_data_pipelines.common.infra_commons.storage.exceptions import (
     FileNotFoundException,
 )
 from ekstep_data_pipelines.common.utils import get_logger
-from google.cloud import storage
-from tqdm import tqdm
 
 Logger = get_logger("GoogleStorage")
 
@@ -83,7 +83,7 @@ class GoogleStorage(BaseStorageInterface):
         return self.download_file_to_location(source_path, destination_path)
 
     def download_folder_to_location(
-        self, source_path: str, destination_path: str, max_workers=5
+            self, source_path: str, destination_path: str, max_workers=5
     ):
         bucket = self.get_bucket_from_path(source_path)
         source = "/".join(source_path.split("/")[1:])

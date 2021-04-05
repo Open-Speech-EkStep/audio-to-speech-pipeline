@@ -13,7 +13,6 @@ LOGGER = get_logger("Snr")
 
 
 class SNR:
-
     """
     Util object for performing SNR analysis over different
     """
@@ -37,7 +36,9 @@ class SNR:
         self.current_working_dir = os.getcwd()
 
     def get_command(self, current_working_dir, file_path):
-        return f'"{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/WADASNR" -i "{file_path}" -t "{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
+        return f'"{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/WADASNR" -i ' \
+               f'"{file_path}" -t "{current_working_dir}' \
+               f'/ekstep_data_pipelines/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
 
     def get_output_directories(self, output_dir, ensure_path=True):
         clean_path, rejected_path = f"{output_dir}/clean", f"{output_dir}/rejected"
@@ -98,22 +99,23 @@ class SNR:
         return file_snrs
 
     def fit_and_move(
-        self,
-        input_file_list,
-        metadata_file_name,
-        threshold,
-        output_dir_path,
-        audio_id,
-        hash_code,
+            self,
+            input_file_list,
+            metadata_file_name,
+            threshold,
+            output_dir_path,
+            audio_id,
+            hash_code,
     ):
         LOGGER.info(f"Processing SNR for for the files {input_file_list}")
         processed_file_snr_dict = self.process_files_list(input_file_list)
 
-        LOGGER.info(f"Getting the clean and reject folders")
+        LOGGER.info("Getting the clean and reject folders")
         clean_dir_path, rejected_dir_path = self.get_output_directories(
             output_dir_path)
         LOGGER.info(
-            f"Got the clean and reject folders, clean/{clean_dir_path} and rejected/{rejected_dir_path}"
+            f"Got the clean and reject folders, clean/{clean_dir_path} and rejected/"
+            f"{rejected_dir_path}"
         )
 
         metadata = pd.read_csv(metadata_file_name)

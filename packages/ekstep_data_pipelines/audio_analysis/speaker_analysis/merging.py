@@ -1,6 +1,6 @@
+from copy import deepcopy
 from sklearn.metrics.pairwise import cosine_distances
 import numpy as np
-from copy import deepcopy
 
 backup = dict({})
 

@@ -1,20 +1,14 @@
-import datetime
-import json
-import os
-import yaml
-from operator import itemgetter
 import collections
+import json
+from operator import itemgetter
+
+import yaml
+from airflow.models import Variable
+
 from gcs_utils import (
     list_blobs_in_a_path,
-    copy_blob,
     check_blob,
-    move_blob,
-    upload_blob,
-    read_blob,
-    move_directory,
-    download_blob,
 )
-from airflow.models import Variable
 
 
 class mydict(dict):

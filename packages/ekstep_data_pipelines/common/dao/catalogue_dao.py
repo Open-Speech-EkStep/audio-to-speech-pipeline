@@ -28,13 +28,15 @@ class CatalogueDao:
     def get_utterances_by_source(self, source, status):
         parm_dict = {"source": source, "status": status}
         data = self.postgres_client.execute_query(
-            "select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr "
+            "select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, "
+            "audio_id, snr "
             "from media_speaker_mapping "
             "where audio_id "
             'in (select audio_id from media_metadata_staging where "source" = :source) '
             "and status = :status "
             "and staged_for_transcription = false "
-            "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15", **parm_dict, )
+            "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15",
+            **parm_dict, )
         return data
 
     def update_utterances(self, audio_id, utterances):
@@ -124,7 +126,8 @@ class CatalogueDao:
         with open(file_path, "r") as f:
             conn = db_conn.raw_connection()
             cursor = conn.cursor()
-            cmd = "COPY source_metadata_downloaded(source,num_speaker,total_duration,num_of_audio) FROM STDIN WITH (FORMAT CSV, HEADER)"
+            cmd = "COPY source_metadata_downloaded(source,num_speaker,total_duration,num_of_audio)"\
+                  " FROM STDIN WITH (FORMAT CSV, HEADER)"
             cursor.copy_expert(cmd, f)
             conn.commit()
 
@@ -141,7 +144,8 @@ class CatalogueDao:
     ):
         update_query = (
             "update media_speaker_mapping "
-            "set speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name limit 1) "
+            "set speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name "
+            "limit 1) "
             ", was_noise=:was_noise "
             "where clipped_utterance_file_name in ")
         utterance_names = list(map(lambda u: f"'{u}'", utterance_file_names))

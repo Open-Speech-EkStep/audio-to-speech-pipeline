@@ -1,14 +1,15 @@
+import ast
 import datetime
 import json
 import os
+from datetime import datetime
+
+import numpy as np
+import pandas as pd
+import yaml
+from sqlalchemy import create_engine
 
 from gcs_utils import list_blobs_in_a_path, upload_blob, download_blob
-import pandas as pd
-import ast
-from sqlalchemy import create_engine
-from datetime import datetime
-import yaml
-import numpy as np
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
@@ -102,17 +103,17 @@ def generate_row(
         audio_id,
         status):
     row = (
-        full_path
-        + ","
-        + source
-        + ","
-        + audio_id
-        + ","
-        + raw_file_name
-        + ","
-        + file_name
-        + ","
-        + status
+            full_path
+            + ","
+            + source
+            + ","
+            + audio_id
+            + ","
+            + raw_file_name
+            + ","
+            + file_name
+            + ","
+            + status
     )
     return row
 
@@ -222,11 +223,11 @@ def get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw):
 def parse_json_utterance_meta(jsonData):
     json_dict = json.loads(jsonData)
     return (
-        str(json_dict["name"]).replace(",", "")
-        + ","
-        + str(json_dict["duration"])
-        + ","
-        + json_dict["status"]
+            str(json_dict["name"]).replace(",", "")
+            + ","
+            + str(json_dict["duration"])
+            + ","
+            + json_dict["status"]
     )
 
 
@@ -369,10 +370,10 @@ def get_valid_utterance_duration_unexploded(bucket_list_in_catalog):
     # valid_utterance_duration = append_file_and_duration(valid_utterance_duration)
     valid_utterance_duration = valid_utterance_duration[
         valid_utterance_duration.status.str.lower() != "rejected"
-    ]
+        ]
     valid_utterance_duration = valid_utterance_duration[
         valid_utterance_duration.utterances_file_status.str.lower() != "rejected"
-    ]
+        ]
     return valid_utterance_duration.groupby("audio_id", as_index=False).agg(
         {
             "utterances_file_duration": lambda x: x.sum() / 60,
@@ -393,7 +394,7 @@ def get_unique_utterances(data_catalog_raw):
 
 
 def get_valid_and_unique_utterances(
-    df_catalog_unique, df_catalog_valid_utterance_duration_unexploded
+        df_catalog_unique, df_catalog_valid_utterance_duration_unexploded
 ):
     df_valid_utterances_with_unique_audioid = (
         df_catalog_valid_utterance_duration_unexploded.merge(
@@ -411,7 +412,8 @@ def get_valid_and_unique_utterances(
 
 
 # def get_bucket_list_in_catalog_unexploded(bucket_list_in_catalog, data_catalog_raw):
-#     audio_ids_in_bucket_and_catalog = bucket_list_in_catalog[~bucket_list_in_catalog.duplicated(subset=['audio_id'])][[
+#     audio_ids_in_bucket_and_catalog = bucket_list_in_catalog[~bucket_list_in_catalog.
+#     duplicated(subset=['audio_id'])][[
 #         'audio_id']]
 #     return data_catalog_raw.merge(audio_ids_in_bucket_and_catalog,
 #                                   on='audio_id')
@@ -482,8 +484,9 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
     )
     bucket_list_in_catalog_cleaned = bucket_list_in_catalog[
         bucket_list_in_catalog.status == "clean"
-    ]
-    # catalog_list_with_rejected_status = bucket_list_in_catalog[bucket_list_in_catalog.status == 'rejected']
+        ]
+    # catalog_list_with_rejected_status = bucket_list_in_catalog[bucket_list_in_catalog
+    # .status == 'rejected']
     df_catalog_invalid_utterance_duration = get_invalid_utterance_duration(
         bucket_list_in_catalog_cleaned
     )
@@ -514,7 +517,8 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
         bucket_list_in_catalog.astype({"audio_id": "str"}).to_excel(
             writer, sheet_name="catalog_list_in_bucket", index=False
         )
-        # catalog_list_with_rejected_status.to_excel(writer, sheet_name='catalog_list_rejected_ones', index=False)
+        # catalog_list_with_rejected_status.to_excel(writer,
+        # sheet_name='catalog_list_rejected_ones', index=False)
         df_catalog_invalid_utterance_duration.astype({"audio_id": "str"}).to_excel(
             writer, sheet_name="catalog_list_invalid_duration", index=False)
         df_catalog_duplicates.astype({"audio_id": "str"}).to_excel(

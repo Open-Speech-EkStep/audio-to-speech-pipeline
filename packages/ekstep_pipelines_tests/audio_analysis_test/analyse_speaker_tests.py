@@ -12,10 +12,12 @@ class AnalyseSpeakersTests(unittest.TestCase):
         "ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings.encoder"
     )
     @mock.patch(
-        "ekstep_data_pipelines.audio_analysis.speaker_analysis.speaker_clustering.create_speaker_clusters"
+        "ekstep_data_pipelines.audio_analysis.speaker_analysis.speaker_clustering"
+        ".create_speaker_clusters"
     )
     @mock.patch(
-        "ekstep_data_pipelines.audio_analysis.speaker_analysis.file_cluster_mapping.speaker_to_file_name_map"
+        "ekstep_data_pipelines.audio_analysis.speaker_analysis.file_cluster_mapping"
+        ".speaker_to_file_name_map"
     )
     @unittest.skip
     def should_analyse_speakers_for_source(

@@ -10,10 +10,12 @@ from ekstep_data_pipelines.audio_transcription.constants import (
 )
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
     get_transcription_sanitizers, )
-from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
+from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors \
+    import (
     TranscriptionSanitizationError, )
 from ekstep_data_pipelines.common import BaseProcessor
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors \
+    import (
     AzureTranscriptionClientError, GoogleTranscriptionClientError, )
 from ekstep_data_pipelines.common.file_utils import get_file_name
 from ekstep_data_pipelines.common.utils import get_logger
@@ -26,7 +28,7 @@ class AudioTranscription(BaseProcessor):
 
     @staticmethod
     def get_instance(
-        data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
+            data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
     ):
         return AudioTranscription(
             data_processor,
@@ -118,7 +120,8 @@ class AudioTranscription(BaseProcessor):
                 self.catalogue_dao.update_utterances(audio_id, utterances)
 
                 LOGGER.info(
-                    f"Uploading local generated files from {local_clean_dir_path} to {remote_stt_output_path}"
+                    f"Uploading local generated files from {local_clean_dir_path} to "
+                    f"{remote_stt_output_path}"
                 )
                 if os.path.exists(local_clean_dir_path):
                     self.fs_interface.upload_folder_to_location(
@@ -128,7 +131,8 @@ class AudioTranscription(BaseProcessor):
                     LOGGER.info("No clean files found")
 
                 LOGGER.info(
-                    f"Uploading local generated files from {local_rejected_dir_path} to {remote_stt_output_path}"
+                    f"Uploading local generated files from {local_rejected_dir_path} to "
+                    f"{remote_stt_output_path}"
                 )
                 if os.path.exists(local_rejected_dir_path):
                     self.fs_interface.upload_folder_to_location(
@@ -163,14 +167,14 @@ class AudioTranscription(BaseProcessor):
             f.write(transcription)
 
     def generate_transcription_for_all_utterenaces(
-        self,
-        audio_id,
-        all_files,
-        stt_language,
-        transcription_client,
-        utterances,
-        should_skip_rejected,
-        remote_path,
+            self,
+            audio_id,
+            all_files,
+            stt_language,
+            transcription_client,
+            utterances,
+            should_skip_rejected,
+            remote_path,
     ):
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
 
@@ -201,8 +205,8 @@ class AudioTranscription(BaseProcessor):
                 utterance_metadata["reason"] = "redacted"
 
             if (
-                float(utterance_metadata["duration"]) < 0.5
-                or float(utterance_metadata["duration"]) > 15
+                    float(utterance_metadata["duration"]) < 0.5
+                    or float(utterance_metadata["duration"]) > 15
             ):
                 LOGGER.error("skipping audio file as duration > 15 or  < .5")
                 continue
@@ -233,14 +237,14 @@ class AudioTranscription(BaseProcessor):
         return local_clean_folder, local_rejected_path
 
     def generate_transcription_and_sanitize(
-        self,
-        audio_id,
-        local_clean_path,
-        local_rejected_path,
-        remote_file_path,
-        stt_language,
-        transcription_client,
-        utterance_metadata,
+            self,
+            audio_id,
+            local_clean_path,
+            local_rejected_path,
+            remote_file_path,
+            stt_language,
+            transcription_client,
+            utterance_metadata,
     ):
         if ".wav" not in remote_file_path:
             return
@@ -269,7 +273,8 @@ class AudioTranscription(BaseProcessor):
 
             if not transcription_sanitizer:
                 LOGGER.info(
-                    f"No transacription sanitizer found for the language {curr_language}, hence falling back to the default sanitizer."
+                    f"No transacription sanitizer found for the language {curr_language}, "
+                    f"hence falling back to the default sanitizer."
                 )
                 transcription_sanitizer = all_transcription_sanitizers.get(
                     "defalt")
@@ -279,7 +284,7 @@ class AudioTranscription(BaseProcessor):
             if original_transcript != transcript:
                 old_file_name = get_file_name(transcription_file_name)
                 new_file_name = "original_" + \
-                    get_file_name(transcription_file_name)
+                                get_file_name(transcription_file_name)
                 file_name_with_original_prefix = transcription_file_name.replace(
                     old_file_name, new_file_name)
                 LOGGER.info(
@@ -313,12 +318,12 @@ class AudioTranscription(BaseProcessor):
             )
 
     def handle_error(
-        self,
-        audio_id,
-        local_clean_path,
-        local_rejected_path,
-        utterance_metadata,
-        reason,
+            self,
+            audio_id,
+            local_clean_path,
+            local_rejected_path,
+            utterance_metadata,
+            reason,
     ):
         utterance_metadata["status"] = "Rejected"
         utterance_metadata["reason"] = reason

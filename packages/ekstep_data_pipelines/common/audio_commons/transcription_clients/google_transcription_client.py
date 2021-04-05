@@ -1,10 +1,11 @@
 import os
 
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
-    GoogleTranscriptionClientError, )
-from ekstep_data_pipelines.common.utils import get_logger
 from google.cloud import speech_v1
 from google.cloud.speech_v1 import enums
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors \
+    import (
+    GoogleTranscriptionClientError, )
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger("GoogleTranscriptionClient")
 
@@ -49,7 +50,7 @@ class GoogleTranscriptionClient(object):
         return self._client
 
     def generate_transcription(self, language, source_file_path):
-        source_file_path = source_file_path.replace("/tmp/", f"gs://")
+        source_file_path = source_file_path.replace("/tmp/", "gs://")
         try:
             content = self.call_speech_to_text(source_file_path)
             transcriptions = list(

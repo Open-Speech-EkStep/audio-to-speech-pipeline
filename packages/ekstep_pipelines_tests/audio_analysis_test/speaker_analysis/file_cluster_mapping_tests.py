@@ -12,18 +12,26 @@ class FileClusterMappingTests(unittest.TestCase):
     def test_should_create_filename_to_speaker_map(self):
         file_map_dict = {
             "mkb_sp_0": [
-                "ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/13_Hashiye_Ka_Siddhant_aur_Sahitya.wav",
-                "ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/14_Hashiye_Ka_Siddhant_aur_Sahitya.wav",
-                "ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/12_Hashiye_Ka_Siddhant_aur_Sahitya.wav",
+                "ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/13_Hashiye_Ka"
+                "_Siddhant_aur_Sahitya.wav",
+                "ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/14_Hashiye_Ka"
+                "_Siddhant_aur_Sahitya.wav",
+                "ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/12_Hashiye_Ka"
+                "_Siddhant_aur_Sahitya.wav",
             ],
             "mkb_sp_1": [
-                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/149_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
-                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/150_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
-                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/153_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/149_Hindi_"
+                "Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/150_Hindi_"
+                "Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/153_Hindi_"
+                "Bhasha_ke_Vikas_ki_Purvpithika.wav",
             ],
             "mkb_sp_2": [
-                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/155_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
-                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/151_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/155_Hindi_"
+                "Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                "ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/151_Hindi_"
+                "Bhasha_ke_Vikas_ki_Purvpithika.wav",
             ],
         }
         expected = {
@@ -45,32 +53,40 @@ class FileClusterMappingTests(unittest.TestCase):
     def test_should_create_speaker_to_filename_map(self):
         file_map_dict = {
             "mkb_sp_0": [
-                ("ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/13_Hashiye_Ka_Siddhant_aur_Sahitya.wav",
+                ("ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/13_Hashiye_"
+                 "Ka_Siddhant_aur_Sahitya.wav",
                  0,
                  ),
-                ("ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/14_Hashiye_Ka_Siddhant_aur_Sahitya.wav",
+                ("ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/14_Hashiye_"
+                 "Ka_Siddhant_aur_Sahitya.wav",
                  1,
                  ),
-                ("ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/12_Hashiye_Ka_Siddhant_aur_Sahitya.wav",
+                ("ekstep_pipelines_tests/resources/CEC/202008120411310459/clean/12_Hashiye_"
+                 "Ka_Siddhant_aur_Sahitya.wav",
                  0,
                  ),
             ],
             "mkb_sp_1": [
-                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/149_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/149_Hindi_"
+                 "Bhasha_ke_Vikas_ki_Purvpithika.wav",
                  0,
                  ),
-                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/150_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/150_Hindi_"
+                 "Bhasha_ke_Vikas_ki_Purvpithika.wav",
                  0,
                  ),
-                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/153_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/153_Hindi_"
+                 "Bhasha_ke_Vikas_ki_Purvpithika.wav",
                  1,
                  ),
             ],
             "mkb_sp_2": [
-                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/155_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/155_Hindi_"
+                 "Bhasha_ke_Vikas_ki_Purvpithika.wav",
                  0,
                  ),
-                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/151_Hindi_Bhasha_ke_Vikas_ki_Purvpithika.wav",
+                ("ekstep_pipelines_tests/resources/CEC/202008120507305747/clean/151_Hindi_"
+                 "Bhasha_ke_Vikas_ki_Purvpithika.wav",
                  0,
                  ),
             ],

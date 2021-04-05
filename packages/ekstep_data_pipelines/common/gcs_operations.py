@@ -7,8 +7,8 @@ from concurrent.futures import ThreadPoolExecutor
 from os import listdir
 from os.path import isfile, join
 
-from ekstep_data_pipelines.common.utils import get_logger
 from google.cloud import storage
+from ekstep_data_pipelines.common.utils import get_logger
 
 Logger = get_logger("GCS Operations")
 
@@ -42,8 +42,8 @@ class CloudStorageOperations:
 
         self._bucket = (
             self.config_dict.get("common", {})
-            .get("gcs_config", {})
-            .get("master_bucket")
+                .get("gcs_config", {})
+                .get("master_bucket")
         )
         return self._bucket
 
@@ -57,10 +57,10 @@ class CloudStorageOperations:
         print("*******src_files***", src, src_files, audio_extn)
         for file_name in src_files:
             meta_file_name = (
-                "/".join(file_name.split("/")[:-1])
-                + "/"
-                + file_name.split("/")[-1].split(".")[0]
-                + ".csv"
+                    "/".join(file_name.split("/")[:-1])
+                    + "/"
+                    + file_name.split("/")[-1].split(".")[0]
+                    + ".csv"
             )
             full_meta_file_name = os.path.join(src, meta_file_name)
             full_file_name = os.path.join(src, file_name)
@@ -85,17 +85,19 @@ class CloudStorageOperations:
             print("Directory {} already exists".format(path))
 
     def download_to_local(
-        self, source_blob_name, destination, is_directory, exclude_extn=None
+            self, source_blob_name, destination, is_directory, exclude_extn=None
     ):
         """Downloads a blob from the bucket."""
         # Provides options to download a file OR folder
         # Option 1: FILE mode: Download a file - copies a file with same name in destination folder
         # bucket_name = "your-bucket-name"
-        # source_blob_name = "storage-object-name" e.g. "data/raw/curation/tobeprocessed/hindi/f10.txt"
+        # source_blob_name = "storage-object-name" e.g. "data/raw/curation/"
+        # "tobeprocessed/hindi/f10.txt"
         # destination = "local/path/to/folder" e.g. "data/raw/curation/tobeprocessed/hindi/f10.txt"
         # isDirectory = flag to specify whether source is Directory OR File
 
-        # Option 2: DIRECTORY mode: Download all files inside a folder - creates destination local dir if not exists and copies all files from source
+        # Option 2: DIRECTORY mode: Download all files inside a folder - creates destination
+        # local dir if not exists and copies all files from source
         # bucket_name = "your-bucket-name"
         # source_blob_name = "storage-object-name" e.g. "data/raw/curation/tobeprocessed/hindi"
         # destination = "local/path/to/folder" e.g. "data/raw/curation/tobeprocessed/hindi"
@@ -163,7 +165,7 @@ class CloudStorageOperations:
             )
 
     def upload_to_gcs(
-        self, local_source_path, destination_blob_name, upload_directory=True
+            self, local_source_path, destination_blob_name, upload_directory=True
     ):
         """
         Uploads a blob from the local.
@@ -171,7 +173,8 @@ class CloudStorageOperations:
         :param string local_source_path: Local path to the file/directory being uploaded.
                                          Must include the file name incase of file upload
 
-        :param string destination_blob_name: Remote path where the file/directory needs to be uploaded to
+        :param string destination_blob_name: Remote path where the file/directory needs
+        to be uploaded to
 
         :param bool upload_directy: Flag for specifying if the function is being used to
                                     upload a file or a directory. Pass false incase of file
@@ -182,7 +185,8 @@ class CloudStorageOperations:
 
         if not upload_directory:
             Logger.info(
-                f"Uploading file from source: {local_source_path} to destination: {self.bucket}/{destination_blob_name}"
+                f"Uploading file from source: {local_source_path} to destination: "
+                f"{self.bucket}/{destination_blob_name}"
             )
             blob = bucket.blob(destination_blob_name)
             try:
@@ -223,7 +227,7 @@ class CloudStorageOperations:
 
         executor.shutdown(wait=True)
 
-        Logger.info(f"Checking the result of all upload values")
+        Logger.info("Checking the result of all upload values")
 
         for upload_future in futures:
             try:
@@ -337,7 +341,7 @@ class CloudStorageOperations:
 
     @staticmethod
     def copy_blob_for_move(
-        bucket_name, blob_name, destination_bucket_name, destination_blob_name
+            bucket_name, blob_name, destination_bucket_name, destination_blob_name
     ):
         """Copies a blob from one bucket to another with a new name."""
         # bucket_name = "your-bucket-name"

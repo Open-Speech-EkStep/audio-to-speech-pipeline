@@ -80,7 +80,8 @@ class Clustering:
         Runs HDBSCAN on partial sets of orginial data,
         Returns:
           - mean embeddings: np.ndarray -> mean embeds of each cluster found in each partial set
-          - flat_noise_embeds: np.ndarray -> an array containing all the noise points found over all partial sets.
+          - flat_noise_embeds: np.ndarray -> an array containing all the noise points
+          found over all partial sets.
           - all_cluster_embeds: list of np.arrays ->
 
         """

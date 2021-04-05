@@ -46,7 +46,7 @@ def concatenate_embed_files(embed_file_dest):
             [file['embeds'] for file in list_of_loaded_files])
         final_file_paths = np.concatenate(
             [file['file_paths'] for file in list_of_loaded_files])
-        print(f'Final length of concatenated embeds', len(final_embeds))
+        print('Final length of concatenated embeds', len(final_embeds))
         save_embeddings(embed_file_dest, embeddings=final_embeds,
                         file_paths=final_file_paths)
 

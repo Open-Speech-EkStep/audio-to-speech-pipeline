@@ -3,9 +3,11 @@ from unittest import mock
 import sys
 
 from azure.cognitiveservices.speech import speech
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.azure_transcription_client import (
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.azure_transcription_client\
+    import (
     AzureTranscriptionClient, )
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors\
+    import (
     AzureTranscriptionClientError, )
 
 
