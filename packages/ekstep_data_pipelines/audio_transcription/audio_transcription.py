@@ -258,7 +258,7 @@ class AudioTranscription(BaseProcessor):
                 LOGGER.info(
                     f"No transacription sanitizer found for the language {curr_language}, hence falling back to the default sanitizer."
                 )
-                transcription_sanitizer = all_transcription_sanitizers.get("defalt")
+                transcription_sanitizer = all_transcription_sanitizers.get("default")
 
             transcript = transcription_sanitizer.sanitize(transcript)
 
