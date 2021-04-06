@@ -119,7 +119,7 @@ class GoogleStorage(BaseStorageInterface):
 
         try:
             blob.upload_from_filename(local_source_path)
-        except Exception as e:
+        except Exception as exception:
             return False
 
         return True

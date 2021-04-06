@@ -142,11 +142,11 @@ class AudioTranscription(BaseProcessor):
 
                 self.delete_audio_id(
                     f"{remote_path_of_dir}/{source}/{audio_id}")
-            except Exception as e:
+            except Exception as exception:
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
                 LOGGER.error(f"Transcription failed for audio_id:{audio_id}")
-                LOGGER.error(str(e))
+                LOGGER.error(str(exception))
                 traceback.print_exc()
                 failed_audio_ids.append(audio_id)
                 continue
@@ -163,8 +163,8 @@ class AudioTranscription(BaseProcessor):
     #     self.fs_interface.upload_to_location(local_path, remote_stt_output_path)
 
     def save_transcription(self, transcription, output_file_path):
-        with open(output_file_path, "w") as f:
-            f.write(transcription)
+        with open(output_file_path, "w") as file:
+            file.write(transcription)
 
     def generate_transcription_for_all_utterenaces(
             self,
@@ -300,9 +300,9 @@ class AudioTranscription(BaseProcessor):
             LOGGER.error("Transcription not valid: " + str(tse))
             reason = "sanitization error:" + str(tse.args)
 
-        except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as e:
-            LOGGER.error("STT API call failed: " + str(e))
-            reason = "STT API error:" + str(e.args)
+        except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as error:
+            LOGGER.error("STT API call failed: " + str(error))
+            reason = "STT API error:" + str(error.args)
 
         except Exception as ex:
             LOGGER.error("Error: " + str(ex))

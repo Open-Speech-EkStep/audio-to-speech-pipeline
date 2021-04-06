@@ -2,6 +2,7 @@ import ast
 import datetime
 import json
 import os
+import sys
 from datetime import datetime
 
 import numpy as np
@@ -220,8 +221,8 @@ def get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw):
     # return catalog_list_not_in_bucket
 
 
-def parse_json_utterance_meta(jsonData):
-    json_dict = json.loads(jsonData)
+def parse_json_utterance_meta(json_data):
+    json_dict = json.loads(json_data)
     return (
             str(json_dict["name"]).replace(",", "")
             + ","
@@ -231,14 +232,14 @@ def parse_json_utterance_meta(jsonData):
     )
 
 
-def check_json_utterance_meta(jsonData):
+def check_json_utterance_meta(json_data):
     # print(f"Utterance_file_list being processed is {jsonData}")
     # try:
     #     json.loads(jsonData)
     # except (ValueError, TypeError):
     #     return False
     # return True
-    if isinstance(jsonData, dict):
+    if isinstance(json_data, dict):
         return True
     else:
         return False
@@ -292,8 +293,8 @@ def sanitize_snr_formats(record):
 def convert_str_to_list(record):
     try:
         return ast.literal_eval(record)
-    except ValueError as e:
-        print(e)
+    except ValueError as error:
+        print(error)
         print(record)
         clean_record = sanitize_snr_formats(record)
 
@@ -591,13 +592,13 @@ def check_dataframes(data_catalog_raw, data_bucket_raw):
     bucket_len = len(data_bucket_raw)
     if catalouge_len == 0 and bucket_len != 0:
         print("For the given source no data in catalouge")
-        exit(1)
+        sys.exit(1)
     elif catalouge_len != 0 and bucket_len == 0:
         print("For the given source no data in bucket")
-        exit(1)
+        sys.exit(1)
     elif catalouge_len == 0 and bucket_len == 0:
         print("For the given source no data found. Check the path and source name!!!!")
-        exit(1)
+        sys.exit(1)
     else:
         pass
 

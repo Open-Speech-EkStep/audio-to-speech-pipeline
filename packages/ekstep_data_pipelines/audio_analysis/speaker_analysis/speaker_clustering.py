@@ -142,7 +142,7 @@ def create_speaker_clusters(
         # step:3 -> FIT NOISE
         (
             all_cluster_embeds_after_noise_fit,
-            mean_embeds_new,
+            mean_embeds_new,  # W0612: Unused variable 'mean_embeds_new' (unused-variable)
             unallocated_noise_embeds,
             was_noise_flag,
         ) = merger.fit_noise_points(
@@ -177,6 +177,8 @@ def create_speaker_clusters(
         }
 
         noise_file_map_dict = dict({})
+        # C1801: Do not use `len(SEQUENCE)` without comparison to
+        # determine if a sequence is empty (len-as-condition)
         if len(unallocated_noise_embeds):
             print(
                 "Creating mapping for {} unallocated noise points".format(
@@ -191,12 +193,13 @@ def create_speaker_clusters(
             }
 
         return file_map_dict, noise_file_map_dict
-    else:
-        print("No clusters could be found!")
+    # R1705: Unnecessary "else" after "return" (no-else-return)
+    # else:
+    #     print("No clusters could be found!")
 
 
 if __name__ == "__main__":
-    file_map_dict, noise_file_map_dict = create_speaker_clusters(
+    file_map_dict_, noise_file_map_dict_ = create_speaker_clusters(
         embed_filename_map_path="/Users/neerajchhimwal/Desktop/spill.npz",
         source_name="spill",
     )

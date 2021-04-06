@@ -21,7 +21,7 @@ class Merge:
 
     def pairs_to_merge(
         self,
-        all_cluster_embeds,
+        all_cluster_embeds,  # W0613: Unused argument 'all_cluster_embeds' (unused-argument)
         mean_embeddings,
         similarity_allowed,
         merge_closest_only=False,
@@ -50,8 +50,8 @@ class Merge:
         for key in list(possible_mergers.keys()):
             if key not in list_of_indices_covered:
                 values = possible_mergers[key]
-                for v in values:
-                    new_vals = [i for i in possible_mergers[v]
+                for value in values:
+                    new_vals = [i for i in possible_mergers[value]
                                 if i not in values if i != key]
                     values.extend(new_vals)
                 list_of_indices_covered.extend(values + [key])
@@ -242,6 +242,8 @@ class Merge:
         closest_cluster_index = np.argmin(distances, axis=1)
         closest_cluster_dist = np.min(distances, axis=1)
 
+        # C1801: Do not use `len(SEQUENCE)` without comparison to
+        # determine if a sequence is empty (len-as-condition)
         if len(closest_cluster_dist):
             for index, dist in enumerate(closest_cluster_dist):
                 if dist <= max_distance_allowed:

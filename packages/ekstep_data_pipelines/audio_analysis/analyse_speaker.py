@@ -16,7 +16,7 @@ def analyse_speakers(
     fit_noise_on_similarity,
 ):
 
-    file_map_dict, noise_file_map_dict = create_speaker_clusters(
+    file_map_dict = create_speaker_clusters(
         embed_file_path,
         source,
         min_cluster_size,
@@ -25,5 +25,5 @@ def analyse_speakers(
         fit_noise_on_similarity,
     )
     speaker_to_file_name = speaker_to_file_name_map(file_map_dict)
-    Logger.info("total speakers:" + str(len(speaker_to_file_name)))
+    Logger.info("total speakers:%s", str(len(speaker_to_file_name)))
     return speaker_to_file_name

@@ -17,7 +17,6 @@ def save_embeddings(embed_file_path, embeddings, file_paths):
         embeds=embeddings,
         file_paths=file_paths)
     print('Embeddings mapped to filepaths have been saved at {}'.format(embed_file_path))
-    return
 
 
 def encoder(file_paths, vocoder):

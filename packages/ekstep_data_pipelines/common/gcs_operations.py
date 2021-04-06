@@ -185,19 +185,20 @@ class CloudStorageOperations:
 
         if not upload_directory:
             Logger.info(
-                f"Uploading file from source: {local_source_path} to destination: "
-                f"{self.bucket}/{destination_blob_name}"
+                "Uploading file from source: %s to destination: "
+                "%f/%f", local_source_path, self.bucket, destination_blob_name
             )
             blob = bucket.blob(destination_blob_name)
             try:
                 blob.upload_from_filename(local_source_path)
-            except Exception as e:
+            # W0703: Catching too general exception Exception (broad-except)
+            except Exception as exception:
                 Logger.info(
-                    f"Single file Upload failed with error {e.__str__()}")
+                    "Single file Upload failed with error %s", exception.__str__())
                 return False
 
             Logger.info(
-                f"Single File uploaded successfully to {self.bucket}/{destination_blob_name}"
+                "Single File uploaded successfully to %f/%f", self.bucket, destination_blob_name
             )
             return True
 
@@ -206,7 +207,7 @@ class CloudStorageOperations:
                 join(
                     local_source_path,
                     f))]
-        Logger.info(f"All the files in directory {files}")
+        Logger.info("All the files in directory %s", files)
         # TODO: move to constant and pass concurrency as args
         estimated_cpu_share = 0.05
         concurrency = multiprocessing.cpu_count() / estimated_cpu_share
@@ -232,14 +233,15 @@ class CloudStorageOperations:
         for upload_future in futures:
             try:
                 upload_future.result()
-            except Exception as e:
+            except Exception as exception:
                 Logger.error(
-                    f"Uploading directory {local_source_path} failed with error {e.__str__()}"
+                    "Uploading directory %s failed with error %s",
+                    local_source_path, exception.__str__()
                 )
                 return False
 
         Logger.info(
-            f"All the files in directory {local_source_path} uploaded successfully"
+            "All the files in directory %s uploaded successfully", local_source_path
         )
         return True
 
@@ -257,8 +259,8 @@ class CloudStorageOperations:
             print(blob.name)
         if delimiter:
             print("Prefixes:")
-            for prefix in blobs.prefixes:
-                print(prefix)
+            for prefix_ in blobs.prefixes:
+                print(prefix_)
 
     def rename_blob(self, bucket_name, blob_name, new_name):
         """Renames a blob."""

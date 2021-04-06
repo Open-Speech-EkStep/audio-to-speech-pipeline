@@ -36,9 +36,9 @@ def feature_extraction(
     min_dur_sec=4,
     win_length=400,
     hop_length=160,
-    n_mels=40,
-    spec_len=400,
-    mode="train",
+    n_mels=40,  # W0613: Unused argument 'n_mels' (unused-argument)
+    spec_len=400,  # W0613: Unused argument 'spec_len' (unused-argument)
+    mode="train",  # W0613: Unused argument 'mode' (unused-argument)
 ):
     audio_data = load_wav(filepath, sr=sr, min_dur_sec=min_dur_sec)
     linear_spect = lin_spectogram_from_wav(

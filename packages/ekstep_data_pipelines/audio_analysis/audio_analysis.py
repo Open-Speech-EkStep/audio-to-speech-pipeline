@@ -52,7 +52,7 @@ class AudioAnalysis(BaseProcessor):
 
     def handle_termination_gracefully(self, signum, frame):
         LOGGER.info(
-            f"SIGINT/SIGTERM invoked with the following information {signum}/{frame}"
+            "SIGINT/SIGTERM invoked with the following information %f/%f", signum, frame
         )
         sys.exit(1)
 
@@ -73,14 +73,14 @@ class AudioAnalysis(BaseProcessor):
         local_audio_download_path = f"{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}/"
         self.ensure_path(local_audio_download_path)
 
-        LOGGER.info(f"Ensured {local_audio_download_path} exists")
+        LOGGER.info("Ensured %s exists", local_audio_download_path)
         remote_download_path = self.get_full_path(source)
 
-        LOGGER.info("Total available cpu count:" +
+        LOGGER.info("Total available cpu count: %s",
                     str(multiprocessing.cpu_count()))
 
         LOGGER.info(
-            "Running speaker clustering using parameters: " +
+            "Running speaker clustering using parameters: %s",
             str(parameters))
         min_cluster_size = parameters.get("min_cluster_size", MIN_CLUSTER_SIZE)
         partial_set_size = parameters.get("partial_set_size", PARTIAL_SET_SIZE)
@@ -124,13 +124,13 @@ class AudioAnalysis(BaseProcessor):
         )
 
     def create_or_fetch_embeddings(
-        self,
-        local_audio_download_path,
-        remote_download_path,
-        embed_file_path,
-        npz_bucket_destination_path,
-        partial_set_size,
-        dir_pattern="*.wav"
+            self,
+            local_audio_download_path,
+            remote_download_path,
+            embed_file_path,
+            npz_bucket_destination_path,
+            partial_set_size,
+            dir_pattern="*.wav"
     ):
         if self.fs_interface.path_exists(npz_bucket_destination_path):
             self.fs_interface.download_file_to_location(
@@ -138,8 +138,8 @@ class AudioAnalysis(BaseProcessor):
             )
         else:
             LOGGER.info(
-                f"Downloading source to {local_audio_download_path} from {remote_download_path}"
-            )
+                "Downloading source to $s from %s",
+                local_audio_download_path, remote_download_path)
             self.fs_interface.download_folder_to_location(
                 remote_download_path, local_audio_download_path, 5
             )
@@ -154,19 +154,19 @@ class AudioAnalysis(BaseProcessor):
             )
             if is_uploaded:
                 LOGGER.info(
-                    "npz file uploaded to :" +
+                    "npz file uploaded to : %s",
                     npz_bucket_destination_path)
             else:
                 LOGGER.info(
-                    "npz file could not be uploaded to :" +
+                    "npz file could not be uploaded to : %s",
                     npz_bucket_destination_path)
 
     def update_info_in_db(
-        self,
-        catalogue_dao,
-        speaker_to_file_name,
-        file_to_speaker_gender_mapping,
-        source,
+            self,
+            catalogue_dao,
+            speaker_to_file_name,
+            file_to_speaker_gender_mapping,
+            source,
     ):
 
         if speaker_to_file_name:
@@ -179,7 +179,7 @@ class AudioAnalysis(BaseProcessor):
             )
 
     def _update_speaker_gender_mapping(
-        self, catalogue_dao, file_speaker_gender_mapping
+            self, catalogue_dao, file_speaker_gender_mapping
     ):
         male_files = []
         female_files = []
@@ -195,11 +195,11 @@ class AudioAnalysis(BaseProcessor):
 
         catalogue_dao.update_utterance_speaker_gender(male_files, "m")
         LOGGER.info(
-            f"Updating the {male_files} with the value with value male")
+            "Updating the %s with the value with value male", male_files)
 
         catalogue_dao.update_utterance_speaker_gender(female_files, "f")
         LOGGER.info(
-            f"Updating the {female_files} with the value with value Female")
+            "Updating the %s with the value with value Female", female_files)
 
     def _update_speaker_count_info(
             self,
@@ -213,17 +213,20 @@ class AudioAnalysis(BaseProcessor):
                 speaker_inserted = catalogue_dao.insert_speaker(
                     source, speaker)
             else:
-                LOGGER.info("Speaker already exists:" + speaker)
+                LOGGER.info("Speaker already exists:%s", speaker)
                 speaker_inserted = True
 
             if not speaker_inserted:
                 # do nothing incase the speaker_inserted is false
                 continue
 
-            LOGGER.info("updating utterances for speaker:" + speaker)
+            LOGGER.info("updating utterances for speaker:%s", speaker)
             utterances = speaker_to_file_name.get(speaker)
-            LOGGER.info("utterances:" + str(utterances))
-            def to_file_name(u): return u[0]
+            LOGGER.info("utterances: %s", str(utterances))
+
+            def to_file_name(utterance):
+                return utterance[0]
+
             was_noise_utterances = list(
                 map(to_file_name, (filter(lambda u: u[1] == 1, utterances)))
             )

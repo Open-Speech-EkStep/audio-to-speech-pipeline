@@ -22,10 +22,10 @@ class ChunkingConversionUtil:
 
     def convert_to_wav(self, input_dir, output_dir=None, ext="mp4"):
 
-        Logger.info(f"Convert all the files in {input_dir} to wav")
+        Logger.info("Convert all the files in %s to wav", input_dir)
         audio_paths = glob.glob(input_dir + "/*." + ext)
 
-        Logger.info(f"Files to be completed: {audio_paths}")
+        Logger.info("Files to be completed: %s", audio_paths)
 
         if len(audio_paths) < 1:
             return None, False
@@ -42,24 +42,24 @@ class ChunkingConversionUtil:
             output_file_path = output_dir + "/" + output_file_name
 
         Logger.info(
-            f"Output path for converted wav file is: {output_file_name}")
+            "Output path for converted wav file is:%s", output_file_name)
 
         if os.path.exists(output_file_path) and os.path.isfile(
                 output_file_path):
             Logger.info(
-                f"WAV file at {output_file_name} already exists, not doing anything"
+                "WAV file at %s already exists, not doing anything", output_file_name
             )
             return output_file_path, True
 
         Logger.info(
-            f"No file exists on {output_file_name}, running the command")
+            "No file exists on %s, running the command", output_file_name)
 
         command = f"ffmpeg -i {input_file_name} -ar 16000 -ac 1 -bits_per_raw_sample 16 -vn " \
                   f"{output_file_path}"
         subprocess.call(command, shell=True)
 
         Logger.info(
-            f"No file exists on {output_file_name}, running the command")
+            "No file exists on %s, running the command", output_file_name)
         return output_file_path, True
 
     def create_audio_clips(
@@ -107,7 +107,7 @@ class ChunkingConversionUtil:
             if duration > max_duration:
                 base_chunk_name = file_path.split("/").pop()
                 Logger.info(
-                    f"rechunking of file {base_chunk_name} and duration of file is: {duration}"
+                    "rechunking of file %s and duration of file is: %s", base_chunk_name, duration
                 )
 
                 self.create_audio_clips(
@@ -124,32 +124,32 @@ class ChunkingConversionUtil:
     def calculate_duration(self, input_filepath):
         duration = sox.file_info.duration(input_filepath)
         Logger.info(
-            f"Duration for input_filepath:{input_filepath} : {str(duration)}")
+            "Duration for input_filepath:%s : %s", input_filepath, str(duration))
         return duration
 
     def read_wave(self, path):
         """Reads a .wav file.
         Takes the path, and returns (PCM audio data, sample rate).
         """
-        with contextlib.closing(wave.open(path, "rb")) as wf:
-            num_channels = wf.getnchannels()
+        with contextlib.closing(wave.open(path, "rb")) as wave_file:
+            num_channels = wave_file.getnchannels()
             assert num_channels == 1
-            sample_width = wf.getsampwidth()
+            sample_width = wave_file.getsampwidth()
             assert sample_width == 2
-            sample_rate = wf.getframerate()
+            sample_rate = wave_file.getframerate()
             assert sample_rate in (8000, 16000, 32000, 48000)
-            pcm_data = wf.readframes(wf.getnframes())
+            pcm_data = wave_file.readframes(wave_file.getnframes())
             return pcm_data, sample_rate
 
     def write_wave(self, path, audio, sample_rate):
         """Writes a .wav file.
         Takes path, PCM audio data, and sample rate.
         """
-        with contextlib.closing(wave.open(path, "wb")) as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(sample_rate)
-            wf.writeframes(audio)
+        with contextlib.closing(wave.open(path, "wb")) as wave_file:
+            wave_file.setnchannels(1)
+            wave_file.setsampwidth(2)
+            wave_file.setframerate(sample_rate)
+            wave_file.writeframes(audio)
 
     def frame_generator(self, frame_duration_ms, audio, sample_rate):
         """Generates audio frames from PCM audio data.
@@ -249,6 +249,8 @@ class ChunkingConversionUtil:
                     yield b"".join([f.bytes for f in voiced_frames])
                     ring_buffer.clear()
                     voiced_frames = []
+        # W0631: Using possibly undefined loop variable 'frame' (undefined-loop-variable)
+        # out of scope frame loop variable
         if triggered:
             sys.stdout.write("-(%s)" % (frame.timestamp + frame.duration))
             file.write("-(%s)" % (frame.timestamp + frame.duration))

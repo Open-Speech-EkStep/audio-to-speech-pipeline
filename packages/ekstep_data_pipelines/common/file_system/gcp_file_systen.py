@@ -14,17 +14,17 @@ class GCPFileSystem:
     def mv(self, source_dir, target_dir, is_dir=True):
         if is_dir and not self.gcp_operations.check_path_exists(
                 self, source_dir):
-            Logger.info("source dir does not exist:" + source_dir)
+            Logger.info("source dir does not exist:%s", source_dir)
             return
 
         files = self.ls(source_dir)
-        for f in files:
-            self.mv_file(f, target_dir)
+        for file in files:
+            self.mv_file(file, target_dir)
 
     def mv_file(self, file, target_dir):
         paths = file.split("/")
         paths.pop()
         source_dir = "/".join(paths)
         destination_blob_name = file.replace(source_dir, target_dir)
-        Logger.info(f"Moving file {file} --> {destination_blob_name}")
+        Logger.info("Moving file %s --> %s", file, destination_blob_name)
         self.gcp_operations.move_blob(file, destination_blob_name)

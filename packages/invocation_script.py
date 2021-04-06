@@ -26,7 +26,7 @@ class ACTIONS:
     AUDIO_CATALOGUER = "audio_cataloguer"
 
 
-class FILE_SYSTEMS:
+class FileSystems:
     GOOGLE = "google"
     LOCAL = "local"
 
@@ -39,7 +39,7 @@ ACTIONS_LIST = [
     ACTIONS.AUDIO_ANALYSIS,
     ACTIONS.AUDIO_CATALOGUER,
 ]
-FILES_SYSTEMS_LIST = [FILE_SYSTEMS.GOOGLE, FILE_SYSTEMS.LOCAL]
+FILES_SYSTEMS_LIST = [FileSystems.GOOGLE, FileSystems.LOCAL]
 # config_bucket = 'ekstepspeechrecognition-dev'
 
 parser = argparse.ArgumentParser(
@@ -381,7 +381,7 @@ def perform_action(arguments, **kwargs):
             data_processor,
             **{"commons_dict": object_dict, "file_interface": arguments.file_system},
         )
-        LOGGER.info(f"Starting processing for {current_action}")
+        LOGGER.info("Starting processing for %s", current_action)
 
     elif current_action == ACTIONS.AUDIO_CATALOGUER:
         LOGGER.info("Intializing data AudioCataloguer with given config")
@@ -400,7 +400,7 @@ def perform_action(arguments, **kwargs):
 
 
 if __name__ == "__main__":
-    config_file_path = process_config_input(processor_args)
+    config_file_path_ = process_config_input(processor_args)
     LOGGER.info("Loaded configuration file path, performing action")
-    action_kwargs = {"config_file_path": config_file_path}
+    action_kwargs = {"config_file_path": config_file_path_}
     perform_action(processor_args, **action_kwargs)
