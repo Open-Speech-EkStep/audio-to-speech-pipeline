@@ -8,15 +8,19 @@ python_setup:
 clean:
 	rm -rf .workspace
 
+install_external:
+	rm -rf ekstep_data_pipelines/binaries
+	cp lib/wada_snr.tar.gz .
+	tar -xzvf wada_snr.tar.gz
+	mkdir -p ekstep_data_pipelines/binaries/
+	mv WadaSNR ekstep_data_pipelines/binaries/
+	rm wada_snr.tar.gz
+
 install_dependencies:
 	echo '>> installing dependencies...'
 	eval "$(pyenv init -)"
 	pip install -r requirements.txt
-	rm -rf ekstep_data_pipelines/binaries
-	cp ../lib/wada_snr.tar.gz .
-	tar -xzvf wada_snr.tar.gz
-	mv WadaSNR ekstep_data_pipelines/binaries
-	rm wada_snr.tar.gz
+	make install_external
 
 gcloud_setup:
 	mkdir -p .workspace
@@ -34,7 +38,7 @@ setup_cloud_proxy:
 	chmod +x ./.workspace/cloud_sql_proxy
 
 start_proxy:
-	nohup .workspace/cloud_sql_proxy -dir=./workspace/cloudsql -instances=${GCP_PROJECT}:${GCP_REGION}:${DB_NAME}=tcp:5432 &
+	./scripts/start_proxy.sh
 
 mac_setup:
 	echo '>> setting up project on mac...'
@@ -87,3 +91,6 @@ test:
 
 deploy:
 	echo 'deploying...'
+
+setup-kubectl:
+	./scripts/setup_kubectl.sh
