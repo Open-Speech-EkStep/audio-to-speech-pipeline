@@ -219,8 +219,8 @@ class CloudStorageOperations:
             src_file = local_source_path + "/" + file
             blob = bucket.blob(destination_blob_name + "/" + file)
             Logger.info(
-                "Uploading files from source: {} to destination: {}/{} ".format(
-                    src_file, self.bucket, blob.name))
+                "Uploading files from source: %s to destination: %s/%s ",
+                src_file, self.bucket, blob.name)
             futures.append(
                 executor.submit(
                     blob.upload_from_filename,

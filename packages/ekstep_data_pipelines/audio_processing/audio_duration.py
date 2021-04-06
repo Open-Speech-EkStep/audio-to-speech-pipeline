@@ -9,7 +9,7 @@ LOGGER = get_logger("audio_duration")
 def calculate_duration(input_filepath):
     duration = sox.file_info.duration(input_filepath)
     LOGGER.info(
-        f"Duration for input_filepath:{input_filepath} : {str(duration)}")
+        "Duration for input_filepath:%s : %s", input_filepath, str(duration))
     return duration
 
 

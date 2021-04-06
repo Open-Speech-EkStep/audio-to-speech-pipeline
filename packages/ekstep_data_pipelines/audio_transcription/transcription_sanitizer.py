@@ -10,7 +10,7 @@ LOGGER = get_logger("TranscriptionSanitizer")
 
 class TranscriptionSanitizer(object):
     def sanitize(self, transcription):
-        LOGGER.info("Sanitizing transcription:" + transcription)
+        LOGGER.info("Sanitizing transcription:%s", transcription)
         transcription = (
             transcription.strip()
         )  # removes spaces in starting of transcription

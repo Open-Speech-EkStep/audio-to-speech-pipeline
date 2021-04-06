@@ -29,8 +29,8 @@ class SNRTests(unittest.TestCase):
 
     def setup_meta_data_file(self, file_name):
         headers = ["audio_id", "cleaned_duration", "utterances_files_list"]
-        with open(file_name, "w") as f:
-            f.write(",".join(headers) + "\n" + "1,abc,null")
+        with open(file_name, "w") as file:
+            file.write(",".join(headers) + "\n" + "1,abc,null")
 
     def test__should_return_command_when_get_command_called_with_file_path_and_dir(
         self,
@@ -153,8 +153,8 @@ class SNRTests(unittest.TestCase):
         self.assertEqual(mock_subprocess_check_output.call_count, 3)
 
         # check the metadata file for information
-        with open(meta_data_file_name) as f:
-            meta_data_contents = f.read()
+        with open(meta_data_file_name) as file:
+            meta_data_contents = file.read()
 
         self.assertEqual(meta_data_contents, self.expected_file_content)
 
@@ -207,8 +207,8 @@ class SNRTests(unittest.TestCase):
         self.assertEqual(mock_subprocess_check_output.call_count, 3)
 
         # check the metadata file for information
-        with open(meta_data_file_name) as f:
-            meta_data_contents = f.read()
+        with open(meta_data_file_name) as file:
+            meta_data_contents = file.read()
         expected_file_content = 'audio_id,cleaned_duration,utterances_files_list,media_hash_code' \
                                 '\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ' \
                                 '""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ' \

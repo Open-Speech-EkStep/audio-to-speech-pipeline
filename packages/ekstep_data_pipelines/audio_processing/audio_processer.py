@@ -72,11 +72,11 @@ class AudioProcessor(BaseProcessor):
         extension = kwargs.get("extension")
         process_master_csv = kwargs.get("process_master_csv", "false")
 
-        Logger.info(f"Processing audio ids {file_name_list}")
+        Logger.info("Processing audio ids %s", file_name_list)
         for file_name in file_name_list:
             audio_id = self.catalogue_dao.get_unique_id()
 
-            Logger.info(f"Processing file {file_name} and audio_id {audio_id}")
+            Logger.info("Processing file %s and audio_id %s", file_name, audio_id)
             self.process_audio_id(audio_id, source, extension, file_name)
 
         if not process_master_csv:
@@ -96,18 +96,19 @@ class AudioProcessor(BaseProcessor):
         meta_data_file = file_name.replace(f".{extension}", ".csv")
 
         Logger.info(
-            f"Downloading file for audio_id/{audio_id} to {local_audio_download_path}"
+            "Downloading file for audio_id/%s to %s",
+            audio_id, local_audio_download_path
         )
 
         self.ensure_path(local_audio_download_path)
-        Logger.info(f"Ensured {local_audio_download_path} exists")
+        Logger.info("Ensured %s exists", local_audio_download_path)
 
         remote_download_path, remote_download_path_of_metadata = self.get_full_path(
             source, file_name, meta_data_file)
 
         Logger.info(
-            f"Downloading audio file and metadat file from {remote_download_path},"
-            f"{remote_download_path_of_metadata} to {local_audio_download_path}"
+            "Downloading audio file and metadata file from %s,%s to %s",
+            remote_download_path, remote_download_path_of_metadata, local_audio_download_path
         )
 
         self.fs_interface.download_file_to_location(
@@ -143,7 +144,7 @@ class AudioProcessor(BaseProcessor):
 
         meta_data_file_path = self._get_csv_in_path(local_audio_download_path)
 
-        Logger.info(f"Conerting the file with audio_id {audio_id} to wav")
+        Logger.info("Converting the file with audio_id %s to wav", audio_id)
         local_converted_wav_file_path = self._convert_to_wav(
             local_audio_download_path, extension
         )
@@ -152,14 +153,15 @@ class AudioProcessor(BaseProcessor):
             return
 
         Logger.info(
-            f"Breaking {audio_id} at {local_converted_wav_file_path} file into chunks"
+            "Breaking %s at %s file into chunks",
+            audio_id, local_converted_wav_file_path
         )
         chunk_output_path = self._break_files_into_chunks(
             audio_id, local_audio_download_path, local_converted_wav_file_path
         )
 
         Logger.info(
-            f"Processing SNR ratios for the all the chunks for audio_id {audio_id}"
+            "Processing SNR ratios for the all the chunks for audio_id %s", audio_id
         )
         self._process_snr(
             chunk_output_path,
@@ -184,7 +186,8 @@ class AudioProcessor(BaseProcessor):
 
         if not clean_file_upload and not rejected_file_upload:
             Logger.error(
-                f"Uploading chunked/snr cleaned files failed for {audio_id} not processing further."
+                "Uploading chunked/snr cleaned files failed for %s not processing further.",
+                audio_id
             )
 
         self.catalogue_dao.upload_file(meta_data_file_path)
@@ -214,8 +217,8 @@ class AudioProcessor(BaseProcessor):
         snr_done_path_metadata_file_path = f"{base_path_with_source}/{meta_data_file}"
 
         Logger.info(
-            f"moving {audio_file_path},{meta_data_file_path} to snr done path"
-            f" {base_path_with_source}"
+            "moving %s,%s to snr done path %s",
+            audio_file_path, meta_data_file_path, base_path_with_source
         )
 
         self.fs_interface.move(audio_file_path, snr_done_path_audio_file_path)
@@ -256,14 +259,14 @@ class AudioProcessor(BaseProcessor):
 
     def _convert_to_wav(self, source_file_directory, extension):
         Logger.info(
-            f"Converting the contents of the local path {source_file_directory} to wav"
+            "Converting the contents of the local path %s to wav", source_file_directory
         )
 
         local_output_directory = f"{source_file_directory}/wav"
 
         self.ensure_path(local_output_directory)
         Logger.info(
-            f"Output initialized to local path {local_output_directory}")
+            "Output initialized to local path %s", local_output_directory)
 
         output_file_path, converted = self.chunking_processor.convert_to_wav(
             source_file_directory, output_dir=local_output_directory, ext=extension)
@@ -279,7 +282,7 @@ class AudioProcessor(BaseProcessor):
             local_download_path,
             wav_file_path):
 
-        Logger.info(f"Chunking audio file at {wav_file_path}")
+        Logger.info("Chunking audio file at %s", wav_file_path)
         local_chunk_output_path = f"{local_download_path}/chunks"
         local_vad_output_path = f"{local_download_path}/vad"
 
@@ -292,7 +295,7 @@ class AudioProcessor(BaseProcessor):
                 f"Aggressiveness must be an int, not {aggressivness_dict}")
 
         self.ensure_path(local_chunk_output_path)
-        Logger.info(f"Ensuring path {local_chunk_output_path}")
+        Logger.info("Ensuring path %s", local_chunk_output_path)
         file_name = wav_file_path.split("/")[-1]
 
         aggressivness = aggressivness_dict.get("aggressiveness")

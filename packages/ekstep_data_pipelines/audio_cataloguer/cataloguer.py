@@ -115,8 +115,8 @@ class AudioCataloguer(BaseProcessor):
                     utterance.get("language_confidence_score", None)
                 )
                 Logger.info(
-                    "inserting with language_confidence_score:"
-                    + str(language_confidence_score)
+                    "inserting with language_confidence_score: %s",
+                    str(language_confidence_score)
                 )
                 if str(utterance.get("snr_value")) == "nan":
                     snr_value = 0.0
@@ -233,7 +233,7 @@ class AudioCataloguer(BaseProcessor):
             snr_value = float(utterance.get("snr_value", 0))
 
         Logger.info(
-            "inserting with language_confidence_score:" +
+            "inserting with language_confidence_score: %s",
             str(language_confidence_score))
 
         return f"{defult_query} ({audio_id[0]},{speaker_id},'{file_name}',{duration},'{datetime}" \

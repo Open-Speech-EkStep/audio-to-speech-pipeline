@@ -22,7 +22,7 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
         pass
 
     def sanitize(self, transcription):
-        LOGGER.info("Sanitizing transcription:" + transcription)
+        LOGGER.info("Sanitizing transcription:%s", transcription)
         transcription = transcription.strip()
 
         transcription = self.replace_bad_char(transcription)

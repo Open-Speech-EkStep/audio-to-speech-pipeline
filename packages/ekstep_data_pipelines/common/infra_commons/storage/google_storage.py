@@ -87,10 +87,10 @@ class GoogleStorage(BaseStorageInterface):
     ):
         bucket = self.get_bucket_from_path(source_path)
         source = "/".join(source_path.split("/")[1:])
-        Logger.info("bucket:" + bucket)
-        Logger.info("source:" + source)
+        Logger.info("bucket:%s", bucket)
+        Logger.info("source:%s", source)
         source_files = self._list_blobs_in_a_path(bucket, source)
-        Logger.info("file:" + str(source_files))
+        Logger.info("file:%s", str(source_files))
         curr_executor = ThreadPoolExecutor(max_workers)
 
         for remote_file in tqdm(source_files):

@@ -70,19 +70,19 @@ class AudioTranscription(BaseProcessor):
             SHOULD_SKIP_REJECTED)
 
         LOGGER.info(
-            "Generating transcriptions for audio_ids:" +
+            "Generating transcriptions for audio_ids:%s",
             str(audio_ids))
         failed_audio_ids = []
 
         for audio_id in audio_ids:
             try:
                 LOGGER.info(
-                    "Generating transcription for audio_id:" +
+                    "Generating transcription for audio_id:%s",
                     str(audio_id))
                 utterances = self.catalogue_dao.get_utterances(audio_id)
 
                 if len(utterances) <= 0:
-                    LOGGER.info("No utterances found for audio_id:" + audio_id)
+                    LOGGER.info("No utterances found for audio_id:%s", audio_id)
                     continue
 
                 remote_dir_path_for_given_audio_id = (
@@ -96,7 +96,7 @@ class AudioTranscription(BaseProcessor):
 
                 transcription_client = self.transcription_clients[stt_api]
                 LOGGER.info(
-                    "Using transcription client:" +
+                    "Using transcription client:%s",
                     str(transcription_client))
                 all_files = self.fs_interface.list_files(
                     remote_dir_path_for_given_audio_id, include_folders=False
@@ -120,8 +120,8 @@ class AudioTranscription(BaseProcessor):
                 self.catalogue_dao.update_utterances(audio_id, utterances)
 
                 LOGGER.info(
-                    f"Uploading local generated files from {local_clean_dir_path} to "
-                    f"{remote_stt_output_path}"
+                    "Uploading local generated files from %s to %s",
+                    local_clean_dir_path, remote_stt_output_path
                 )
                 if os.path.exists(local_clean_dir_path):
                     self.fs_interface.upload_folder_to_location(
@@ -131,8 +131,8 @@ class AudioTranscription(BaseProcessor):
                     LOGGER.info("No clean files found")
 
                 LOGGER.info(
-                    f"Uploading local generated files from {local_rejected_dir_path} to "
-                    f"{remote_stt_output_path}"
+                    "Uploading local generated files from %s to %s",
+                    local_rejected_dir_path, remote_stt_output_path
                 )
                 if os.path.exists(local_rejected_dir_path):
                     self.fs_interface.upload_folder_to_location(
@@ -145,7 +145,7 @@ class AudioTranscription(BaseProcessor):
             except Exception as exception:
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
-                LOGGER.error(f"Transcription failed for audio_id:{audio_id}")
+                LOGGER.error("Transcription failed for audio_id: %s", audio_id)
                 LOGGER.error(str(exception))
                 traceback.print_exc()
                 failed_audio_ids.append(audio_id)
@@ -189,17 +189,17 @@ class AudioTranscription(BaseProcessor):
             )
 
             if utterance_metadata is None:
-                LOGGER.info("No utterance found for file_name: " + file_name)
+                LOGGER.info("No utterance found for file_name: %s", file_name)
                 continue
 
             if utterance_metadata["status"] == "Rejected":
 
                 if should_skip_rejected:
-                    LOGGER.info("Skipping rejected file_name: " + file_name)
+                    LOGGER.info("Skipping rejected file_name: %s", file_name)
                     continue
 
                 LOGGER.info(
-                    "Marking rejected file as clean, as  this will be transcribed: " +
+                    "Marking rejected file as clean, as  this will be transcribed: %s",
                     file_name)
                 utterance_metadata["status"] = "Clean"
                 utterance_metadata["reason"] = "redacted"
@@ -212,7 +212,7 @@ class AudioTranscription(BaseProcessor):
                 continue
 
             LOGGER.info(
-                "Generating transcription for utterance:" +
+                "Generating transcription for utterance:%s",
                 str(utterance_metadata))
 
             local_clean_folder = f"/tmp/{remote_path}"
@@ -264,7 +264,7 @@ class AudioTranscription(BaseProcessor):
             curr_language = self.audio_transcription_config.get(AUDIO_LANGUAGE)
 
             LOGGER.info(
-                f"Getting transacription sanitizer for the language {curr_language}"
+                "Getting transacription sanitizer for the language %s", curr_language
             )
 
             all_transcription_sanitizers = get_transcription_sanitizers()
@@ -273,8 +273,8 @@ class AudioTranscription(BaseProcessor):
 
             if not transcription_sanitizer:
                 LOGGER.info(
-                    f"No transacription sanitizer found for the language {curr_language}, "
-                    f"hence falling back to the default sanitizer."
+                    "No transacription sanitizer found for the language %s, "
+                    "hence falling back to the default sanitizer.", curr_language
                 )
                 transcription_sanitizer = all_transcription_sanitizers.get(
                     "defalt")
@@ -288,7 +288,7 @@ class AudioTranscription(BaseProcessor):
                 file_name_with_original_prefix = transcription_file_name.replace(
                     old_file_name, new_file_name)
                 LOGGER.info(
-                    "saving original transcription to:" +
+                    "saving original transcription to: %s",
                     file_name_with_original_prefix)
                 self.save_transcription(
                     original_transcript, file_name_with_original_prefix
@@ -297,15 +297,15 @@ class AudioTranscription(BaseProcessor):
             self.save_transcription(transcript, transcription_file_name)
 
         except TranscriptionSanitizationError as tse:
-            LOGGER.error("Transcription not valid: " + str(tse))
+            LOGGER.error("Transcription not valid: %s", str(tse))
             reason = "sanitization error:" + str(tse.args)
 
         except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as error:
-            LOGGER.error("STT API call failed: " + str(error))
+            LOGGER.error("STT API call failed: %s", str(error))
             reason = "STT API error:" + str(error.args)
 
         except Exception as ex:
-            LOGGER.error("Error: " + str(ex))
+            LOGGER.error("Error: %s", str(ex))
             reason = ex.args
 
         if reason is not None:
@@ -333,7 +333,7 @@ class AudioTranscription(BaseProcessor):
             os.makedirs(local_rejected_path)
         command = f"mv {local_clean_path} {local_rejected_path}"
         LOGGER.info(
-            f"moving bad wav file: {local_clean_path} to rejected folder: {local_rejected_path}"
+            "moving bad wav file: %s to rejected folder: %s", local_clean_path, local_rejected_path
         )
         os.system(command)
 

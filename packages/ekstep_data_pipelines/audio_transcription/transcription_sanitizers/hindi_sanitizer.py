@@ -22,7 +22,7 @@ class HindiSanitizer(BaseTranscriptionSanitizer):
         pass
 
     def sanitize(self, transcription: str):
-        LOGGER.info("Sanitizing transcription:" + transcription)
+        LOGGER.info("Sanitizing transcription:%s", transcription)
         transcription = (
             transcription.strip()
         )  # removes spaces from the starting and ending of transcription

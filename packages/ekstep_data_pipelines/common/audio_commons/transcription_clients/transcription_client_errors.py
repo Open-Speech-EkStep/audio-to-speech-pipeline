@@ -4,7 +4,7 @@ class GoogleTranscriptionClientError(Exception):
     """
 
     def __init__(self, root_error):
-        self.rootError = root_error
+        self.root_error = root_error
 
 
 class AzureTranscriptionClientError(Exception):
@@ -13,4 +13,4 @@ class AzureTranscriptionClientError(Exception):
     """
 
     def __init__(self, root_error):
-        self.rootError = root_error
+        self.root_error = root_error
