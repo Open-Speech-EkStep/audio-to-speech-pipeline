@@ -1,19 +1,19 @@
 import unittest
 
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
-    get_transcription_sanitizers, )
+    get_transcription_sanitizers,
+)
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
-    TranscriptionSanitizationError, )
+    TranscriptionSanitizationError,
+)
 
 
 class TestTrancriptionSanitizer(unittest.TestCase):
     def setUp(self):
         transcription_sanitizers = get_transcription_sanitizers()
-        self.kannada_transcription_sanitizers = transcription_sanitizers.get(
-            "kannada")
+        self.kannada_transcription_sanitizers = transcription_sanitizers.get("kannada")
 
-    def test_transcription_containing_empty_string_should_raise_runtime_exception(
-            self):
+    def test_transcription_containing_empty_string_should_raise_runtime_exception(self):
         transcript_obj = self.kannada_transcription_sanitizers
         transcript = " "
         with self.assertRaises(TranscriptionSanitizationError):

@@ -11,10 +11,7 @@ class BaseStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def download_folder_to_location(
-            self,
-            source_path: str,
-            destination_path: str):
+    def download_folder_to_location(self, source_path: str, destination_path: str):
         pass
 
     @abstractmethod
@@ -22,10 +19,7 @@ class BaseStorageInterface(ABC):
         pass
 
     @abstractmethod
-    def upload_folder_to_location(
-            self,
-            source_path: str,
-            destination_path: str):
+    def upload_folder_to_location(self, source_path: str, destination_path: str):
         pass
 
     @abstractmethod

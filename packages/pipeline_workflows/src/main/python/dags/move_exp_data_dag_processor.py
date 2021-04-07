@@ -52,10 +52,8 @@ def move_utterance_chunk(bucket_name_, source_file_name, experiment_name):
         + source_file_name.split("/")[-1]
     )
     move_blob(
-        bucket_name_,
-        source_file_name,
-        bucket_name_,
-        archive_utterances_file_name)
+        bucket_name_, source_file_name, bucket_name_, archive_utterances_file_name
+    )
     # os.remove(local_file_name)
 
 

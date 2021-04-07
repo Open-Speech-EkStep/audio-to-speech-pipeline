@@ -3,12 +3,12 @@ from unittest import mock
 import sys
 
 from azure.cognitiveservices.speech import speech
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.azure_transcription_client\
-    import (
-    AzureTranscriptionClient, )
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors\
-    import (
-    AzureTranscriptionClientError, )
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.azure_transcription_client import (
+    AzureTranscriptionClient,
+)
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
+    AzureTranscriptionClientError,
+)
 
 
 class TestAzureTranscriptionClient(unittest.TestCase):
@@ -32,8 +32,8 @@ class TestAzureTranscriptionClient(unittest.TestCase):
             "hi-IN", audio_file_path
         )
         self.assertEqual(
-            "कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है।",
-            actual_value)
+            "कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है।", actual_value
+        )
 
     @mock.patch("azure.cognitiveservices.speech.SpeechRecognizer")
     def test__speech_to_text_no_match(self, mock_speechrecongnizer):

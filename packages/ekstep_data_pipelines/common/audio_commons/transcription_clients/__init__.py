@@ -1,9 +1,9 @@
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.azure_transcription_client \
-    import (
-    AzureTranscriptionClient, )
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.google_transcription_client \
-    import (
-    GoogleTranscriptionClient, )
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.azure_transcription_client import (
+    AzureTranscriptionClient,
+)
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.google_transcription_client import (
+    GoogleTranscriptionClient,
+)
 
 
 def get_transcription_clients(initialization_dict):
@@ -14,5 +14,4 @@ def get_transcription_clients(initialization_dict):
         initialization_dict
     )
 
-    return {"azure": azure_transcription_client,
-            "google": google_transcription_client}
+    return {"azure": azure_transcription_client, "google": google_transcription_client}

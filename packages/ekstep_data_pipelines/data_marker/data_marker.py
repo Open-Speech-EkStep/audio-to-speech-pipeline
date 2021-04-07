@@ -36,8 +36,7 @@ class DataMarker(BaseProcessor):
         self.gcs_instance = gcs_instance
         self.data_tagger_config = None
         self.data_filter = DataFilter()
-        Logger.info("Total available cpu count: %s",
-                    str(multiprocessing.cpu_count()))
+        Logger.info("Total available cpu count: %s", str(multiprocessing.cpu_count()))
         self.data_mover = MediaFilesMover(
             GCPFileSystem(self.gcs_instance),
             multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE,
@@ -51,19 +50,17 @@ class DataMarker(BaseProcessor):
         Main function for running all processing that takes places in the data marker
         """
         Logger.info("*************Starting data marker****************")
-        self.data_tagger_config = self.postgres_client.config_dict.get(
-            CONFIG_NAME)
+        self.data_tagger_config = self.postgres_client.config_dict.get(CONFIG_NAME)
         source, filter_criteria = self.get_config(**kwargs)
         Logger.info("Fetching utterances for source: %s", source)
-        utterances = self.catalogue_dao.get_utterances_by_source(
-            source, "Clean")
+        utterances = self.catalogue_dao.get_utterances_by_source(source, "Clean")
 
         filtered_utterances = self.data_filter.apply_filters(
             filter_criteria, utterances
         )
         Logger.info(
             "updating utterances that need to be staged, count=%s",
-            str(len(filtered_utterances))
+            str(len(filtered_utterances)),
         )
 
         if len(filtered_utterances) > 0:

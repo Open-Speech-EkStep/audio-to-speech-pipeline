@@ -3,9 +3,9 @@ import unittest
 from unittest import mock
 from unittest.mock import Mock
 
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.google_transcription_client \
-    import (
-    GoogleTranscriptionClient, )
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.google_transcription_client import (
+    GoogleTranscriptionClient,
+)
 
 sys.path.insert(0, "..")
 
@@ -46,5 +46,5 @@ class TestGoogleTranscriptionClient(unittest.TestCase):
         self.assertEqual(mock_client.long_running_recognize.call_count, 1)
 
         self.assertEqual(
-            actual_result,
-            " कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है।")
+            actual_result, " कोरोना के प्रभाव से हमारी मन की बात भी अछूती नहीं रही है।"
+        )

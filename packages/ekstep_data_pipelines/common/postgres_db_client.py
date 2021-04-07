@@ -42,8 +42,10 @@ class PostgresClient:
     """
 
     GET_UNIQUE_ID = "SELECT nextval('audio_id_seq');"
-    IS_EXIST = "select exists(select 1 from media_metadata_staging where raw_file_name= " \
-               ":file_name or media_hash_code = :hash_code);"
+    IS_EXIST = (
+        "select exists(select 1 from media_metadata_staging where raw_file_name= "
+        ":file_name or media_hash_code = :hash_code);"
+    )
 
     @staticmethod
     def get_instance(config_dict, **kwargs):
@@ -80,11 +82,9 @@ class PostgresClient:
         db_name = db_configuration.get("db_name")
         db_user = db_configuration.get("db_user")
         db_pass = db_configuration.get("db_pass")
-        cloud_sql_connection_name = db_configuration.get(
-            "cloud_sql_connection_name")
+        cloud_sql_connection_name = db_configuration.get("cloud_sql_connection_name")
 
-        valid_config = all(
-            [db_name, db_user, db_pass, cloud_sql_connection_name])
+        valid_config = all([db_name, db_user, db_pass, cloud_sql_connection_name])
 
         if not valid_config:
             # TODO: Raise DB config missing exception

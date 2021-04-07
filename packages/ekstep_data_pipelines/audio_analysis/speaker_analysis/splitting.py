@@ -52,7 +52,8 @@ def get_big_cluster_embeds(all_cluster_embeds):
             item for sublist in big_cluster_embeds for item in sublist
         ]
 
-        print("total points in big clusters: {}".format(
-            len(flat_embeddings_big_clusters)))
+        print(
+            "total points in big clusters: {}".format(len(flat_embeddings_big_clusters))
+        )
         flat_embeddings_big_clusters = np.array(flat_embeddings_big_clusters)
     return flat_embeddings_big_clusters, big_clusters_indices

@@ -2,9 +2,11 @@ import unittest
 from os import path
 
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import (
-    encode_on_partial_sets, )
+    encode_on_partial_sets,
+)
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.speaker_clustering import (
-    create_speaker_clusters, )
+    create_speaker_clusters,
+)
 
 
 class AudioSpeakerClusteringTests(unittest.TestCase):
@@ -15,7 +17,7 @@ class AudioSpeakerClusteringTests(unittest.TestCase):
             source_dir=source_path,
             source_dir_pattern="*/clean/*.wav",
             embed_file_path=embed_file_name,
-            partial_set_size_for_embedding=11122
+            partial_set_size_for_embedding=11122,
         )
         self.assertTrue(path.exists(embed_file_name))
 

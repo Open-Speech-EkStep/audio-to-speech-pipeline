@@ -91,8 +91,7 @@ class AudioCataloguer(BaseProcessor):
 
     def update_utterance_in_mapping_table(self):
 
-        all_data = self.data_processor.execute_query(
-            FETCH_QUERY_WHERE_SPEAKER_IS_NULL)
+        all_data = self.data_processor.execute_query(FETCH_QUERY_WHERE_SPEAKER_IS_NULL)
 
         processed_audio_ids = []
 
@@ -116,7 +115,7 @@ class AudioCataloguer(BaseProcessor):
                 )
                 Logger.info(
                     "inserting with language_confidence_score: %s",
-                    str(language_confidence_score)
+                    str(language_confidence_score),
                 )
                 if str(utterance.get("snr_value")) == "nan":
                     snr_value = 0.0
@@ -216,7 +215,7 @@ class AudioCataloguer(BaseProcessor):
         self.set_isnormalized_flag(audio_ids, True)
 
     def create_insert_query(
-            self, utterance, speaker_id, audio_id, datetime, defult_query
+        self, utterance, speaker_id, audio_id, datetime, defult_query
     ):
 
         file_name = utterance["name"]
@@ -234,7 +233,10 @@ class AudioCataloguer(BaseProcessor):
 
         Logger.info(
             "inserting with language_confidence_score: %s",
-            str(language_confidence_score))
+            str(language_confidence_score),
+        )
 
-        return f"{defult_query} ({audio_id[0]},{speaker_id},'{file_name}',{duration},'{datetime}" \
-               f"',{snr_value},'{status}','{fail_reason}','{language_confidence_score}'),"
+        return (
+            f"{defult_query} ({audio_id[0]},{speaker_id},'{file_name}',{duration},'{datetime}"
+            f"',{snr_value},'{status}','{fail_reason}','{language_confidence_score}'),"
+        )

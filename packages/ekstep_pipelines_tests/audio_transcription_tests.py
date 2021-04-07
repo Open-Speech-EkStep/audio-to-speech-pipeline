@@ -6,9 +6,9 @@ from ekstep_data_pipelines.audio_transcription.audio_transcription import (
     AudioTranscription,
 )
 from ekstep_data_pipelines.audio_transcription.constants import AUDIO_LANGUAGE
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors \
-    import (
-    GoogleTranscriptionClientError, )
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
+    GoogleTranscriptionClientError,
+)
 
 
 class AudioTranscriptionTests(unittest.TestCase):
@@ -26,24 +26,20 @@ class AudioTranscriptionTests(unittest.TestCase):
         self.audio_transcription.fs_interface = Mock()
 
     def test__delete_audio_id_should_call_gcp_delete_object_method(self):
-        self.audio_transcription.delete_audio_id(
-            "remote_dir_path_for_given_audio_id")
+        self.audio_transcription.delete_audio_id("remote_dir_path_for_given_audio_id")
 
-        self.assertEqual(
-            self.audio_transcription.fs_interface.delete.call_count, 1)
+        self.assertEqual(self.audio_transcription.fs_interface.delete.call_count, 1)
 
     def test__get_local_dir_path_should_return_dir_path(self):
         actual_output = self.audio_transcription.get_local_dir_path(
             "testdir/inside_dir/test_local_file_path/test_filename.txt"
         )
 
-        self.assertEqual(
-            actual_output,
-            "testdir/inside_dir/test_local_file_path")
+        self.assertEqual(actual_output, "testdir/inside_dir/test_local_file_path")
 
     @unittest.mock.patch("os.system")
     def test__handle_error_should_call_update_db_and_move_rejected_data_to_rejected_folder_create_rejected_folder_if_not_exist(
-            self, mock_os
+        self, mock_os
     ):
         metadata = {"status": "test_status", "reason": "test_reason"}
 
@@ -55,17 +51,15 @@ class AudioTranscriptionTests(unittest.TestCase):
             "reason_of_fail",
         )
 
-        self.assertEqual(
-            self.catalogue_dao.update_utterance_status.call_count, 1)
-        self.catalogue_dao.update_utterance_status.assert_called_with(
-            1234, metadata)
+        self.assertEqual(self.catalogue_dao.update_utterance_status.call_count, 1)
+        self.catalogue_dao.update_utterance_status.assert_called_with(1234, metadata)
         self.assertEqual(mock_os.call_count, 1)
         mock_os.assert_called_with(
             "mv testdir/local_clean_path testdir/local_rejected_path"
         )
 
     def test__generate_transcription_and_sanitize_called_with_filename_that_is_not_contained_wav_extension_shoud_not_call_any_function(
-            self,
+        self,
     ):
         file_path = "filename_without_extension"
 
@@ -83,19 +77,17 @@ class AudioTranscriptionTests(unittest.TestCase):
             metadata,
         )
 
-        self.assertEqual(
-            transcription_client.generate_transcription.call_count, 0)
+        self.assertEqual(transcription_client.generate_transcription.call_count, 0)
 
     def test__generate_transcription_and_sanitize_called_with_filename_that_contained_wav_extension_shoud_call_generate_transcription(
-            self,
+        self,
     ):
         file_name = "filename_with_extension.wav"
 
         transcription_client = self.audio_commons.get("transcription_clients")
         transcription_client.generate_transcription.return_value = "अलग अलग होते है"
 
-        self.audio_transcription.audio_transcription_config = {
-            AUDIO_LANGUAGE: "hindi"}
+        self.audio_transcription.audio_transcription_config = {AUDIO_LANGUAGE: "hindi"}
         metadata = {"status": "test_status", "reason": "test_reason"}
 
         self.audio_transcription.generate_transcription_and_sanitize(
@@ -113,10 +105,10 @@ class AudioTranscriptionTests(unittest.TestCase):
             1,
         )
         self.audio_transcription.fs_interface.download_file_to_location.assert_called_with(
-            file_name, "local_clean_file.wav")
+            file_name, "local_clean_file.wav"
+        )
 
-        self.assertEqual(
-            transcription_client.generate_transcription.call_count, 1)
+        self.assertEqual(transcription_client.generate_transcription.call_count, 1)
         transcription_client.generate_transcription.assert_called_with(
             "language", "local_clean_file.wav"
         )
@@ -124,7 +116,7 @@ class AudioTranscriptionTests(unittest.TestCase):
         self.assertTrue(os.path.exists("local_clean_file.txt"))
 
     def test__generate_transcription_and_sanitize_called_with_filename_that_contained_wav_extension_when_generate_transcription_throw_error(
-            self,
+        self,
     ):
         # file_path = Mock()
 
@@ -152,21 +144,19 @@ class AudioTranscriptionTests(unittest.TestCase):
             1,
         )
         self.audio_transcription.fs_interface.download_file_to_location.assert_called_with(
-            file_path, "testdir/local_clean_path/local_clean_file.wav")
+            file_path, "testdir/local_clean_path/local_clean_file.wav"
+        )
 
-        self.assertEqual(
-            transcription_client.generate_transcription.call_count, 1)
+        self.assertEqual(transcription_client.generate_transcription.call_count, 1)
         transcription_client.generate_transcription.assert_called_with(
             "language", "testdir/local_clean_path/local_clean_file.wav"
         )
 
-        self.assertEqual(
-            self.catalogue_dao.update_utterance_status.call_count, 1)
-        self.catalogue_dao.update_utterance_status.assert_called_with(
-            1234, metadata)
+        self.assertEqual(self.catalogue_dao.update_utterance_status.call_count, 1)
+        self.catalogue_dao.update_utterance_status.assert_called_with(1234, metadata)
 
     def test__generate_transcription_for_all_utterenaces_should_do_transcription_for_all_file_in_given_audio_id_when_should_skip_rejected_is_false(
-            self,
+        self,
     ):
         file_one_path = "testdir/file_one_with_extension.wav"
         file_two_path = "testdir/file_two_with_extension.wav"
@@ -192,14 +182,12 @@ class AudioTranscriptionTests(unittest.TestCase):
             "remote_path",
         )
 
-        self.assertEqual(
-            self.catalogue_dao.find_utterance_by_name.call_count, 3)
+        self.assertEqual(self.catalogue_dao.find_utterance_by_name.call_count, 3)
 
-        self.assertEqual(
-            transcription_client.generate_transcription.call_count, 3)
+        self.assertEqual(transcription_client.generate_transcription.call_count, 3)
 
     def test__generate_transcription_for_all_utterenaces_should_do_transcription_for_only_clean_file_in_given_audio_id_when_should_skip_rejected_is_true(
-            self,
+        self,
     ):
         file_one_path = "testdir/file_one_with_extension.wav"
         file_two_path = "testdir/file_two_with_extension.wav"
@@ -225,14 +213,12 @@ class AudioTranscriptionTests(unittest.TestCase):
             "remote_path",
         )
 
-        self.assertEqual(
-            self.catalogue_dao.find_utterance_by_name.call_count, 3)
+        self.assertEqual(self.catalogue_dao.find_utterance_by_name.call_count, 3)
 
-        self.assertEqual(
-            transcription_client.generate_transcription.call_count, 2)
+        self.assertEqual(transcription_client.generate_transcription.call_count, 2)
 
     def test__generate_transcription_for_all_utterenaces_should_do_transcription_for_only_clean_file_and_duration_is_in_threshold_and_in_given_audio_id_when_should_skip_rejected_is_true(
-            self,
+        self,
     ):
         file_one_path = "testdir/file_one_with_extension.wav"
         file_two_path = "testdir/file_two_with_extension.wav"
@@ -265,8 +251,6 @@ class AudioTranscriptionTests(unittest.TestCase):
             "remote_path",
         )
 
-        self.assertEqual(
-            self.catalogue_dao.find_utterance_by_name.call_count, 4)
+        self.assertEqual(self.catalogue_dao.find_utterance_by_name.call_count, 4)
 
-        self.assertEqual(
-            transcription_client.generate_transcription.call_count, 1)
+        self.assertEqual(transcription_client.generate_transcription.call_count, 1)

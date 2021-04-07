@@ -36,5 +36,5 @@ def get_transcription_sanitizers(**kwargs):
         "gujrati": gujrati_sanitizer,
         "default": hindi_sanitizer,
         "kannada": kannada_sanitizer,
-        "indian_english": indian_english_sanitizer
+        "indian_english": indian_english_sanitizer,
     }

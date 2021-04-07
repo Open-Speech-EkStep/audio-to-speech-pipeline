@@ -8,11 +8,7 @@ import gswrap
 
 def upload_files(bucket_name, srcFolderPath, bucketFolder):
     """Upload files to GCP bucket."""
-    files = [
-        f for f in listdir(srcFolderPath) if isfile(
-            join(
-                srcFolderPath,
-                f))]
+    files = [f for f in listdir(srcFolderPath) if isfile(join(srcFolderPath, f))]
     for file in files:
         srcFile = srcFolderPath + file
         print("file path: ", srcFile)
@@ -95,11 +91,7 @@ def rename_blob(bucket_name, blob_name, new_name):
     )
 
 
-def move_blob(
-        bucket_name,
-        blob_name,
-        destination_bucket_name,
-        destination_blob_name):
+def move_blob(bucket_name, blob_name, destination_bucket_name, destination_blob_name):
     source_blob = copy_blob(
         bucket_name, blob_name, destination_bucket_name, destination_blob_name
     )
@@ -107,11 +99,7 @@ def move_blob(
     print("Blob {} deleted.".format(source_blob))
 
 
-def copy_blob(
-        bucket_name,
-        blob_name,
-        destination_bucket_name,
-        destination_blob_name):
+def copy_blob(bucket_name, blob_name, destination_bucket_name, destination_blob_name):
     """Copies a blob from one bucket to another with a new name."""
     # bucket_name = "your-bucket-name"
     # blob_name = "your-object-name"
@@ -155,9 +143,7 @@ def list_blobs_in_a_path(bucket_name, file_prefix, delimiter=None):
 def check_blob(bucket_name, file_prefix):
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
-    stats = storage.Blob(
-        bucket=bucket,
-        name=file_prefix).exists(storage_client)
+    stats = storage.Blob(bucket=bucket, name=file_prefix).exists(storage_client)
     return stats
 
 

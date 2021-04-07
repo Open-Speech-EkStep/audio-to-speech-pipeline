@@ -36,13 +36,15 @@ class CatalogueDao:
             "and status = :status "
             "and staged_for_transcription = false "
             "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15",
-            **parm_dict, )
+            **parm_dict,
+        )
         return data
 
     def update_utterances(self, audio_id, utterances):
         update_query = (
             "update media_metadata_staging "
-            "set utterances_files_list = :utterances where audio_id = :audio_id")
+            "set utterances_files_list = :utterances where audio_id = :audio_id"
+        )
         utterances_json_str = json.dumps(utterances)
         LOGGER.info("utterances_json_str:%s", utterances_json_str)
         LOGGER.info("utterances:%s", str(utterances))
@@ -51,10 +53,7 @@ class CatalogueDao:
         return True
 
     def find_utterance_by_name(self, utterances, name):
-        filtered_utterances = list(
-            filter(
-                lambda d: d["name"] == name,
-                utterances))
+        filtered_utterances = list(filter(lambda d: d["name"] == name, utterances))
         if len(filtered_utterances) > 0:
             return filtered_utterances[0]
         else:
@@ -126,8 +125,10 @@ class CatalogueDao:
         with open(file_path, "r") as file:
             conn = db_conn.raw_connection()
             cursor = conn.cursor()
-            cmd = "COPY source_metadata_downloaded(source,num_speaker,total_duration,num_of_audio)"\
-                  " FROM STDIN WITH (FORMAT CSV, HEADER)"
+            cmd = (
+                "COPY source_metadata_downloaded(source,num_speaker,total_duration,num_of_audio)"
+                " FROM STDIN WITH (FORMAT CSV, HEADER)"
+            )
             cursor.copy_expert(cmd, file)
             conn.commit()
 
@@ -147,7 +148,8 @@ class CatalogueDao:
             "set speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name "
             "limit 1) "
             ", was_noise=:was_noise "
-            "where clipped_utterance_file_name in ")
+            "where clipped_utterance_file_name in "
+        )
         utterance_names = list(map(lambda u: f"'{u}'", utterance_file_names))
         update_query = update_query + "(" + ",".join(utterance_names) + ")"
         param_dict = {"speaker_name": speaker_name, "was_noise": was_noise}
@@ -160,8 +162,7 @@ class CatalogueDao:
         result = self.postgres_client.execute_query(sql, **param_dict)
         return result[0][0] if len(result) > 0 else -1
 
-    def update_utterance_speaker_gender(
-            self, utterance_file_names, speaker_gender):
+    def update_utterance_speaker_gender(self, utterance_file_names, speaker_gender):
         update_query = (
             "update media_speaker_mapping "
             "set speaker_gender=:speaker_gender "

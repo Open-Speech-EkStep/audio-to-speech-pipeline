@@ -6,10 +6,8 @@ from ekstep_data_pipelines.audio_language_identification.utils import utils
 class SpeechDataGenerator:
     def __init__(self, manifest, mode):
         self.mode = mode
-        self.audio_links = [line.rstrip("\n").split(
-            ",")[0] for line in open(manifest)]
-        self.labels = [int(line.rstrip("\n").split(",")[1])
-                       for line in open(manifest)]
+        self.audio_links = [line.rstrip("\n").split(",")[0] for line in open(manifest)]
+        self.labels = [int(line.rstrip("\n").split(",")[1]) for line in open(manifest)]
 
     def __len__(self):
         return len(self.audio_links)

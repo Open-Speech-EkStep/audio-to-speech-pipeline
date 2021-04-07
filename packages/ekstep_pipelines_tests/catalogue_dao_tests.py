@@ -9,8 +9,11 @@ class CatalogueTests(unittest.TestCase):
     @mock.patch("ekstep_data_pipelines.common.postgres_db_client.PostgresClient")
     def test_get_utterances(self, mock_postgres_client):
         mock_postgres_client.execute_query.return_value = [
-            ('[{"name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav", '
-             '"duration": "13.38", "snr_value": 38.432806, "status": "Clean"}]', )]
+            (
+                '[{"name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav", '
+                '"duration": "13.38", "snr_value": 38.432806, "status": "Clean"}]',
+            )
+        ]
         catalogueDao = CatalogueDao(mock_postgres_client)
         audio_id = "2020"
         actual_utterances = catalogueDao.get_utterances(audio_id)
@@ -53,8 +56,10 @@ class CatalogueTests(unittest.TestCase):
             "utterances": json.dumps(utterances),
             "audio_id": audio_id,
         }
-        called_with_sql = "update media_metadata_staging set utterances_files_list " \
-                          "= :utterances where audio_id = :audio_id"
+        called_with_sql = (
+            "update media_metadata_staging set utterances_files_list "
+            "= :utterances where audio_id = :audio_id"
+        )
         self.assertEqual(rows_updated, True)
         self.assertEqual(called_with_sql, args[0][0][0])
         self.assertEqual(called_with_params, args[0][1])
@@ -89,8 +94,7 @@ class CatalogueTests(unittest.TestCase):
         )
 
     @mock.patch("ekstep_data_pipelines.common.postgres_db_client.PostgresClient")
-    def test_utterance_by_name_return_None_if_not_found(
-            self, mock_postgres_client):
+    def test_utterance_by_name_return_None_if_not_found(self, mock_postgres_client):
         catalogueDao = CatalogueDao(mock_postgres_client)
         name = "not_exists.wav"
         utterances = [
@@ -123,8 +127,7 @@ class CatalogueTests(unittest.TestCase):
             "reason": "stt error",
         }
 
-        rows_updated = catalogueDao.update_utterance_status(
-            audio_id, utterance)
+        rows_updated = catalogueDao.update_utterance_status(audio_id, utterance)
 
         args = mock_postgres_client.execute_update.call_args_list
         called_with_query = (
@@ -163,7 +166,8 @@ class CatalogueTests(unittest.TestCase):
             'where "source" = :source) '
             "and status = :status "
             "and staged_for_transcription = false "
-            "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15")
+            "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15"
+        )
         mock_postgres_client.execute_query.return_value = expected_utterances
         catalogueDao = CatalogueDao(mock_postgres_client)
         args = mock_postgres_client.execute_query.call_args_list
@@ -188,7 +192,8 @@ class CatalogueTests(unittest.TestCase):
             "update media_speaker_mapping set staged_for_transcription = true "
             "where audio_id in (select audio_id from media_metadata_staging "
             "where \"source\" = :source) and clipped_utterance_file_name in ('file_1.wav',"
-            "'file_2.wav')")
+            "'file_2.wav')"
+        )
 
         called_with_args = {"source": "test_source"}
         args = mock_postgres_client.execute_update.call_args
@@ -222,14 +227,11 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual("SELECT nextval('audio_id_seq');", args[0][0][0])
 
     @mock.patch("ekstep_data_pipelines.common.postgres_db_client.PostgresClient")
-    def test__should_check_in_db_file_present_or_not(
-            self, mock_postgres_client):
+    def test__should_check_in_db_file_present_or_not(self, mock_postgres_client):
 
         mock_postgres_client.execute_query.return_value = [[True]]
         args = mock_postgres_client.execute_query.call_args_list
-        calling_args = {
-            "file_name": "test_file",
-            "hash_code": "dummy_hash_code"}
+        calling_args = {"file_name": "test_file", "hash_code": "dummy_hash_code"}
 
         catalogueDao = CatalogueDao(mock_postgres_client)
         actul_value = catalogueDao.check_file_exist_in_db(
@@ -257,7 +259,8 @@ class CatalogueTests(unittest.TestCase):
             "update media_speaker_mapping set "
             "speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name limit 1) "
             ", was_noise=:was_noise "
-            "where clipped_utterance_file_name in ('file_1.wav','file_2.wav')")
+            "where clipped_utterance_file_name in ('file_1.wav','file_2.wav')"
+        )
         called_with_args = {"speaker_name": speaker_name, "was_noise": 0}
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(called_with_query, args[0][0])
@@ -271,9 +274,7 @@ class CatalogueTests(unittest.TestCase):
         called_with_query = (
             "insert into speaker (source, speaker_name) values (:source, :speaker_name)"
         )
-        called_with_args = {
-            "source": "test_source",
-            "speaker_name": "test_speaker"}
+        called_with_args = {"source": "test_source", "speaker_name": "test_speaker"}
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(called_with_query, args[0][0])
         self.assertEqual(called_with_args, args[1])

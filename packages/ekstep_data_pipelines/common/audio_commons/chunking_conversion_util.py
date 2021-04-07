@@ -31,46 +31,43 @@ class ChunkingConversionUtil:
             return None, False
 
         input_file_name = audio_paths[0]
-        output_file_name = input_file_name.split(
-            "/")[-1].split(".")[0] + ".wav"
+        output_file_name = input_file_name.split("/")[-1].split(".")[0] + ".wav"
 
         if output_dir is None:
             output_file_path = (
-                    "/".join(input_file_name.split("/")[:-1]) + "/" + output_file_name
+                "/".join(input_file_name.split("/")[:-1]) + "/" + output_file_name
             )
         else:
             output_file_path = output_dir + "/" + output_file_name
 
-        Logger.info(
-            "Output path for converted wav file is:%s", output_file_name)
+        Logger.info("Output path for converted wav file is:%s", output_file_name)
 
-        if os.path.exists(output_file_path) and os.path.isfile(
-                output_file_path):
+        if os.path.exists(output_file_path) and os.path.isfile(output_file_path):
             Logger.info(
                 "WAV file at %s already exists, not doing anything", output_file_name
             )
             return output_file_path, True
 
-        Logger.info(
-            "No file exists on %s, running the command", output_file_name)
+        Logger.info("No file exists on %s, running the command", output_file_name)
 
-        command = f"ffmpeg -i {input_file_name} -ar 16000 -ac 1 -bits_per_raw_sample 16 -vn " \
-                  f"{output_file_path}"
+        command = (
+            f"ffmpeg -i {input_file_name} -ar 16000 -ac 1 -bits_per_raw_sample 16 -vn "
+            f"{output_file_path}"
+        )
         subprocess.call(command, shell=True)
 
-        Logger.info(
-            "No file exists on %s, running the command", output_file_name)
+        Logger.info("No file exists on %s, running the command", output_file_name)
         return output_file_path, True
 
     def create_audio_clips(
-            self,
-            aggressiveness,
-            max_duration,
-            wav_file_path,
-            dir_to_save_chunks,
-            vad_output_file_path,
-            base_chunk_name,
-            is_rechunking=True,
+        self,
+        aggressiveness,
+        max_duration,
+        wav_file_path,
+        dir_to_save_chunks,
+        vad_output_file_path,
+        base_chunk_name,
+        is_rechunking=True,
     ):
         audio, sample_rate = self.read_wave(wav_file_path)
         vad = webrtcvad.Vad(int(aggressiveness))
@@ -95,7 +92,7 @@ class ChunkingConversionUtil:
             )
 
     def rechunking_acc_to_duration(
-            self, max_duration, dir_of_chunks, vad_output_file_path
+        self, max_duration, dir_of_chunks, vad_output_file_path
     ):
 
         file_list = glob.glob(dir_of_chunks + "/*.wav")
@@ -107,7 +104,9 @@ class ChunkingConversionUtil:
             if duration > max_duration:
                 base_chunk_name = file_path.split("/").pop()
                 Logger.info(
-                    "rechunking of file %s and duration of file is: %s", base_chunk_name, duration
+                    "rechunking of file %s and duration of file is: %s",
+                    base_chunk_name,
+                    duration,
                 )
 
                 self.create_audio_clips(
@@ -124,7 +123,8 @@ class ChunkingConversionUtil:
     def calculate_duration(self, input_filepath):
         duration = sox.file_info.duration(input_filepath)
         Logger.info(
-            "Duration for input_filepath:%s : %s", input_filepath, str(duration))
+            "Duration for input_filepath:%s : %s", input_filepath, str(duration)
+        )
         return duration
 
     def read_wave(self, path):
@@ -165,19 +165,19 @@ class ChunkingConversionUtil:
             #         print("offset, offset+n: ", offset, offset+n)
             #         print("timestamp:", timestamp)
             #         print("duration:", duration)
-            yield Frame(audio[offset: offset + n], timestamp, duration)
+            yield Frame(audio[offset : offset + n], timestamp, duration)
             timestamp += duration
             offset += n
 
     def vad_collector(
-            self,
-            sample_rate,
-            frame_duration_ms,
-            padding_duration_ms,
-            vad,
-            frames,
-            vad_output_file_path,
-            file,
+        self,
+        sample_rate,
+        frame_duration_ms,
+        padding_duration_ms,
+        vad,
+        frames,
+        vad_output_file_path,
+        file,
     ):
         """Filters out non-voiced audio frames.
         Given a webrtcvad.Vad and a source of audio frames, yields only
@@ -233,15 +233,12 @@ class ChunkingConversionUtil:
                 # and add it to the ring buffer.
                 voiced_frames.append(frame)
                 ring_buffer.append((frame, is_speech))
-                num_unvoiced = len(
-                    [f for f, speech in ring_buffer if not speech])
+                num_unvoiced = len([f for f, speech in ring_buffer if not speech])
                 # If more than 90% of the frames in the ring buffer are
                 # unvoiced, then enter NOTTRIGGERED and yield whatever
                 # audio we've collected.
                 if num_unvoiced > 0.9 * ring_buffer.maxlen:
-                    sys.stdout.write(
-                        "-(%s)" %
-                        (frame.timestamp + frame.duration))
+                    sys.stdout.write("-(%s)" % (frame.timestamp + frame.duration))
                     file.write("-(%s)" % (frame.timestamp + frame.duration))
 
                     # file.write('\n')

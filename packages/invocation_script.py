@@ -42,8 +42,7 @@ ACTIONS_LIST = [
 FILES_SYSTEMS_LIST = [FileSystems.GOOGLE, FileSystems.LOCAL]
 # config_bucket = 'ekstepspeechrecognition-dev'
 
-parser = argparse.ArgumentParser(
-    description="Util for data processing for EkStep")
+parser = argparse.ArgumentParser(description="Util for data processing for EkStep")
 
 parser.add_argument(
     "-b",
@@ -85,7 +84,7 @@ parser.add_argument(
     dest="file_name_list",
     default=[],
     help="list of all the filename that need to processed, this needs to a comma seperated "
-         "list eg. audio_id1,audio_id2 . Only works with the audio processor",
+    "list eg. audio_id1,audio_id2 . Only works with the audio processor",
 )
 
 parser.add_argument(
@@ -94,7 +93,7 @@ parser.add_argument(
     dest="audio_ids",
     default=[],
     help="list of all the audio ids that need to processed, this needs to a comma seperated "
-         "list eg. audio_id1,audio_id2 . Only works with the audio processor",
+    "list eg. audio_id1,audio_id2 . Only works with the audio processor",
 )
 
 parser.add_argument(
@@ -103,7 +102,7 @@ parser.add_argument(
     dest="audio_source",
     default=None,
     help="The name of the source of the audio which is being processed. Only works with "
-         "audio processor",
+    "audio processor",
 )
 
 parser.add_argument(
@@ -112,7 +111,7 @@ parser.add_argument(
     dest="audio_format",
     default=None,
     help="The format of the audio which is being processed eg mp4,mp3 . Only works with "
-         "audio processor",
+    "audio processor",
 )
 
 parser.add_argument(
@@ -150,11 +149,8 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-l",
-    "--language",
-    dest="language",
-    default="hindi",
-    help="Specify the language")
+    "-l", "--language", dest="language", default="hindi", help="Specify the language"
+)
 
 processor_args = parser.parse_args()
 
@@ -202,8 +198,8 @@ def process_config_input(arguments):
 
     if arguments.remote_config:
         LOGGER.info(
-            "http/https file path %s found for config file. "
-            "Downloading config file", arguments.remote_config
+            "http/https file path %s found for config file. " "Downloading config file",
+            arguments.remote_config,
         )
         config_file_path = download_config_file(
             arguments.remote_config, arguments.config_bucket
@@ -221,10 +217,7 @@ def validate_data_filter_config(arguments):
     if arguments.filter_by is None:
         raise argparse.ArgumentTypeError("Filter config is missing")
 
-    return {
-        "filter": json.loads(
-            arguments.filter_by),
-        "source": arguments.audio_source}
+    return {"filter": json.loads(arguments.filter_by), "source": arguments.audio_source}
 
 
 def validate_audio_analysis_config(arguments):
@@ -244,10 +237,8 @@ def validate_audio_processing_input(arguments):
         )
 
     file_name_list = [
-        i.strip() for i in list(
-            filter(
-                None,
-                arguments.file_name_list.split(",")))]
+        i.strip() for i in list(filter(None, arguments.file_name_list.split(",")))
+    ]
 
     if file_name_list == []:
         raise argparse.ArgumentTypeError(
@@ -281,11 +272,7 @@ def validate_audio_transcription_input(arguments):
             "Audio Id list missing. Please audio ID for processing"
         )
 
-    audio_ids = [
-        i.strip() for i in list(
-            filter(
-                None,
-                arguments.audio_ids.split(",")))]
+    audio_ids = [i.strip() for i in list(filter(None, arguments.audio_ids.split(",")))]
 
     if arguments.speech_to_text_client not in STT_CLIENT:
         raise argparse.ArgumentTypeError("Stt client must be google or azure")

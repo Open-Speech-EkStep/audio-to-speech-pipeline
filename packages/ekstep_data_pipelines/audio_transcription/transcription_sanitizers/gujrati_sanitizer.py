@@ -1,5 +1,6 @@
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
-    BaseTranscriptionSanitizer, )
+    BaseTranscriptionSanitizer,
+)
 from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger("GujratiTranscriptionSanitizer")

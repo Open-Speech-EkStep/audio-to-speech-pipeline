@@ -53,23 +53,19 @@ def load_yaml_file(path):
 
 
 def evaluation(
-        audio_path,
-        model_path="ekstep_data_pipelines/audio_language_identification/model/model.pt",
+    audio_path,
+    model_path="ekstep_data_pipelines/audio_language_identification/model/model.pt",
 ):
     model = load_model(model_path)
     model_output = forward(audio_path, model=model)
     soft_max = torch.nn.Softmax()
     probabilities = soft_max(model_output)
-    confidence_scores = [
-        "{:.5f}".format(
-            i.item()) for i in list(
-            probabilities[0])]
+    confidence_scores = ["{:.5f}".format(i.item()) for i in list(probabilities[0])]
     return confidence_scores
 
 
 def infer_language(
-        audio_path,
-        language_map_path="ekstep_data_pipelines/audio_language_identification/language_map.yml",
+    audio_path,
+    language_map_path="ekstep_data_pipelines/audio_language_identification/language_map.yml",
 ):
-    return language_confidence_score_map(
-        evaluation(audio_path), language_map_path)
+    return language_confidence_score_map(evaluation(audio_path), language_map_path)

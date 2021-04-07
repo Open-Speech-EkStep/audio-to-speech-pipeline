@@ -9,7 +9,8 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from ekstep_data_pipelines.audio_language_identification.loaders.data_loader import (
-    SpeechDataGenerator, )
+    SpeechDataGenerator,
+)
 
 
 def load_yaml_file(path):
@@ -31,15 +32,11 @@ def load_data_loaders(train_manifest, batch_size, num_workers):
     )
 
     train_loader = DataLoader(
-        dataset=train_set,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers)
+        dataset=train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers
+    )
     test_loader = DataLoader(
-        dataset=test_set,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers)
+        dataset=test_set, batch_size=batch_size, shuffle=True, num_workers=num_workers
+    )
 
     loaders = {
         "train": train_loader,
@@ -59,13 +56,7 @@ def show_model_parameters(model):
     )
 
 
-def save_ckp(
-        state,
-        model,
-        is_best,
-        checkpoint_path,
-        best_model_path,
-        final_model_path):
+def save_ckp(state, model, is_best, checkpoint_path, best_model_path, final_model_path):
     """
     state: checkpoint we want to save
     is_best: is this the best checkpoint; min validation loss
@@ -141,12 +132,10 @@ def train(
         ###################
         model.train()
         for batch_idx, (data, target) in tqdm(
-            enumerate(
-                loaders["train"]), total=len(
-                loaders["train"]), leave=False):
+            enumerate(loaders["train"]), total=len(loaders["train"]), leave=False
+        ):
             # move to GPU
-            data, target = data.to(
-                device, dtype=torch.float), target.to(device)
+            data, target = data.to(device, dtype=torch.float), target.to(device)
             # find the loss and update the model parameters accordingly
             # clear the gradients of all optimized variables
             optimizer.zero_grad()
@@ -165,8 +154,7 @@ def train(
             temp_predict = [pred.item() for pred in predictions]
             temp_target = [actual.item() for actual in target]
 
-            train_loss = train_loss + \
-                ((1 / (batch_idx + 1)) * (loss.data - train_loss))
+            train_loss = train_loss + ((1 / (batch_idx + 1)) * (loss.data - train_loss))
 
         train_predict = train_predict + temp_predict
         train_target = train_target + temp_target
@@ -180,8 +168,7 @@ def train(
         ):
             # move to GPU
             if use_cuda:
-                data, target = data.to(
-                    device, dtype=torch.float), target.to(device)
+                data, target = data.to(device, dtype=torch.float), target.to(device)
             # update the average validation loss
             # forward pass: compute predicted outputs by passing inputs to the
             # model
@@ -189,8 +176,7 @@ def train(
             # calculate the batch loss
             loss = criterion(output, target)
             # update average validation loss
-            valid_loss = valid_loss + \
-                ((1 / (batch_idx + 1)) * (loss.data - valid_loss))
+            valid_loss = valid_loss + ((1 / (batch_idx + 1)) * (loss.data - valid_loss))
             _, predictions = output.max(1)
             temp_predict = [pred.item() for pred in predictions]
             temp_target = [actual.item() for actual in target]
@@ -208,11 +194,9 @@ def train(
         print(
             "Epoch: {} \tTraining Loss: {:.10f} \tTraining Accuracy: {:.6f} \tValidation "
             "Loss: {:.10f} \tValidation  Accuracy: {:.6f} ".format(
-                epoch,
-                train_loss,
-                train_acc,
-                valid_loss,
-                valid_acc))
+                epoch, train_loss, train_acc, valid_loss, valid_acc
+            )
+        )
 
         # create checkpoint variable and add important data
         checkpoint = {
@@ -225,17 +209,15 @@ def train(
         scheduler.step(valid_loss)
         # save checkpoint
         save_ckp(
-            checkpoint,
-            model,
-            False,
-            checkpoint_path,
-            best_model_path,
-            final_model_path)
+            checkpoint, model, False, checkpoint_path, best_model_path, final_model_path
+        )
 
         if valid_loss <= valid_loss_min:
             print(
                 "Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...".format(
-                    valid_loss_min, valid_loss))
+                    valid_loss_min, valid_loss
+                )
+            )
             save_ckp(
                 checkpoint,
                 model,

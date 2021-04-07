@@ -29,8 +29,7 @@ secret_file = secret.Secret(
 
 
 def interpolate_language_paths(language):
-    source_path_for_snr_set = source_path_for_snr.replace(
-        LANGUAGE_CONSTANT, language)
+    source_path_for_snr_set = source_path_for_snr.replace(LANGUAGE_CONSTANT, language)
     return source_path_for_snr_set
 
 
@@ -74,7 +73,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
 
             chunk_size = math.ceil(len(file_path_list) / parallelism)
             batches = [
-                file_path_list[i: i + chunk_size]
+                file_path_list[i : i + chunk_size]
                 for i in range(0, len(file_path_list), chunk_size)
             ]
             data_prep_cataloguer = kubernetes_pod_operator.KubernetesPodOperator(
@@ -160,5 +159,4 @@ for source in snr_catalogue_source.keys():
 
     dag_number = dag_id + str(batch_count)
 
-    globals()[dag_id] = create_dag(
-        dag_id, dag_number, dag_args, args, batch_count)
+    globals()[dag_id] = create_dag(dag_id, dag_number, dag_args, args, batch_count)

@@ -12,8 +12,7 @@ class AudioCataloguerTests(unittest.TestCase):
         self.postgres_client = Mock()
         self.cataloguer = AudioCataloguer(self.postgres_client)
 
-    def test__get_utterance_list_should_call_execuete_query_return_utterence_list(
-            self):
+    def test__get_utterance_list_should_call_execuete_query_return_utterence_list(self):
         dummy_audio_id = ["1234"]
         self.postgres_client.execute_query.return_value = [['["1234"]']]
 
@@ -33,8 +32,7 @@ class AudioCataloguerTests(unittest.TestCase):
 
         self.assertEqual(actual_value, ["12345"])
 
-    def test__create_insert_query_should_return_query_for_given_utterance(
-            self):
+    def test__create_insert_query_should_return_query_for_given_utterance(self):
         defult_query = "dummy_query"
         audio_id = ["121"]
         speaker_id = "dummy_speaker_id"
@@ -50,13 +48,15 @@ class AudioCataloguerTests(unittest.TestCase):
             utterance, speaker_id, audio_id, datetime, defult_query
         )
 
-        expected_output = "dummy_query (121,dummy_speaker_id,'test_file1',1.1,'10/10/20',16.1," \
-                          "'Clean','','null'),"
+        expected_output = (
+            "dummy_query (121,dummy_speaker_id,'test_file1',1.1,'10/10/20',16.1,"
+            "'Clean','','null'),"
+        )
 
         self.assertEqual(actual_output, expected_output)
 
     def test__create_insert_query_when_snr_value_is_nan_should_return_query_for_given_utterance(
-            self,
+        self,
     ):
         defult_query = "dummy_query"
         audio_id = ["121"]
@@ -73,8 +73,10 @@ class AudioCataloguerTests(unittest.TestCase):
             utterance, speaker_id, audio_id, datetime, defult_query
         )
 
-        expected_output = "dummy_query (121,dummy_speaker_id,'test_file1',1.1,'10/10/20'" \
-                          ",0.0,'Clean','','null'),"
+        expected_output = (
+            "dummy_query (121,dummy_speaker_id,'test_file1',1.1,'10/10/20'"
+            ",0.0,'Clean','','null'),"
+        )
 
         self.assertEqual(actual_output, expected_output)
 
@@ -103,7 +105,7 @@ class AudioCataloguerTests(unittest.TestCase):
         )
 
     def test__set_isnormalized_flag_should_set_isnormalized_flag_to_true_when_audio_ids_is_nested(
-            self,
+        self,
     ):
         dummy_audio_ids = [["123"], ["1234"], ["12345"], ["12346"]]
 
@@ -130,7 +132,7 @@ class AudioCataloguerTests(unittest.TestCase):
         )
 
     def test__copy_data_from_media_metadata_staging_to_speaker_should_copy_data_from_staging_to_speaker_table(
-            self,
+        self,
     ):
         self.cataloguer.copy_data_from_media_metadata_staging_to_speaker()
 

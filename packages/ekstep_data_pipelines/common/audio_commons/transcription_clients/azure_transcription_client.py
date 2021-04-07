@@ -48,12 +48,10 @@ class AzureTranscriptionClient(object):
             LOGGER.info("Recognized: %s", result.text)
             return result
         elif result.reason == speech.ResultReason.NoMatch:
-            msg = "No speech could be recognized: {}".format(
-                result.no_match_details)
+            msg = "No speech could be recognized: {}".format(result.no_match_details)
             raise RuntimeError(msg)
         elif result.reason == speech.ResultReason.Canceled:
             cancellation_details = result.cancellation_details
-            msg = "Speech Recognition canceled: {}".format(
-                cancellation_details.reason)
+            msg = "Speech Recognition canceled: {}".format(cancellation_details.reason)
             raise RuntimeError(msg)
         LOGGER.info("done..")

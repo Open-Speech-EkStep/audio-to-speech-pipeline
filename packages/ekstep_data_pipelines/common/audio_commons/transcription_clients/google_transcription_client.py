@@ -2,9 +2,9 @@ import os
 
 from google.cloud import speech_v1
 from google.cloud.speech_v1 import enums
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors \
-    import (
-    GoogleTranscriptionClientError, )
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
+    GoogleTranscriptionClientError,
+)
 from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger("GoogleTranscriptionClient")
@@ -69,7 +69,8 @@ class GoogleTranscriptionClient(object):
         )
 
         LOGGER.info(
-            "Waiting for {operation} to complete on GCP for %s", input_file_path)
+            "Waiting for {operation} to complete on GCP for %s", input_file_path
+        )
         response = operation.result()
 
         return response

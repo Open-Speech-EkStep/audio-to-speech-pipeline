@@ -1,20 +1,19 @@
 import unittest
 
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
-    get_transcription_sanitizers, )
-from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors\
-    import (
-    TranscriptionSanitizationError, )
+    get_transcription_sanitizers,
+)
+from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
+    TranscriptionSanitizationError,
+)
 
 
 class TestTrancriptionSanitizer(unittest.TestCase):
     def setUp(self):
         transcription_sanitizers = get_transcription_sanitizers()
-        self.hindi_transcription_sanitizers = transcription_sanitizers.get(
-            "hindi")
+        self.hindi_transcription_sanitizers = transcription_sanitizers.get("hindi")
 
-    def test_transcription_containing_empty_string_should_raise_runtime_exception(
-            self):
+    def test_transcription_containing_empty_string_should_raise_runtime_exception(self):
         transcript_obj = self.hindi_transcription_sanitizers
         transcript = " "
         with self.assertRaises(TranscriptionSanitizationError):
@@ -23,19 +22,14 @@ class TestTrancriptionSanitizer(unittest.TestCase):
     def test_transcription_containing_space_in_start_should_return_None(self):
         transcript_obj = self.hindi_transcription_sanitizers
         transcript = " अलग अलग होते हैं"
-        self.assertEqual(
-            transcript_obj.sanitize(transcript),
-            "अलग अलग होते हैं")
+        self.assertEqual(transcript_obj.sanitize(transcript), "अलग अलग होते हैं")
 
     def test_transcription_punctuations_are_being_removed(self):
         transcript_obj = self.hindi_transcription_sanitizers
         transcript = "अलग-अलग होते है!\"#%&'()*+,./;<=>?@[\\]^_`{|}~।"
-        self.assertEqual(
-            transcript_obj.replace_bad_char(transcript),
-            "अलग अलग होते है")
+        self.assertEqual(transcript_obj.replace_bad_char(transcript), "अलग अलग होते है")
 
-    def test_transcription_containing_numbers_0123456789_should_be_accepted(
-            self):
+    def test_transcription_containing_numbers_0123456789_should_be_accepted(self):
         transcript_obj = self.hindi_transcription_sanitizers
         transcript = "लेकिन मैक्सिमॅम 0123456789"
         self.assertEqual(transcript_obj.shouldReject(transcript), False)
@@ -66,9 +60,7 @@ class TestTrancriptionSanitizer(unittest.TestCase):
             ),
         ]
         for each_transcript, correct_response in transcripts:
-            self.assertEqual(
-                transcript_obj.sanitize(each_transcript),
-                correct_response)
+            self.assertEqual(transcript_obj.sanitize(each_transcript), correct_response)
 
     def test_transcription_containing_time_should_fail(self):
         transcript_obj = self.hindi_transcription_sanitizers

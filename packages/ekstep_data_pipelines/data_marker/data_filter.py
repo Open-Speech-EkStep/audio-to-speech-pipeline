@@ -7,13 +7,11 @@ Logger = get_logger("DataFilter")
 
 class DataFilter(object):
     def exclude_audio_ids(self, utterances, audio_ids):
-        excluding_audio_ids = filter(
-            lambda t: t[0] not in audio_ids, utterances)
+        excluding_audio_ids = filter(lambda t: t[0] not in audio_ids, utterances)
         return excluding_audio_ids
 
     def exclude_speaker_ids(self, utterances, speaker_ids):
-        excluding_speaker_ids = filter(
-            lambda t: t[0] not in speaker_ids, utterances)
+        excluding_speaker_ids = filter(lambda t: t[0] not in speaker_ids, utterances)
         return excluding_speaker_ids
 
     def by_utterance_duration(self, utterances, filters):
@@ -40,9 +38,9 @@ class DataFilter(object):
             Logger.info("applying randomness")
             data_frame = data_frame.sample(frac=with_fraction)
         data_frame["cum_hours"] = data_frame["clipped_utterance_duration"].cumsum()
-        data_frame = data_frame[(data_frame.cum_hours <= total_duration_in_hrs * 3600)].drop(
-            columns="cum_hours"
-        )
+        data_frame = data_frame[
+            (data_frame.cum_hours <= total_duration_in_hrs * 3600)
+        ].drop(columns="cum_hours")
         return self.to_tuples(data_frame)
 
     def to_df(self, utterances):
@@ -73,9 +71,19 @@ class DataFilter(object):
         data_frame["cum_hours"] = data_frame.groupby(["speaker_id"])[
             "clipped_utterance_duration"
         ].cumsum()
-        data_frame = data_frame[data_frame["speaker_id"].isin(list(data_frame[(data_frame.cum_hours <= upper_bound) & (
-            data_frame.cum_hours >= lower_bound)]["speaker_id"]))]
-        data_frame = data_frame[(data_frame.cum_hours <= upper_bound)].drop(columns="cum_hours")
+        data_frame = data_frame[
+            data_frame["speaker_id"].isin(
+                list(
+                    data_frame[
+                        (data_frame.cum_hours <= upper_bound)
+                        & (data_frame.cum_hours >= lower_bound)
+                    ]["speaker_id"]
+                )
+            )
+        ]
+        data_frame = data_frame[(data_frame.cum_hours <= upper_bound)].drop(
+            columns="cum_hours"
+        )
         return self.to_tuples(data_frame)
 
     def apply_filters(self, filters, utterances):
@@ -101,8 +109,7 @@ class DataFilter(object):
 
         if len(exclude_audio_ids) > 0:
             Logger.info("Excluding audio_ids: %s", str(exclude_audio_ids))
-            filtered_utterances = self.exclude_audio_ids(
-                utterances, exclude_audio_ids)
+            filtered_utterances = self.exclude_audio_ids(utterances, exclude_audio_ids)
 
         if by_utterance_duration is not None:
             Logger.info(
@@ -124,6 +131,7 @@ class DataFilter(object):
         if by_duration is not None:
             Logger.info("Filtering by duration: %s", str(by_duration))
             filtered_utterances = self.by_duration(
-                filtered_utterances, by_duration, with_randomness, with_fraction)
+                filtered_utterances, by_duration, with_randomness, with_fraction
+            )
 
         return list(filtered_utterances)

@@ -5,7 +5,8 @@ import subprocess
 
 import pandas as pd
 from ekstep_data_pipelines.audio_language_identification.audio_language_inference import (
-    infer_language, )
+    infer_language,
+)
 from ekstep_data_pipelines.audio_processing.audio_duration import calculate_duration
 from ekstep_data_pipelines.common.utils import get_logger
 
@@ -26,7 +27,7 @@ class SNR:
         ).get("feat_language_identification", False)
         LOGGER.info(
             "Running with feat_language_identification=%s",
-            str(feat_language_identification)
+            str(feat_language_identification),
         )
         curr_instance = SNR(feat_language_identification)
         return curr_instance
@@ -36,9 +37,11 @@ class SNR:
         self.current_working_dir = os.getcwd()
 
     def get_command(self, current_working_dir, file_path):
-        return f'"{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/WADASNR" -i ' \
-               f'"{file_path}" -t "{current_working_dir}' \
-               f'/ekstep_data_pipelines/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
+        return (
+            f'"{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/WADASNR" -i '
+            f'"{file_path}" -t "{current_working_dir}'
+            f'/ekstep_data_pipelines/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
+        )
 
     def get_output_directories(self, output_dir, ensure_path=True):
         clean_path, rejected_path = f"{output_dir}/clean", f"{output_dir}/rejected"
@@ -46,7 +49,7 @@ class SNR:
         if ensure_path:
             LOGGER.info(
                 "ensure_path flag is %s, ensuring that the directories exist",
-                ensure_path
+                ensure_path,
             )
             if not os.path.exists(clean_path):
                 LOGGER.info("%s does not exist, creating it", clean_path)
@@ -81,8 +84,7 @@ class SNR:
 
     def process_files_list(self, input_file_list):
 
-        LOGGER.info(
-            "Processing all the file in the directory %s", input_file_list)
+        LOGGER.info("Processing all the file in the directory %s", input_file_list)
 
         file_snrs = {}
 
@@ -100,23 +102,23 @@ class SNR:
         return file_snrs
 
     def fit_and_move(
-            self,
-            input_file_list,
-            metadata_file_name,
-            threshold,
-            output_dir_path,
-            audio_id,
-            hash_code,
+        self,
+        input_file_list,
+        metadata_file_name,
+        threshold,
+        output_dir_path,
+        audio_id,
+        hash_code,
     ):
         LOGGER.info("Processing SNR for for the files %s", input_file_list)
         processed_file_snr_dict = self.process_files_list(input_file_list)
 
         LOGGER.info("Getting the clean and reject folders")
-        clean_dir_path, rejected_dir_path = self.get_output_directories(
-            output_dir_path)
+        clean_dir_path, rejected_dir_path = self.get_output_directories(output_dir_path)
         LOGGER.info(
             "Got the clean and reject folders, clean/%s and rejected/%s",
-            clean_dir_path, rejected_dir_path
+            clean_dir_path,
+            rejected_dir_path,
         )
 
         metadata = pd.read_csv(metadata_file_name)
@@ -136,9 +138,7 @@ class SNR:
                 language_confidence_score = infer_language(file_path)
             else:
                 language_confidence_score = None
-            LOGGER.info(
-                "language_confidence_score:%s",
-                str(language_confidence_score))
+            LOGGER.info("language_confidence_score:%s", str(language_confidence_score))
             clip_duration = calculate_duration(file_path)
             if snr_value < threshold:
                 self.move_file_locally(
@@ -191,8 +191,7 @@ class SNR:
                 continue
 
             clean_audio_duration.append(clip_duration)
-            self.move_file_locally(
-                file_path, f"{clean_dir_path}/{audio_file_name}")
+            self.move_file_locally(file_path, f"{clean_dir_path}/{audio_file_name}")
             list_file_utterances_with_duration.append(
                 {
                     "name": audio_file_name,
@@ -203,8 +202,7 @@ class SNR:
                 }
             )
 
-            metadata["cleaned_duration"] = round(
-                (sum(clean_audio_duration) / 60), 2)
+            metadata["cleaned_duration"] = round((sum(clean_audio_duration) / 60), 2)
             metadata["utterances_files_list"] = json.dumps(
                 list_file_utterances_with_duration
             )

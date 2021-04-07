@@ -50,7 +50,8 @@ def get_common_variables(stage, language):
         LANGUAGE_CONSTANT, language
     )
     integration_processed_path = variables["integration_processed_path"].replace(
-        LANGUAGE_CONSTANT, language)
+        LANGUAGE_CONSTANT, language
+    )
     db_catalog_tbl = variables["db_catalog_tbl"]
     bucket_file_list = "_bucket_file_list.csv"
     print(f"report_upload_path is {report_upload_path}")
@@ -65,8 +66,7 @@ def get_variables(stage):
     bucket_name = Variable.get("bucket")
     language = Variable.get("language").lower()
     get_common_variables(stage, language)
-    validation_report_source = Variable.get(
-        "validation_report_source_" + stage)
+    validation_report_source = Variable.get("validation_report_source_" + stage)
 
 
 def set_report_names(source):
@@ -79,8 +79,9 @@ def set_report_names(source):
 
 
 def get_prefix_attributes_full_path(full_path, integration_processed_path):
-    source_prefix_split_list = full_path.split(
-        integration_processed_path + "/")[1].split("/")
+    source_prefix_split_list = full_path.split(integration_processed_path + "/")[
+        1
+    ].split("/")
     return get_file_attributes(source_prefix_split_list)
 
 
@@ -96,25 +97,19 @@ def get_file_attributes(source_prefix_split_list):
     return file_name, raw_file_name, source, audio_id, status
 
 
-def generate_row(
-        full_path,
-        file_name,
-        raw_file_name,
-        source,
-        audio_id,
-        status):
+def generate_row(full_path, file_name, raw_file_name, source, audio_id, status):
     row = (
-            full_path
-            + ","
-            + source
-            + ","
-            + audio_id
-            + ","
-            + raw_file_name
-            + ","
-            + file_name
-            + ","
-            + status
+        full_path
+        + ","
+        + source
+        + ","
+        + audio_id
+        + ","
+        + raw_file_name
+        + ","
+        + file_name
+        + ","
+        + status
     )
     return row
 
@@ -152,12 +147,8 @@ def generate_bucket_file_list(source):
                     full_path, integration_processed_path
                 )
                 row = generate_row(
-                    full_path,
-                    file_name,
-                    raw_file_name,
-                    source,
-                    audio_id,
-                    status)
+                    full_path, file_name, raw_file_name, source, audio_id, status
+                )
                 output_file.write("\n")
                 output_file.write(row)
         except BaseException:
@@ -224,11 +215,11 @@ def get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw):
 def parse_json_utterance_meta(json_data):
     json_dict = json.loads(json_data)
     return (
-            str(json_dict["name"]).replace(",", "")
-            + ","
-            + str(json_dict["duration"])
-            + ","
-            + json_dict["status"]
+        str(json_dict["name"]).replace(",", "")
+        + ","
+        + str(json_dict["duration"])
+        + ","
+        + json_dict["status"]
     )
 
 
@@ -304,7 +295,8 @@ def convert_str_to_list(record):
 def explode_utterances(data_catalog_raw):
     data_catalog_raw["utterances_files_list"].fillna("[]", inplace=True)
     data_catalog_raw.utterances_files_list = (
-        data_catalog_raw.utterances_files_list.astype("str").apply(convert_str_to_list))
+        data_catalog_raw.utterances_files_list.astype("str").apply(convert_str_to_list)
+    )
     data_catalog_exploded = data_catalog_raw.explode(
         "utterances_files_list"
     ).reset_index(drop=True)
@@ -318,8 +310,7 @@ def normalize_exploded_utterances(data_catalog_raw):
         if check_json_utterance_meta(x)
         else parse_string_utterance_meta(str(x))
     )
-    utterances_files_list_meta = utterances_files_list_meta.str.split(
-        ",", expand=True)
+    utterances_files_list_meta = utterances_files_list_meta.str.split(",", expand=True)
     # print(utterances_files_list_meta)
     data_catalog_exploded[
         "utterances_files_list"
@@ -332,9 +323,8 @@ def normalize_exploded_utterances(data_catalog_raw):
         5, "utterances_file_name", utterances_files_list_meta[0]
     )
     data_catalog_exploded.insert(
-        6,
-        "utterances_file_duration",
-        utterances_files_list_meta[1].astype("float"))
+        6, "utterances_file_duration", utterances_files_list_meta[1].astype("float")
+    )
     data_catalog_exploded.insert(
         7, "utterances_file_status", utterances_files_list_meta[2]
     )
@@ -371,10 +361,10 @@ def get_valid_utterance_duration_unexploded(bucket_list_in_catalog):
     # valid_utterance_duration = append_file_and_duration(valid_utterance_duration)
     valid_utterance_duration = valid_utterance_duration[
         valid_utterance_duration.status.str.lower() != "rejected"
-        ]
+    ]
     valid_utterance_duration = valid_utterance_duration[
         valid_utterance_duration.utterances_file_status.str.lower() != "rejected"
-        ]
+    ]
     return valid_utterance_duration.groupby("audio_id", as_index=False).agg(
         {
             "utterances_file_duration": lambda x: x.sum() / 60,
@@ -390,12 +380,11 @@ def get_duplicates_utterances(data_catalog_raw):
 
 
 def get_unique_utterances(data_catalog_raw):
-    return data_catalog_raw[~data_catalog_raw.duplicated(
-        subset=["raw_file_name"])]
+    return data_catalog_raw[~data_catalog_raw.duplicated(subset=["raw_file_name"])]
 
 
 def get_valid_and_unique_utterances(
-        df_catalog_unique, df_catalog_valid_utterance_duration_unexploded
+    df_catalog_unique, df_catalog_valid_utterance_duration_unexploded
 ):
     df_valid_utterances_with_unique_audioid = (
         df_catalog_valid_utterance_duration_unexploded.merge(
@@ -438,8 +427,7 @@ def append_transcription_files_list(df_cleaned_dataset):
         column="transcriptions_path_bucket",
         value=df_cleaned_dataset_transcipts["bucket_file_path"].values.tolist(),
     )
-    df_cleaned_dataset = df_cleaned_dataset.drop(
-        ["utterances_file_name"], axis=1)
+    df_cleaned_dataset = df_cleaned_dataset.drop(["utterances_file_name"], axis=1)
     df_cleaned_dataset = df_cleaned_dataset.rename(
         columns={
             "bucket_file_path": "wav_path_bucket",
@@ -447,7 +435,8 @@ def append_transcription_files_list(df_cleaned_dataset):
         }
     )
     df_cleaned_dataset.wav_path_bucket = df_cleaned_dataset.wav_path_bucket.apply(
-        lambda x: "gs://" + bucket_name + "/" + x)
+        lambda x: "gs://" + bucket_name + "/" + x
+    )
     df_cleaned_dataset.transcriptions_path_bucket = (
         df_cleaned_dataset.transcriptions_path_bucket.apply(
             lambda x: "gs://" + bucket_name + "/" + x
@@ -456,9 +445,7 @@ def append_transcription_files_list(df_cleaned_dataset):
     return df_cleaned_dataset
 
 
-def generate_cleaned_dataset(
-        df_cleaned_utterances_unexploded,
-        bucket_list_in_catalog):
+def generate_cleaned_dataset(df_cleaned_utterances_unexploded, bucket_list_in_catalog):
     df_cleaned_dataset = df_cleaned_utterances_unexploded.merge(
         bucket_list_in_catalog,
         on=["audio_id", "utterances_files_list"],
@@ -485,7 +472,7 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
     )
     bucket_list_in_catalog_cleaned = bucket_list_in_catalog[
         bucket_list_in_catalog.status == "clean"
-        ]
+    ]
     # catalog_list_with_rejected_status = bucket_list_in_catalog[bucket_list_in_catalog
     # .status == 'rejected']
     df_catalog_invalid_utterance_duration = get_invalid_utterance_duration(
@@ -521,12 +508,14 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
         # catalog_list_with_rejected_status.to_excel(writer,
         # sheet_name='catalog_list_rejected_ones', index=False)
         df_catalog_invalid_utterance_duration.astype({"audio_id": "str"}).to_excel(
-            writer, sheet_name="catalog_list_invalid_duration", index=False)
+            writer, sheet_name="catalog_list_invalid_duration", index=False
+        )
         df_catalog_duplicates.astype({"audio_id": "str"}).to_excel(
             writer, sheet_name="catalog_list_with_duplicates", index=False
         )
         df_valid_utterances_with_unique_audioid.astype({"audio_id": "str"}).to_excel(
-            writer, sheet_name="Cleaned_data_catalog", index=False)
+            writer, sheet_name="Cleaned_data_catalog", index=False
+        )
         writer.save()
     df_cleaned_dataset.to_csv(cleaned_csv_report_file_name, index=False)
     print(f"{report_file_name} has been generated....")
@@ -556,9 +545,8 @@ def upload_report_to_bucket():
         bucket_name,
         cleaned_csv_report_file_name,
         os.path.join(
-            report_upload_path,
-            "Final_csv_reports",
-            cleaned_csv_report_file_name),
+            report_upload_path, "Final_csv_reports", cleaned_csv_report_file_name
+        ),
     )
     os.remove(cleaned_csv_report_file_name)
 
@@ -603,12 +591,7 @@ def check_dataframes(data_catalog_raw, data_bucket_raw):
         pass
 
 
-def report_generation_pipeline(
-        stage,
-        bucket,
-        language="",
-        mode="cluster",
-        source=[]):
+def report_generation_pipeline(stage, bucket, language="", mode="cluster", source=[]):
     if mode == "local":
         get_local_variables(bucket, source, stage, language.lower())
     else:
@@ -623,8 +606,7 @@ def report_generation_pipeline(
             _source, get_db_connection_object()
         )
         check_dataframes(data_catalog_raw, data_bucket_raw)
-        generate_data_validation_report(
-            data_catalog_raw, data_bucket_raw, stage)
+        generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage)
         upload_report_to_bucket()
         print(f"Processed successfully for source: {_source}")
 

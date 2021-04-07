@@ -13,11 +13,7 @@ from tqdm import tqdm
 def get_parser():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--model-path",
-        default=None,
-        type=str,
-        help="path to model")
+    parser.add_argument("--model-path", default=None, type=str, help="path to model")
 
     parser.add_argument(
         "--csv-path",
@@ -45,10 +41,8 @@ def get_parser():
     )
 
     parser.add_argument(
-        "--save-dir",
-        default="./",
-        type=str,
-        help="location to save prediction file")
+        "--save-dir", default="./", type=str, help="location to save prediction file"
+    )
 
     return parser
 
@@ -58,10 +52,7 @@ def load_model(model_path):
 
 
 def get_embed(voice_enc, file):
-    return np.asarray(
-        voice_enc.embed_utterance(
-            preprocess_wav(file))).reshape(
-        1, -1)
+    return np.asarray(voice_enc.embed_utterance(preprocess_wav(file))).reshape(1, -1)
 
 
 def get_prediction(voice_enc, model, file):
@@ -83,11 +74,8 @@ def get_prediction_csv_mode(voice_enc, model, csv_path, save_dir):
         for file_path in tqdm(data_frame["file_paths"].values)
     )
     data_frame.to_csv(
-        os.path.join(
-            save_dir,
-            "predictions.csv"),
-        header=False,
-        index=False)
+        os.path.join(save_dir, "predictions.csv"), header=False, index=False
+    )
     print("Inference Completed")
 
 
@@ -105,8 +93,7 @@ def get_prediction_from_npz_file(model, npz_file_path):
         delayed(get_prediction_for_embed)(model, embed.reshape(1, -1))
         for embed in tqdm(embeds)
     )
-    predicted_gender = list(
-        map(lambda x: "m" if x == 0 else "f", predicted_gender))
+    predicted_gender = list(map(lambda x: "m" if x == 0 else "f", predicted_gender))
 
     if len(predicted_gender) == len(file_paths):
         file_vs_gender_dict = dict(zip(file_paths, predicted_gender))

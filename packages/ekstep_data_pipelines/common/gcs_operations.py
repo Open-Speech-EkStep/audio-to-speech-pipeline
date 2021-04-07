@@ -42,8 +42,8 @@ class CloudStorageOperations:
 
         self._bucket = (
             self.config_dict.get("common", {})
-                .get("gcs_config", {})
-                .get("master_bucket")
+            .get("gcs_config", {})
+            .get("master_bucket")
         )
         return self._bucket
 
@@ -57,17 +57,16 @@ class CloudStorageOperations:
         print("*******src_files***", src, src_files, audio_extn)
         for file_name in src_files:
             meta_file_name = (
-                    "/".join(file_name.split("/")[:-1])
-                    + "/"
-                    + file_name.split("/")[-1].split(".")[0]
-                    + ".csv"
+                "/".join(file_name.split("/")[:-1])
+                + "/"
+                + file_name.split("/")[-1].split(".")[0]
+                + ".csv"
             )
             full_meta_file_name = os.path.join(src, meta_file_name)
             full_file_name = os.path.join(src, file_name)
             print("*******full_meta_file_name****", full_meta_file_name)
             print("*******full_file_name****", full_file_name)
-            if os.path.isfile(full_file_name) and os.path.isfile(
-                    full_meta_file_name):
+            if os.path.isfile(full_file_name) and os.path.isfile(full_meta_file_name):
                 destination = dest + "/" + self.get_audio_id()
                 self.make_directories(destination)
                 print("****dest***", destination)
@@ -85,7 +84,7 @@ class CloudStorageOperations:
             print("Directory {} already exists".format(path))
 
     def download_to_local(
-            self, source_blob_name, destination, is_directory, exclude_extn=None
+        self, source_blob_name, destination, is_directory, exclude_extn=None
     ):
         """Downloads a blob from the bucket."""
         # Provides options to download a file OR folder
@@ -113,7 +112,9 @@ class CloudStorageOperations:
             self.make_directories(destination)
             print(
                 "Fetching all blobs list from Bucket: {} and Source: {}".format(
-                    self.bucket, source_blob_name))
+                    self.bucket, source_blob_name
+                )
+            )
 
             blobs = list(
                 storage_client.list_blobs(self.bucket, prefix=source_blob_name)
@@ -126,11 +127,17 @@ class CloudStorageOperations:
             )
 
             for blob in blobs:
-                if (not blob.name.endswith("/")) & (not blob.name[blob.name.rfind(
-                        "/") + 1: len(blob.name)].split(".")[1] == exclude_extn):
+                if (not blob.name.endswith("/")) & (
+                    not blob.name[blob.name.rfind("/") + 1 : len(blob.name)].split(".")[
+                        1
+                    ]
+                    == exclude_extn
+                ):
                     print(
                         "Downloading blob {}/{} to local directory: {}: ".format(
-                            self.bucket, blob.name, destination))
+                            self.bucket, blob.name, destination
+                        )
+                    )
                     blob.download_to_filename(
                         destination + "/" + blob.name.split("/")[-1]
                     )
@@ -139,7 +146,7 @@ class CloudStorageOperations:
             print("Running in FILE mode...")
 
             # Get the Destination directory from input
-            destination_directory = destination[0: destination.rfind("/")]
+            destination_directory = destination[0 : destination.rfind("/")]
             print(
                 "Destination directory to be used for file download: {}".format(
                     destination_directory
@@ -165,7 +172,7 @@ class CloudStorageOperations:
             )
 
     def upload_to_gcs(
-            self, local_source_path, destination_blob_name, upload_directory=True
+        self, local_source_path, destination_blob_name, upload_directory=True
     ):
         """
         Uploads a blob from the local.
@@ -185,8 +192,10 @@ class CloudStorageOperations:
 
         if not upload_directory:
             Logger.info(
-                "Uploading file from source: %s to destination: "
-                "%f/%f", local_source_path, self.bucket, destination_blob_name
+                "Uploading file from source: %s to destination: " "%f/%f",
+                local_source_path,
+                self.bucket,
+                destination_blob_name,
             )
             blob = bucket.blob(destination_blob_name)
             try:
@@ -194,19 +203,20 @@ class CloudStorageOperations:
             # W0703: Catching too general exception Exception (broad-except)
             except Exception as exception:
                 Logger.info(
-                    "Single file Upload failed with error %s", exception.__str__())
+                    "Single file Upload failed with error %s", exception.__str__()
+                )
                 return False
 
             Logger.info(
-                "Single File uploaded successfully to %f/%f", self.bucket, destination_blob_name
+                "Single File uploaded successfully to %f/%f",
+                self.bucket,
+                destination_blob_name,
             )
             return True
 
         files = [
-            f for f in listdir(local_source_path) if isfile(
-                join(
-                    local_source_path,
-                    f))]
+            f for f in listdir(local_source_path) if isfile(join(local_source_path, f))
+        ]
         Logger.info("All the files in directory %s", files)
         # TODO: move to constant and pass concurrency as args
         estimated_cpu_share = 0.05
@@ -220,11 +230,11 @@ class CloudStorageOperations:
             blob = bucket.blob(destination_blob_name + "/" + file)
             Logger.info(
                 "Uploading files from source: %s to destination: %s/%s ",
-                src_file, self.bucket, blob.name)
-            futures.append(
-                executor.submit(
-                    blob.upload_from_filename,
-                    src_file))
+                src_file,
+                self.bucket,
+                blob.name,
+            )
+            futures.append(executor.submit(blob.upload_from_filename, src_file))
 
         executor.shutdown(wait=True)
 
@@ -236,7 +246,8 @@ class CloudStorageOperations:
             except Exception as exception:
                 Logger.error(
                     "Uploading directory %s failed with error %s",
-                    local_source_path, exception.__str__()
+                    local_source_path,
+                    exception.__str__(),
                 )
                 return False
 
@@ -280,11 +291,7 @@ class CloudStorageOperations:
             )
         )
 
-    def copy_blob(
-            self,
-            blob_name,
-            destination_blob_name,
-            destination_bucket_name=None):
+    def copy_blob(self, blob_name, destination_blob_name, destination_bucket_name=None):
         """Copies a blob from one bucket to another with a new name."""
         # bucket_name = "your-bucket-name"
         # blob_name = "your-object-name"
@@ -324,26 +331,20 @@ class CloudStorageOperations:
         )
         return blobs
 
-    def move_blob(
-            self,
-            blob_name,
-            destination_blob_name,
-            destination_bucket_name=None):
+    def move_blob(self, blob_name, destination_blob_name, destination_bucket_name=None):
 
         if not destination_bucket_name:
             destination_bucket_name = self.bucket
 
         source_blob = self.copy_blob_for_move(
-            self.bucket,
-            blob_name,
-            destination_bucket_name,
-            destination_blob_name)
+            self.bucket, blob_name, destination_bucket_name, destination_blob_name
+        )
         source_blob.delete()
         print("Blob {} deleted.".format(source_blob))
 
     @staticmethod
     def copy_blob_for_move(
-            bucket_name, blob_name, destination_bucket_name, destination_blob_name
+        bucket_name, blob_name, destination_bucket_name, destination_blob_name
     ):
         """Copies a blob from one bucket to another with a new name."""
         # bucket_name = "your-bucket-name"
