@@ -1,19 +1,19 @@
-import argparse
 import json
 import os
 import uuid
-
+import argparse
 from google.cloud import storage
 
 from ekstep_data_pipelines.audio_analysis.audio_analysis import AudioAnalysis
 from ekstep_data_pipelines.audio_cataloguer.cataloguer import AudioCataloguer
+from ekstep_data_pipelines.data_marker.data_marker import DataMarker
 from ekstep_data_pipelines.audio_processing.audio_processer import AudioProcessor
 from ekstep_data_pipelines.audio_transcription.audio_transcription import (
     AudioTranscription,
 )
-from ekstep_data_pipelines.common import get_periperhals
+from ekstep_data_pipelines.audio_embedding.audio_embedding import AudioEmbedding
 from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.data_marker.data_marker import DataMarker
+from ekstep_data_pipelines.common import get_periperhals
 
 STT_CLIENT = ["google", "azure"]
 
@@ -24,6 +24,7 @@ class ACTIONS:
     AUDIO_TRANSCRIPTION = "audio_transcription"
     AUDIO_ANALYSIS = "audio_analysis"
     AUDIO_CATALOGUER = "audio_cataloguer"
+    AUDIO_EMBEDDING = "audio_embedding"
 
 
 class FileSystems:
@@ -38,6 +39,7 @@ ACTIONS_LIST = [
     ACTIONS.AUDIO_TRANSCRIPTION,
     ACTIONS.AUDIO_ANALYSIS,
     ACTIONS.AUDIO_CATALOGUER,
+    ACTIONS.AUDIO_EMBEDDING
 ]
 FILES_SYSTEMS_LIST = [FileSystems.GOOGLE, FileSystems.LOCAL]
 # config_bucket = 'ekstepspeechrecognition-dev'
@@ -139,6 +141,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-fp",
+    "--file-path",
+    dest="file_path",
+    default=None,
+    help="The parameters that need to be used in audio embedding",
+)
+
+parser.add_argument(
     "-f",
     "--file_system",
     dest="file_system",
@@ -226,6 +236,13 @@ def validate_audio_analysis_config(arguments):
     if arguments.audio_source is None:
         raise argparse.ArgumentTypeError("Source is missing")
     return {"source": arguments.audio_source}
+
+def validate_audio_embedding_config(arguments):
+    LOGGER.info("validating input for audio embedding")
+
+    if arguments.file_path is None:
+        raise argparse.ArgumentTypeError(f"file path is missing")
+    return {"file_path": arguments.file_path}
 
 
 def validate_audio_processing_input(arguments):
@@ -381,6 +398,22 @@ def perform_action(arguments, **kwargs):
 
         curr_processor = AudioCataloguer.get_instance(data_processor)
         LOGGER.info("Starting processing for %s", current_action)
+        LOGGER.info(f"Starting processing for {current_action}")
+
+    elif current_action == ACTIONS.AUDIO_EMBEDDING:
+
+        kwargs.update(validate_audio_embedding_config(arguments))
+
+        LOGGER.info("Intializing data AudioEmbedding with given config")
+
+        config_params = {"config_file_path": kwargs.get("config_file_path")}
+
+        object_dict = get_periperhals(config_params, arguments.language)
+
+        data_processor = object_dict.get("data_processor")
+
+        curr_processor = AudioEmbedding.get_instance(data_processor,**{"commons_dict": object_dict, "file_interface": arguments.file_system})
+        LOGGER.info(f"Starting processing for {current_action}")
 
     curr_processor.process(**kwargs)
     LOGGER.info("Ending processing for %s", current_action)
