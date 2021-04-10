@@ -50,12 +50,12 @@ def get_sorted_file_list_after_batch(file_name_dict, batch_count):
 
 
 def get_file_path_from_bucket(
-    source,
-    source_landing_path,
-    batch_count,
-    audio_format,
-    meta_file_extension,
-    bucket_name,
+        source,
+        source_landing_path,
+        batch_count,
+        audio_format,
+        meta_file_extension,
+        bucket_name,
 ):
     file_path_dict = json.loads(Variable.get("audiofilelist"))
     file_name_dict = {}
@@ -85,7 +85,7 @@ def get_file_path_from_bucket(
             print("Meta File is {}".format(metadata_file_name))
 
             if check_if_meta_data_present(
-                source_landing_path + source, metadata_file_name, bucket_name
+                    source_landing_path + source, metadata_file_name, bucket_name
             ):
                 file_name_dict[file_name] = file_size
 
@@ -135,3 +135,92 @@ def data_marking_start():
 
 def audio_analysis_start():
     return "audio analysis started.."
+
+
+def upload_batch(source, bucket_name, destination_path, batch_filename):
+    upload_blob(
+        bucket_name,
+        batch_filename,
+        os.path.join(destination_path, source, batch_filename),
+    )
+
+
+def split_upload_batches(source, bucket_name, destination_path, file_object, max_records_threshold_per_pod):
+    lines_per_file = max_records_threshold_per_pod
+    list_of_batches = []
+    batchfile = None
+    batch_file_count = 0
+    file_object.seek(0)
+    for lineno, line in enumerate(file_object):
+        # print(lineno, " ", line)
+        if lineno % lines_per_file == 0:
+            batch_file_count += 1
+            if batchfile:
+                batchfile.close()
+                print("Uploading batch: ", batch_filename)
+                upload_batch(source, bucket_name, destination_path, batch_filename)
+                list_of_batches.append(os.path.join(destination_path, source, batch_filename))
+            batch_filename = 'batch_file_{}.txt'.format(batch_file_count)
+            batchfile = open(batch_filename, "w")
+        batchfile.write(line)
+    if batchfile:
+        batchfile.close()
+        print("Uploading last batch: ", batch_filename)
+        upload_batch(source, bucket_name, destination_path, batch_filename)
+        list_of_batches.append(os.path.join(destination_path, source, batch_filename))
+    return list_of_batches
+
+def generate_splitted_batches_for_audio_analysis(
+        source,
+        source_path,
+        destination_path,
+        max_records_threshold_per_pod,
+        audio_format,
+        bucket_name
+):
+    delimiter = "/"
+    print("****The source is *****" + source)
+    batch_file_path_dict = json.loads(Variable.get("batchfilelist"))
+    all_blobs = list_blobs_in_a_path(
+        bucket_name, source_path + source + delimiter
+    )
+    with open(source + ".txt", "a+") as file_object:
+        appendEOL = False
+        file_object.seek(0)
+        no_of_lines = 0
+        data = file_object.read(100)
+        if len(data) > 0:
+            appendEOL = True
+        for blob in all_blobs:
+            # print("*********The file name is ********* " + blob.name)
+            # print("*********The file size is {} bytes *********".format(blob.size))
+            file_name = get_file_name(blob.name, delimiter)
+
+            file_extension = get_file_extension(file_name)
+            expected_file_extension = audio_format
+
+            if file_extension in [
+                expected_file_extension,
+                expected_file_extension.swapcase(),
+            ]:
+
+                if appendEOL == True:
+                    file_object.write("\n")
+                else:
+                    appendEOL = True
+
+                file_object.write(blob.name)
+                no_of_lines += 1
+
+        if no_of_lines > 0:
+            print("Total number of audio files selected are : ", no_of_lines)
+            print("split into batches and upload batches")
+            list_of_batches = split_upload_batches(source, bucket_name, destination_path, file_object, max_records_threshold_per_pod)
+            list_of_batches
+    batch_file_path_dict[source] = list_of_batches
+    batch_file_path_dict = mydict(batch_file_path_dict)
+    Variable.set("batchfilelist", batch_file_path_dict)
+# generate_splitted_batches_for_audio_analysis("Kannada_Pustaka",
+#                                              "data/audiotospeech/raw/download/catalogued/kannada/audio/",
+#                                              "data/audiotospeech/raw/download/audio_embeddings/", 100, "wav",
+#                                              "ekstepspeechrecognition-dev")
