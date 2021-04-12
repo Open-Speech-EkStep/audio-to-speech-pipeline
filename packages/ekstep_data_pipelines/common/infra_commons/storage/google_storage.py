@@ -201,3 +201,9 @@ class GoogleStorage(BaseStorageInterface):
     def _list_blobs_in_a_path(self, bucket, file_prefix, delimiter=None):
         blobs = self.client.list_blobs(bucket, prefix=file_prefix, delimiter=delimiter)
         return blobs
+
+    def list_blobs_in_a_path(self, full_path, delimiter=None):
+        bucket = self.client.bucket(self.get_bucket_from_path(full_path))
+        file_prefix = self.get_path_without_bucket(full_path)
+        blobs = self.client.list_blobs(bucket, prefix=file_prefix, delimiter=delimiter)
+        return blobs
