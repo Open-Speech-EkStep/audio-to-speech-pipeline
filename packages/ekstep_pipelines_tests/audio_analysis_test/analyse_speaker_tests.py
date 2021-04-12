@@ -2,22 +2,23 @@ import unittest
 from unittest import mock
 
 from ekstep_data_pipelines.audio_analysis.analyse_speaker import analyse_speakers
+# from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import (
+#     encoder,
+# )
 
 
 class AnalyseSpeakersTests(unittest.TestCase):
+    # @mock.patch(
+    #     "ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings.encoder"
+    # )
+    # @mock.patch(
+    #     "ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings.encoder"
+    # )
     @mock.patch(
-        "ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings.encoder"
+        "ekstep_data_pipelines.audio_analysis.speaker_analysis.speaker_clustering.create_speaker_clusters"
     )
     @mock.patch(
-        "ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings.encoder"
-    )
-    @mock.patch(
-        "ekstep_data_pipelines.audio_analysis.speaker_analysis.speaker_clustering"
-        ".create_speaker_clusters"
-    )
-    @mock.patch(
-        "ekstep_data_pipelines.audio_analysis.speaker_analysis.file_cluster_mapping"
-        ".speaker_to_file_name_map"
+        "ekstep_data_pipelines.audio_analysis.speaker_analysis.file_cluster_mapping.speaker_to_file_name_map"
     )
     @unittest.skip
     def should_analyse_speakers_for_source(
@@ -27,7 +28,7 @@ class AnalyseSpeakersTests(unittest.TestCase):
         encoder_mock,
         catalogue_dao,
     ):
-        encoder_mock.return_value = None
+        # encoder_mock.return_value = None
         create_speaker_clusters_mock.return_value = None, None
         speaker_to_file_name_map_mock.return_value = {}
         catalogue_dao.insert_speaker.return_value = True
