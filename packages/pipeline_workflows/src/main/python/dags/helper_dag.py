@@ -165,7 +165,7 @@ def split_upload_batches(source, bucket_name, destination_path, file_object, max
                 batchfile.close()
                 print("Uploading batch: ", batch_filename)
                 upload_batch(source, bucket_name, destination_path, batch_filename)
-                list_of_batches.append(os.path.join(destination_path, source, batch_filename))
+                list_of_batches.append(os.path.join(bucket_name, destination_path, source, batch_filename))
             batch_filename = 'batch_file_{}.txt'.format(batch_file_count)
             batchfile = open(batch_filename, "w")
         batchfile.write(line)
@@ -173,8 +173,9 @@ def split_upload_batches(source, bucket_name, destination_path, file_object, max
         batchfile.close()
         print("Uploading last batch: ", batch_filename)
         upload_batch(source, bucket_name, destination_path, batch_filename)
-        list_of_batches.append(os.path.join(destination_path, source, batch_filename))
+        list_of_batches.append(os.path.join(bucket_name, destination_path, source, batch_filename))
     return list_of_batches
+
 
 def generate_splitted_batches_for_audio_analysis(
         source,
@@ -186,10 +187,15 @@ def generate_splitted_batches_for_audio_analysis(
 ):
     delimiter = "/"
     print("****The source is *****" + source)
-    batch_file_path_dict = json.loads(Variable.get("batchfilelist"))
+    print("****The source path is *****" + source_path)
+    print("****The destination path is *****" + destination_path)
+    batch_file_path_dict = json.loads(Variable.get("embedding_batch_file_list"))
     all_blobs = list_blobs_in_a_path(
         bucket_name, source_path + source + delimiter
     )
+    list_of_batches = []
+    if os.path.exists(source + ".txt"):
+        os.remove(source + ".txt")
     with open(source + ".txt", "a+") as file_object:
         appendEOL = False
         file_object.seek(0)
@@ -215,18 +221,19 @@ def generate_splitted_batches_for_audio_analysis(
                 else:
                     appendEOL = True
 
-                file_object.write(blob.name)
+                file_object.write(os.path.join(bucket_name, blob.name))
                 no_of_lines += 1
 
         if no_of_lines > 0:
             print("Total number of audio files selected are : ", no_of_lines)
             print("split into batches and upload batches")
-            list_of_batches = split_upload_batches(source, bucket_name, destination_path, file_object, max_records_threshold_per_pod)
+            list_of_batches = split_upload_batches(source, bucket_name, destination_path, file_object,
+                                                   max_records_threshold_per_pod)
             list_of_batches
     batch_file_path_dict[source] = list_of_batches
     batch_file_path_dict = mydict(batch_file_path_dict)
-    Variable.set("batchfilelist", batch_file_path_dict)
-# generate_splitted_batches_for_audio_analysis("Kannada_Pustaka",
-#                                              "data/audiotospeech/raw/download/catalogued/kannada/audio/",
-#                                              "data/audiotospeech/raw/download/audio_embeddings/", 100, "wav",
+    Variable.set("embedding_batch_file_list", batch_file_path_dict)
+# generate_splitted_batches_for_audio_analysis("Smart_money_with_Sonia_Shenoy",
+#                                              "data/audiotospeech/raw/download/catalogued/indian_english/audio/",
+#                                              "data/audiotospeech/raw/download/catalogued/indian_english/embeddings/", 500, "wav",
 #                                              "ekstepspeechrecognition-dev")
