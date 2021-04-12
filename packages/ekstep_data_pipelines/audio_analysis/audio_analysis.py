@@ -10,8 +10,10 @@ from ekstep_data_pipelines.audio_analysis.constants import (
     AUDIO_ANALYSIS_PARAMS,
     ANALYSIS_OPTIONS,
 )
+from ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import (
-    encode_on_partial_sets,
+    concatenate_embed_files,
 )
 from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
 from ekstep_data_pipelines.common.utils import get_logger
@@ -73,7 +75,9 @@ class AudioAnalysis(BaseProcessor):
         local_audio_download_path = f"{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}/"
         self.ensure_path(local_audio_download_path)
 
-        LOGGER.info("Ensured %s exists", local_audio_download_path)
+        local_embeddings_path = f'{self.DEFAULT_DOWNLOAD_PATH}/embeddings/'
+
+        LOGGER.info(f"Ensured {local_audio_download_path} exists")
         remote_download_path = self.get_full_path(source)
 
         LOGGER.info("Total available cpu count: %s", str(multiprocessing.cpu_count()))
@@ -82,9 +86,13 @@ class AudioAnalysis(BaseProcessor):
         min_cluster_size = parameters.get("min_cluster_size", MIN_CLUSTER_SIZE)
         partial_set_size = parameters.get("partial_set_size", PARTIAL_SET_SIZE)
         min_samples = parameters.get("min_samples", MIN_SAMPLES)
+
+        path_for_embeddings = parameters.get("path_for_embeddings")
         fit_noise_on_similarity = parameters.get(
             "fit_noise_on_similarity", FIT_NOISE_ON_SIMILARITY
         )
+
+
         npz_destination_path = f"{remote_download_path}/{source}_embed_file.npz"
 
         analysis_options = self.get_analysis_options()
@@ -92,12 +100,15 @@ class AudioAnalysis(BaseProcessor):
         speaker_to_file_name = None
         file_to_speaker_gender_mapping = None
 
-        self.create_or_fetch_embeddings(
-            local_audio_download_path,
-            remote_download_path,
+
+        self.ensure_path(local_embeddings_path)
+
+        self.download_all_embedding(path_for_embeddings,local_embeddings_path)
+
+        self.merge_embeddings(
             embed_file_path,
-            npz_destination_path,
-            partial_set_size,
+            local_embeddings_path,
+            npz_destination_path
         )
 
         if analysis_options.get("speaker_analysis") == 1:
@@ -120,35 +131,37 @@ class AudioAnalysis(BaseProcessor):
             source,
         )
 
-    def create_or_fetch_embeddings(
+    def download_all_embedding(self,full_path,local_embeddings_path):
+
+        all_blobs = self.fs_interface.list_blobs_in_a_path(full_path)
+        bucket_name = full_path.split('/')[0]
+
+        for blob in all_blobs:
+            print(blob.name)
+            if '.npz' in blob.name:
+                print(f'{local_embeddings_path}{os.path.basename(blob.name)}{blob.name},{blob}')
+                self.fs_interface.download_file_to_location(
+                    f'{bucket_name}/{blob.name}', f'{local_embeddings_path}{os.path.basename(blob.name)}'
+                )
+
+
+    def merge_embeddings(
         self,
-        local_audio_download_path,
-        remote_download_path,
         embed_file_path,
+        local_embeddings_path,
         npz_bucket_destination_path,
-        partial_set_size,
-        dir_pattern="*.wav",
     ):
+
         if self.fs_interface.path_exists(npz_bucket_destination_path):
             self.fs_interface.download_file_to_location(
                 npz_bucket_destination_path, embed_file_path
             )
         else:
             LOGGER.info(
-                "Downloading source to $s from %s",
-                local_audio_download_path,
-                remote_download_path,
+                f"Start merging embedding files"
             )
-            self.fs_interface.download_folder_to_location(
-                remote_download_path, local_audio_download_path, 5
-            )
-            # encoder(local_audio_download_path, dir_pattern, embed_file_path)
-            encode_on_partial_sets(
-                local_audio_download_path,
-                dir_pattern,
-                embed_file_path,
-                partial_set_size,
-            )
+            concatenate_embed_files(embed_file_path, local_embeddings_path)
+
             is_uploaded = self.fs_interface.upload_to_location(
                 embed_file_path, npz_bucket_destination_path
             )

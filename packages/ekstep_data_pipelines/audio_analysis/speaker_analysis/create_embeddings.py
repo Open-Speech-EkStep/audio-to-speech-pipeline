@@ -1,4 +1,6 @@
 import glob
+# from joblib import Parallel, delayed
+import numpy as np
 import math
 
 import numpy as np
@@ -18,36 +20,23 @@ def save_embeddings(embed_file_path, embeddings, file_paths):
     )
 
 
-def encoder(file_paths, vocoder):
-    print("Number of files in batch: {}".format(len(file_paths)))
-
-    processed_wavs = [preprocess_wav(i) for i in tqdm(file_paths)]
-
-    encodings = [vocoder.embed_utterance(i) for i in tqdm(processed_wavs)]
-    print("Creating embeddings")
-    encodings = np.array(encodings)
-    return encodings
-
-
-def concatenate_embed_files(embed_file_dest):
-    pattern = "_*.npz"
-    pattern_prefix = embed_file_dest[:-4]
+def concatenate_embed_files(embed_file_dest,local_npz_folder_path):
+    pattern = '.npz'
+    pattern_prefix = f'{local_npz_folder_path}*'
     print(pattern_prefix)
-    npz_files_to_concat = glob.glob(pattern_prefix + pattern, recursive=True)
+    npz_files_to_concat = glob.glob(pattern_prefix, recursive=True)
     if npz_files_to_concat:
         print(npz_files_to_concat)
         list_of_loaded_files = []
         for file in npz_files_to_concat:
-            list_of_loaded_files.append(np.load(file))
+            if pattern in file:
+                list_of_loaded_files.append(np.load(file))
 
-        final_embeds = np.concatenate([file["embeds"] for file in list_of_loaded_files])
-        final_file_paths = np.concatenate(
-            [file["file_paths"] for file in list_of_loaded_files]
-        )
-        print("Final length of concatenated embeds", len(final_embeds))
-        save_embeddings(
-            embed_file_dest, embeddings=final_embeds, file_paths=final_file_paths
-        )
+        final_embeds = np.concatenate([file['embeds'] for file in list_of_loaded_files])
+        final_file_paths = np.concatenate([file['file_paths'] for file in list_of_loaded_files])
+        print(f'Final length of concatenated embeds', len(final_embeds))
+        save_embeddings(embed_file_dest, embeddings=final_embeds,
+                        file_paths=final_file_paths)
 
 
 def encode_on_partial_sets(

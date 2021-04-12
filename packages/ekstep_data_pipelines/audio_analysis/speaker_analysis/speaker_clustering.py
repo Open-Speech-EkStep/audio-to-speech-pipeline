@@ -20,6 +20,7 @@ def create_speaker_clusters(
     # step:1 -> ENCODING AND SAVING : done by create_embeddings.py
 
     # step:2 -> CLUSTERING AND MAPPING FILES TO CLUSTERS
+
     embed_speaker_map = np.load(embed_filename_map_path)
     embeddings = embed_speaker_map["embeds"]
     file_paths = embed_speaker_map["file_paths"]
