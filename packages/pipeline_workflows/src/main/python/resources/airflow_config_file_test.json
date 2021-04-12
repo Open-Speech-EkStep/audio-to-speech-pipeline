@@ -133,14 +133,20 @@
       }
     }
   },
-  "audio_analysis_config" : {
-    "testamulya2" : {
-      "language" : "hindi",
-      "parameters": {
-        "min_cluster_size": 5,
-        "partial_set_size": 11122,
-        "min_samples": 2
-      }
+  "destinationpathforaudioanalysis": "data/audiotospeech/raw/download/catalogued/{language}/embeddings/",
+  "sourcepathforaudioanalysis": "data/audiotospeech/raw/download/catalogued/{language}/audio/",
+  "audio_analysis_config": {
+    "CEC_English": {
+      "language": "indian_english",
+      "format": "wav",
+      "parallelism": 5,
+      "batch_size": 5000
+    },
+    "Smart_money_with_Sonia_Shenoy": {
+      "language": "indian_english",
+      "format": "wav",
+      "parallelism": 4,
+      "batch_size": 100
     }
   }
 }

@@ -9,7 +9,7 @@ from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
 from helper_dag import generate_splitted_batches_for_audio_analysis
 
-audio_embedding_catalogue = json.loads(Variable.get("audio_embedding_catalogue"))
+audio_embedding_catalogue = json.loads(Variable.get("audio_analysis_config"))
 source_path = Variable.get("sourcepathforaudioanalysis")
 destination_path = Variable.get("destinationpathforaudioanalysis")
 bucket_name = Variable.get("bucket")
@@ -28,9 +28,9 @@ secret_file = secret.Secret(
 )
 
 
-def interpolate_language_paths(language):
-    source_path_set = source_path.replace(LANGUAGE_CONSTANT, language)
-    return source_path_set
+def interpolate_language_paths(path, language):
+    path_set = path.replace(LANGUAGE_CONSTANT, language)
+    return path_set
 
 
 def create_dag(dag_id, dag_number, default_args, args, max_records_threshold_per_pod):
@@ -48,15 +48,15 @@ def create_dag(dag_id, dag_number, default_args, args, max_records_threshold_per
         source = args.get("source")
         print(args)
         print(f"Language for source is {language}")
-        source_path_set = interpolate_language_paths(language)
-
+        source_path_set = interpolate_language_paths(source_path, language)
+        destination_path_set = interpolate_language_paths(destination_path, language)
         generate_batch_files = PythonOperator(
             task_id=dag_id + "_generate_batches",
             python_callable=generate_splitted_batches_for_audio_analysis,
             op_kwargs={
                 "source": source,
                 "source_path": source_path_set,
-                "destination_path": destination_path,
+                "destination_path": destination_path_set,
                 "max_records_threshold_per_pod": max_records_threshold_per_pod,
                 "audio_format": audio_format,
                 "bucket_name": bucket_name,
@@ -65,7 +65,33 @@ def create_dag(dag_id, dag_number, default_args, args, max_records_threshold_per
         )
 
         generate_batch_files
-        batch_file_path_dict = json.loads(Variable.get("batchfilelist"))
+
+        data_audio_analysis_task = kubernetes_pod_operator.KubernetesPodOperator(
+            task_id=f"data-audio-analysis-{source}",
+            name="data-audio-analysis",
+            cmds=[
+                "python",
+                "invocation_script.py",
+                "-b",
+                bucket_name,
+                "-a",
+                "audio_analysis",
+                "-rc",
+                f"data/audiotospeech/config/config_test.yaml",
+                "-as",
+                source,
+                "-l",
+                language,
+            ],
+            namespace=composer_namespace,
+            startup_timeout_seconds=300,
+            secrets=[secret_file],
+            image=f"us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}_1.0.0",
+            image_pull_policy="Always",
+            resources=resource_limits,
+        )
+
+        batch_file_path_dict = json.loads(Variable.get("embedding_batch_file_list"))
         list_of_batch_files = batch_file_path_dict[source]
         total_phases = math.ceil(len(list_of_batch_files) / parallelism)
         task_dict = {}
@@ -73,9 +99,9 @@ def create_dag(dag_id, dag_number, default_args, args, max_records_threshold_per
             for pod in range(1, parallelism + 1):
                 if len(list_of_batch_files) > 0:
                     batch_file = list_of_batch_files.pop()
-                    task_dict[f"create_embedding_task_{phase}"] = kubernetes_pod_operator.KubernetesPodOperator(
+                    task_dict[f"create_embedding_task_{pod}_{phase}"] = kubernetes_pod_operator.KubernetesPodOperator(
                         task_id=source + "_create_embedding_" + str(pod) + '_' + str(phase),
-                        name="create_embedding",
+                        name="create-embedding",
                         cmds=[
                             "python",
                             "invocation_script.py",
@@ -83,6 +109,8 @@ def create_dag(dag_id, dag_number, default_args, args, max_records_threshold_per
                             bucket_name,
                             "-a",
                             "audio_embedding",
+                            "-rc",
+                            f"data/audiotospeech/config/config_test.yaml",
                             "-fp",
                             batch_file,
                             "-as",
@@ -97,11 +125,16 @@ def create_dag(dag_id, dag_number, default_args, args, max_records_threshold_per
                         image_pull_policy="Always",
                         resources=resource_limits,
                     )
-                if phase == 0:
-                    generate_batch_files >> task_dict["create_embedding_task_0"]
-                else:
-                    task_dict[f"create_embedding_task_{phase-1}"] >> task_dict[f"create_embedding_task_{phase}"]
-        #     generate_batch_files >> data_prep_task >> data_prep_cataloguer
+                    if phase == 0:
+                        generate_batch_files >> task_dict[f"create_embedding_task_{pod}_{phase}"] >> data_audio_analysis_task
+                    # elif phase == total_phases - 1:
+                    #     task_dict[f"create_embedding_task_{pod}_{phase - 1}"] >> task_dict[
+                    #         f"create_embedding_task_{pod}_{phase}"] >> data_audio_analysis_task
+                    else:
+                        task_dict[f"create_embedding_task_{pod}_{phase - 1}"] >> task_dict[
+                            f"create_embedding_task_{pod}_{phase}"] >> data_audio_analysis_task
+            # if phase == total_phases - 1:
+            #     task_dict[f"create_embedding_task_{last_pod_no}_{phase}"] >> data_audio_analysis_task
 
     return dag
 
@@ -109,15 +142,15 @@ def create_dag(dag_id, dag_number, default_args, args, max_records_threshold_per
 for source in audio_embedding_catalogue.keys():
     source_info = audio_embedding_catalogue.get(source)
 
-    max_records_threshold_per_pod = source_info.get("max_records_threshold_per_pod")
-    parallelism = source_info.get("max_parallel_pods", 5)
+    max_records_threshold_per_pod = source_info.get("batch_size")
+    parallelism = source_info.get("parallelism", 5)
     audio_format = source_info.get("format")
     language = source_info.get("language").lower()
 
     dag_id = source + '_' + 'audio_embedding_analysis'
 
     dag_args = {
-        "email": ["gaurav.gupta@thoughtworks.com"],
+        "email": ["soujyo.sen@thoughtworks.com"],
     }
 
     args = {
