@@ -66,8 +66,14 @@ class AudioAnalysis(BaseProcessor):
 
         self.audio_analysis_config = self.data_processor.config_dict.get(CONFIG_NAME)
 
+        remote_base_path = self.audio_analysis_config.get("path_for_embeddings")
+
+
+
         source = self.get_source_from_config(**kwargs)
         parameters = self.get_speaker_analysis_params()
+
+        path_for_embeddings = f'{remote_base_path}/{source}'
 
         embed_file_path = (
             f"{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}_embed_file.npz"
@@ -87,7 +93,7 @@ class AudioAnalysis(BaseProcessor):
         partial_set_size = parameters.get("partial_set_size", PARTIAL_SET_SIZE)
         min_samples = parameters.get("min_samples", MIN_SAMPLES)
 
-        path_for_embeddings = parameters.get("path_for_embeddings")
+        # path_for_embeddings = parameters.get("path_for_embeddings")
         fit_noise_on_similarity = parameters.get(
             "fit_noise_on_similarity", FIT_NOISE_ON_SIMILARITY
         )
