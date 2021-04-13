@@ -148,6 +148,10 @@
       "parallelism": 4,
       "batch_size": 100
     }
+  },
+  "embedding_batch_file_list": {
+    "Smart_money_with_Sonia_Shenoy": [],
+    "CEC_English": []
   }
 }
 
