@@ -1,23 +1,17 @@
-import datetime
-import json
-import os
-import yaml
-from operator import itemgetter
 import collections
-from gcs_utils import (
-    list_blobs_in_a_path,
-    copy_blob,
-    check_blob,
-    move_blob,
-    upload_blob,
-    read_blob,
-    move_directory,
-    download_blob,
-)
+import json
+from operator import itemgetter
+
+import yaml
 from airflow.models import Variable
 
+from gcs_utils import (
+    list_blobs_in_a_path,
+    check_blob,
+)
 
-class mydict(dict):
+
+class MyDict(dict):
     def __str__(self):
         return json.dumps(self)
 
@@ -98,7 +92,7 @@ def get_file_path_from_bucket(
     file_path_dict[source] = get_sorted_file_list_after_batch(
         file_name_dict, batch_count
     )
-    file_path_dict = mydict(file_path_dict)
+    file_path_dict = MyDict(file_path_dict)
     Variable.set("audiofilelist", file_path_dict)
 
 
@@ -121,7 +115,7 @@ def get_require_audio_id(source, stt_source_path, batch_count, bucket_name):
             break
     audio_ids[source] = list(audio_id_list)
 
-    Variable.set("audioidsforstt", mydict(audio_ids))
+    Variable.set("audioidsforstt", MyDict(audio_ids))
 
 
 def __load_yaml_file(path):

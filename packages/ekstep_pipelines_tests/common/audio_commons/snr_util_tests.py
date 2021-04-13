@@ -1,20 +1,25 @@
-import sys
-import unittest
-from unittest.mock import call
-
-# from audio_processing import constants
-from unittest.mock import Mock
 import subprocess
+import unittest
 from unittest import mock
-import pandas as pd
-
+from unittest.mock import Mock
+from unittest.mock import call
 
 from ekstep_data_pipelines.common.audio_commons.snr_util import SNR
 
 
 class SNRTests(unittest.TestCase):
 
-    expected_file_content = 'audio_id,cleaned_duration,utterances_files_list,media_hash_code\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": null}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": null}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": null}]",dummy_hash\n'
+    expected_file_content = (
+        "audio_id,cleaned_duration,utterances_files_list,media_hash_code\n"
+        '17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"",'
+        ' ""snr_value"": 24.0, ""status"": ""Clean"", '
+        '""language_confidence_score"": null}, {""name"": '
+        '""file2.wav"", ""duration"": ""10"", ""snr_value"": '
+        '25.0, ""status"": ""Clean"", ""language_confidence_score"": null}, '
+        '{""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": '
+        '280.0, ""status"": ""Clean"", ""language_confidence_score"":'
+        ' null}]",dummy_hash\n'
+    )
 
     def setUp(self):
         self.maxDiff = None
@@ -24,13 +29,17 @@ class SNRTests(unittest.TestCase):
 
     def setup_meta_data_file(self, file_name):
         headers = ["audio_id", "cleaned_duration", "utterances_files_list"]
-        with open(file_name, "w") as f:
-            f.write(",".join(headers) + "\n" + "1,abc,null")
+        with open(file_name, "w") as file:
+            file.write(",".join(headers) + "\n" + "1,abc,null")
 
     def test__should_return_command_when_get_command_called_with_file_path_and_dir(
         self,
     ):
-        command = '"test_dir/ekstep_data_pipelines/binaries/WadaSNR/Exe/WADASNR" -i "input_file_path" -t "test_dir/ekstep_data_pipelines/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
+        command = (
+            '"test_dir/ekstep_data_pipelines/binaries/WadaSNR/Exe/WADASNR" -i '
+            '"input_file_path" -t "test_dir/ekstep_data_pipelines/binaries/WadaSNR/'
+            'Exe/Alpha0.400000.txt" -ifmt mswav'
+        )
         actual_output = self.snr.get_command("test_dir", "input_file_path")
         self.assertEqual(actual_output, command)
 
@@ -144,9 +153,8 @@ class SNRTests(unittest.TestCase):
         self.assertEqual(mock_subprocess_check_output.call_count, 3)
 
         # check the metadata file for information
-        meta_data_contents = ""
-        with open(meta_data_file_name) as f:
-            meta_data_contents = f.read()
+        with open(meta_data_file_name) as file:
+            meta_data_contents = file.read()
 
         self.assertEqual(meta_data_contents, self.expected_file_content)
 
@@ -199,10 +207,21 @@ class SNRTests(unittest.TestCase):
         self.assertEqual(mock_subprocess_check_output.call_count, 3)
 
         # check the metadata file for information
-        meta_data_contents = ""
-        with open(meta_data_file_name) as f:
-            meta_data_contents = f.read()
-        expected_file_content = 'audio_id,cleaned_duration,utterances_files_list,media_hash_code\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": ""10"", ""snr_value"": 24.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file2.wav"", ""duration"": ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}, {""name"": ""file3.wav"", ""duration"": ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", ""language_confidence_score"": {""hi-IN"": ""0.00004"", ""en"": ""0.99996""}}]",dummy_hash\n'
+        with open(meta_data_file_name) as file:
+            meta_data_contents = file.read()
+        expected_file_content = (
+            "audio_id,cleaned_duration,utterances_files_list,media_hash_code"
+            '\n17147714,0.5,"[{""name"": ""file1.wav"", ""duration"": '
+            '""10"", ""snr_value"": 24.0, ""status"": ""Clean"", '
+            '""language_confidence_score"": {""hi-IN"": ""0.00004"", '
+            '""en"": ""0.99996""}}, {""name"": ""file2.wav"", ""duration"":'
+            ' ""10"", ""snr_value"": 25.0, ""status"": ""Clean"", '
+            '""language_confidence_score"": {""hi-IN"": ""0.00004"", '
+            '""en"": ""0.99996""}}, {""name"": ""file3.wav"", ""duration"":'
+            ' ""10"", ""snr_value"": 280.0, ""status"": ""Clean"", '
+            '""language_confidence_score"": {""hi-IN"": ""0.00004"", '
+            '""en"": ""0.99996""}}]",dummy_hash\n'
+        )
         print("meta_data_contents:" + meta_data_contents)
         print("expected_file_content:" + self.expected_file_content)
         self.assertEqual(expected_file_content, meta_data_contents)

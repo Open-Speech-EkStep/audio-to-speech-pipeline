@@ -1,14 +1,16 @@
+import ast
 import datetime
 import json
 import os
+import sys
+from datetime import datetime
+
+import numpy as np
+import pandas as pd
+import yaml
+from sqlalchemy import create_engine
 
 from gcs_utils import list_blobs_in_a_path, upload_blob, download_blob
-import pandas as pd
-import ast
-from sqlalchemy import create_engine
-from datetime import datetime
-import yaml
-import numpy as np
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
@@ -87,7 +89,7 @@ def get_file_attributes(source_prefix_split_list):
     file_name = source_prefix_split_list[-1]
     try:
         raw_file_name = file_name.split("_", 1)[1].split(".")[0]
-    except:
+    except BaseException:
         raw_file_name = "NA"
     source = source_prefix_split_list[0]
     audio_id = source_prefix_split_list[1]
@@ -149,7 +151,7 @@ def generate_bucket_file_list(source):
                 )
                 output_file.write("\n")
                 output_file.write(row)
-        except:
+        except BaseException:
             print(f"Failed at {full_path}")
     print("Bucket list has been generated")
     output_file.close()
@@ -210,8 +212,8 @@ def get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw):
     # return catalog_list_not_in_bucket
 
 
-def parse_json_utterance_meta(jsonData):
-    json_dict = json.loads(jsonData)
+def parse_json_utterance_meta(json_data):
+    json_dict = json.loads(json_data)
     return (
         str(json_dict["name"]).replace(",", "")
         + ","
@@ -221,14 +223,14 @@ def parse_json_utterance_meta(jsonData):
     )
 
 
-def check_json_utterance_meta(jsonData):
+def check_json_utterance_meta(json_data):
     # print(f"Utterance_file_list being processed is {jsonData}")
     # try:
     #     json.loads(jsonData)
     # except (ValueError, TypeError):
     #     return False
     # return True
-    if type(jsonData) == dict:
+    if isinstance(json_data, dict):
         return True
     else:
         return False
@@ -282,8 +284,8 @@ def sanitize_snr_formats(record):
 def convert_str_to_list(record):
     try:
         return ast.literal_eval(record)
-    except ValueError as e:
-        print(e)
+    except ValueError as error:
+        print(error)
         print(record)
         clean_record = sanitize_snr_formats(record)
 
@@ -400,7 +402,8 @@ def get_valid_and_unique_utterances(
 
 
 # def get_bucket_list_in_catalog_unexploded(bucket_list_in_catalog, data_catalog_raw):
-#     audio_ids_in_bucket_and_catalog = bucket_list_in_catalog[~bucket_list_in_catalog.duplicated(subset=['audio_id'])][[
+#     audio_ids_in_bucket_and_catalog = bucket_list_in_catalog[~bucket_list_in_catalog.
+#     duplicated(subset=['audio_id'])][[
 #         'audio_id']]
 #     return data_catalog_raw.merge(audio_ids_in_bucket_and_catalog,
 #                                   on='audio_id')
@@ -470,7 +473,8 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
     bucket_list_in_catalog_cleaned = bucket_list_in_catalog[
         bucket_list_in_catalog.status == "clean"
     ]
-    # catalog_list_with_rejected_status = bucket_list_in_catalog[bucket_list_in_catalog.status == 'rejected']
+    # catalog_list_with_rejected_status = bucket_list_in_catalog[bucket_list_in_catalog
+    # .status == 'rejected']
     df_catalog_invalid_utterance_duration = get_invalid_utterance_duration(
         bucket_list_in_catalog_cleaned
     )
@@ -501,7 +505,8 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
         bucket_list_in_catalog.astype({"audio_id": "str"}).to_excel(
             writer, sheet_name="catalog_list_in_bucket", index=False
         )
-        # catalog_list_with_rejected_status.to_excel(writer, sheet_name='catalog_list_rejected_ones', index=False)
+        # catalog_list_with_rejected_status.to_excel(writer,
+        # sheet_name='catalog_list_rejected_ones', index=False)
         df_catalog_invalid_utterance_duration.astype({"audio_id": "str"}).to_excel(
             writer, sheet_name="catalog_list_invalid_duration", index=False
         )
@@ -575,13 +580,13 @@ def check_dataframes(data_catalog_raw, data_bucket_raw):
     bucket_len = len(data_bucket_raw)
     if catalouge_len == 0 and bucket_len != 0:
         print("For the given source no data in catalouge")
-        exit(1)
+        sys.exit(1)
     elif catalouge_len != 0 and bucket_len == 0:
         print("For the given source no data in bucket")
-        exit(1)
+        sys.exit(1)
     elif catalouge_len == 0 and bucket_len == 0:
         print("For the given source no data found. Check the path and source name!!!!")
-        exit(1)
+        sys.exit(1)
     else:
         pass
 

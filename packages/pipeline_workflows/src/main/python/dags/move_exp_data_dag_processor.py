@@ -1,23 +1,17 @@
-import datetime
 import json
-import re
-import os
+
 import pandas as pd
+from airflow.models import Variable
+
 from gcs_utils import (
     list_blobs_in_a_path,
     copy_blob,
-    check_blob,
     move_blob,
-    upload_blob,
-    read_blob,
-    move_directory,
     download_blob,
 )
 
-from airflow.models import Variable
 
-
-class mydict(dict):
+class MyDict(dict):
     def __str__(self):
         return json.dumps(self)
 
@@ -45,11 +39,11 @@ def count_utterances_file_chunks(**kwargs):
             list_of_blobs.append(str(blob.name))
     print("***The utterances file chunks***", list_of_blobs)
     utterances_names["utteranceschunkslist"] = list_of_blobs
-    utterances_names = mydict(utterances_names)
+    utterances_names = MyDict(utterances_names)
     Variable.set("utteranceschunkslist", utterances_names)
 
 
-def move_utterance_chunk(bucket_name, source_file_name, experiment_name):
+def move_utterance_chunk(bucket_name_, source_file_name, experiment_name):
     get_variables()
     archive_utterances_file_name = (
         archive_utterances_path
@@ -57,7 +51,9 @@ def move_utterance_chunk(bucket_name, source_file_name, experiment_name):
         + "/"
         + source_file_name.split("/")[-1]
     )
-    move_blob(bucket_name, source_file_name, bucket_name, archive_utterances_file_name)
+    move_blob(
+        bucket_name_, source_file_name, bucket_name_, archive_utterances_file_name
+    )
     # os.remove(local_file_name)
 
 
@@ -66,8 +62,8 @@ def copy_utterances(src_file_name, **kwargs):
     extn_list = ["wav", "txt"]
     local_file_name = bucket_name.split("/")[-1]
     download_blob(bucket_name, src_file_name, local_file_name)
-    df = pd.read_csv(local_file_name)
-    for i, row in df.iterrows():
+    dataframe = pd.read_csv(local_file_name)
+    for i, row in dataframe.iterrows():
         audio_id = row["audio_id"]
         source = row["source"]
         experiment_name = row["experiment_name"]

@@ -21,9 +21,7 @@ class TestTrancriptionSanitizer(unittest.TestCase):
     def test_transcription_containing_space_in_start_should_return_None(self):
         transcript_obj = self.punjabi_transcription_sanitizers
         transcript = " ਹੈਲੋ ਤੁਸੀ ਕਿਵੇਂ ਹੋ"
-        self.assertEqual(
-            transcript_obj.sanitize(transcript), "ਹੈਲੋ ਤੁਸੀ ਕਿਵੇਂ ਹੋ"
-        )
+        self.assertEqual(transcript_obj.sanitize(transcript), "ਹੈਲੋ ਤੁਸੀ ਕਿਵੇਂ ਹੋ")
 
     def test_transcription_containing_english_character_should_give_runtime_exception(
         self,

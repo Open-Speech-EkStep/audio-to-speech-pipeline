@@ -86,7 +86,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
                     "-a",
                     "audio_transcription",
                     "-rc",
-                    f"data/audiotospeech/config/config.yaml",
+                    "data/audiotospeech/config/config.yaml",
                     "-ai",
                     ",".join(batch_audio_file_ids),
                     "-as",

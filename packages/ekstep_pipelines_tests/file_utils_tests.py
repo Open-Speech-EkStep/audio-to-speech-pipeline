@@ -1,4 +1,3 @@
-import sys
 import unittest
 
 from ekstep_data_pipelines.common.file_utils import get_file_name

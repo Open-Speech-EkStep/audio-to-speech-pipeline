@@ -1,12 +1,13 @@
-import os
-import pandas as pd
-import numpy as np
 import argparse
+import os
 import time
+
 import joblib
+import numpy as np
+import pandas as pd
 from joblib import Parallel, delayed
-from tqdm import tqdm
 from resemblyzer import VoiceEncoder, preprocess_wav
+from tqdm import tqdm
 
 
 def get_parser():
@@ -56,9 +57,9 @@ def get_embed(voice_enc, file):
 
 def get_prediction(voice_enc, model, file):
     if os.path.exists(file):
-        X = get_embed(voice_enc, file)
-        return model.predict(X)[0]
-    else:
+        voice_array = get_embed(voice_enc, file)
+        return model.predict(voice_array)[0]
+    else:  # R1705: Unnecessary "else" after "return" (no-else-return)
         raise Exception(f"File path does not exist {file}")
 
 
@@ -67,13 +68,15 @@ def get_prediction_for_embed(model, embed):
 
 
 def get_prediction_csv_mode(voice_enc, model, csv_path, save_dir):
-    df = pd.read_csv(csv_path, header=None, names=["file_paths"])
-    df["predicted_gender"] = Parallel(n_jobs=-1)(
+    data_frame = pd.read_csv(csv_path, header=None, names=["file_paths"])
+    data_frame["predicted_gender"] = Parallel(n_jobs=-1)(
         delayed(get_prediction)(voice_enc, model, file_path)
-        for file_path in tqdm(df["file_paths"].values)
+        for file_path in tqdm(data_frame["file_paths"].values)
     )
-    df.to_csv(os.path.join(save_dir, "predictions.csv"), header=False, index=False)
-    print(f"Inference Completed")
+    data_frame.to_csv(
+        os.path.join(save_dir, "predictions.csv"), header=False, index=False
+    )
+    print("Inference Completed")
 
 
 def get_prediction_from_npz_file(model, npz_file_path):
@@ -121,7 +124,7 @@ def main(args):
 
 if __name__ == "__main__":
     s = time.time()
-    parser = get_parser()
-    args = parser.parse_args()
-    main(args)
+    parser_ = get_parser()
+    args_ = parser_.parse_args()
+    main(args_)
     print(f"Time taken {time.time() - s} seconds")

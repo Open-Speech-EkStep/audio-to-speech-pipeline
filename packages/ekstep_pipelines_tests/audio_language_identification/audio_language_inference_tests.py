@@ -1,4 +1,3 @@
-import sys
 import unittest
 
 from ekstep_data_pipelines.audio_language_identification import audio_language_inference

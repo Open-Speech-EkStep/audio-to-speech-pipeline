@@ -1,4 +1,3 @@
-import sys
 import unittest
 
 from ekstep_data_pipelines.audio_processing.generate_hash import (

@@ -55,7 +55,7 @@ def create_dag(default_args):
                     "-a",
                     "audio_analysis",
                     "-rc",
-                    f"data/audiotospeech/config/config.yaml",
+                    "data/audiotospeech/config/config.yaml",
                     "-as",
                     source,
                     "-l",

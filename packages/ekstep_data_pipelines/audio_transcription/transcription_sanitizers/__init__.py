@@ -12,7 +12,6 @@ class BaseTranscriptionSanitizer(metaclass=ABCMeta):
 
 
 def get_transcription_sanitizers(**kwargs):
-
     # cyclic imports
     from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.hindi_sanitizer import (
         HindiSanitizer,
@@ -27,7 +26,7 @@ def get_transcription_sanitizers(**kwargs):
         IndianEnglishSanitizer,
     )
     from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.punjabi_sanitizer import (
-        PunjabiSanitizer
+        PunjabiSanitizer,
     )
 
     hindi_sanitizer = HindiSanitizer.get_instance(**kwargs)
@@ -35,12 +34,12 @@ def get_transcription_sanitizers(**kwargs):
     kannada_sanitizer = KannadaSanitizer.get_instance(**kwargs)
     indian_english_sanitizer = IndianEnglishSanitizer.get_instance(**kwargs)
     punjabi_sanitizer = PunjabiSanitizer.get_instance(**kwargs)
-    
+
     return {
         "hindi": hindi_sanitizer,
         "gujrati": gujrati_sanitizer,
         "default": hindi_sanitizer,
         "kannada": kannada_sanitizer,
         "indian_english": indian_english_sanitizer,
-        "punjabi": punjabi_sanitizer
+        "punjabi": punjabi_sanitizer,
     }

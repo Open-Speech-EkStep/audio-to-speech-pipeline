@@ -1,13 +1,11 @@
-from ekstep_data_pipelines.common.utils import get_logger
-from google.cloud.speech_v1 import enums
-from google.cloud import speech_v1
-import sys
 import os
 
+from google.cloud import speech_v1
+from google.cloud.speech_v1 import enums
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
     GoogleTranscriptionClientError,
 )
-
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger("GoogleTranscriptionClient")
 
@@ -31,7 +29,7 @@ class GoogleTranscriptionClient(object):
         if not os.path.exists(path):
             LOGGER(f"Directory {path} not does already exist")
             os.makedirs(path)
-            LOGGER.info(f"Directory {path} created successfully")
+            LOGGER.info("Directory %s created successfully", path)
 
     @property
     def config(self):
@@ -52,25 +50,27 @@ class GoogleTranscriptionClient(object):
         return self._client
 
     def generate_transcription(self, language, source_file_path):
-        source_file_path = source_file_path.replace("/tmp/", f"gs://")
+        source_file_path = source_file_path.replace("/tmp/", "gs://")
         try:
             content = self.call_speech_to_text(source_file_path)
             transcriptions = list(
                 map(lambda c: c.alternatives[0].transcript, content.results)
             )
-        except RuntimeError as e:
-            raise GoogleTranscriptionClientError(e)
+        except RuntimeError as error:
+            raise GoogleTranscriptionClientError(error)
 
         return " ".join(transcriptions)
 
     def call_speech_to_text(self, input_file_path):
 
-        LOGGER.info(f"Queuing operation on GCP for {input_file_path}")
+        LOGGER.info("Queuing operation on GCP for %s", input_file_path)
         operation = self.client.long_running_recognize(
             self.config, {"uri": input_file_path}
         )
 
-        LOGGER.info(f"Waiting for {operation} to complete on GCP for {input_file_path}")
+        LOGGER.info(
+            "Waiting for {operation} to complete on GCP for %s", input_file_path
+        )
         response = operation.result()
 
         return response

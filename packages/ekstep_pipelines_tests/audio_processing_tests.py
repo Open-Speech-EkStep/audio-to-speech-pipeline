@@ -1,12 +1,8 @@
-import sys
 import unittest
-from ekstep_data_pipelines.audio_processing import constants
-from unittest.mock import Mock
 from unittest import mock
+from unittest.mock import Mock
 
-
-from ekstep_data_pipelines.audio_processing import generate_hash
-
+from ekstep_data_pipelines.audio_processing import constants
 from ekstep_data_pipelines.audio_processing.audio_processer import AudioProcessor
 
 

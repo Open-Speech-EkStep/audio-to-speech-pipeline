@@ -12,7 +12,7 @@ LOGGER = get_logger("PunjabiSanitizer")
 
 
 class PunjabiSanitizer(BaseTranscriptionSanitizer):
-                    
+
     VALID_CHARS = "[  ਼ ਂ ੍ੑ ਾ ਿ ੀ ੁ ੂ ੇ ੈ ੋੰੱਅ-ਊਏ-ਐਓ-ਨਪ-ਰਲਲ਼ਵਸ਼ਸਹਖ਼-ੜਫ਼]+"
     PUNCTUATION = "!\"#%&'()*+,./;<=>?@[\\]^_`{|}~।"
 

@@ -1,8 +1,8 @@
-import numpy as np
-import hdbscan
-from tqdm import tqdm
-from sklearn.metrics.pairwise import cosine_distances
 import math
+
+import hdbscan
+import numpy as np
+from sklearn.metrics.pairwise import cosine_distances
 
 
 class Clustering:
@@ -78,7 +78,8 @@ class Clustering:
         Runs HDBSCAN on partial sets of orginial data,
         Returns:
           - mean embeddings: np.ndarray -> mean embeds of each cluster found in each partial set
-          - flat_noise_embeds: np.ndarray -> an array containing all the noise points found over all partial sets.
+          - flat_noise_embeds: np.ndarray -> an array containing all the noise points
+          found over all partial sets.
           - all_cluster_embeds: list of np.arrays ->
 
         """
@@ -117,17 +118,20 @@ class Clustering:
                 )
             )
 
-            # mapping contains cluster label as key and cluster embeddings as values
+            # mapping contains cluster label as key and cluster embeddings as
+            # values
             mapping = self.get_cluster_embeddings(partial_set, partial_set_labels)
 
-            # logic for calculating mean embedding of the cluster if cluster-label != -1 (noise)
+            # logic for calculating mean embedding of the cluster if
+            # cluster-label != -1 (noise)
             for i in mapping.items():
                 if i[0] != -1:
                     raw_embed = np.mean(i[1], axis=0)
                     mean_embeddings.append(raw_embed / np.linalg.norm(raw_embed, 2))
                     all_cluster_embeds.append(list(i[1]))
 
-        # getting flat noise embeds -> noise contains a list of numpy arrays : len(noise) = num_partial_sets
+        # getting flat noise embeds -> noise contains a list of numpy arrays :
+        # len(noise) = num_partial_sets
         flat_noise_embeds = [item for sublist in noise for item in sublist]
 
         return (

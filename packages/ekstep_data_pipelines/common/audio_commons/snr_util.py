@@ -1,24 +1,19 @@
-import sys
-
-from ekstep_data_pipelines.audio_processing.audio_duration import calculate_duration
-
-
-import os
 import json
+import os
 import shutil
 import subprocess
+
 import pandas as pd
 from ekstep_data_pipelines.audio_language_identification.audio_language_inference import (
     infer_language,
 )
-import librosa
+from ekstep_data_pipelines.audio_processing.audio_duration import calculate_duration
 from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger("Snr")
 
 
 class SNR:
-
     """
     Util object for performing SNR analysis over different
     """
@@ -31,8 +26,8 @@ class SNR:
             "audio_processor_config", {}
         ).get("feat_language_identification", False)
         LOGGER.info(
-            "Running with feat_language_identification="
-            + str(feat_language_identification)
+            "Running with feat_language_identification=%s",
+            str(feat_language_identification),
         )
         curr_instance = SNR(feat_language_identification)
         return curr_instance
@@ -42,21 +37,26 @@ class SNR:
         self.current_working_dir = os.getcwd()
 
     def get_command(self, current_working_dir, file_path):
-        return f'"{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/WADASNR" -i "{file_path}" -t "{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
+        return (
+            f'"{current_working_dir}/ekstep_data_pipelines/binaries/WadaSNR/Exe/WADASNR" -i '
+            f'"{file_path}" -t "{current_working_dir}'
+            f'/ekstep_data_pipelines/binaries/WadaSNR/Exe/Alpha0.400000.txt" -ifmt mswav'
+        )
 
     def get_output_directories(self, output_dir, ensure_path=True):
         clean_path, rejected_path = f"{output_dir}/clean", f"{output_dir}/rejected"
 
         if ensure_path:
             LOGGER.info(
-                f"ensure_path flag is {ensure_path}, ensuring that the directories exist"
+                "ensure_path flag is %s, ensuring that the directories exist",
+                ensure_path,
             )
             if not os.path.exists(clean_path):
-                LOGGER.info(f"{clean_path} does not exist, creating it")
+                LOGGER.info("%s does not exist, creating it", clean_path)
                 os.makedirs(clean_path)
 
             if not os.path.exists(rejected_path):
-                LOGGER.info(f"{rejected_path} does not exist, creating it")
+                LOGGER.info("%s does not exist, creating it", rejected_path)
                 os.makedirs(rejected_path)
 
         return clean_path, rejected_path
@@ -68,23 +68,23 @@ class SNR:
         """
         Convert given file to required format with FFMPEG and process with WADA.
         """
-        LOGGER.info(f"Measuring SNR for file at {file_path}")
+        LOGGER.info("Measuring SNR for file at ", file_path)
         command = self.get_command(self.current_working_dir, file_path)
 
-        LOGGER.info(f"Command to be run {command}")
+        LOGGER.info("Command to be run %s", command)
 
         try:
             process_output = subprocess.check_output(command, shell=True)
-            LOGGER.info("process_output:" + str(process_output))
-        except subprocess.CalledProcessError as e:
-            LOGGER.error("Called process error:" + str(e))
+            LOGGER.info("process_output:%s", str(process_output))
+        except subprocess.CalledProcessError as error:
+            LOGGER.error("Called process error:%s", str(error))
             return float(-1)
 
         return float(process_output.split()[-3].decode("utf-8"))
 
     def process_files_list(self, input_file_list):
 
-        LOGGER.info(f"Processing all the file in the directory {input_file_list}")
+        LOGGER.info("Processing all the file in the directory %s", input_file_list)
 
         file_snrs = {}
 
@@ -97,7 +97,7 @@ class SNR:
 
             file_snrs[file_path] = snr_value
 
-            LOGGER.info(f"{file_path} has an snr value of {snr_value}")
+            LOGGER.info("%s has an snr value of %s", file_path, snr_value)
 
         return file_snrs
 
@@ -110,13 +110,15 @@ class SNR:
         audio_id,
         hash_code,
     ):
-        LOGGER.info(f"Processing SNR for for the files {input_file_list}")
+        LOGGER.info("Processing SNR for for the files %s", input_file_list)
         processed_file_snr_dict = self.process_files_list(input_file_list)
 
-        LOGGER.info(f"Getting the clean and reject folders")
+        LOGGER.info("Getting the clean and reject folders")
         clean_dir_path, rejected_dir_path = self.get_output_directories(output_dir_path)
         LOGGER.info(
-            f"Got the clean and reject folders, clean/{clean_dir_path} and rejected/{rejected_dir_path}"
+            "Got the clean and reject folders, clean/%s and rejected/%s",
+            clean_dir_path,
+            rejected_dir_path,
         )
 
         metadata = pd.read_csv(metadata_file_name)
@@ -136,7 +138,7 @@ class SNR:
                 language_confidence_score = infer_language(file_path)
             else:
                 language_confidence_score = None
-            LOGGER.info("language_confidence_score:" + str(language_confidence_score))
+            LOGGER.info("language_confidence_score:%s", str(language_confidence_score))
             clip_duration = calculate_duration(file_path)
             if snr_value < threshold:
                 self.move_file_locally(

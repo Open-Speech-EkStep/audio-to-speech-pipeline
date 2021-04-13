@@ -1,13 +1,10 @@
-import json
 import datetime
-import math
-import time
 
 from airflow import DAG
-from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
-from airflow.contrib.operators import kubernetes_pod_operator
+from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
+
 from data_validation_report_processor import report_generation_pipeline
 
 secret_file = secret.Secret(

@@ -1,4 +1,5 @@
 import re
+
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
     BaseTranscriptionSanitizer,
 )
@@ -11,7 +12,6 @@ LOGGER = get_logger("HindiTranscriptionSanitizer")
 
 
 class HindiSanitizer(BaseTranscriptionSanitizer):
-
     VALID_CHARS = "[ ँ-ःअ-ऋए-ऑओ-नप-रलव-ह़ा-ृे-ॉो-्0-9क़-य़ ॅ]"
     PUNCTUATION = "!\"#%&'()*+,./;<=>?@[\\]^_`{|}~।"
 
@@ -23,7 +23,7 @@ class HindiSanitizer(BaseTranscriptionSanitizer):
         pass
 
     def sanitize(self, transcription: str):
-        LOGGER.info("Sanitizing transcription:" + transcription)
+        LOGGER.info("Sanitizing transcription:%s", transcription)
         transcription = (
             transcription.strip()
         )  # removes spaces from the starting and ending of transcription

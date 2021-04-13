@@ -1,12 +1,13 @@
 # [START composer_kubernetespodoperator]
 import datetime
 import json
-import time
+
 from airflow import models
-from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
+from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
+
 from move_exp_data_dag_processor import count_utterances_file_chunks, copy_utterances
 
 composer_namespace = Variable.get("composer_namespace")

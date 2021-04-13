@@ -1,13 +1,8 @@
+import sys
 import unittest
 from unittest import mock
-import sys
-import os
-import shutil
+from unittest.mock import Mock
 
-from unittest.mock import MagicMock, patch, Mock
-
-
-from azure.cognitiveservices.speech import speech
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.google_transcription_client import (
     GoogleTranscriptionClient,
 )

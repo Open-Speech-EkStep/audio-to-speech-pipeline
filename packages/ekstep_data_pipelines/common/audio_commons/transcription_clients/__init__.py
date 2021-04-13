@@ -7,7 +7,6 @@ from ekstep_data_pipelines.common.audio_commons.transcription_clients.google_tra
 
 
 def get_transcription_clients(initialization_dict):
-
     azure_transcription_client = AzureTranscriptionClient.get_instance(
         initialization_dict
     )

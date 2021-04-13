@@ -1,5 +1,6 @@
-import numpy as np
 import math
+
+import numpy as np
 
 
 def get_big_cluster_size_threshold(all_cluster_embeds):
@@ -11,8 +12,8 @@ def get_big_cluster_size_threshold(all_cluster_embeds):
 
     cl_sizes = []
     thresholds_wrt_multipliers = []
-    for cl in all_cluster_embeds:
-        cl_sizes.append(len(cl))
+    for cluster in all_cluster_embeds:
+        cl_sizes.append(len(cluster))
     mean_cl_size = np.mean(np.array(cl_sizes))
     for multiplier in range(5, 1, -1):
         if [size for size in cl_sizes if size >= mean_cl_size * multiplier]:

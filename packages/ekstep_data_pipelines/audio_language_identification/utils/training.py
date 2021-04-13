@@ -1,14 +1,13 @@
 import os
-import yaml
 import shutil
+
 import numpy as np
-
-from sklearn.metrics import accuracy_score
-from tqdm import tqdm
-
 import torch
+import yaml
+from sklearn.metrics import accuracy_score
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 from ekstep_data_pipelines.audio_language_identification.loaders.data_loader import (
     SpeechDataGenerator,
 )
@@ -137,18 +136,20 @@ def train(
         ):
             # move to GPU
             data, target = data.to(device, dtype=torch.float), target.to(device)
-            ## find the loss and update the model parameters accordingly
+            # find the loss and update the model parameters accordingly
             # clear the gradients of all optimized variables
             optimizer.zero_grad()
-            # forward pass: compute predicted outputs by passing inputs to the model
+            # forward pass: compute predicted outputs by passing inputs to the
+            # model
             output = model(data)
             # calculate the batch loss
             loss = criterion(output, target)
-            # backward pass: compute gradient of the loss with respect to model parameters
+            # backward pass: compute gradient of the loss with respect to model
+            # parameters
             loss.backward()
             # perform a single optimization step (parameter update)
             optimizer.step()
-            ## record the average training loss, using something like
+            # record the average training loss, using something like
             _, predictions = output.max(1)
             temp_predict = [pred.item() for pred in predictions]
             temp_target = [actual.item() for actual in target]
@@ -168,8 +169,9 @@ def train(
             # move to GPU
             if use_cuda:
                 data, target = data.to(device, dtype=torch.float), target.to(device)
-            ## update the average validation loss
-            # forward pass: compute predicted outputs by passing inputs to the model
+            # update the average validation loss
+            # forward pass: compute predicted outputs by passing inputs to the
+            # model
             output = model(data)
             # calculate the batch loss
             loss = criterion(output, target)
@@ -190,7 +192,8 @@ def train(
 
         # print training/validation statistics
         print(
-            "Epoch: {} \tTraining Loss: {:.10f} \tTraining Accuracy: {:.6f} \tValidation Loss: {:.10f} \tValidation  Accuracy: {:.6f} ".format(
+            "Epoch: {} \tTraining Loss: {:.10f} \tTraining Accuracy: {:.6f} \tValidation "
+            "Loss: {:.10f} \tValidation  Accuracy: {:.6f} ".format(
                 epoch, train_loss, train_acc, valid_loss, valid_acc
             )
         )

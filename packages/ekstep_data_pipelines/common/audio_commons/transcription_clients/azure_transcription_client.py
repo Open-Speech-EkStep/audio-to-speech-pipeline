@@ -26,14 +26,14 @@ class AzureTranscriptionClient(object):
     def generate_transcription(self, language, source_file_path):
         try:
             result = self.speech_to_text(source_file_path)
-        except RuntimeError as e:
-            raise AzureTranscriptionClientError(e)
+        except RuntimeError as error:
+            raise AzureTranscriptionClientError(error)
         return result.text
 
     def speech_to_text(self, audio_file_path):
         audio_input = speech.audio.AudioConfig(filename=audio_file_path)
 
-        LOGGER.info(f"calling azure stt API for file: {audio_file_path}")
+        LOGGER.info("calling azure stt API for file: %s", audio_file_path)
         speech_recognizer = speech.SpeechRecognizer(
             speech_config=self.speech_config,
             language=self.language,
@@ -43,8 +43,9 @@ class AzureTranscriptionClient(object):
 
         result = speech_recognizer.recognize_once()
 
+        # R1705: Unnecessary "elif" after "return" (no-else-return)
         if result.reason == speech.ResultReason.RecognizedSpeech:
-            LOGGER.info("Recognized: {}".format(result.text))
+            LOGGER.info("Recognized: %s", result.text)
             return result
         elif result.reason == speech.ResultReason.NoMatch:
             msg = "No speech could be recognized: {}".format(result.no_match_details)

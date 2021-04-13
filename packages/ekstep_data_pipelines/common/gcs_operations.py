@@ -1,12 +1,13 @@
+import datetime
+import glob
 import multiprocessing
 import os
-import yaml
-import shutil, glob
+import shutil
+from concurrent.futures import ThreadPoolExecutor
 from os import listdir
 from os.path import isfile, join
+
 from google.cloud import storage
-from concurrent.futures import ThreadPoolExecutor
-import datetime
 from ekstep_data_pipelines.common.utils import get_logger
 
 Logger = get_logger("GCS Operations")
@@ -89,11 +90,13 @@ class CloudStorageOperations:
         # Provides options to download a file OR folder
         # Option 1: FILE mode: Download a file - copies a file with same name in destination folder
         # bucket_name = "your-bucket-name"
-        # source_blob_name = "storage-object-name" e.g. "data/raw/curation/tobeprocessed/hindi/f10.txt"
+        # source_blob_name = "storage-object-name" e.g. "data/raw/curation/"
+        # "tobeprocessed/hindi/f10.txt"
         # destination = "local/path/to/folder" e.g. "data/raw/curation/tobeprocessed/hindi/f10.txt"
         # isDirectory = flag to specify whether source is Directory OR File
 
-        # Option 2: DIRECTORY mode: Download all files inside a folder - creates destination local dir if not exists and copies all files from source
+        # Option 2: DIRECTORY mode: Download all files inside a folder - creates destination
+        # local dir if not exists and copies all files from source
         # bucket_name = "your-bucket-name"
         # source_blob_name = "storage-object-name" e.g. "data/raw/curation/tobeprocessed/hindi"
         # destination = "local/path/to/folder" e.g. "data/raw/curation/tobeprocessed/hindi"
@@ -177,7 +180,8 @@ class CloudStorageOperations:
         :param string local_source_path: Local path to the file/directory being uploaded.
                                          Must include the file name incase of file upload
 
-        :param string destination_blob_name: Remote path where the file/directory needs to be uploaded to
+        :param string destination_blob_name: Remote path where the file/directory needs
+        to be uploaded to
 
         :param bool upload_directy: Flag for specifying if the function is being used to
                                     upload a file or a directory. Pass false incase of file
@@ -188,24 +192,32 @@ class CloudStorageOperations:
 
         if not upload_directory:
             Logger.info(
-                f"Uploading file from source: {local_source_path} to destination: {self.bucket}/{destination_blob_name}"
+                "Uploading file from source: %s to destination: " "%f/%f",
+                local_source_path,
+                self.bucket,
+                destination_blob_name,
             )
             blob = bucket.blob(destination_blob_name)
             try:
                 blob.upload_from_filename(local_source_path)
-            except Exception as e:
-                Logger.info(f"Single file Upload failed with error {e.__str__()}")
+            # W0703: Catching too general exception Exception (broad-except)
+            except Exception as exception:
+                Logger.info(
+                    "Single file Upload failed with error %s", exception.__str__()
+                )
                 return False
 
             Logger.info(
-                f"Single File uploaded successfully to {self.bucket}/{destination_blob_name}"
+                "Single File uploaded successfully to %f/%f",
+                self.bucket,
+                destination_blob_name,
             )
             return True
 
         files = [
             f for f in listdir(local_source_path) if isfile(join(local_source_path, f))
         ]
-        Logger.info(f"All the files in directory {files}")
+        Logger.info("All the files in directory %s", files)
         # TODO: move to constant and pass concurrency as args
         estimated_cpu_share = 0.05
         concurrency = multiprocessing.cpu_count() / estimated_cpu_share
@@ -217,27 +229,30 @@ class CloudStorageOperations:
             src_file = local_source_path + "/" + file
             blob = bucket.blob(destination_blob_name + "/" + file)
             Logger.info(
-                "Uploading files from source: {} to destination: {}/{} ".format(
-                    src_file, self.bucket, blob.name
-                )
+                "Uploading files from source: %s to destination: %s/%s ",
+                src_file,
+                self.bucket,
+                blob.name,
             )
             futures.append(executor.submit(blob.upload_from_filename, src_file))
 
         executor.shutdown(wait=True)
 
-        Logger.info(f"Checking the result of all upload values")
+        Logger.info("Checking the result of all upload values")
 
         for upload_future in futures:
             try:
                 upload_future.result()
-            except Exception as e:
+            except Exception as exception:
                 Logger.error(
-                    f"Uploading directory {local_source_path} failed with error {e.__str__()}"
+                    "Uploading directory %s failed with error %s",
+                    local_source_path,
+                    exception.__str__(),
                 )
                 return False
 
         Logger.info(
-            f"All the files in directory {local_source_path} uploaded successfully"
+            "All the files in directory %s uploaded successfully", local_source_path
         )
         return True
 
@@ -255,8 +270,8 @@ class CloudStorageOperations:
             print(blob.name)
         if delimiter:
             print("Prefixes:")
-            for prefix in blobs.prefixes:
-                print(prefix)
+            for prefix_ in blobs.prefixes:
+                print(prefix_)
 
     def rename_blob(self, bucket_name, blob_name, new_name):
         """Renames a blob."""

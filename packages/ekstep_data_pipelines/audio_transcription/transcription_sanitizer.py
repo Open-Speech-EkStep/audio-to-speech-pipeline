@@ -1,16 +1,16 @@
 import re
+
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
     TranscriptionSanitizationError,
 )
 from ekstep_data_pipelines.common.utils import get_logger
-
 
 LOGGER = get_logger("TranscriptionSanitizer")
 
 
 class TranscriptionSanitizer(object):
     def sanitize(self, transcription):
-        LOGGER.info("Sanitizing transcription:" + transcription)
+        LOGGER.info("Sanitizing transcription:%s", transcription)
         transcription = (
             transcription.strip()
         )  # removes spaces in starting of transcription

@@ -12,5 +12,5 @@ def get_hash_code_of_audio_file(file_path):
     content = audio_file.read()
     md5_hash.update(content)
     digest = md5_hash.hexdigest()
-    LOGGER.info(f"Given file is {file_path} and hash is {digest}")
+    LOGGER.info("Given file is %s and hash is %s", file_path, digest)
     return digest

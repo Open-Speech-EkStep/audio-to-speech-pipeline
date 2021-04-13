@@ -1,6 +1,6 @@
+from copy import deepcopy
 from sklearn.metrics.pairwise import cosine_distances
 import numpy as np
-from copy import deepcopy
 
 backup = dict({})
 
@@ -21,7 +21,7 @@ class Merge:
 
     def pairs_to_merge(
         self,
-        all_cluster_embeds,
+        all_cluster_embeds,  # W0613: Unused argument 'all_cluster_embeds' (unused-argument)
         mean_embeddings,
         similarity_allowed,
         merge_closest_only=False,
@@ -29,7 +29,6 @@ class Merge:
         distances = cosine_distances(mean_embeddings)
         mask = np.eye(distances.shape[0], distances.shape[1])
         distances = distances + mask
-        # print('Pairs to merge:')
 
         possible_mergers = dict({})
 
@@ -49,9 +48,12 @@ class Merge:
         for key in list(possible_mergers.keys()):
             if key not in list_of_indices_covered:
                 values = possible_mergers[key]
-                for v in values:
+                for value in values:
                     new_vals = [
-                        i for i in possible_mergers[v] if i not in values if i != key
+                        i
+                        for i in possible_mergers[value]
+                        if i not in values
+                        if i != key
                     ]
                     values.extend(new_vals)
                 list_of_indices_covered.extend(values + [key])
@@ -71,10 +73,6 @@ class Merge:
 
                 final_mergers[key] = values
 
-        # total_merged = 0
-        # for val in final_mergers.values():
-        #     total_merged += len(val)
-        # print(total_merged)
         return final_mergers
 
     def mean_embedding_of_cluster(self, cluster_embeds):
@@ -112,7 +110,6 @@ class Merge:
         for cluster in final_all_clusters_embeds:
             final_mean_embeds.append(self.mean_embedding_of_cluster(cluster))
 
-        # print('Total clusters after merging: {}'.format(len(final_all_clusters_embeds)))
         return final_all_clusters_embeds, final_mean_embeds
 
     def run_repetitive_merging(
@@ -127,7 +124,6 @@ class Merge:
         backup["all_cluster_embeds"] = all_cluster_embeds
         backup["mean_embeddings"] = mean_embeddings
 
-        # print('using similarity: {}'.format(start_similarity_allowed))
         possible_mergers = self.pairs_to_merge(
             all_cluster_embeds,
             mean_embeddings,
@@ -142,8 +138,6 @@ class Merge:
             backup["all_cluster_embeds"] = all_embeds_merged
             backup["mean_embeddings"] = mean_embeds_merged
 
-            # print(len(all_embeds_merged))
-            # print('-' * 100)
             self.run_repetitive_merging(
                 all_embeds_merged,
                 mean_embeds_merged,
@@ -164,8 +158,6 @@ class Merge:
                 all_embeds_merged, mean_embeds_merged = self.get_clusters_after_merging(
                     possible_mergers, all_cluster_embeds
                 )
-                # print(len(all_embeds_merged))
-                # print('-' * 100)
 
                 backup["all_cluster_embeds"] = all_embeds_merged
                 backup["mean_embeddings"] = mean_embeds_merged
@@ -243,11 +235,14 @@ class Merge:
             )
         )
         # distances is a matrix of shape (num_noise_points, num_mean_embeds)
-        # with cosine dist of each noise embed with all mean embeds present in rows
+        # with cosine dist of each noise embed with all mean embeds present in
+        # rows
         distances = cosine_distances(noise_embeds, mean_embeds)
         closest_cluster_index = np.argmin(distances, axis=1)
         closest_cluster_dist = np.min(distances, axis=1)
 
+        # C1801: Do not use `len(SEQUENCE)` without comparison to
+        # determine if a sequence is empty (len-as-condition)
         if len(closest_cluster_dist):
             for index, dist in enumerate(closest_cluster_dist):
                 if dist <= max_distance_allowed:

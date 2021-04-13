@@ -1,18 +1,12 @@
+import numpy as np
+from ekstep_data_pipelines.audio_analysis.speaker_analysis.clustering import Clustering
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_file_mappings import (
     Map,
 )
-from ekstep_data_pipelines.audio_analysis.speaker_analysis.clustering import Clustering
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.merging import Merge
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.splitting import (
     get_big_cluster_embeds,
 )
-
-import numpy as np
-
-# from clustering import Clustering
-# from create_file_mappings import Map
-# from merging import Merge
-# from splitting import get_big_cluster_embeds
 
 
 def create_speaker_clusters(
@@ -42,7 +36,8 @@ def create_speaker_clusters(
 
     print("Num clusters = {}".format(num_clusters))
     if num_clusters >= 1:
-        # step:2.2 -> APPLYING MERGING OVER SIMILAR CLUSTERS FROM PARTIAL SETS CLUSTERS
+        # step:2.2 -> APPLYING MERGING OVER SIMILAR CLUSTERS FROM PARTIAL SETS
+        # CLUSTERS
 
         merger = Merge()
         (
@@ -101,7 +96,8 @@ def create_speaker_clusters(
                     )
                 )
 
-            # preparing new list of clusters (after adding split+merged clusters together) and updated final noise
+            # preparing new list of clusters (after adding split+merged
+            # clusters together) and updated final noise
             (
                 all_cluster_embeds_to_merge,
                 mean_embeddings_to_merge,
@@ -122,7 +118,8 @@ def create_speaker_clusters(
             )
             print("Num final noise points = {}".format(len(noise_embeds_final)))
 
-            # step:2.4 -> repetitive merging on the final clusters from step 2.3
+            # step:2.4 -> repetitive merging on the final clusters from step
+            # 2.3
             merger_final = Merge()
             (
                 all_cluster_embeds_merged,
@@ -145,7 +142,7 @@ def create_speaker_clusters(
         # step:3 -> FIT NOISE
         (
             all_cluster_embeds_after_noise_fit,
-            mean_embeds_new,
+            mean_embeds_new,  # W0612: Unused variable 'mean_embeds_new' (unused-variable)
             unallocated_noise_embeds,
             was_noise_flag,
         ) = merger.fit_noise_points(
@@ -163,7 +160,9 @@ def create_speaker_clusters(
             for cluster in all_cluster_embeds_after_noise_fit
         ]
         files_in_clusters = [map_obj.find_file(row) for row in indices]
-        # files_in_clusters_with_noise_flag = [(file, was_noise_flag[ind]) for ind, file in enumerate(files_in_clusters)]
+        # files_in_clusters_with_noise_flag = [(file, was_noise_flag[ind])
+        # for ind, file in enumerate(
+        # files_in_clusters)]
         files_in_clusters_with_noise_flag = []
         for ind, list_of_files in enumerate(files_in_clusters):
             cluster = []
@@ -178,6 +177,8 @@ def create_speaker_clusters(
         }
 
         noise_file_map_dict = dict({})
+        # C1801: Do not use `len(SEQUENCE)` without comparison to
+        # determine if a sequence is empty (len-as-condition)
         if len(unallocated_noise_embeds):
             print(
                 "Creating mapping for {} unallocated noise points".format(
@@ -193,12 +194,13 @@ def create_speaker_clusters(
             }
 
         return file_map_dict, noise_file_map_dict
-    else:
-        print("No clusters could be found!")
+    # R1705: Unnecessary "else" after "return" (no-else-return)
+    # else:
+    #     print("No clusters could be found!")
 
 
 if __name__ == "__main__":
-    file_map_dict, noise_file_map_dict = create_speaker_clusters(
+    file_map_dict_, noise_file_map_dict_ = create_speaker_clusters(
         embed_filename_map_path="/Users/neerajchhimwal/Desktop/spill.npz",
         source_name="spill",
     )

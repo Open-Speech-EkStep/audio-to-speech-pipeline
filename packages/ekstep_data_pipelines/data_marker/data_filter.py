@@ -33,15 +33,15 @@ class DataFilter(object):
         with_randomness="false",
         with_fraction=1,
     ):
-        df = self.to_df(utterances)
+        data_frame = self.to_df(utterances)
         if with_randomness == "true":
             Logger.info("applying randomness")
-            df = df.sample(frac=with_fraction)
-        df["cum_hours"] = df["clipped_utterance_duration"].cumsum()
-        df = df[(df.cum_hours <= total_duration_in_hrs * 3600)].drop(
-            columns="cum_hours"
-        )
-        return self.to_tuples(df)
+            data_frame = data_frame.sample(frac=with_fraction)
+        data_frame["cum_hours"] = data_frame["clipped_utterance_duration"].cumsum()
+        data_frame = data_frame[
+            (data_frame.cum_hours <= total_duration_in_hrs * 3600)
+        ].drop(columns="cum_hours")
+        return self.to_tuples(data_frame)
 
     def to_df(self, utterances):
         return pd.DataFrame(
@@ -66,25 +66,28 @@ class DataFilter(object):
         lower_bound = gte_speaker_duration - threshold
         upper_bound = lte_speaker_duration + threshold
 
-        df = self.to_df(utterances)
+        data_frame = self.to_df(utterances)
         # df = df[df['speaker_id' is not None]]
-        df["cum_hours"] = df.groupby(["speaker_id"])[
+        data_frame["cum_hours"] = data_frame.groupby(["speaker_id"])[
             "clipped_utterance_duration"
         ].cumsum()
-        df = df[
-            df["speaker_id"].isin(
+        data_frame = data_frame[
+            data_frame["speaker_id"].isin(
                 list(
-                    df[(df.cum_hours <= upper_bound) & (df.cum_hours >= lower_bound)][
-                        "speaker_id"
-                    ]
+                    data_frame[
+                        (data_frame.cum_hours <= upper_bound)
+                        & (data_frame.cum_hours >= lower_bound)
+                    ]["speaker_id"]
                 )
             )
         ]
-        df = df[(df.cum_hours <= upper_bound)].drop(columns="cum_hours")
-        return self.to_tuples(df)
+        data_frame = data_frame[(data_frame.cum_hours <= upper_bound)].drop(
+            columns="cum_hours"
+        )
+        return self.to_tuples(data_frame)
 
     def apply_filters(self, filters, utterances):
-        Logger.info("Applying filters:" + str(filters))
+        Logger.info("Applying filters: %s", str(filters))
         by_utterance_duration = filters.get("by_utterance_duration", None)
         by_snr = filters.get("by_snr", None)
         by_speaker = filters.get("by_speaker", None)
@@ -99,34 +102,34 @@ class DataFilter(object):
             return []
 
         if len(exclude_speaker_ids) > 0:
-            Logger.info("Excluding audio_ids :" + str(exclude_speaker_ids))
+            Logger.info("Excluding audio_ids: %s", str(exclude_speaker_ids))
             filtered_utterances = self.exclude_speaker_ids(
                 utterances, exclude_speaker_ids
             )
 
         if len(exclude_audio_ids) > 0:
-            Logger.info("Excluding audio_ids: " + str(exclude_audio_ids))
+            Logger.info("Excluding audio_ids: %s", str(exclude_audio_ids))
             filtered_utterances = self.exclude_audio_ids(utterances, exclude_audio_ids)
 
         if by_utterance_duration is not None:
             Logger.info(
-                "Filtering by_utterance_duration:" + str(by_utterance_duration)
+                "Filtering by_utterance_duration: %s", str(by_utterance_duration)
             )
             filtered_utterances = self.by_utterance_duration(
                 filtered_utterances, by_utterance_duration
             )
         if by_snr is not None:
-            Logger.info("Filtering by snr:" + str(by_snr))
+            Logger.info("Filtering by snr: %s", str(by_snr))
             filtered_utterances = self.by_snr(filtered_utterances, by_snr)
-            
+
         if by_speaker is not None:
-            Logger.info("Filtering by speaker:" + str(by_speaker))
+            Logger.info("Filtering by speaker: %s", str(by_speaker))
             filtered_utterances = self.by_per_speaker_duration(
                 filtered_utterances, by_speaker
             )
 
         if by_duration is not None:
-            Logger.info("Filtering by duration: " + str(by_duration))
+            Logger.info("Filtering by duration: %s", str(by_duration))
             filtered_utterances = self.by_duration(
                 filtered_utterances, by_duration, with_randomness, with_fraction
             )

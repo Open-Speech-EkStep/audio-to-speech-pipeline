@@ -1,11 +1,6 @@
 import json
 
 import pandas as pd
-
-from ekstep_data_pipelines.common.utils import get_logger
-
-from sqlalchemy import text
-
 from ekstep_data_pipelines.common.dao.constants import (
     GET_UNIQUE_ID,
     IS_EXIST,
@@ -13,6 +8,7 @@ from ekstep_data_pipelines.common.dao.constants import (
     COMMAND_WITHOUT_LICENSE,
     LICENSE,
 )
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger("CatalogueDao")
 
@@ -32,7 +28,8 @@ class CatalogueDao:
     def get_utterances_by_source(self, source, status):
         parm_dict = {"source": source, "status": status}
         data = self.postgres_client.execute_query(
-            "select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr "
+            "select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, "
+            "audio_id, snr "
             "from media_speaker_mapping "
             "where audio_id "
             'in (select audio_id from media_metadata_staging where "source" = :source) '
@@ -49,8 +46,8 @@ class CatalogueDao:
             "set utterances_files_list = :utterances where audio_id = :audio_id"
         )
         utterances_json_str = json.dumps(utterances)
-        LOGGER.info("utterances_json_str:" + utterances_json_str)
-        LOGGER.info("utterances:" + str(utterances))
+        LOGGER.info("utterances_json_str:%s", utterances_json_str)
+        LOGGER.info("utterances:%s", str(utterances))
         parm_dict = {"utterances": utterances_json_str, "audio_id": audio_id}
         self.postgres_client.execute_update(update_query, **parm_dict)
         return True
@@ -109,15 +106,15 @@ class CatalogueDao:
         """
         db = self.postgres_client.db
 
-        with open(meta_data_path, "r") as f:
-            df = pd.read_csv(meta_data_path)
-            columns = df.columns
+        with open(meta_data_path, "r") as file:
+            dataframe = pd.read_csv(meta_data_path)
+            columns = dataframe.columns
             cmd = COMMAND_WITHOUT_LICENSE
             if LICENSE in columns:
                 cmd = COMMAND_WITH_LICENSE
             conn = db.raw_connection()
             cursor = conn.cursor()
-            cursor.copy_expert(cmd, f)
+            cursor.copy_expert(cmd, file)
             conn.commit()
 
     def upload_file_to_downloaded_source(self, file_path):
@@ -125,11 +122,14 @@ class CatalogueDao:
         db_conn = self.postgres_client.db
 
         LOGGER.info("uploading data to source_metadata")
-        with open(file_path, "r") as f:
+        with open(file_path, "r") as file:
             conn = db_conn.raw_connection()
             cursor = conn.cursor()
-            cmd = "COPY source_metadata_downloaded(source,num_speaker,total_duration,num_of_audio) FROM STDIN WITH (FORMAT CSV, HEADER)"
-            cursor.copy_expert(cmd, f)
+            cmd = (
+                "COPY source_metadata_downloaded(source,num_speaker,total_duration,num_of_audio)"
+                " FROM STDIN WITH (FORMAT CSV, HEADER)"
+            )
+            cursor.copy_expert(cmd, file)
             conn.commit()
 
     def insert_speaker(self, source, speaker_name):
@@ -145,7 +145,8 @@ class CatalogueDao:
     ):
         update_query = (
             "update media_speaker_mapping "
-            "set speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name limit 1) "
+            "set speaker_id=(select speaker_id from speaker where speaker_name=:speaker_name "
+            "limit 1) "
             ", was_noise=:was_noise "
             "where clipped_utterance_file_name in "
         )

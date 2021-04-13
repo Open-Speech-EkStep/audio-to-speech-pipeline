@@ -1,6 +1,4 @@
 import json
-from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.common import BaseProcessor
 
 from ekstep_data_pipelines.audio_cataloguer.constants import (
     MAX_LOAD_DATE_FOR_MEDIA_QUERY,
@@ -15,7 +13,8 @@ from ekstep_data_pipelines.audio_cataloguer.constants import (
     GET_LOAD_TIME_FOR_AUDIO_QUERY,
     GET_UTTERANCES_LIST_OF_AUDIO_ID,
 )
-
+from ekstep_data_pipelines.common import BaseProcessor
+from ekstep_data_pipelines.common.utils import get_logger
 
 Logger = get_logger("Audio_cataloguer")
 
@@ -106,7 +105,7 @@ class AudioCataloguer(BaseProcessor):
 
             processed_audio_ids.append(audio_id)
 
-            if utterance_list == None:
+            if utterance_list is None:
                 Logger.info(audio_id)
                 continue
 
@@ -115,8 +114,8 @@ class AudioCataloguer(BaseProcessor):
                     utterance.get("language_confidence_score", None)
                 )
                 Logger.info(
-                    "inserting with language_confidence_score:"
-                    + str(language_confidence_score)
+                    "inserting with language_confidence_score: %s",
+                    str(language_confidence_score),
                 )
                 if str(utterance.get("snr_value")) == "nan":
                     snr_value = 0.0
@@ -125,7 +124,8 @@ class AudioCataloguer(BaseProcessor):
 
                 insert_query_into_mapping_table.append(
                     f"('{utterance['name']}',{utterance['duration']},\
-                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason','')}','{language_confidence_score}','{load_datetime}')"
+                    {audio_id},{snr_value},'{utterance['status']}','{utterance.get('reason', '')}'"
+                    f",'{language_confidence_score}','{load_datetime}')"
                 )
 
         return insert_query_into_mapping_table, processed_audio_ids
@@ -157,7 +157,6 @@ class AudioCataloguer(BaseProcessor):
 
         if len(results) <= 0:
             Logger.info("No sperakr id found in given audio_id")
-            pass
 
         speaker_id = results[0][0]
         return speaker_id
@@ -195,7 +194,6 @@ class AudioCataloguer(BaseProcessor):
             utterance_list = self.get_utterance_list(audio_id)
 
             for utterance_name_diration in utterance_list:
-
                 updated_query = self.create_insert_query(
                     utterance_name_diration,
                     speaker_id,
@@ -234,7 +232,11 @@ class AudioCataloguer(BaseProcessor):
             snr_value = float(utterance.get("snr_value", 0))
 
         Logger.info(
-            "inserting with language_confidence_score:" + str(language_confidence_score)
+            "inserting with language_confidence_score: %s",
+            str(language_confidence_score),
         )
 
-        return f"{defult_query} ({audio_id[0]},{speaker_id},'{file_name}',{duration},'{datetime}',{snr_value},'{status}','{fail_reason}','{language_confidence_score}'),"
+        return (
+            f"{defult_query} ({audio_id[0]},{speaker_id},'{file_name}',{duration},'{datetime}"
+            f"',{snr_value},'{status}','{fail_reason}','{language_confidence_score}'),"
+        )

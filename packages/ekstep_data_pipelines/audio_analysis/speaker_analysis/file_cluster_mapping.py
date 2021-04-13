@@ -2,8 +2,8 @@ import json
 
 
 def save_json(file_path, mappings):
-    with open(file_path, "w+") as f:
-        json.dump(mappings, f)
+    with open(file_path, "w+") as file:
+        json.dump(mappings, file)
 
 
 def file_to_speaker_map(speaker_to_file_map):

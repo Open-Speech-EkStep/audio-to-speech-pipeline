@@ -1,9 +1,7 @@
-import psycopg2
-import yaml
-from sqlalchemy import create_engine, select, MetaData, Table, text
 import numpy as np
 from psycopg2._json import Json
 from psycopg2.extensions import register_adapter, AsIs
+from sqlalchemy import create_engine, text
 
 
 def addapt_numpy_float64(numpy_float64):
@@ -44,7 +42,10 @@ class PostgresClient:
     """
 
     GET_UNIQUE_ID = "SELECT nextval('audio_id_seq');"
-    IS_EXIST = "select exists(select 1 from media_metadata_staging where raw_file_name= :file_name or media_hash_code = :hash_code);"
+    IS_EXIST = (
+        "select exists(select 1 from media_metadata_staging where raw_file_name= "
+        ":file_name or media_hash_code = :hash_code);"
+    )
 
     @staticmethod
     def get_instance(config_dict, **kwargs):

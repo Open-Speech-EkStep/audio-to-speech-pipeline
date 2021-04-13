@@ -1,15 +1,14 @@
-import os
+from concurrent.futures import ThreadPoolExecutor
 from os import listdir
 from os.path import isfile, join
+
 from google.cloud import storage
+from tqdm import tqdm
 from ekstep_data_pipelines.common.infra_commons.storage import BaseStorageInterface
-from concurrent.futures import ThreadPoolExecutor
 from ekstep_data_pipelines.common.infra_commons.storage.exceptions import (
     FileNotFoundException,
-    PathDoesNotExist,
 )
 from ekstep_data_pipelines.common.utils import get_logger
-from tqdm import tqdm
 
 Logger = get_logger("GoogleStorage")
 
@@ -88,10 +87,10 @@ class GoogleStorage(BaseStorageInterface):
     ):
         bucket = self.get_bucket_from_path(source_path)
         source = "/".join(source_path.split("/")[1:])
-        Logger.info("bucket:" + bucket)
-        Logger.info("source:" + source)
+        Logger.info("bucket:%s", bucket)
+        Logger.info("source:%s", source)
         source_files = self._list_blobs_in_a_path(bucket, source)
-        Logger.info("file:" + str(source_files))
+        Logger.info("file:%s", str(source_files))
         curr_executor = ThreadPoolExecutor(max_workers)
 
         for remote_file in tqdm(source_files):
@@ -116,7 +115,7 @@ class GoogleStorage(BaseStorageInterface):
 
         try:
             blob.upload_from_filename(local_source_path)
-        except Exception as e:
+        except Exception as exception:
             return False
 
         return True
@@ -194,7 +193,7 @@ class GoogleStorage(BaseStorageInterface):
             path_exists = storage.Blob(bucket=bucket, name=actual_path).exists(
                 self.client
             )
-        except:
+        except BaseException:
             return False
         return path_exists
 

@@ -1,11 +1,9 @@
 import multiprocessing
 
+from ekstep_data_pipelines.common import BaseProcessor
 from ekstep_data_pipelines.common import CatalogueDao
 from ekstep_data_pipelines.common.file_system.gcp_file_systen import GCPFileSystem
 from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.common import BaseProcessor
-
-
 from ekstep_data_pipelines.data_marker.constants import (
     CONFIG_NAME,
     FILTER_CRITERIA,
@@ -38,7 +36,7 @@ class DataMarker(BaseProcessor):
         self.gcs_instance = gcs_instance
         self.data_tagger_config = None
         self.data_filter = DataFilter()
-        Logger.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
+        Logger.info("Total available cpu count: %s", str(multiprocessing.cpu_count()))
         self.data_mover = MediaFilesMover(
             GCPFileSystem(self.gcs_instance),
             multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE,
@@ -54,15 +52,15 @@ class DataMarker(BaseProcessor):
         Logger.info("*************Starting data marker****************")
         self.data_tagger_config = self.postgres_client.config_dict.get(CONFIG_NAME)
         source, filter_criteria = self.get_config(**kwargs)
-        Logger.info("Fetching utterances for source:" + source)
+        Logger.info("Fetching utterances for source: %s", source)
         utterances = self.catalogue_dao.get_utterances_by_source(source, "Clean")
 
         filtered_utterances = self.data_filter.apply_filters(
             filter_criteria, utterances
         )
         Logger.info(
-            "updating utterances that need to be staged, count="
-            + str(len(filtered_utterances))
+            "updating utterances that need to be staged, count=%s",
+            str(len(filtered_utterances)),
         )
 
         if len(filtered_utterances) > 0:
@@ -71,7 +69,7 @@ class DataMarker(BaseProcessor):
                     filtered_utterances, source
                 )
             )
-            Logger.info("Rows updated:" + str(rows_updated))
+            Logger.info("Rows updated: %s", str(rows_updated))
         else:
             Logger.info("No utterances found for filter criteria")
         source_dir = filter_criteria.get("landing_source_dir", source)
@@ -82,7 +80,7 @@ class DataMarker(BaseProcessor):
             f"{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}"
         )
         files = self.to_files(filtered_utterances, source_path_with_source)
-        Logger.info("Staging utterances to dir:" + landing_path_with_source)
+        Logger.info("Staging utterances to dir: %s", landing_path_with_source)
         self.data_mover.move_media_files(files, landing_path_with_source)
         Logger.info("************* Data marker completed ****************")
 

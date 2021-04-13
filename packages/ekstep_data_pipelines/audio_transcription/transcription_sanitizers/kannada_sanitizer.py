@@ -1,18 +1,17 @@
+import re
+
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
     BaseTranscriptionSanitizer,
 )
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
     TranscriptionSanitizationError,
 )
-
 from ekstep_data_pipelines.common.utils import get_logger
-import re
 
 LOGGER = get_logger("KannadaTranscriptionSanitizer")
 
 
 class KannadaSanitizer(BaseTranscriptionSanitizer):
-
     VALID_CHARS = "[ ಂ-ಃಅ-ಋಎ-ಐಒ-ನಪ-ರಲ-ಳವ-ಹಾ-ೄೆ-ೈೊ-್ೲ]+"
     PUNCTUATION = "!\"#%&'()*+,./;<=>?@[\\]^_`{|}~।"
 
@@ -24,7 +23,7 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
         pass
 
     def sanitize(self, transcription):
-        LOGGER.info("Sanitizing transcription:" + transcription)
+        LOGGER.info("Sanitizing transcription:%s", transcription)
         transcription = transcription.strip()
 
         transcription = self.replace_bad_char(transcription)

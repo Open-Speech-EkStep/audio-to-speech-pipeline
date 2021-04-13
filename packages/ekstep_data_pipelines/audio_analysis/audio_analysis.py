@@ -1,22 +1,20 @@
-# import signal
-import sys
 import multiprocessing
 import os
+import sys
 
-from ekstep_data_pipelines.audio_analysis.analyse_speaker import analyse_speakers
 from ekstep_data_pipelines.audio_analysis.analyse_gender import analyse_gender
+from ekstep_data_pipelines.audio_analysis.analyse_speaker import analyse_speakers
 from ekstep_data_pipelines.audio_analysis.constants import (
     CONFIG_NAME,
     REMOTE_PROCESSED_FILE_PATH,
     AUDIO_ANALYSIS_PARAMS,
     ANALYSIS_OPTIONS,
 )
-from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
 from ekstep_data_pipelines.audio_analysis.speaker_analysis.create_embeddings import (
     encode_on_partial_sets,
 )
-
+from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
+from ekstep_data_pipelines.common.utils import get_logger
 
 MIN_SAMPLES = 1
 
@@ -55,7 +53,7 @@ class AudioAnalysis(BaseProcessor):
 
     def handle_termination_gracefully(self, signum, frame):
         LOGGER.info(
-            f"SIGINT/SIGTERM invoked with the following information {signum}/{frame}"
+            "SIGINT/SIGTERM invoked with the following information %f/%f", signum, frame
         )
         sys.exit(1)
 
@@ -75,12 +73,12 @@ class AudioAnalysis(BaseProcessor):
         local_audio_download_path = f"{AudioAnalysis.DEFAULT_DOWNLOAD_PATH}/{source}/"
         self.ensure_path(local_audio_download_path)
 
-        LOGGER.info(f"Ensured {local_audio_download_path} exists")
+        LOGGER.info("Ensured %s exists", local_audio_download_path)
         remote_download_path = self.get_full_path(source)
 
-        LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
+        LOGGER.info("Total available cpu count: %s", str(multiprocessing.cpu_count()))
 
-        LOGGER.info("Running speaker clustering using parameters: " + str(parameters))
+        LOGGER.info("Running speaker clustering using parameters: %s", str(parameters))
         min_cluster_size = parameters.get("min_cluster_size", MIN_CLUSTER_SIZE)
         partial_set_size = parameters.get("partial_set_size", PARTIAL_SET_SIZE)
         min_samples = parameters.get("min_samples", MIN_SAMPLES)
@@ -99,7 +97,7 @@ class AudioAnalysis(BaseProcessor):
             remote_download_path,
             embed_file_path,
             npz_destination_path,
-            partial_set_size
+            partial_set_size,
         )
 
         if analysis_options.get("speaker_analysis") == 1:
@@ -129,7 +127,7 @@ class AudioAnalysis(BaseProcessor):
         embed_file_path,
         npz_bucket_destination_path,
         partial_set_size,
-        dir_pattern="*.wav"
+        dir_pattern="*.wav",
     ):
         if self.fs_interface.path_exists(npz_bucket_destination_path):
             self.fs_interface.download_file_to_location(
@@ -137,21 +135,29 @@ class AudioAnalysis(BaseProcessor):
             )
         else:
             LOGGER.info(
-                f"Downloading source to {local_audio_download_path} from {remote_download_path}"
+                "Downloading source to $s from %s",
+                local_audio_download_path,
+                remote_download_path,
             )
             self.fs_interface.download_folder_to_location(
                 remote_download_path, local_audio_download_path, 5
             )
             # encoder(local_audio_download_path, dir_pattern, embed_file_path)
-            encode_on_partial_sets(local_audio_download_path, dir_pattern, embed_file_path, partial_set_size)
+            encode_on_partial_sets(
+                local_audio_download_path,
+                dir_pattern,
+                embed_file_path,
+                partial_set_size,
+            )
             is_uploaded = self.fs_interface.upload_to_location(
                 embed_file_path, npz_bucket_destination_path
             )
             if is_uploaded:
-                LOGGER.info("npz file uploaded to :" + npz_bucket_destination_path)
+                LOGGER.info("npz file uploaded to : %s", npz_bucket_destination_path)
             else:
                 LOGGER.info(
-                    "npz file could not be uploaded to :" + npz_bucket_destination_path
+                    "npz file could not be uploaded to : %s",
+                    npz_bucket_destination_path,
                 )
 
     def update_info_in_db(
@@ -186,10 +192,10 @@ class AudioAnalysis(BaseProcessor):
                 female_files.append(utterance_name)
 
         catalogue_dao.update_utterance_speaker_gender(male_files, "m")
-        LOGGER.info(f"Updating the {male_files} with the value with value male")
+        LOGGER.info("Updating the %s with the value with value male", male_files)
 
         catalogue_dao.update_utterance_speaker_gender(female_files, "f")
-        LOGGER.info(f"Updating the {female_files} with the value with value Female")
+        LOGGER.info("Updating the %s with the value with value Female", female_files)
 
     def _update_speaker_count_info(self, catalogue_dao, speaker_to_file_name, source):
         for speaker in speaker_to_file_name:
@@ -198,17 +204,20 @@ class AudioAnalysis(BaseProcessor):
             if speaker_id == -1:
                 speaker_inserted = catalogue_dao.insert_speaker(source, speaker)
             else:
-                LOGGER.info("Speaker already exists:" + speaker)
+                LOGGER.info("Speaker already exists:%s", speaker)
                 speaker_inserted = True
 
             if not speaker_inserted:
                 # do nothing incase the speaker_inserted is false
                 continue
 
-            LOGGER.info("updating utterances for speaker:" + speaker)
+            LOGGER.info("updating utterances for speaker:%s", speaker)
             utterances = speaker_to_file_name.get(speaker)
-            LOGGER.info("utterances:" + str(utterances))
-            to_file_name = lambda u: u[0]
+            LOGGER.info("utterances: %s", str(utterances))
+
+            def to_file_name(utterance):
+                return utterance[0]
+
             was_noise_utterances = list(
                 map(to_file_name, (filter(lambda u: u[1] == 1, utterances)))
             )

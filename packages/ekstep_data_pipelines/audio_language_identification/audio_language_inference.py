@@ -1,12 +1,13 @@
 import os
+import sys
 
 import numpy as np
 import torch
 import yaml
-
 from ekstep_data_pipelines.audio_language_identification.utils import utils
 
 # check cuda available
+# E1101: Module 'torch' has no 'device' member (no-member)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(0)
 
@@ -18,7 +19,7 @@ def load_model(model_path):
         print("Model loaded from ", model_path)
     else:
         print("Saved model not found")
-        exit(1)
+        sys.exit(1)
     return model
 
 
@@ -27,12 +28,13 @@ def forward(audio, model, mode="train"):
         model.eval()
         spec = utils.load_data(audio, mode=mode)[np.newaxis, ...]
         feats = np.asarray(spec)
+        # E1101: Module 'torch' has no 'from_numpy' member (no-member)
         feats = torch.from_numpy(feats)
         feats = feats.unsqueeze(0)
         feats = feats.to(device)
         label = model(feats.float())
         return label
-    except:
+    except BaseException:
         print("File error ", audio)
 
 
@@ -56,8 +58,8 @@ def evaluation(
 ):
     model = load_model(model_path)
     model_output = forward(audio_path, model=model)
-    sm = torch.nn.Softmax()
-    probabilities = sm(model_output)
+    soft_max = torch.nn.Softmax()
+    probabilities = soft_max(model_output)
     confidence_scores = ["{:.5f}".format(i.item()) for i in list(probabilities[0])]
     return confidence_scores
 

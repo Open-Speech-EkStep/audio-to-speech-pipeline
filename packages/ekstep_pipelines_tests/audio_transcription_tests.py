@@ -1,18 +1,12 @@
-import sys
-import unittest
 import os
-from ekstep_data_pipelines.audio_processing import constants
+import unittest
 from unittest.mock import Mock
-
 
 from ekstep_data_pipelines.audio_transcription.audio_transcription import (
     AudioTranscription,
 )
-
-from ekstep_data_pipelines.audio_transcription.constants import LANGUAGE, AUDIO_LANGUAGE
-
+from ekstep_data_pipelines.audio_transcription.constants import AUDIO_LANGUAGE
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
-    AzureTranscriptionClientError,
     GoogleTranscriptionClientError,
 )
 
@@ -32,19 +26,11 @@ class AudioTranscriptionTests(unittest.TestCase):
         self.audio_transcription.fs_interface = Mock()
 
     def test__delete_audio_id_should_call_gcp_delete_object_method(self):
-
         self.audio_transcription.delete_audio_id("remote_dir_path_for_given_audio_id")
 
         self.assertEqual(self.audio_transcription.fs_interface.delete.call_count, 1)
 
-    # def test__move_to_gcs_should_call_gcp_upload_to_gcs_method(self):
-
-    #     self.audio_transcription.move_to_gcs('local_path', 'remote_stt_output_path')
-
-    #     self.assertEqual(self.audio_transcription.fs_interface.upload_to_gcs.call_count,1)
-
     def test__get_local_dir_path_should_return_dir_path(self):
-
         actual_output = self.audio_transcription.get_local_dir_path(
             "testdir/inside_dir/test_local_file_path/test_filename.txt"
         )
@@ -55,7 +41,6 @@ class AudioTranscriptionTests(unittest.TestCase):
     def test__handle_error_should_call_update_db_and_move_rejected_data_to_rejected_folder_create_rejected_folder_if_not_exist(
         self, mock_os
     ):
-
         metadata = {"status": "test_status", "reason": "test_reason"}
 
         self.audio_transcription.handle_error(
@@ -76,7 +61,6 @@ class AudioTranscriptionTests(unittest.TestCase):
     def test__generate_transcription_and_sanitize_called_with_filename_that_is_not_contained_wav_extension_shoud_not_call_any_function(
         self,
     ):
-
         file_path = "filename_without_extension"
 
         transcription_client = self.audio_commons.get("transcription_clients")
@@ -98,7 +82,6 @@ class AudioTranscriptionTests(unittest.TestCase):
     def test__generate_transcription_and_sanitize_called_with_filename_that_contained_wav_extension_shoud_call_generate_transcription(
         self,
     ):
-
         file_name = "filename_with_extension.wav"
 
         transcription_client = self.audio_commons.get("transcription_clients")
@@ -135,7 +118,6 @@ class AudioTranscriptionTests(unittest.TestCase):
     def test__generate_transcription_and_sanitize_called_with_filename_that_contained_wav_extension_when_generate_transcription_throw_error(
         self,
     ):
-
         # file_path = Mock()
 
         file_path = "filename_with_extension.wav"
@@ -176,7 +158,6 @@ class AudioTranscriptionTests(unittest.TestCase):
     def test__generate_transcription_for_all_utterenaces_should_do_transcription_for_all_file_in_given_audio_id_when_should_skip_rejected_is_false(
         self,
     ):
-
         file_one_path = "testdir/file_one_with_extension.wav"
         file_two_path = "testdir/file_two_with_extension.wav"
         file_three_path = "testdir/file_three_with_extension.wav"
@@ -208,7 +189,6 @@ class AudioTranscriptionTests(unittest.TestCase):
     def test__generate_transcription_for_all_utterenaces_should_do_transcription_for_only_clean_file_in_given_audio_id_when_should_skip_rejected_is_true(
         self,
     ):
-
         file_one_path = "testdir/file_one_with_extension.wav"
         file_two_path = "testdir/file_two_with_extension.wav"
         file_three_path = "testdir/file_three_with_extension.wav"
@@ -240,7 +220,6 @@ class AudioTranscriptionTests(unittest.TestCase):
     def test__generate_transcription_for_all_utterenaces_should_do_transcription_for_only_clean_file_and_duration_is_in_threshold_and_in_given_audio_id_when_should_skip_rejected_is_true(
         self,
     ):
-
         file_one_path = "testdir/file_one_with_extension.wav"
         file_two_path = "testdir/file_two_with_extension.wav"
         file_three_path = "testdir/file_three_with_extension.wav"

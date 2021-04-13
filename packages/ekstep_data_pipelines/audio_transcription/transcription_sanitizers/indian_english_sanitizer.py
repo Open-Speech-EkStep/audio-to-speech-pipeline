@@ -14,7 +14,7 @@ LOGGER = get_logger("IndianEnglishSanitizer")
 class IndianEnglishSanitizer(BaseTranscriptionSanitizer):
 
     VALID_CHARS = "[ a-zA-Z0-9']"
-    PUNCTUATION = "!\"#%&()*+,./;<=>?@[\\]^_`{|}~।"
+    PUNCTUATION = '!"#%&()*+,./;<=>?@[\\]^_`{|}~।'
 
     @staticmethod
     def get_instance(**kwargs):
