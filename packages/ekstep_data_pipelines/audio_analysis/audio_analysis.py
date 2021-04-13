@@ -1,4 +1,3 @@
-# import signal
 import sys
 import multiprocessing
 import os
@@ -47,9 +46,6 @@ class AudioAnalysis(BaseProcessor):
         self.audio_analysis_config = None
         self.catalogue_dao = CatalogueDao(self.data_processor)
 
-        # signal.signal(signal.SIGINT, self.handle_termination_gracefully)
-        # signal.signal(signal.SIGTERM, self.handle_termination_gracefully)
-        # signal.signal(signal.SIGKILL, self.handle_termination_gracefully)
 
         super().__init__(**kwargs)
 
@@ -159,6 +155,8 @@ class AudioAnalysis(BaseProcessor):
     ):
 
         if self.fs_interface.path_exists(npz_bucket_destination_path):
+
+            LOGGER.info("npz file is already present in bucket.")
             self.fs_interface.download_file_to_location(
                 npz_bucket_destination_path, embed_file_path
             )
