@@ -194,6 +194,7 @@ def generate_splitted_batches_for_audio_analysis(
         bucket_name, source_path + source + delimiter
     )
     list_of_batches = []
+    processed_flag = False
     if os.path.exists(source + ".txt"):
         os.remove(source + ".txt")
     with open(source + ".txt", "a+") as file_object:
@@ -211,6 +212,11 @@ def generate_splitted_batches_for_audio_analysis(
             file_extension = get_file_extension(file_name)
             expected_file_extension = audio_format
 
+            if file_extension == 'npz':
+                print("Final embedding is present already for the source,No further chunking of embeddings needed")
+                processed_flag = True
+                break
+
             if file_extension in [
                 expected_file_extension,
                 expected_file_extension.swapcase(),
@@ -224,7 +230,7 @@ def generate_splitted_batches_for_audio_analysis(
                 file_object.write(os.path.join(bucket_name, blob.name))
                 no_of_lines += 1
 
-        if no_of_lines > 0:
+        if no_of_lines > 0 and not processed_flag:
             print("Total number of audio files selected are : ", no_of_lines)
             print("split into batches and upload batches")
             list_of_batches = split_upload_batches(source, bucket_name, destination_path, file_object,
