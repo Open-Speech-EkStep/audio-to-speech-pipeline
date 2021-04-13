@@ -15,7 +15,7 @@ destination_path = Variable.get("destinationpathforaudioanalysis")
 bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
-resource_limits = json.loads(Variable.get("snr_resource_limits"))
+resource_limits = json.loads(Variable.get("audio_analysis_resource_limits"))
 
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 LANGUAGE_CONSTANT = "{language}"
