@@ -1,13 +1,14 @@
 import collections
 import json
 from operator import itemgetter
+import os
 
 import yaml
 from airflow.models import Variable
 
 from gcs_utils import (
     list_blobs_in_a_path,
-    check_blob,
+    check_blob,upload_blob
 )
 
 
@@ -231,7 +232,7 @@ def generate_splitted_batches_for_audio_analysis(
                                                    max_records_threshold_per_pod)
             list_of_batches
     batch_file_path_dict[source] = list_of_batches
-    batch_file_path_dict = mydict(batch_file_path_dict)
+    batch_file_path_dict = MyDict(batch_file_path_dict)
     Variable.set("embedding_batch_file_list", batch_file_path_dict)
 # generate_splitted_batches_for_audio_analysis("Smart_money_with_Sonia_Shenoy",
 #                                              "data/audiotospeech/raw/download/catalogued/indian_english/audio/",
