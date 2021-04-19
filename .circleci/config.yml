@@ -309,11 +309,17 @@ workflows:
           env_name: 'prod'
           requires:
             - ekstep_data_pipelines_deploy_prod
+      - approval_for_prod_deploy:
+          name: approval-for-prod-dag-deploy
+          type: approval
+          requires:
+            - ekstep_data_pipelines_deploy_prod
       - build-dags:
           name: pipeline-dag-build_prod
           package_name: pipeline_workflows
           env_name: 'prod'
           requires:
             - ekstep-database-migrations-apply-prod
+            - approval-for-prod-dag-deploy
 
 

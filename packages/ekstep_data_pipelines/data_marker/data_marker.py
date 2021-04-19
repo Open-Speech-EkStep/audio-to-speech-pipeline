@@ -63,15 +63,7 @@ class DataMarker(BaseProcessor):
             str(len(filtered_utterances)),
         )
 
-        if len(filtered_utterances) > 0:
-            rows_updated = (
-                self.catalogue_dao.update_utterances_staged_for_transcription(
-                    filtered_utterances, source
-                )
-            )
-            Logger.info("Rows updated: %s", str(rows_updated))
-        else:
-            Logger.info("No utterances found for filter criteria")
+
         source_dir = filter_criteria.get("landing_source_dir", source)
         landing_path_with_source = (
             f"{self.data_tagger_config.get(LANDING_BASE_PATH)}/{source_dir}"
@@ -82,6 +74,17 @@ class DataMarker(BaseProcessor):
         files = self.to_files(filtered_utterances, source_path_with_source)
         Logger.info("Staging utterances to dir: %s", landing_path_with_source)
         self.data_mover.move_media_files(files, landing_path_with_source)
+        
+        if len(filtered_utterances) > 0:
+            rows_updated = (
+                self.catalogue_dao.update_utterances_staged_for_transcription(
+                    filtered_utterances, source
+                )
+            )
+            Logger.info("Rows updated: %s", str(rows_updated))
+        else:
+            Logger.info("No utterances found for filter criteria")
+
         Logger.info("************* Data marker completed ****************")
 
     def to_files(self, utterances, source_path_with_source):

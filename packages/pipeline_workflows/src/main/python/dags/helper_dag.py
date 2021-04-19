@@ -215,7 +215,7 @@ def generate_splitted_batches_for_audio_analysis(
             if file_extension in [
                 expected_file_extension,
                 expected_file_extension.swapcase(),
-            ]:
+            ]  and 'clean' in blob.name:
 
                 if appendEOL == True:
                     file_object.write("\n")
