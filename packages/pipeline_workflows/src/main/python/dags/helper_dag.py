@@ -172,6 +172,33 @@ def split_upload_batches(source, bucket_name, destination_path, file_object, max
     return list_of_batches
 
 
+def find_all_batch_without_npz(bucket_name,destination_path,source):
+    all_file_list = []
+    full_path_for_embeddings = os.path.join(destination_path,source)
+
+    all_batch_txt_npz = list_blobs_in_a_path(
+        bucket_name, full_path_for_embeddings
+    )
+
+    for filename in all_batch_txt_npz:
+        print(filename.name)
+        if 'txt' in filename.name:
+            filename_without_extension = filename.name.replace('.txt','')
+            print(filename_without_extension,"when it is txt")
+            if filename_without_extension in all_file_list:
+                all_file_list.remove(filename_without_extension)
+                continue
+            all_file_list.append(filename_without_extension)
+        if 'npz' in filename.name:
+            filename_without_extension = filename.name.replace('.npz','')
+            print(filename_without_extension,"when it is npz")
+            if filename_without_extension in all_file_list:
+                all_file_list.remove(filename_without_extension)
+                continue
+            all_file_list.append(filename_without_extension)
+    return all_file_list
+
+
 def generate_splitted_batches_for_audio_analysis(
         source,
         source_path,
@@ -185,6 +212,20 @@ def generate_splitted_batches_for_audio_analysis(
     print("****The source path is *****" + source_path)
     print("****The destination path is *****" + destination_path)
     batch_file_path_dict = json.loads(Variable.get("embedding_batch_file_list"))
+
+    all_batch_set = find_all_batch_without_npz(bucket_name,destination_path,source)
+
+    if len(all_batch_set) > 0:
+        print(all_batch_set,"All batch set")
+        # list_of_batches = list(all_batch_set)
+        add_txt_in_path = [f'{bucket_name}/{file_path}.txt' for file_path in all_batch_set ]
+
+        batch_file_path_dict[source] = add_txt_in_path
+        batch_file_path_dict = MyDict(batch_file_path_dict)
+        Variable.set("embedding_batch_file_list", batch_file_path_dict)
+        return
+
+
     all_blobs = list_blobs_in_a_path(
         bucket_name, source_path + source + delimiter
     )
