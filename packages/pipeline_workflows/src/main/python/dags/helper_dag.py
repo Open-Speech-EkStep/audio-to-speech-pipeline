@@ -215,7 +215,7 @@ def generate_splitted_batches_for_audio_analysis(
 
     all_batch_set = find_all_batch_without_npz(bucket_name,destination_path,source)
 
-    if len(all_batch_set) > 0:
+    if len(all_batch_set) >= 0:
         print(all_batch_set,"All batch set")
         # list_of_batches = list(all_batch_set)
         add_txt_in_path = [f'{bucket_name}/{file_path}.txt' for file_path in all_batch_set ]
