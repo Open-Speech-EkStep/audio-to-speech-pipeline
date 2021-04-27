@@ -8,16 +8,16 @@ from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_tr
 )
 from ekstep_data_pipelines.common.utils import get_logger
 
-LOGGER = get_logger("KannadaTranscriptionSanitizer")
+LOGGER = get_logger("MalayalamTranscriptionSanitizer")
 
 
-class KannadaSanitizer(BaseTranscriptionSanitizer):
-    VALID_CHARS = "[ ಂ-ಃಅ-ಋಎ-ಐಒ-ನಪ-ರಲ-ಳವ-ಹಾ-ೄೆ-ೈೊ-್ೲ]+"
+class MalayalamSanitizer(BaseTranscriptionSanitizer):
+    VALID_CHARS = "[ ം-ഃഅ-ഋഎ-ഐഒ-നപ-ഺാ-ൃെ-ൈൊ-്ൺ-ൾ]+"
     PUNCTUATION = "!\"#%&'()*+,./;<=>?@[\\]^_`{|}~।"
 
     @staticmethod
     def get_instance(**kwargs):
-        return KannadaSanitizer()
+        return MalayalamSanitizer()
 
     def __init__(self, *args, **kwargs):
         pass
@@ -35,14 +35,14 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
 
         if self.shouldReject(transcription):
             raise TranscriptionSanitizationError(
-                "transcription has char which is not in  ಂ-ಃಅ-ಋಎ-ಐಒ-ನಪ-ರಲ-ಳವ-ಹಾ-ೄೆ-ೈೊ-್ೲ"
+                "transcription has char which is not in  ം-ഃഅ-ഋഎ-ഐഒ-നപ-ഺാ-ൃെ-ൈൊ-്ൺ-ൾ"
             )
 
         return transcription
 
     def shouldReject(self, transcription):
         rejected_string = re.sub(
-            pattern=KannadaSanitizer.VALID_CHARS, repl="", string=transcription
+            pattern=MalayalamSanitizer.VALID_CHARS, repl="", string=transcription
         )
 
         if len(rejected_string.strip()) > 0:
@@ -57,5 +57,5 @@ class KannadaSanitizer(BaseTranscriptionSanitizer):
         if "-" in transcription:
             transcription = transcription.replace("-", " ")
 
-        table = str.maketrans(dict.fromkeys(KannadaSanitizer.PUNCTUATION))
+        table = str.maketrans(dict.fromkeys(MalayalamSanitizer.PUNCTUATION))
         return transcription.translate(table)
