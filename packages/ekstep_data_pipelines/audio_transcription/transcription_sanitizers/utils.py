@@ -4,6 +4,8 @@ def get_transcription_sanitizers(**kwargs):
     kannada_sanitizer = KannadaSanitizer.get_instance(**kwargs)
     indian_english_sanitizer = IndianEnglishSanitizer.get_instance(**kwargs)
     punjabi_sanitizer = PunjabiSanitizer.get_instance(**kwargs)
+    malayalam_sanitizer = MalayalamSanitizer.get_instance(**kwargs)
+    bengali_sanitizer = BengaliSanitizer.get_instance(**kwargs)
 
     return {
         "hindi_sanitizer": hindi_sanitizer,
@@ -12,4 +14,6 @@ def get_transcription_sanitizers(**kwargs):
         "kannada": kannada_sanitizer,
         "indian_english": indian_english_sanitizer,
         "punjabi": punjabi_sanitizer,
+        "malayalam": malayalam_sanitizer,
+        "bengali": bengali_sanitizer
     }
