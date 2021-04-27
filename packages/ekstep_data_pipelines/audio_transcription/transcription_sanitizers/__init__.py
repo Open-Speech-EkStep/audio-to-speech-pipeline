@@ -28,10 +28,10 @@ def get_transcription_sanitizers(**kwargs):
     from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.punjabi_sanitizer import (
         PunjabiSanitizer,
     )
-     from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.malayalam_sanitizer import (
+    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.malayalam_sanitizer import (
         MalayalamSanitizer,
     )
-      from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.bengali_sanitizer import (
+    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.bengali_sanitizer import (
         BengaliSanitizer,
     )
 
