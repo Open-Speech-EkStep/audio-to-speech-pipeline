@@ -44,6 +44,7 @@ def get_common_variables(stage, language):
     global integration_processed_path
     global bucket_file_list
     global db_catalog_tbl
+    global db_mapping_tbl
     global report_upload_path
     variables = get_config_variables(stage)
     report_upload_path = variables["report_upload_path"].replace(
@@ -53,6 +54,7 @@ def get_common_variables(stage, language):
         LANGUAGE_CONSTANT, language
     )
     db_catalog_tbl = variables["db_catalog_tbl"]
+    db_mapping_tbl = variables["db_mapping_tbl"]
     bucket_file_list = "_bucket_file_list.csv"
     print(f"report_upload_path is {report_upload_path}")
     print(f"integration_processed_path is {integration_processed_path}")
@@ -99,17 +101,17 @@ def get_file_attributes(source_prefix_split_list):
 
 def generate_row(full_path, file_name, raw_file_name, source, audio_id, status):
     row = (
-        full_path
-        + ","
-        + source
-        + ","
-        + audio_id
-        + ","
-        + raw_file_name
-        + ","
-        + file_name
-        + ","
-        + status
+            full_path
+            + ","
+            + source
+            + ","
+            + audio_id
+            + ","
+            + raw_file_name
+            + ","
+            + file_name
+            + ","
+            + status
     )
     return row
 
@@ -178,6 +180,15 @@ def fetch_data_catalog(source, db_catalog_tbl, db_conn_obj):
     return data_catalog_raw
 
 
+def fetch_mapping_catalog(db_mapping_tbl, unique_audio_ids, db_conn_obj):
+    filter_string = f"audio_id in {unique_audio_ids}"
+    data_mapping_raw = pd.read_sql(
+        f"SELECT * FROM {db_mapping_tbl} where {filter_string}", db_conn_obj
+    )
+    # data_mapping_raw = cleanse_catalog(data_catalog_raw)
+    return data_mapping_raw
+
+
 def fetch_bucket_list(source, bucket_file_list):
     generate_bucket_file_list(source)
     data_bucket_raw = pd.read_csv(source + bucket_file_list, low_memory=False)
@@ -215,11 +226,11 @@ def get_catalog_list_not_in_bucket(data_catalog_exploded, data_bucket_raw):
 def parse_json_utterance_meta(json_data):
     json_dict = json.loads(json_data)
     return (
-        str(json_dict["name"]).replace(",", "")
-        + ","
-        + str(json_dict["duration"])
-        + ","
-        + json_dict["status"]
+            str(json_dict["name"]).replace(",", "")
+            + ","
+            + str(json_dict["duration"])
+            + ","
+            + json_dict["status"]
     )
 
 
@@ -354,6 +365,18 @@ def append_file_and_duration(valid_utterance_duration):
     return valid_utterance_duration
 
 
+def merge_with_mapping_catalog(df_cleaned_dataset, unique_audio_ids):
+    db_mapping_catalog = fetch_mapping_catalog(db_mapping_tbl, unique_audio_ids, get_db_connection_object())
+    db_mapping_catalog = db_mapping_catalog[
+        ['audio_id', 'clipped_utterance_file_name', 'speaker_id', 'speaker_gender', 'snr', 'status',
+         'staged_for_transcription', 'language_confidence_score', 'was_noise']]
+    df_cleaned_dataset['utterance_file_name'] = df_cleaned_dataset.wav_path_bucket.apply(lambda x: x.split('/')[-1])
+    df_cleaned_dataset_mapped = df_cleaned_dataset.merge(
+        db_mapping_catalog, left_on=["audio_id", "utterance_file_name"],
+        right_on=["audio_id", "clipped_utterance_file_name"], suffixes=("", "_y"))
+    return df_cleaned_dataset_mapped.loc[:, df_cleaned_dataset_mapped.columns != 'clipped_utterance_file_name']
+
+
 def get_valid_utterance_duration_unexploded(bucket_list_in_catalog):
     valid_utterance_duration = bucket_list_in_catalog[
         bucket_list_in_catalog.utterances_file_duration.between(0.5, 15)
@@ -361,10 +384,10 @@ def get_valid_utterance_duration_unexploded(bucket_list_in_catalog):
     # valid_utterance_duration = append_file_and_duration(valid_utterance_duration)
     valid_utterance_duration = valid_utterance_duration[
         valid_utterance_duration.status.str.lower() != "rejected"
-    ]
+        ]
     valid_utterance_duration = valid_utterance_duration[
         valid_utterance_duration.utterances_file_status.str.lower() != "rejected"
-    ]
+        ]
     return valid_utterance_duration.groupby("audio_id", as_index=False).agg(
         {
             "utterances_file_duration": lambda x: x.sum() / 60,
@@ -384,7 +407,7 @@ def get_unique_utterances(data_catalog_raw):
 
 
 def get_valid_and_unique_utterances(
-    df_catalog_unique, df_catalog_valid_utterance_duration_unexploded
+        df_catalog_unique, df_catalog_valid_utterance_duration_unexploded
 ):
     df_valid_utterances_with_unique_audioid = (
         df_catalog_valid_utterance_duration_unexploded.merge(
@@ -410,7 +433,7 @@ def get_valid_and_unique_utterances(
 #
 
 
-def append_transcription_files_list(df_cleaned_dataset):
+def append_transcription_files_list(df_cleaned_dataset, stage):
     df_cleaned_dataset_transcipts = df_cleaned_dataset.copy()
     df_cleaned_dataset_transcipts.bucket_file_path = (
         df_cleaned_dataset_transcipts.bucket_file_path.apply(
@@ -422,11 +445,17 @@ def append_transcription_files_list(df_cleaned_dataset):
             lambda x: x.replace("wav", "txt")
         )
     )
-    df_cleaned_dataset.insert(
-        loc=1,
-        column="transcriptions_path_bucket",
-        value=df_cleaned_dataset_transcipts["bucket_file_path"].values.tolist(),
-    )
+    if "post" in stage:
+        df_cleaned_dataset.insert(
+            loc=1,
+            column="transcriptions_path_bucket",
+            value=df_cleaned_dataset_transcipts["bucket_file_path"].values.tolist(),
+        )
+        df_cleaned_dataset.transcriptions_path_bucket = (
+            df_cleaned_dataset.transcriptions_path_bucket.apply(
+                lambda x: "gs://" + bucket_name + "/" + x
+            )
+        )
     df_cleaned_dataset = df_cleaned_dataset.drop(["utterances_file_name"], axis=1)
     df_cleaned_dataset = df_cleaned_dataset.rename(
         columns={
@@ -437,25 +466,25 @@ def append_transcription_files_list(df_cleaned_dataset):
     df_cleaned_dataset.wav_path_bucket = df_cleaned_dataset.wav_path_bucket.apply(
         lambda x: "gs://" + bucket_name + "/" + x
     )
-    df_cleaned_dataset.transcriptions_path_bucket = (
-        df_cleaned_dataset.transcriptions_path_bucket.apply(
-            lambda x: "gs://" + bucket_name + "/" + x
-        )
-    )
+
     return df_cleaned_dataset
 
 
-def generate_cleaned_dataset(df_cleaned_utterances_unexploded, bucket_list_in_catalog):
-    df_cleaned_dataset = df_cleaned_utterances_unexploded.merge(
+def generate_cleaned_dataset(df_cleaned_utterances_exploded, bucket_list_in_catalog, stage):
+    df_cleaned_dataset = df_cleaned_utterances_exploded.merge(
         bucket_list_in_catalog,
         on=["audio_id", "utterances_files_list"],
         suffixes=("_y", " "),
     )
     return append_transcription_files_list(
         df_cleaned_dataset[
-            ["bucket_file_path", "utterances_file_name", "utterances_file_duration"]
-        ]
+            ["audio_id", "bucket_file_path", "utterances_file_name", "utterances_file_duration"]
+        ], stage
     )
+
+
+def get_audio_ids(df_catalog_unique):
+    return tuple(df_catalog_unique['audio_id'].tolist())
 
 
 def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
@@ -472,28 +501,23 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
     )
     bucket_list_in_catalog_cleaned = bucket_list_in_catalog[
         bucket_list_in_catalog.status == "clean"
-    ]
-    # catalog_list_with_rejected_status = bucket_list_in_catalog[bucket_list_in_catalog
-    # .status == 'rejected']
+        ]
+    df_catalog_duplicates = get_duplicates_utterances(data_catalog_raw)
+    df_catalog_unique = get_unique_utterances(data_catalog_raw)
+
+    unique_audio_ids = get_audio_ids(df_catalog_unique)
+
     df_catalog_invalid_utterance_duration = get_invalid_utterance_duration(
         bucket_list_in_catalog_cleaned
     )
     df_catalog_valid_utterance_duration_unexploded = (
         get_valid_utterance_duration_unexploded(bucket_list_in_catalog_cleaned)
     )
-    df_catalog_duplicates = get_duplicates_utterances(data_catalog_raw)
-    df_catalog_unique = get_unique_utterances(data_catalog_raw)
 
     df_valid_utterances_with_unique_audioid = get_valid_and_unique_utterances(
         df_catalog_unique, df_catalog_valid_utterance_duration_unexploded
     )
 
-    df_cleaned_utterances_unexploded = explode_utterances(
-        df_valid_utterances_with_unique_audioid
-    )
-    df_cleaned_dataset = generate_cleaned_dataset(
-        df_cleaned_utterances_unexploded, bucket_list_in_catalog_cleaned
-    )
     if "pre" in stage:
         writer = pd.ExcelWriter(report_file_name, engine="xlsxwriter")
         bucket_list_not_in_catalog.astype({"audio_id": "str"}).to_excel(
@@ -517,8 +541,15 @@ def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
             writer, sheet_name="Cleaned_data_catalog", index=False
         )
         writer.save()
-    df_cleaned_dataset.to_csv(cleaned_csv_report_file_name, index=False)
-    print(f"{report_file_name} has been generated....")
+        print(f"{report_file_name} has been generated....")
+    df_cleaned_utterances_exploded = explode_utterances(
+        df_valid_utterances_with_unique_audioid
+    )
+    df_cleaned_dataset = generate_cleaned_dataset(
+        df_cleaned_utterances_exploded, bucket_list_in_catalog_cleaned, stage
+    )
+    df_cleaned_dataset_mapped = merge_with_mapping_catalog(df_cleaned_dataset, unique_audio_ids)
+    df_cleaned_dataset_mapped.to_csv(cleaned_csv_report_file_name, index=False)
     print(f"{cleaned_csv_report_file_name} has been generated....")
 
 
@@ -541,14 +572,15 @@ def upload_report_to_bucket():
             os.path.join(report_upload_path, report_file_name),
         )
         os.remove(report_file_name)
-    upload_blob(
-        bucket_name,
-        cleaned_csv_report_file_name,
-        os.path.join(
-            report_upload_path, "Final_csv_reports", cleaned_csv_report_file_name
-        ),
-    )
-    os.remove(cleaned_csv_report_file_name)
+    if os.path.exists(cleaned_csv_report_file_name):
+        upload_blob(
+            bucket_name,
+            cleaned_csv_report_file_name,
+            os.path.join(
+                report_upload_path, "Final_csv_reports", cleaned_csv_report_file_name
+            ),
+        )
+        os.remove(cleaned_csv_report_file_name)
 
 
 def __load_yaml_file():
@@ -614,8 +646,8 @@ def report_generation_pipeline(stage, bucket, language="", mode="cluster", sourc
 if __name__ == "__main__":
     report_generation_pipeline(
         mode="local",
-        stage="pre-transcription",
+        stage="post-transcription",
         bucket="ekstepspeechrecognition-dev",
-        language="english",
-        source=["iskcon"],
+        language="hindi",
+        source=["STAGE"],
     )
