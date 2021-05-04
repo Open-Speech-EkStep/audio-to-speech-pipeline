@@ -17,26 +17,29 @@ pd.set_option("display.max_columns", None)
 pd.set_option("display.width", None)
 pd.set_option("display.max_colwidth", -1)
 LANGUAGE_CONSTANT = "{language}"
+UTTERANCE_FILE_FORMAT = "wav"
+TRANSCRIPT_FILE_FORMAT = "txt"
 
 
 def get_config_variables(stage):
     global config_path
     config_path = f"./config_{stage}.yaml"
+    print("Downloading config file for validation report job")
     download_blob(
         bucket_name,
         f"data/audiotospeech/config/validation_report_dag/config_{stage}.yaml",
-        config_path,
-    )
+        config_path,)
+
     variables = __load_yaml_file()["report_configuration"]
     return variables
 
 
-def get_local_variables(bucket, source, stage, language):
-    global validation_report_source
+def get_local_variables(bucket, sources):
+    global validation_report_sources
     global bucket_name
     bucket_name = bucket
-    get_common_variables(stage, language)
-    validation_report_source = source
+    # get_common_variables(stage, language)
+    validation_report_sources = sources
 
 
 def get_common_variables(stage, language):
@@ -60,15 +63,15 @@ def get_common_variables(stage, language):
     print(f"integration_processed_path is {integration_processed_path}")
 
 
-def get_variables(stage):
+def get_airflow_variables(stage):
     from airflow.models import Variable
 
-    global validation_report_source
+    global validation_report_sources
     global bucket_name
     bucket_name = Variable.get("bucket")
-    language = Variable.get("language").lower()
-    get_common_variables(stage, language)
-    validation_report_source = Variable.get("validation_report_source_" + stage)
+    # language = Variable.get("language").lower()
+    # get_common_variables(stage, language)
+    validation_report_sources = json.loads(Variable.get("validation_report_source_" + stage))
 
 
 def set_report_names(source):
@@ -138,7 +141,7 @@ def generate_bucket_file_list(source):
     for blob in all_blobs:
         full_path = str(blob.name).replace(",", "")
         try:
-            if "wav" in full_path:
+            if UTTERANCE_FILE_FORMAT in full_path:
                 (
                     file_name,
                     raw_file_name,
@@ -180,12 +183,21 @@ def fetch_data_catalog(source, db_catalog_tbl, db_conn_obj):
     return data_catalog_raw
 
 
+def cleanse_mapping_catalog(data_mapping_raw):
+    data_mapping_raw = data_mapping_raw[~data_mapping_raw.audio_id.isna()]
+    data_mapping_raw["clipped_utterance_file_name"] = data_mapping_raw.clipped_utterance_file_name.apply(
+        lambda x: x.replace(",", "")
+    )
+    data_mapping_raw["audio_id"] = data_mapping_raw["audio_id"].astype("int")
+    return data_mapping_raw
+
+
 def fetch_mapping_catalog(db_mapping_tbl, unique_audio_ids, db_conn_obj):
     filter_string = f"audio_id in {unique_audio_ids}"
     data_mapping_raw = pd.read_sql(
         f"SELECT * FROM {db_mapping_tbl} where {filter_string}", db_conn_obj
     )
-    # data_mapping_raw = cleanse_catalog(data_catalog_raw)
+    data_mapping_raw = cleanse_mapping_catalog(data_mapping_raw)
     return data_mapping_raw
 
 
@@ -371,7 +383,7 @@ def merge_with_mapping_catalog(df_cleaned_dataset, unique_audio_ids):
         ['audio_id', 'clipped_utterance_file_name', 'speaker_id', 'speaker_gender', 'snr', 'status',
          'staged_for_transcription', 'language_confidence_score', 'was_noise']]
     df_cleaned_dataset['utterance_file_name'] = df_cleaned_dataset.wav_path_bucket.apply(lambda x: x.split('/')[-1])
-    df_cleaned_dataset_mapped = df_cleaned_dataset.merge(
+    df_cleaned_dataset_mapped = df_cleaned_dataset.loc[:, df_cleaned_dataset.columns != 'speaker_gender'].merge(
         db_mapping_catalog, left_on=["audio_id", "utterance_file_name"],
         right_on=["audio_id", "clipped_utterance_file_name"], suffixes=("", "_y"))
     return df_cleaned_dataset_mapped.loc[:, df_cleaned_dataset_mapped.columns != 'clipped_utterance_file_name']
@@ -437,12 +449,12 @@ def append_transcription_files_list(df_cleaned_dataset, stage):
     df_cleaned_dataset_transcipts = df_cleaned_dataset.copy()
     df_cleaned_dataset_transcipts.bucket_file_path = (
         df_cleaned_dataset_transcipts.bucket_file_path.apply(
-            lambda x: x.replace("wav", "txt")
+            lambda x: x.replace(UTTERANCE_FILE_FORMAT, TRANSCRIPT_FILE_FORMAT)
         )
     )
     df_cleaned_dataset_transcipts.utterances_file_name = (
         df_cleaned_dataset_transcipts.utterances_file_name.apply(
-            lambda x: x.replace("wav", "txt")
+            lambda x: x.replace(UTTERANCE_FILE_FORMAT, TRANSCRIPT_FILE_FORMAT)
         )
     )
     if "post" in stage:
@@ -623,16 +635,22 @@ def check_dataframes(data_catalog_raw, data_bucket_raw):
         pass
 
 
-def report_generation_pipeline(stage, bucket, language="", mode="cluster", source=[]):
+def report_generation_pipeline(stage, bucket, mode="cluster", sources={}):
     if mode == "local":
-        get_local_variables(bucket, source, stage, language.lower())
+        get_local_variables(bucket, sources)
     else:
-        get_variables(stage)
-    source_list = ast.literal_eval(str(validation_report_source))
-    if len(source_list) == 0:
-        source_list.append("")
-    for _source in source_list:
+        get_airflow_variables(stage)
+    if not bool(validation_report_sources):
+        print("No sources has been specified in the source list,so Aborting....")
+        exit(1)
+    for _source, _source_info in validation_report_sources.items():
         print(f"Processing for source: {_source}")
+        try:
+            language = _source_info.get('language').lower()
+        except KeyError as e:
+            print(f"No language parameter provided for source {_source},Aborting...")
+            exit(0)
+        get_common_variables(stage, language)
         set_report_names(_source)
         data_catalog_raw, data_bucket_raw = fetch_data(
             _source, get_db_connection_object()
@@ -648,6 +666,9 @@ if __name__ == "__main__":
         mode="local",
         stage="post-transcription",
         bucket="ekstepspeechrecognition-dev",
-        language="hindi",
-        source=["STAGE"],
+        # language="hindi",
+        sources={
+            "STAGE": {
+                "language": "hindi"
+            }}
     )

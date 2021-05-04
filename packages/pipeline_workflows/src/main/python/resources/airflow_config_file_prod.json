@@ -1,6 +1,5 @@
 {
   "env": "prod",
-  "language": "hindi",
   "table": "texttospeechpipeline",
   "bucket": "ekstepspeechrecognition-dev",
   "inputbasepath": "/data/integration/curation/processed/{language}/",
@@ -84,12 +83,16 @@
       "voice1"
     ]
   },
-  "validation_report_source_post-transcription": [
-    "CEC"
-  ],
-  "validation_report_source_pre-transcription": [
-    "CEC"
-  ],
+  "validation_report_source_post-transcription": {
+    "CEC": {
+      "language"
+    : "hindi"}
+  },
+  "validation_report_source_pre-transcription": {
+    "CEC": {
+      "language"
+    : "hindi"}
+  },
   "snr_resource_limits": {
     "request_memory": "200Mi",
     "request_cpu": "50m",
