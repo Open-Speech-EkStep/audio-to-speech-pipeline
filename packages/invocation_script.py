@@ -110,6 +110,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-fm",
+    "--file-mode",
+    dest="file_mode",
+    default=False,
+    help="Specify its a file mode or non file mode for data filtering. Only works with "
+         "audio processor",
+)
+
+parser.add_argument(
     "-af",
     "--audio-format",
     dest="audio_format",
@@ -147,7 +156,7 @@ parser.add_argument(
     "--file-path",
     dest="file_path",
     default=None,
-    help="The parameters that need to be used in audio embedding",
+    help="The parameters that need to be used in audio embedding and data marking",
 )
 
 parser.add_argument(
@@ -234,10 +243,14 @@ def validate_data_filter_config(arguments):
     if arguments.audio_source is None:
         raise argparse.ArgumentTypeError("Source is missing")
 
-    if arguments.filter_by is None:
-        raise argparse.ArgumentTypeError("Filter config is missing")
+    if arguments.file_mode is False and arguments.filter_by is None:
+        raise argparse.ArgumentTypeError("Filter config is missing in non file mode")
 
-    return {"filter": json.loads(arguments.filter_by), "source": arguments.audio_source}
+    if arguments.file_mode is not False and arguments.file_path is None:
+        raise argparse.ArgumentTypeError(f"file mode is true but no file path provided")
+
+    return {"filter": json.loads(arguments.filter_by) if arguments.filter_by is not None else None, "source": arguments.audio_source, "file_mode"
+    : arguments.file_mode, "file_path": arguments.file_path}
 
 def validate_ulca_dataset_config(arguments):
     LOGGER.info("validating input for ulca dataset")
