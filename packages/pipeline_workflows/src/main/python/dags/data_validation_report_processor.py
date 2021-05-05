@@ -28,7 +28,7 @@ def get_config_variables(stage):
     download_blob(
         bucket_name,
         f"data/audiotospeech/config/validation_report_dag/config_{stage}.yaml",
-        config_path,)
+        config_path, )
 
     variables = __load_yaml_file()["report_configuration"]
     return variables
@@ -496,7 +496,7 @@ def generate_cleaned_dataset(df_cleaned_utterances_exploded, bucket_list_in_cata
 
 
 def get_audio_ids(df_catalog_unique):
-    return tuple(df_catalog_unique['audio_id'].tolist())
+    return tuple(df_catalog_unique['audio_id'].tolist()) + (0, 0)
 
 
 def generate_data_validation_report(data_catalog_raw, data_bucket_raw, stage):
