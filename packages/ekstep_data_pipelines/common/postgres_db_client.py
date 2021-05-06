@@ -83,6 +83,7 @@ class PostgresClient:
         db_user = db_configuration.get("db_user")
         db_pass = db_configuration.get("db_pass")
         cloud_sql_connection_name = db_configuration.get("cloud_sql_connection_name")
+        port = db_configuration.get("port",5432)
 
         valid_config = all([db_name, db_user, db_pass, cloud_sql_connection_name])
 
@@ -91,7 +92,7 @@ class PostgresClient:
             pass
 
         self.db = create_engine(
-            f"postgresql://{db_user}:{db_pass}@{cloud_sql_connection_name}/{db_name}"
+            f"postgresql://{db_user}:{db_pass}@{cloud_sql_connection_name}:{port}/{db_name}"
         )
 
     def execute_query(self, query, **parm_dict):
