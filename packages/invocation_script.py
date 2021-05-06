@@ -86,7 +86,7 @@ parser.add_argument(
     dest="file_name_list",
     default=[],
     help="list of all the filename that need to processed, this needs to a comma seperated "
-    "list eg. audio_id1,audio_id2 . Only works with the audio processor",
+         "list eg. audio_id1,audio_id2 . Only works with the audio processor",
 )
 
 parser.add_argument(
@@ -95,7 +95,7 @@ parser.add_argument(
     dest="audio_ids",
     default=[],
     help="list of all the audio ids that need to processed, this needs to a comma seperated "
-    "list eg. audio_id1,audio_id2 . Only works with the audio processor",
+         "list eg. audio_id1,audio_id2 . Only works with the audio processor",
 )
 
 parser.add_argument(
@@ -104,15 +104,6 @@ parser.add_argument(
     dest="audio_source",
     default=None,
     help="The name of the source of the audio which is being processed. Only works with "
-    "audio processor",
-)
-
-parser.add_argument(
-    "-fm",
-    "--file-mode",
-    dest="file_mode",
-    default=False,
-    help="Specify its a file mode or non file mode for data filtering. Only works with "
          "audio processor",
 )
 
@@ -122,7 +113,7 @@ parser.add_argument(
     dest="audio_format",
     default=None,
     help="The format of the audio which is being processed eg mp4,mp3 . Only works with "
-    "audio processor",
+         "audio processor",
 )
 
 parser.add_argument(
@@ -134,11 +125,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-fb",
-    "--filter_by",
-    dest="filter_by",
+    "-fs",
+    "--filter_spec",
+    dest="filter_spec",
     default=None,
-    help="The filter that needs to be applied for data marking",
+    help="The filter spec that needs to be applied for data marking",
 )
 
 parser.add_argument(
@@ -233,14 +224,22 @@ def validate_data_filter_config(arguments):
     if arguments.audio_source is None:
         raise argparse.ArgumentTypeError("Source is missing")
 
-    if arguments.file_mode is False and arguments.filter_by is None:
-        raise argparse.ArgumentTypeError("Filter config is missing in non file mode")
+    if arguments.filter_spec is None:
+        raise argparse.ArgumentTypeError("Filter spec is missing")
 
-    if arguments.file_mode is not False and arguments.file_path is None:
-        raise argparse.ArgumentTypeError(f"file mode is true but no file path provided")
+    if arguments.filter_spec is not None:
+        filter_spec_dict = json.loads(arguments.filter_spec)
+        if filter_spec_dict.get("file_mode", None) in (None, 'n', 'N') and filter_spec_dict.get("filter", None) is None:
+            raise argparse.ArgumentTypeError("Filter spec has no file_mode and no filter")
+        if filter_spec_dict.get("file_mode", None) not in ('y', 'n', 'Y', 'N'):
+            raise argparse.ArgumentTypeError("Filter spec has no proper file_mode")
+        if filter_spec_dict.get("file_mode", None) in ('y', 'Y') and filter_spec_dict.get("file_path", None) is None:
+            raise argparse.ArgumentTypeError("Filter spec has file_mode but no file path")
+        if filter_spec_dict.get("data_set", None) not in ('train', 'test'):
+            raise argparse.ArgumentTypeError("Filter spec has no proper data set type")
 
-    return {"filter": json.loads(arguments.filter_by) if arguments.filter_by is not None else None, "source": arguments.audio_source, "file_mode"
-    : arguments.file_mode, "file_path": arguments.file_path}
+    return {"filter_spec": filter_spec_dict,
+            "source": arguments.audio_source}
 
 
 def validate_audio_analysis_config(arguments):
@@ -249,6 +248,7 @@ def validate_audio_analysis_config(arguments):
     if arguments.audio_source is None:
         raise argparse.ArgumentTypeError("Source is missing")
     return {"source": arguments.audio_source}
+
 
 def validate_audio_embedding_config(arguments):
     LOGGER.info("validating input for audio embedding")
@@ -425,7 +425,8 @@ def perform_action(arguments, **kwargs):
 
         data_processor = object_dict.get("data_processor")
 
-        curr_processor = AudioEmbedding.get_instance(data_processor,**{"commons_dict": object_dict, "file_interface": arguments.file_system})
+        curr_processor = AudioEmbedding.get_instance(data_processor, **{"commons_dict": object_dict,
+                                                                        "file_interface": arguments.file_system})
         LOGGER.info(f"Starting processing for {current_action}")
 
     curr_processor.process(**kwargs)
