@@ -57,7 +57,7 @@ def create_dag(data_marker_config, default_args):
                     "data/audiotospeech/config/config.yaml",
                     "-as",
                     source,
-                    "-fb",
+                    "-fs",
                     json.dumps(filter_by_config),
                     "-l",
                     language,

@@ -115,6 +115,9 @@
   "data_filter_config": {
     "test_source1": {
       "language": "hindi",
+      "file_mode" : "y",
+      "data_set" : "test",
+      "file_path" : "ekstepspeechrecognition-test/data/audiotospeech/raw/download/duplicate/test_source1.csv",
       "filter": {
         "by_snr": {
           "lte": 75,
@@ -126,6 +129,8 @@
     },
     "test_source2": {
       "language": "hindi",
+      "file_mode" : "n",
+      "data_set" : "test",
       "filter": {
         "by_speaker": {
           "lte_per_speaker_duration": 60,
