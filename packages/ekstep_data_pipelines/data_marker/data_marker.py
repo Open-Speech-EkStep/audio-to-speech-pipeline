@@ -63,8 +63,12 @@ class DataMarker(BaseProcessor):
             Logger.info("Fetching already filtered utterances from a file for source: %s", source)
             ensure_path(self.local_input_path)
             download_path = self.download_filtered_utterances_file(file_path, self.local_input_path)
-            filtered_utterances = self.get_utterances_from_file(download_path)
-            source_dir = source
+            if check_file_exits(download_path):
+                Logger.info("File Downloaded successfully")
+                filtered_utterances = self.get_utterances_from_file(download_path)
+                source_dir = source
+            else:
+                raise Exception("File Download failed")
         else:
             Logger.info("Fetching utterances for source: %s", source)
             utterances = self.catalogue_dao.get_utterances_by_source(source, "Clean")
@@ -95,6 +99,14 @@ class DataMarker(BaseProcessor):
                 )
             )
             Logger.info("Rows updated: %s", str(rows_updated))
+            if data_set == 'test':
+                dictinct_audio_ids = self.fetch_distinct_audio_ids(filtered_utterances)
+                paths = self.to_paths(dictinct_audio_ids, source_path_with_source)
+                archive_path_with_source = (
+                    f"{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}/archive"
+                )
+                Logger.info("Archiving audio_ids to dir: %s", archive_path_with_source)
+                self.data_mover.move_media_paths(paths, archive_path_with_source)
         else:
             Logger.info("No utterances found for filter criteria")
 
@@ -106,6 +118,11 @@ class DataMarker(BaseProcessor):
         )
         return list(
             map(lambda u: f"{source_path_with_source}/{u[3]}/clean/{u[1]}", utterances)
+        )
+
+    def to_paths(self, audio_ids, source_path_with_source):
+        return list(
+            map(lambda a: f"{source_path_with_source}/{a}", audio_ids)
         )
 
     def get_config(self, **kwargs):
@@ -128,12 +145,15 @@ class DataMarker(BaseProcessor):
             input_file_path, download_path
         )
 
-        if check_file_exits(download_path):
-            Logger.info("File Downloaded successfully")
-        else:
-            raise Exception("File Download failed")
         return download_path
 
     def get_utterances_from_file(self, local_file_path):
         df = pd.read_csv(local_file_path)
-        return list(df[FILE_COLUMN_LIST].to_records(index=False, column_dtypes={"speaker_id": "int32"}))
+        if not df.empty:
+            return list(df[FILE_COLUMN_LIST].to_records(index=False, column_dtypes={"speaker_id": "int32"}))
+        else:
+            raise Exception("Empty filtered csv with no records..Aborting.")
+
+    def fetch_distinct_audio_ids(self, utterances):
+        df = pd.DataFrame.from_records(utterances, columns=FILE_COLUMN_LIST)
+        return list(df['audio_id'].unique())

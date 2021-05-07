@@ -18,3 +18,11 @@ class MediaFilesMover(object):
             landing_path = f"{landing_path_with_source}/{relative_audio_id_clean_path}"
             worker_pool.submit(self.file_system.mv_file, file, landing_path)
         worker_pool.shutdown(wait=True)
+
+    def move_media_paths(self, paths, landing_path_with_source):
+        Logger.info("using concurrency:%s", str(self.concurrency))
+        worker_pool = ThreadPoolExecutor(max_workers=self.concurrency)
+        for path in paths:
+            landing_path_with_source_audio_id = landing_path_with_source + '/' + path.split('/')[-1]
+            worker_pool.submit(self.file_system.mv, path, landing_path_with_source_audio_id)
+        worker_pool.shutdown(wait=True)

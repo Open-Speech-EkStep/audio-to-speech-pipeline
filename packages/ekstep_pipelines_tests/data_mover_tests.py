@@ -37,3 +37,31 @@ class DataMoverTests(unittest.TestCase):
             "swayamprabha_chapter/1/clean/file2.wav",
         )
         self.assertEqual(call_args_list[1][0][1], f"{landing_base_path}/1/clean")
+
+    def test__should_move_media_dirs(self):
+        landing_base_path = (
+            "gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/landing/"
+            "hindi/audio/swayamprabha_chapter/archive"
+        )
+
+        files = [
+            "gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/"
+            "swayamprabha_chapter/1",
+            "gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/"
+            "swayamprabha_chapter/2",
+        ]
+        self.media_files_mover.move_media_paths(files, landing_base_path)
+        call_args_list = self.file_system.mv.call_args_list
+        self.assertEqual(
+            call_args_list[0][0][0],
+            "gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/"
+            "swayamprabha_chapter/1",
+        )
+        self.assertEqual(call_args_list[0][0][1], f"{landing_base_path}/1")
+
+        self.assertEqual(
+            call_args_list[1][0][0],
+            "gs://ekstepspeechrecognition-dev/data/audiotospeech/raw/catalogued/hindi/audio/"
+            "swayamprabha_chapter/2",
+        )
+        self.assertEqual(call_args_list[1][0][1], f"{landing_base_path}/2")
