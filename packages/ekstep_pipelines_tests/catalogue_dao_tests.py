@@ -190,13 +190,13 @@ class CatalogueTests(unittest.TestCase):
         )
         called_with_query = (
             "update media_speaker_mapping set staged_for_transcription = true,"
-            "data_set = :data_set "
+            "data_type = :data_set "
             "where audio_id in (select audio_id from media_metadata_staging "
             "where \"source\" = :source) and clipped_utterance_file_name in ('file_1.wav',"
             "'file_2.wav')"
         )
 
-        called_with_args = {"source": "test_source", " data-set": "test"}
+        called_with_args = {"source": "test_source", "data_set": "test"}
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(called_with_query, args[0][0])
         self.assertEqual(called_with_args, args[1])
