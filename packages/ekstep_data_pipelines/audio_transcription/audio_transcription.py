@@ -30,14 +30,14 @@ class AudioTranscription(BaseProcessor):
 
     @staticmethod
     def get_instance(
-        data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
+            data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
     ):
         return AudioTranscription(
             data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
         )
 
     def __init__(
-        self, data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
+            self, data_processor, gcs_instance, audio_commons, catalogue_dao, **kwargs
     ):
         self.data_processor = data_processor
         self.gcs_instance = gcs_instance
@@ -56,10 +56,10 @@ class AudioTranscription(BaseProcessor):
         source = kwargs.get("audio_source")
         audio_ids = kwargs.get("audio_ids", [])
         stt_api = kwargs.get("speech_to_text_client")
+        data_set = kwargs.get("data_set")
 
         stt_language = self.audio_transcription_config.get(LANGUAGE)
         remote_path_of_dir = self.audio_transcription_config.get(CLEAN_AUDIO_PATH)
-
         should_skip_rejected = self.audio_transcription_config.get(SHOULD_SKIP_REJECTED)
 
         LOGGER.info("Generating transcriptions for audio_ids:%s", str(audio_ids))
@@ -75,13 +75,13 @@ class AudioTranscription(BaseProcessor):
                     continue
 
                 remote_dir_path_for_given_audio_id = (
-                    f"{remote_path_of_dir}/{source}/{audio_id}/clean"
+                    f"{remote_path_of_dir}/{source}/{data_set}/{audio_id}/clean"
                 )
 
                 remote_stt_output_path = self.audio_transcription_config.get(
                     "remote_stt_audio_file_path"
                 )
-                remote_stt_output_path = f"{remote_stt_output_path}/{source}/{audio_id}"
+                remote_stt_output_path = f"{remote_stt_output_path}/{source}/{data_set}/{audio_id}"
 
                 transcription_client = self.transcription_clients[stt_api]
                 LOGGER.info("Using transcription client:%s", str(transcription_client))
@@ -130,7 +130,7 @@ class AudioTranscription(BaseProcessor):
                 else:
                     LOGGER.info("No rejected files found")
 
-                self.delete_audio_id(f"{remote_path_of_dir}/{source}/{audio_id}")
+                self.delete_audio_id(f"{remote_path_of_dir}/{source}/{data_set}/{audio_id}")
             except Exception as exception:
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
@@ -156,14 +156,14 @@ class AudioTranscription(BaseProcessor):
             file.write(transcription)
 
     def generate_transcription_for_all_utterenaces(
-        self,
-        audio_id,
-        all_files,
-        stt_language,
-        transcription_client,
-        utterances,
-        should_skip_rejected,
-        remote_path,
+            self,
+            audio_id,
+            all_files,
+            stt_language,
+            transcription_client,
+            utterances,
+            should_skip_rejected,
+            remote_path,
     ):
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
 
@@ -195,8 +195,8 @@ class AudioTranscription(BaseProcessor):
                 utterance_metadata["reason"] = "redacted"
 
             if (
-                float(utterance_metadata["duration"]) < 0.5
-                or float(utterance_metadata["duration"]) > 15
+                    float(utterance_metadata["duration"]) < 0.5
+                    or float(utterance_metadata["duration"]) > 15
             ):
                 LOGGER.error("skipping audio file as duration > 15 or  < .5")
                 continue
@@ -226,14 +226,14 @@ class AudioTranscription(BaseProcessor):
         return local_clean_folder, local_rejected_path
 
     def generate_transcription_and_sanitize(
-        self,
-        audio_id,
-        local_clean_path,
-        local_rejected_path,
-        remote_file_path,
-        stt_language,
-        transcription_client,
-        utterance_metadata,
+            self,
+            audio_id,
+            local_clean_path,
+            local_rejected_path,
+            remote_file_path,
+            stt_language,
+            transcription_client,
+            utterance_metadata,
     ):
         if ".wav" not in remote_file_path:
             return
@@ -306,12 +306,12 @@ class AudioTranscription(BaseProcessor):
             )
 
     def handle_error(
-        self,
-        audio_id,
-        local_clean_path,
-        local_rejected_path,
-        utterance_metadata,
-        reason,
+            self,
+            audio_id,
+            local_clean_path,
+            local_rejected_path,
+            utterance_metadata,
+            reason,
     ):
         utterance_metadata["status"] = "Rejected"
         utterance_metadata["reason"] = reason

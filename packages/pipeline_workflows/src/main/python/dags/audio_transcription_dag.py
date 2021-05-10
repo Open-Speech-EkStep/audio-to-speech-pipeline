@@ -42,6 +42,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
     with dag:
 
         language = args.get("language")
+        data_set = args.get("data_set")
         print(args)
         print(f"Language for source is {language}")
         stt_source_path_set = interpolate_language_paths(language)
@@ -52,6 +53,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
             op_kwargs={
                 "source": dag_id,
                 "stt_source_path": stt_source_path_set,
+                "data_set": data_set,
                 "batch_count": batch_count,
                 "bucket_name": bucket_name,
             },
@@ -70,7 +72,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
         if len(audio_file_ids) > 0:
             chunk_size = math.ceil(len(audio_file_ids) / parallelism)
             batches = [
-                audio_file_ids[i : i + chunk_size]
+                audio_file_ids[i: i + chunk_size]
                 for i in range(0, len(audio_file_ids), chunk_size)
             ]
 
@@ -89,6 +91,8 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
                     "data/audiotospeech/config/config.yaml",
                     "-ai",
                     ",".join(batch_audio_file_ids),
+                    "-ds",
+                    data_set,
                     "-as",
                     dag_id,
                     "-stt",
@@ -116,14 +120,14 @@ for source in sourceinfo.keys():
     parallelism = source_info.get("parallelism", batch_count)
     api = source_info.get("stt")
     language = source_info.get("language").lower()
-
+    data_set = source_info.get("data_set").lower()
     dag_id = source
 
     dag_args = {
         "email": ["gaurav.gupta@thoughtworks.com"],
     }
 
-    args = {"parallelism": parallelism, "stt": api, "language": language}
+    args = {"parallelism": parallelism, "stt": api, "language": language, "data_set": data_set}
 
     dag_number = dag_id + str(batch_count)
 
