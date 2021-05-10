@@ -97,10 +97,10 @@ def get_file_path_from_bucket(
     Variable.set("audiofilelist", file_path_dict)
 
 
-def get_require_audio_id(source, stt_source_path, batch_count, bucket_name):
+def get_require_audio_id(source, stt_source_path, data_set, batch_count, bucket_name):
     audio_ids = json.loads(Variable.get("audioidsforstt"))
 
-    source_dir_path = f"{stt_source_path}{source}"
+    source_dir_path = f"{stt_source_path}{source}/{data_set}"
     all_audio_id_path = list_blobs_in_a_path(bucket_name, source_dir_path)
     audio_id_list = set()
     for blob in all_audio_id_path:
@@ -172,9 +172,9 @@ def split_upload_batches(source, bucket_name, destination_path, file_object, max
     return list_of_batches
 
 
-def find_all_batch_without_npz(bucket_name,destination_path,source):
+def find_all_batch_without_npz(bucket_name, destination_path, source):
     all_file_list = []
-    full_path_for_embeddings = os.path.join(destination_path,source)
+    full_path_for_embeddings = os.path.join(destination_path, source)
 
     all_batch_txt_npz = list_blobs_in_a_path(
         bucket_name, full_path_for_embeddings
@@ -183,24 +183,24 @@ def find_all_batch_without_npz(bucket_name,destination_path,source):
     has_npz_file = False
     for filename in all_batch_txt_npz:
         print(filename.name)
-        
+
         if 'txt' in filename.name:
-            filename_without_extension = filename.name.replace('.txt','')
-            print(filename_without_extension,"when it is txt")
+            filename_without_extension = filename.name.replace('.txt', '')
+            print(filename_without_extension, "when it is txt")
             if filename_without_extension in all_file_list:
                 all_file_list.remove(filename_without_extension)
                 continue
             all_file_list.append(filename_without_extension)
         if 'npz' in filename.name:
             has_npz_file = True
-            filename_without_extension = filename.name.replace('.npz','')
-            print(filename_without_extension,"when it is npz")
+            filename_without_extension = filename.name.replace('.npz', '')
+            print(filename_without_extension, "when it is npz")
             if filename_without_extension in all_file_list:
                 all_file_list.remove(filename_without_extension)
                 continue
             all_file_list.append(filename_without_extension)
 
-    return all_file_list,has_npz_file
+    return all_file_list, has_npz_file
 
 
 def generate_splitted_batches_for_audio_analysis(
@@ -217,13 +217,12 @@ def generate_splitted_batches_for_audio_analysis(
     print("****The destination path is *****" + destination_path)
     batch_file_path_dict = json.loads(Variable.get("embedding_batch_file_list"))
 
-    all_batch_set,has_npz_file = find_all_batch_without_npz(bucket_name,destination_path,source)
+    all_batch_set, has_npz_file = find_all_batch_without_npz(bucket_name, destination_path, source)
 
     if len(all_batch_set) > 0:
-
-        print(all_batch_set,"All batch set")
+        print(all_batch_set, "All batch set")
         # list_of_batches = list(all_batch_set)
-        add_txt_in_path = [f'{bucket_name}/{file_path}.txt' for file_path in all_batch_set ]
+        add_txt_in_path = [f'{bucket_name}/{file_path}.txt' for file_path in all_batch_set]
 
         batch_file_path_dict[source] = add_txt_in_path
         batch_file_path_dict = MyDict(batch_file_path_dict)
@@ -231,12 +230,10 @@ def generate_splitted_batches_for_audio_analysis(
         return
 
     if len(all_batch_set) == 0 and has_npz_file:
-
         batch_file_path_dict[source] = all_batch_set
         batch_file_path_dict = MyDict(batch_file_path_dict)
         Variable.set("embedding_batch_file_list", batch_file_path_dict)
         return
-
 
     all_blobs = list_blobs_in_a_path(
         bucket_name, source_path + source + delimiter
@@ -268,7 +265,7 @@ def generate_splitted_batches_for_audio_analysis(
             if file_extension in [
                 expected_file_extension,
                 expected_file_extension.swapcase(),
-            ]  and 'clean' in blob.name:
+            ] and 'clean' in blob.name:
 
                 if appendEOL == True:
                     file_object.write("\n")

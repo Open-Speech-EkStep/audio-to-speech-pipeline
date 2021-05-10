@@ -149,6 +149,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-ds",
+    "--data-set",
+    dest="data_set",
+    default=None,
+    help="The dataset type that need to be used in audio embedding",
+)
+parser.add_argument(
     "-f",
     "--file_system",
     dest="file_system",
@@ -316,10 +323,15 @@ def validate_audio_transcription_input(arguments):
 
     audio_source = arguments.audio_source
 
+    if arguments.data_set is None:
+        raise argparse.ArgumentTypeError(f"data set type is missing")
+
+    data_set = arguments.data_set
     return {
         "audio_ids": audio_ids,
         "speech_to_text_client": speech_to_text_client,
         "audio_source": audio_source,
+        "data_set": data_set
     }
 
 
