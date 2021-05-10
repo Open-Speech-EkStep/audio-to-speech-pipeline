@@ -113,6 +113,15 @@ class DataMarker(BaseProcessor):
         Logger.info("************* Data marker completed ****************")
 
     def to_files(self, utterances, source_path_with_source):
+        """Returns the list of complete path of utterances.
+
+        Args:
+            utterances: list of utterance files data
+            source_path_with_source: base path for the audio source directory
+
+        Returns:
+            the list of complete path for provided utterances
+        """
         list(
             map(lambda u: f"{source_path_with_source}/{u[3]}/clean/{u[1]}", utterances)
         )
@@ -121,11 +130,30 @@ class DataMarker(BaseProcessor):
         )
 
     def to_paths(self, audio_ids, source_path_with_source):
+        """Returns the list of complete path of audio.
+
+        Args:
+            audio_ids: list of audio_ids
+            source_path_with_source: base path for the audio source directory
+
+        Returns:
+            the list of complete path for provided utterances
+        """
         return list(
             map(lambda a: f"{source_path_with_source}/{a}", audio_ids)
         )
 
     def get_config(self, **kwargs):
+        """Extract configuration values for filter_spec from given json data.
+
+        Args:
+            kwargs: contains key-value pair in json format for filter_spec
+
+        Returns:
+            Returns source, data_set, filters, file_mode, file_path
+
+        """
+
         filter_spec = kwargs.get(FILTER_SPEC, {})
         filters = filter_spec.get(FILTER_CRITERIA, {})
         source = kwargs.get("source")
@@ -136,7 +164,16 @@ class DataMarker(BaseProcessor):
         return source, data_set, filters, file_mode, file_path
 
     def download_filtered_utterances_file(self, input_file_path, local_path):
+        """Download the filtered utterance file from input_file_path to local_path
 
+        Args:
+            input_file_path: path of the filtered utterances csv file
+            local_path: local directory path where file needs to be downloaded
+
+        Returns:
+            Download path where filtered utterance file is downloaded.
+
+        """
         Logger.info(
             f"Downloading file from path from {input_file_path}"
         )
@@ -148,6 +185,17 @@ class DataMarker(BaseProcessor):
         return download_path
 
     def get_utterances_from_file(self, local_file_path):
+        """Returns utterance list from csv file, if file is empty raise an exception.
+
+        Args:
+            local_file_path: file path of csv file containing utterance records.
+
+        Returns:
+            Complete download path
+
+        Raises:
+            Exception: Empty file with no records.
+        """
         df = pd.read_csv(local_file_path)
         if not df.empty:
             return list(df[FILE_COLUMN_LIST].to_records(index=False, column_dtypes={"speaker_id": "int32"}))
@@ -155,5 +203,13 @@ class DataMarker(BaseProcessor):
             raise Exception("Empty filtered csv with no records..Aborting.")
 
     def fetch_distinct_audio_ids(self, utterances):
+        """Returns List of unique audio_ids from utterance list
+
+        Args:
+            utterances: list of utterance files data
+
+        Returns:
+            List of unique audio_ids
+        """
         df = pd.DataFrame.from_records(utterances, columns=FILE_COLUMN_LIST)
         return list(df['audio_id'].unique())
