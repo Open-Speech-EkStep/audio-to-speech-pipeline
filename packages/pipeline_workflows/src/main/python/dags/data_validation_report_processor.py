@@ -97,8 +97,12 @@ def get_file_attributes(source_prefix_split_list):
     except BaseException:
         raw_file_name = "NA"
     source = source_prefix_split_list[0]
-    audio_id = source_prefix_split_list[1]
-    status = source_prefix_split_list[2]
+    if str(source_prefix_split_list[1]).lower() not in ('train', 'test'):
+        audio_id = source_prefix_split_list[1]
+        status = source_prefix_split_list[2]
+    else:
+        audio_id = source_prefix_split_list[2]
+        status = source_prefix_split_list[3]
     return file_name, raw_file_name, source, audio_id, status
 
 
@@ -665,10 +669,10 @@ if __name__ == "__main__":
     report_generation_pipeline(
         mode="local",
         stage="post-transcription",
-        bucket="ekstepspeechrecognition-dev",
+        bucket="ekstepspeechrecognition-test",
         # language="hindi",
         sources={
-            "STAGE": {
+            "testamulya2": {
                 "language": "hindi"
             }}
     )
