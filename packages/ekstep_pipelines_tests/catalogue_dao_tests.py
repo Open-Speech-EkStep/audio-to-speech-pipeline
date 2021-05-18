@@ -150,6 +150,7 @@ class CatalogueTests(unittest.TestCase):
     def test_get_utterances_by_source(self, mock_postgres_client):
         source = "test_source"
         status = "Clean"
+        data_set = "test"
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
         expected_utterances = [
             (1, "file_1.wav", "10", "2010123", 16),
@@ -163,7 +164,7 @@ class CatalogueTests(unittest.TestCase):
             "from media_speaker_mapping "
             "where audio_id in "
             "(select audio_id from media_metadata_staging "
-            'where "source" = :source) '
+            'where "source" = :source and data_set_used_for IS NULL or data_set_used_for = :data_set) '
             "and status = :status "
             "and staged_for_transcription = false "
             "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15"
@@ -171,7 +172,7 @@ class CatalogueTests(unittest.TestCase):
         mock_postgres_client.execute_query.return_value = expected_utterances
         catalogueDao = CatalogueDao(mock_postgres_client)
         args = mock_postgres_client.execute_query.call_args_list
-        utterances = catalogueDao.get_utterances_by_source(source, status)
+        utterances = catalogueDao.get_utterances_by_source(source, status, data_set)
         self.assertEqual(utterances, expected_utterances)
         self.assertEqual(called_with_sql, args[0][0][0])
 

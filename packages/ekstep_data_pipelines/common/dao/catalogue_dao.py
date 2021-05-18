@@ -25,14 +25,14 @@ class CatalogueDao:
         )
         return json.loads(utterances[0][0]) if len(utterances) > 0 else []
 
-    def get_utterances_by_source(self, source, status):
-        parm_dict = {"source": source, "status": status}
+    def get_utterances_by_source(self, source, status, data_set):
+        parm_dict = {"source": source, "status": status, "data_set": data_set}
         data = self.postgres_client.execute_query(
             "select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, "
             "audio_id, snr "
             "from media_speaker_mapping "
             "where audio_id "
-            'in (select audio_id from media_metadata_staging where "source" = :source) '
+            'in (select audio_id from media_metadata_staging where "source" = :source and data_set_used_for IS NULL or data_set_used_for = :data_set) '
             "and status = :status "
             "and staged_for_transcription = false "
             "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15",
@@ -74,6 +74,20 @@ class CatalogueDao:
             "audio_id": audio_id,
             "name": name,
         }
+        self.postgres_client.execute_update(update_query, **param_dict)
+        return True
+
+    def update_audio_ids_with_data_type(self, source, audio_ids, data_set):
+        if len(audio_ids) <= 0:
+            return True
+
+        update_query = (
+            "update media_metadata_staging set data_set_used_for = :data_set "
+            'where "source" = :source and audio_id in '
+        )
+        audio_ids = list(map(str, audio_ids))
+        update_query = update_query + "(" + ",".join(audio_ids) + ")"
+        param_dict = {"source": source, "data_set": data_set}
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
 
@@ -142,7 +156,7 @@ class CatalogueDao:
         return True
 
     def update_utterance_speaker(
-        self, utterance_file_names, speaker_name, was_noise=False
+            self, utterance_file_names, speaker_name, was_noise=False
     ):
         update_query = (
             "update media_speaker_mapping "
