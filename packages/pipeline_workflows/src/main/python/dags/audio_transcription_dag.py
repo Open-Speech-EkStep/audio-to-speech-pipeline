@@ -120,7 +120,7 @@ for source in sourceinfo.keys():
     parallelism = source_info.get("parallelism", batch_count)
     api = source_info.get("stt")
     language = source_info.get("language").lower()
-    data_set = source_info.get("data_set").lower()
+    data_set = source_info.get("data_set", '').lower()
     dag_id = source
 
     dag_args = {
