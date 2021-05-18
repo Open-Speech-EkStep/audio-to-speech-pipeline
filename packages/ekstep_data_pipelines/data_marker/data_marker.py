@@ -71,7 +71,7 @@ class DataMarker(BaseProcessor):
                 raise Exception("File Download failed")
         else:
             Logger.info("Fetching utterances for source: %s", source)
-            utterances = self.catalogue_dao.get_utterances_by_source(source, "Clean")
+            utterances = self.catalogue_dao.get_utterances_by_source(source, "Clean", data_set)
             Logger.info("Applying filters on %d utterances for source: %s", len(utterances), source)
             filtered_utterances = self.data_filter.apply_filters(
                 filter_criteria, utterances
@@ -99,14 +99,17 @@ class DataMarker(BaseProcessor):
                 )
             )
             Logger.info("Rows updated: %s", str(rows_updated))
-            if data_set == 'test':
-                dictinct_audio_ids = self.fetch_distinct_audio_ids(filtered_utterances)
-                paths = self.to_paths(dictinct_audio_ids, source_path_with_source)
-                archive_path_with_source = (
-                    f"{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}/archive"
-                )
-                Logger.info("Archiving audio_ids to dir: %s", archive_path_with_source)
-                self.data_mover.move_media_paths(paths, archive_path_with_source)
+            dictinct_audio_ids = self.fetch_distinct_audio_ids(filtered_utterances)
+            Logger.info("Updating audio_ids with data set type used for tags")
+            self.catalogue_dao.update_audio_ids_with_data_type(source, dictinct_audio_ids, data_set)
+            Logger.info("All audio_ids updated with data set type tags")
+            #Data archival
+            # paths = self.to_paths(dictinct_audio_ids, source_path_with_source)
+            # archive_path_with_source = (
+            #     f"{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}/archive"
+            # )
+            # Logger.info("Archiving audio_ids to dir: %s", archive_path_with_source)
+            # self.data_mover.move_media_paths(paths, archive_path_with_source)
         else:
             Logger.info("No utterances found for filter criteria")
 
