@@ -118,7 +118,7 @@
       "language": "hindi",
       "file_mode" : "y",
       "data_set" : "test",
-      "file_path" : "ekstepspeechrecognition-test/data/audiotospeech/raw/download/duplicate/test_source1.csv",
+      "file_path" : "data/audiotospeech/raw/download/duplicate/test_source1.csv",
       "filter": {
         "by_snr": {
           "lte": 75,

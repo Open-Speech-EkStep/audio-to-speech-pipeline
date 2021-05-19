@@ -7,6 +7,9 @@ from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common.file_utils import *
 from ekstep_data_pipelines.data_marker.constants import (
     CONFIG_NAME,
+    COMMON_CONFIG_NAME,
+    COMMON_GCS_CONFIG_NAME,
+    COMMON_GCS_BUCKET_CONFIG,
     FILTER_CRITERIA,
     LANDING_BASE_PATH,
     SOURCE_BASE_PATH,
@@ -58,11 +61,13 @@ class DataMarker(BaseProcessor):
         """
         Logger.info("*************Starting data marker****************")
         self.data_tagger_config = self.postgres_client.config_dict.get(CONFIG_NAME)
+        self.bucket = self.postgres_client.config_dict.get(COMMON_CONFIG_NAME).get(COMMON_GCS_CONFIG_NAME).get(
+            COMMON_GCS_BUCKET_CONFIG)
         source, data_set, filter_criteria, file_mode, file_path = self.get_config(**kwargs)
         if file_mode.lower() == 'y':
             Logger.info("Fetching already filtered utterances from a file for source: %s", source)
             ensure_path(self.local_input_path)
-            download_path = self.download_filtered_utterances_file(file_path, self.local_input_path)
+            download_path = self.download_filtered_utterances_file(self.bucket, file_path, self.local_input_path)
             if check_file_exits(download_path):
                 Logger.info("File Downloaded successfully")
                 filtered_utterances = self.get_utterances_from_file(download_path)
@@ -103,7 +108,7 @@ class DataMarker(BaseProcessor):
             Logger.info("Updating audio_ids with data set type used for tags")
             self.catalogue_dao.update_audio_ids_with_data_type(source, dictinct_audio_ids, data_set)
             Logger.info("All audio_ids updated with data set type tags")
-            #Data archival
+            # Data archival
             # paths = self.to_paths(dictinct_audio_ids, source_path_with_source)
             # archive_path_with_source = (
             #     f"{self.data_tagger_config.get(SOURCE_BASE_PATH)}/{source}/archive"
@@ -166,10 +171,11 @@ class DataMarker(BaseProcessor):
 
         return source, data_set, filters, file_mode, file_path
 
-    def download_filtered_utterances_file(self, input_file_path, local_path):
+    def download_filtered_utterances_file(self, bucket, input_file_path, local_path):
         """Download the filtered utterance file from input_file_path to local_path
 
         Args:
+            bucket: bucket name
             input_file_path: path of the filtered utterances csv file
             local_path: local directory path where file needs to be downloaded
 
@@ -177,12 +183,13 @@ class DataMarker(BaseProcessor):
             Download path where filtered utterance file is downloaded.
 
         """
+        input_file_path_abs = bucket + '/' + input_file_path
         Logger.info(
-            f"Downloading file from path from {input_file_path}"
+            f"Downloading file from path from {input_file_path_abs}"
         )
-        download_path = f'{local_path}{os.path.basename(input_file_path)}'
+        download_path = f'{local_path}{os.path.basename(input_file_path_abs)}'
         self.fs_interface.download_file_to_location(
-            input_file_path, download_path
+            input_file_path_abs, download_path
         )
 
         return download_path
