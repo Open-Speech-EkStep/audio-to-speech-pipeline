@@ -225,6 +225,15 @@ def process_config_input(arguments):
     return config_file_path
 
 
+def check_if_csv_file_path_valid(file_path):
+    try:
+        file_ext = file_path.split('/')[-1].split('.')[-1]
+        if file_ext == 'csv':
+            return True
+    except Exception as e:
+        return False
+
+
 def validate_data_filter_config(arguments):
     LOGGER.info("validating input for audio processing")
 
@@ -236,14 +245,17 @@ def validate_data_filter_config(arguments):
 
     if arguments.filter_spec is not None:
         filter_spec_dict = json.loads(arguments.filter_spec)
+        if filter_spec_dict.get("data_set", None) not in ('train', 'test'):
+            raise argparse.ArgumentTypeError("Filter spec has no proper data set type")
         if filter_spec_dict.get("file_mode", None) in (None, 'n', 'N') and filter_spec_dict.get("filter", None) is None:
             raise argparse.ArgumentTypeError("Filter spec has no file_mode and no filter")
-        if filter_spec_dict.get("file_mode", None) not in ('y', 'n', 'Y', 'N'):
+        if filter_spec_dict.get("file_mode", None) not in ('y', 'n', 'Y', 'N', None):
             raise argparse.ArgumentTypeError("Filter spec has no proper file_mode")
         if filter_spec_dict.get("file_mode", None) in ('y', 'Y') and filter_spec_dict.get("file_path", None) is None:
             raise argparse.ArgumentTypeError("Filter spec has file_mode but no file path")
-        if filter_spec_dict.get("data_set", None) not in ('train', 'test'):
-            raise argparse.ArgumentTypeError("Filter spec has no proper data set type")
+        if filter_spec_dict.get("file_path", None) is not None and not check_if_csv_file_path_valid(
+                filter_spec_dict.get("file_path", None)):
+            raise argparse.ArgumentTypeError("Filter spec has no valid csv file path")
 
     return {"filter_spec": filter_spec_dict,
             "source": arguments.audio_source}

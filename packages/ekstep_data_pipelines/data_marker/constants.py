@@ -1,3 +1,6 @@
+COMMON_CONFIG_NAME = 'common'
+COMMON_GCS_CONFIG_NAME = 'gcs_config'
+COMMON_GCS_BUCKET_CONFIG = 'master_bucket'
 CONFIG_NAME = "data_marker_config"
 FILTER_CRITERIA = "filter"
 FILTER_SPEC = 'filter_spec'
