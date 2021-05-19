@@ -99,10 +99,11 @@ class DataMarkerTests(unittest.TestCase):
         self.assertListEqual(audio_ids_list, expected_files)
 
     def test__should_download_filtered_utterances_file(self):
-        input_file_path = "ekstepspeechrecognition-test/data/audiotospeech/raw/download/duplicate/test_source1.csv"
+        bucket = 'ekstepspeechrecognition-test'
+        input_file_path = "data/audiotospeech/raw/download/duplicate/test_source1.csv"
         local_path = "./data_marker/file_path/"
         expected_download_path = f'{local_path}{os.path.basename(input_file_path)}'
-        actual_path_downloaded = self.data_stager.download_filtered_utterances_file(input_file_path, local_path)
+        actual_path_downloaded = self.data_stager.download_filtered_utterances_file(bucket, input_file_path, local_path)
         call_args_list = self.data_stager.fs_interface.download_file_to_location.call_args_list
         self.assertEqual(
             self.data_stager.fs_interface.download_file_to_location.call_count,
@@ -110,7 +111,7 @@ class DataMarkerTests(unittest.TestCase):
         )
         self.assertEqual(
             call_args_list[0][0][0],
-            input_file_path,
+            bucket + '/' + input_file_path,
         )
         self.assertEqual(
             call_args_list[0][0][1],
