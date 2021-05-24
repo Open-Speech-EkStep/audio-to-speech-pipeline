@@ -16,8 +16,8 @@ def get_transcription_sanitizers(**kwargs):
     from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.hindi_sanitizer import (
         HindiSanitizer,
     )
-    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.gujrati_sanitizer import (
-        GujratiSanitizer,
+    from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.gujarati_sanitizer import (
+        GujaratiSanitizer,
     )
     from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.kannada_sanitizer import (
         KannadaSanitizer,
@@ -45,7 +45,7 @@ def get_transcription_sanitizers(**kwargs):
     )
 
     hindi_sanitizer = HindiSanitizer.get_instance(**kwargs)
-    gujrati_sanitizer = GujratiSanitizer.get_instance(**kwargs)
+    gujarati_sanitizer = GujaratiSanitizer.get_instance(**kwargs)
     kannada_sanitizer = KannadaSanitizer.get_instance(**kwargs)
     indian_english_sanitizer = IndianEnglishSanitizer.get_instance(**kwargs)
     punjabi_sanitizer = PunjabiSanitizer.get_instance(**kwargs)
@@ -57,7 +57,7 @@ def get_transcription_sanitizers(**kwargs):
 
     return {
         "hindi": hindi_sanitizer,
-        "gujrati": gujrati_sanitizer,
+        "gujarati": gujarati_sanitizer,
         "default": hindi_sanitizer,
         "kannada": kannada_sanitizer,
         "indian_english": indian_english_sanitizer,
