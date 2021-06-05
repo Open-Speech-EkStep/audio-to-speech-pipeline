@@ -1,6 +1,8 @@
 import sys
 import multiprocessing
 import os, fnmatch
+import json
+import subprocess
 
 from ekstep_data_pipelines.audio_analysis.constants import (
     CONFIG_NAME,
@@ -9,10 +11,10 @@ from ekstep_data_pipelines.audio_analysis.constants import (
 from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
 
+
 ESTIMATED_CPU_SHARE = 0.1
 
 LOGGER = get_logger("ULCADataset")
-
 
 
 class ULCADataset(BaseProcessor):
@@ -21,7 +23,11 @@ class ULCADataset(BaseProcessor):
     """
 
     DEFAULT_DOWNLOAD_PATH = "./ulca"
-    ULCA_PARAMS = 'ULCA_PARAMS'
+    ULCA_PARAMS = "params"
+    LANGUAGE = "language"
+    SOURCE_PATH = "source_path"
+    PUBLISH_PATH = "publish_path"
+
     @staticmethod
     def get_instance(data_processor, **kwargs):
         return ULCADataset(data_processor, **kwargs)
@@ -30,7 +36,6 @@ class ULCADataset(BaseProcessor):
         self.data_processor = data_processor
         self.ulca_config = None
         self.catalogue_dao = CatalogueDao(self.data_processor)
-
         super().__init__(**kwargs)
 
     def handle_termination_gracefully(self, signum, frame):
@@ -43,13 +48,15 @@ class ULCADataset(BaseProcessor):
         """
         Function for mapping utterance to speakers
         """
+        LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
         self.ulca_config = self.data_processor.config_dict.get(CONFIG_NAME)
 
-        remote_base_path = self.ulca_config.get("source_path")
-
         source = self.get_source_from_config(**kwargs)
-        parameters = self.get_params()
+        params = self.ulca_config.get(ULCADataset.ULCA_PARAMS)
+        language = self.ulca_config.get(ULCADataset.LANGUAGE)
+        remote_base_path = self.ulca_config.get(ULCADataset.SOURCE_PATH)
+        publish_path = self.ulca_config.get(ULCADataset.PUBLISH_PATH)
 
         local_audio_download_path = f"{ULCADataset.DEFAULT_DOWNLOAD_PATH}/{source}/"
         self.ensure_path(local_audio_download_path)
@@ -58,8 +65,24 @@ class ULCADataset(BaseProcessor):
 
         LOGGER.info(f"Downloading source to:{local_audio_download_path}")
 
-        LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
+        max_workers = multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE
+        self.fs_interface.download_folder_to_location(
+            remote_base_path, local_audio_download_path, max_workers=max_workers
+        )
 
+        text_dict = self.read_transcriptions(local_audio_download_path)
+        data = self.create_data_json(text_dict, source, language, self.catalogue_dao)
+        self.write_json(local_audio_download_path, "data.json", data)
+        self.write_json(local_audio_download_path, "params.json", params)
+
+        self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
+
+        self.publish_artifact(f"{source}.tar.gz", publish_path)
+
+    def write_json(self, local_audio_download_path, filename, data):
+        data_json = json.dumps(data, indent=4)
+        with open(f"{local_audio_download_path}/{filename}", "w") as f:
+            f.write(data_json)
 
     def get_full_path(self, source):
         remote_file_path = self.audio_analysis_config.get(REMOTE_PROCESSED_FILE_PATH)
@@ -78,15 +101,16 @@ class ULCADataset(BaseProcessor):
         return source
 
     def get_params(self):
-        return self.audio_analysis_config.get(ULCADataset.ULCA_PARAMS)
+        return self.ulca_config.get(ULCADataset.ULCA_PARAMS)
 
-    def create_data_json(self, text_dict,
-            source,language,
-            catalogue_dao):
-        LOGGER.info('Creating json')
+    def create_data_json(self, text_dict, source, language, catalogue_dao):
+        LOGGER.info("Creating json")
         utterances = catalogue_dao.get_utterance_details_by_source(source, language)
-        LOGGER.info('utterances', type(utterances))
-        data = [self.to_data_element(utterance, source, text_dict) for utterance in utterances]
+        LOGGER.info("utterances", type(utterances))
+        data = [
+            self.to_data_element(utterance, source, text_dict)
+            for utterance in utterances
+        ]
         data = filter(lambda d: d != {}, data)
         return list(data)
 
@@ -96,13 +120,8 @@ class ULCADataset(BaseProcessor):
         snr = utterance[2]
         main_source_url = utterance[4]
         source_url = utterance[5]
-        snr = {
-            "methodType": "WadaSnr",
-            "methodDetails": {
-                "snr": snr
-            }
-        }
-        file_name_key = file_name.split('.')[0]
+        snr = {"methodType": "WadaSnr", "methodDetails": {"snr": snr}}
+        file_name_key = file_name.split(".")[0]
         if file_name_key in text_dict:
             text = text_dict.get(file_name_key, "")
             return {
@@ -110,7 +129,7 @@ class ULCADataset(BaseProcessor):
                 "text": text,
                 "collectionSource": [source, main_source_url, source_url],
                 "snr": snr,
-                "duration": duration
+                "duration": duration,
             }
         else:
             return {}
@@ -119,17 +138,18 @@ class ULCADataset(BaseProcessor):
         listOfFiles = os.listdir(local_source_path)
         pattern = "*.txt"
         text_dict = {}
-        print('listOfFiles', listOfFiles)
+        print("listOfFiles", listOfFiles)
         for entry in listOfFiles:
             if fnmatch.fnmatch(entry, pattern):
                 print(entry)
-                with open(f'{local_source_path}/{entry}', "r") as reader:
+                with open(f"{local_source_path}/{entry}", "r") as reader:
                     transcription = reader.read()
                     file_name = entry.split(".")[0]
                     text_dict[file_name] = transcription
-
-        # with os.scandir(local_source_path) as entries:
-        #     for entry in entries:
-        #         print('entry', entry.name)
-
         return text_dict
+
+    def make_tarfile(self, output_filename, source_dir):
+        subprocess.call(["tar", "-czvf", output_filename, source_dir])
+
+    def publish_artifact(self, tar_file, publish_path):
+        self.fs_interface.upload_to_location(tar_file, publish_path)

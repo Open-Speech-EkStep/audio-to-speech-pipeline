@@ -1,11 +1,10 @@
 import unittest
-from unittest import mock
 from unittest.mock import Mock
 
 from ekstep_data_pipelines.ulca.ulca_dataset import ULCADataset
 
-class ULCADatasetTests(unittest.TestCase):
 
+class ULCADatasetTests(unittest.TestCase):
     def setUp(self):
         self.data_processor = Mock()
         self.catalogue_dao = Mock()
@@ -49,15 +48,10 @@ class ULCADatasetTests(unittest.TestCase):
                 "collectionSource": [
                     "test_source",
                     "dummy_main_source",
-                    "dummy_collection_source"
+                    "dummy_collection_source",
                 ],
-                "snr": {
-                    "methodType": "WadaSnr",
-                    "methodDetails": {
-                        "snr": 38.432806
-                    }
-                },
-                "duration": 13.38
+                "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 38.432806}},
+                "duration": 13.38,
             },
             {
                 "audioFilename": "sample2.wav",
@@ -65,24 +59,16 @@ class ULCADatasetTests(unittest.TestCase):
                 "collectionSource": [
                     "test_source",
                     "dummy_main_source_2",
-                    "dummy_collection_source_2"
+                    "dummy_collection_source_2",
                 ],
-                "snr": {
-                    "methodType": "WadaSnr",
-                    "methodDetails": {
-                        "snr": 40.432806
-                    }
-                },
-                "duration": 15.38
+                "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 40.432806}},
+                "duration": 15.38,
             }
         ]
 
         text_dict = {"sample1": "sample text", "sample2": "sample text"}
         data = ULCADataset(self.data_processor).create_data_json(
-            text_dict,
-            "test_source",
-            "Hindi",
-            self.catalogue_dao
+            text_dict, "test_source", "Hindi", self.catalogue_dao
         )
         select_args = self.catalogue_dao.get_utterance_details_by_source.call_args
         print(data)
@@ -92,5 +78,12 @@ class ULCADatasetTests(unittest.TestCase):
 
     def test_should_read_transcription(self):
         expected_text_dict = {"test1": "sample text 1", "test2": "sample text 2"}
-        text_dict = ULCADataset(self.data_processor).read_transcriptions("ekstep_pipelines_tests/resources/ulca")
+        text_dict = ULCADataset(self.data_processor).read_transcriptions(
+            "ekstep_pipelines_tests/resources/ulca"
+        )
         self.assertEqual(expected_text_dict, text_dict)
+
+    def test_should_create_tar(self):
+        tar_file_name = "ulca.tar.gz"
+        source_dir = "ekstep_pipelines_tests/resources/ulca/"
+        ULCADataset(self.data_processor).make_tarfile(tar_file_name, source_dir)
