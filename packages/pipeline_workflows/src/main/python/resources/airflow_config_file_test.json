@@ -139,6 +139,8 @@
   "ulca_dataset_config": {
  	"test_source1": {
  		"language": "Hindi",
+        "source_path" : "data/audiotospeech/integration/processed/hindi/audio/testamulya2",
+        "publish_path" : "data/audiotospeech/integration/publish/hindi",
  		"params": {
  			"datasetType": "asr-corpus",
  			"languages": {

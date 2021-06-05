@@ -22,6 +22,8 @@ class ULCADataset(BaseProcessor):
     """
 
     DEFAULT_DOWNLOAD_PATH = "./ulca"
+    ULCA_CONFIG = "ulca_config"
+    SOURCE = "source"
     ULCA_PARAMS = "params"
     LANGUAGE = "language"
     SOURCE_PATH = "source_path"
@@ -49,13 +51,7 @@ class ULCADataset(BaseProcessor):
         """
         LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
-        self.ulca_config = self.data_processor.config_dict.get("ulca_config")
-
-        source = self.get_source_from_config(**kwargs)
-        params = self.ulca_config.get(ULCADataset.ULCA_PARAMS)
-        language = self.ulca_config.get(ULCADataset.LANGUAGE)
-        remote_base_path = self.ulca_config.get(ULCADataset.SOURCE_PATH)
-        publish_path = self.ulca_config.get(ULCADataset.PUBLISH_PATH)
+        source, ulca_config, language, source_path, publish_path, params = self.get_config(**kwargs)
 
         local_audio_download_path = f"{ULCADataset.DEFAULT_DOWNLOAD_PATH}/{source}/"
         self.ensure_path(local_audio_download_path)
@@ -66,7 +62,7 @@ class ULCADataset(BaseProcessor):
 
         max_workers = multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE
         self.fs_interface.download_folder_to_location(
-            remote_base_path, local_audio_download_path, max_workers=max_workers
+            source_path, local_audio_download_path, max_workers=max_workers
         )
 
         text_dict = self.read_transcriptions(local_audio_download_path)
@@ -91,13 +87,34 @@ class ULCADataset(BaseProcessor):
     def ensure_path(self, path):
         os.makedirs(path, exist_ok=True)
 
-    def get_source_from_config(self, **kwargs):
-        source = kwargs.get("source")
+    def get_config(self, **kwargs):
+        source = kwargs.get(ULCADataset.SOURCE)
+        ulca_config = kwargs.get(ULCADataset.ULCA_CONFIG)
+
+        language = ulca_config.get(ULCADataset.LANGUAGE)
+        source_path = ulca_config.get(ULCADataset.SOURCE_PATH)
+        publish_path = ulca_config.get(ULCADataset.PUBLISH_PATH)
+        params = ulca_config.get(ULCADataset.ULCA_PARAMS)
 
         if source is None:
-            raise Exception("filter by source is mandatory")
+            raise Exception("source is mandatory")
 
-        return source
+        if ulca_config is None:
+            raise Exception("ulca_config is mandatory")
+
+        if language is None:
+            raise Exception("language is mandatory")
+
+        if source_path is None:
+            raise Exception("source_path is mandatory")
+
+        if publish_path is None:
+            raise Exception("publish_path is mandatory")
+
+        if params is None:
+            raise Exception("params is mandatory")
+
+        return source, ulca_config, language, source_path, publish_path, params
 
     def get_params(self):
         return self.ulca_config.get(ULCADataset.ULCA_PARAMS)

@@ -164,9 +164,7 @@ parser.add_argument(
     "-ulca_config",
     "--ulca_config",
     dest="ulca_config",
-    choices=FILES_SYSTEMS_LIST,
-    default="google",
-    help="Specify the file system to use for running the pipeline",
+    help="Specify ulca config",
     required=False,
 )
 
