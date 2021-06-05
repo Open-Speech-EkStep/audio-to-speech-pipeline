@@ -77,7 +77,7 @@ class ULCADatasetTests(unittest.TestCase):
             }
         ]
 
-        text_dict = {"sample1.wav": "sample text", "sample2.wav": "sample text"}
+        text_dict = {"sample1": "sample text", "sample2": "sample text"}
         data = ULCADataset(self.data_processor).create_data_json(
             text_dict,
             "test_source",
@@ -89,3 +89,8 @@ class ULCADatasetTests(unittest.TestCase):
         self.assertEqual("test_source", select_args[0][0])
         self.assertEqual("Hindi", select_args[0][1])
         self.assertEqual(expected_data, data)
+
+    def test_should_read_transcription(self):
+        expected_text_dict = {"test1": "sample text 1", "test2": "sample text 2"}
+        text_dict = ULCADataset(self.data_processor).read_transcriptions("ekstep_pipelines_tests/resources/ulca")
+        self.assertEqual(expected_text_dict, text_dict)

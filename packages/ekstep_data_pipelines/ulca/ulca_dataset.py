@@ -1,6 +1,6 @@
 import sys
 import multiprocessing
-import os
+import os, fnmatch
 
 from ekstep_data_pipelines.audio_analysis.constants import (
     CONFIG_NAME,
@@ -56,6 +56,8 @@ class ULCADataset(BaseProcessor):
 
         LOGGER.info(f"Ensured {local_audio_download_path} exists")
 
+        LOGGER.info(f"Downloading source to:{local_audio_download_path}")
+
         LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
 
@@ -100,8 +102,9 @@ class ULCADataset(BaseProcessor):
                 "snr": snr
             }
         }
-        if (file_name in text_dict ):
-            text = text_dict.get(file_name, "")
+        file_name_key = file_name.split('.')[0]
+        if file_name_key in text_dict:
+            text = text_dict.get(file_name_key, "")
             return {
                 "audioFilename": file_name,
                 "text": text,
@@ -112,4 +115,21 @@ class ULCADataset(BaseProcessor):
         else:
             return {}
 
+    def read_transcriptions(self, local_source_path):
+        listOfFiles = os.listdir(local_source_path)
+        pattern = "*.txt"
+        text_dict = {}
+        print('listOfFiles', listOfFiles)
+        for entry in listOfFiles:
+            if fnmatch.fnmatch(entry, pattern):
+                print(entry)
+                with open(f'{local_source_path}/{entry}', "r") as reader:
+                    transcription = reader.read()
+                    file_name = entry.split(".")[0]
+                    text_dict[file_name] = transcription
 
+        # with os.scandir(local_source_path) as entries:
+        #     for entry in entries:
+        #         print('entry', entry.name)
+
+        return text_dict
