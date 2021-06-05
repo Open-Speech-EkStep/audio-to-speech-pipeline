@@ -176,3 +176,6 @@ class CatalogueDao:
 
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
+
+    def get_utterance_details_by_source(self, source, language):
+        return []
