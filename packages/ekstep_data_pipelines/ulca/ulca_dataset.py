@@ -117,10 +117,16 @@ class ULCADataset(BaseProcessor):
         file_name = utterance[0]
         duration = utterance[1]
         snr = utterance[2]
+        speaker = utterance[3]
         main_source_url = utterance[4]
         source_url = utterance[5]
+        gender = utterance[6]
         snr = {"methodType": "WadaSnr", "methodDetails": {"snr": snr}}
         file_name_key = file_name.split(".")[0]
+        gender_map  = {
+            "m": "male",
+            "f": "female"
+        }
         if file_name_key in text_dict:
             text = text_dict.get(file_name_key, "")
             return {
@@ -129,6 +135,8 @@ class ULCADataset(BaseProcessor):
                 "collectionSource": [source, main_source_url, source_url],
                 "snr": snr,
                 "duration": duration,
+                "speaker": speaker,
+                "gender": gender_map.get(gender, "non-specified")
             }
         else:
             return {}

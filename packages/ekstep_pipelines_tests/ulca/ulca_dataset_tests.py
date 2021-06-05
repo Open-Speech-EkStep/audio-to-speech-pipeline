@@ -21,6 +21,7 @@ class ULCADatasetTests(unittest.TestCase):
                 "dummy_speaker_name",
                 "dummy_main_source",
                 "dummy_collection_source",
+                "m"
             ),
             (
                 "sample2.wav",
@@ -29,6 +30,7 @@ class ULCADatasetTests(unittest.TestCase):
                 "dummy_speaker_name_2",
                 "dummy_main_source_2",
                 "dummy_collection_source_2",
+                "f"
             ),
             (
                 "sample3.wav",
@@ -37,6 +39,7 @@ class ULCADatasetTests(unittest.TestCase):
                 "dummy_speaker_name_2",
                 "dummy_main_source_2",
                 "dummy_collection_source_2",
+                "f"
             )
         ]
         self.catalogue_dao.get_utterance_details_by_source.return_value = utterances
@@ -52,6 +55,8 @@ class ULCADatasetTests(unittest.TestCase):
                 ],
                 "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 38.432806}},
                 "duration": 13.38,
+                "speaker": "dummy_speaker_name",
+                "gender": "male"
             },
             {
                 "audioFilename": "sample2.wav",
@@ -63,6 +68,8 @@ class ULCADatasetTests(unittest.TestCase):
                 ],
                 "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 40.432806}},
                 "duration": 15.38,
+                "speaker": "dummy_speaker_name_2",
+                "gender": "female"
             }
         ]
 

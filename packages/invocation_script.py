@@ -41,10 +41,10 @@ ACTIONS_LIST = [
     ACTIONS.AUDIO_TRANSCRIPTION,
     ACTIONS.AUDIO_ANALYSIS,
     ACTIONS.AUDIO_CATALOGUER,
-    ACTIONS.AUDIO_EMBEDDING
+    ACTIONS.AUDIO_EMBEDDING,
+    ACTIONS.ULCA_DATASET
 ]
 FILES_SYSTEMS_LIST = [FileSystems.GOOGLE, FileSystems.LOCAL]
-# config_bucket = 'ekstepspeechrecognition-dev'
 
 parser = argparse.ArgumentParser(description="Util for data processing for EkStep")
 
