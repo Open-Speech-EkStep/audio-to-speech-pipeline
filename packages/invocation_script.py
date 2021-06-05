@@ -242,13 +242,13 @@ def validate_data_filter_config(arguments):
 def validate_ulca_dataset_config(arguments):
     LOGGER.info("validating input for ulca dataset")
 
-    if arguments.source is None:
+    if arguments.audio_source is None:
         raise argparse.ArgumentTypeError("Source is missing")
 
     if arguments.ulca_config is None:
         raise argparse.ArgumentTypeError("ulca_config is missing")
 
-    return {"source": arguments.source, "ulca_config": arguments.ulca_config}
+    return {"source": arguments.audio_source, "ulca_config": arguments.ulca_config}
 
 
 def validate_audio_analysis_config(arguments):
