@@ -178,4 +178,19 @@ class CatalogueDao:
         return True
 
     def get_utterance_details_by_source(self, source, language):
-        return []
+        parm_dict = {"source": source, "status": "Clean", "language": language}
+        data = self.postgres_client.execute_query(
+            """
+            select msp.clipped_utterance_file_name as audio_file_name, 
+            msp.clipped_utterance_duration as duration, msp.snr , s.speaker_name, 
+            mms.source_url as collection_source , mms.source_website as main_source
+            from media_speaker_mapping msp 
+                inner join media_metadata_staging mms 
+                    on msp.audio_id = mms.audio_id
+            left outer join speaker s 
+                    on s.speaker_id = msp.speaker_id 
+            where mms.source = :source and mms.language=:language and msp.status =:status'
+            """
+            **parm_dict,
+        )
+        return data

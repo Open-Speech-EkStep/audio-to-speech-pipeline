@@ -7,6 +7,7 @@ from google.cloud import storage
 from ekstep_data_pipelines.audio_analysis.audio_analysis import AudioAnalysis
 from ekstep_data_pipelines.audio_cataloguer.cataloguer import AudioCataloguer
 from ekstep_data_pipelines.data_marker.data_marker import DataMarker
+from ekstep_data_pipelines.ulca.ulca_dataset import ULCADataset
 from ekstep_data_pipelines.audio_processing.audio_processer import AudioProcessor
 from ekstep_data_pipelines.audio_transcription.audio_transcription import (
     AudioTranscription,
@@ -25,6 +26,7 @@ class ACTIONS:
     AUDIO_ANALYSIS = "audio_analysis"
     AUDIO_CATALOGUER = "audio_cataloguer"
     AUDIO_EMBEDDING = "audio_embedding"
+    ULCA_DATASET = "ulca_dataset"
 
 
 class FileSystems:
@@ -159,6 +161,16 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-ulca_config",
+    "--ulca_config",
+    dest="ulca_config",
+    choices=FILES_SYSTEMS_LIST,
+    default="google",
+    help="Specify the file system to use for running the pipeline",
+    required=False,
+)
+
+parser.add_argument(
     "-l", "--language", dest="language", default="hindi", help="Specify the language"
 )
 
@@ -228,6 +240,17 @@ def validate_data_filter_config(arguments):
         raise argparse.ArgumentTypeError("Filter config is missing")
 
     return {"filter": json.loads(arguments.filter_by), "source": arguments.audio_source}
+
+def validate_ulca_dataset_config(arguments):
+    LOGGER.info("validating input for ulca dataset")
+
+    if arguments.source is None:
+        raise argparse.ArgumentTypeError("Source is missing")
+
+    if arguments.ulca_config is None:
+        raise argparse.ArgumentTypeError("ulca_config is missing")
+
+    return {"source": arguments.source, "ulca_config": arguments.ulca_config}
 
 
 def validate_audio_analysis_config(arguments):
@@ -414,6 +437,21 @@ def perform_action(arguments, **kwargs):
 
         curr_processor = AudioEmbedding.get_instance(data_processor,**{"commons_dict": object_dict, "file_interface": arguments.file_system})
         LOGGER.info(f"Starting processing for {current_action}")
+
+    elif current_action == ACTIONS.ULCA_DATASET:
+        kwargs.update(validate_ulca_dataset_config(arguments))
+        LOGGER.info("Intializing ulca dataset process with given config")
+
+        config_params = {"config_file_path": kwargs.get("config_file_path")}
+
+        object_dict = get_periperhals(config_params, arguments.language)
+
+        data_processor = object_dict.get("data_processor")
+
+        curr_processor = ULCADataset.get_instance(
+            data_processor,
+            **{"commons_dict": object_dict, "file_interface": arguments.file_system},
+        )
 
     curr_processor.process(**kwargs)
     LOGGER.info("Ending processing for %s", current_action)

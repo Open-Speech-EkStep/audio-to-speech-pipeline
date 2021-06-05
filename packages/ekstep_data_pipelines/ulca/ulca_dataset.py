@@ -5,7 +5,6 @@ import json
 import subprocess
 
 from ekstep_data_pipelines.audio_analysis.constants import (
-    CONFIG_NAME,
     REMOTE_PROCESSED_FILE_PATH,
 )
 from ekstep_data_pipelines.common.utils import get_logger
@@ -50,7 +49,7 @@ class ULCADataset(BaseProcessor):
         """
         LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
-        self.ulca_config = self.data_processor.config_dict.get(CONFIG_NAME)
+        self.ulca_config = self.data_processor.config_dict.get("ulca_config")
 
         source = self.get_source_from_config(**kwargs)
         params = self.ulca_config.get(ULCADataset.ULCA_PARAMS)
