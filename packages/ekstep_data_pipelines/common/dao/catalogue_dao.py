@@ -183,7 +183,7 @@ class CatalogueDao:
             """
             select msp.clipped_utterance_file_name as audio_file_name, 
             msp.clipped_utterance_duration as duration, msp.snr , s.speaker_name, 
-            mms.source_url as collection_source , mms.source_website as main_source
+            mms.source_url as collection_source , mms.source_website as main_source, msp.gender as gender
             from media_speaker_mapping msp 
                 inner join media_metadata_staging mms 
                     on msp.audio_id = mms.audio_id

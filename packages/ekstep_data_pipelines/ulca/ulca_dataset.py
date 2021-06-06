@@ -72,7 +72,7 @@ class ULCADataset(BaseProcessor):
 
         self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
 
-        self.publish_artifact(f"{source}.tar.gz", publish_path)
+        self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{source}.tar.gz")
 
     def write_json(self, local_audio_download_path, filename, data):
         data_json = json.dumps(data, indent=4)
