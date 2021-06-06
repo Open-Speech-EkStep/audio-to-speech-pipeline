@@ -69,7 +69,8 @@ class ULCADataset(BaseProcessor):
         data = self.create_data_json(text_dict, source, language, self.catalogue_dao)
         self.write_json(local_audio_download_path, "data.json", data)
         self.write_json(local_audio_download_path, "params.json", params)
-
+        self.remove_txt_file(local_audio_download_path)
+        self.remove_rejected_files(local_audio_download_path, data)
         self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
 
         self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{source}.tar.gz")
@@ -140,7 +141,7 @@ class ULCADataset(BaseProcessor):
         gender = utterance[6]
         snr = {"methodType": "WadaSnr", "methodDetails": {"snr": snr}}
         file_name_key = file_name.split(".")[0]
-        gender_map  = {
+        gender_map = {
             "m": "male",
             "f": "female"
         }
@@ -177,3 +178,19 @@ class ULCADataset(BaseProcessor):
 
     def publish_artifact(self, tar_file, publish_path):
         self.fs_interface.upload_to_location(tar_file, publish_path)
+
+    def remove_txt_file(self, local_path):
+        LOGGER.info('removing txt files')
+        listOfFiles = os.listdir(local_path)
+        pattern = "*.txt"
+        for entry in listOfFiles:
+            if fnmatch.fnmatch(entry, pattern):
+                os.remove(f"{local_path}/{entry}")
+
+    def remove_rejected_files(self, local_path, data):
+        LOGGER.info('Remove files not in catalogue not clean based on data.json')
+        listOfFiles = os.listdir(local_path)
+        valid_files = list(map(lambda d: d['audioFilename'], data))
+        for entry in listOfFiles:
+            if entry not in valid_files:
+                os.remove(f"{local_path}/{entry}")

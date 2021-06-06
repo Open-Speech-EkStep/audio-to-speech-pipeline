@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import Mock
 
@@ -94,3 +95,63 @@ class ULCADatasetTests(unittest.TestCase):
         tar_file_name = "ulca.tar.gz"
         source_dir = "ekstep_pipelines_tests/resources/ulca/"
         ULCADataset(self.data_processor).make_tarfile(tar_file_name, source_dir)
+
+    def test_should_remove_txt_files(self):
+        temp_dir = "ekstep_pipelines_tests/resources/ulca/temp"
+        filenames = ["file1.txt", "file2.txt", "file2.wav"]
+        os.makedirs(temp_dir, exist_ok=True)
+
+        for filename in filenames:
+            with open(f"{temp_dir}/{filename}", "w") as f:
+                f.write("test content")
+
+        ULCADataset(self.data_processor).remove_txt_file(temp_dir)
+
+        listOfFiles = os.listdir(temp_dir)
+
+        self.assertEqual(listOfFiles, ["file2.wav"])
+
+
+    def test_remove_rejected_files(self):
+
+        data = [
+            {
+                "audioFilename": "file1.wav",
+                "text": "sample text",
+                "collectionSource": [
+                    "test_source",
+                    "dummy_main_source",
+                    "dummy_collection_source",
+                ],
+                "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 38.432806}},
+                "duration": 13.38,
+                "speaker": "dummy_speaker_name",
+                "gender": "male"
+            },
+            {
+                "audioFilename": "file2.wav",
+                "text": "sample text",
+                "collectionSource": [
+                    "test_source",
+                    "dummy_main_source_2",
+                    "dummy_collection_source_2",
+                ],
+                "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 40.432806}},
+                "duration": 15.38,
+                "speaker": "dummy_speaker_name_2",
+                "gender": "female"
+            }
+        ]
+        temp_dir = "ekstep_pipelines_tests/resources/ulca/temp2"
+        filenames = ["file2.wav", "file1.wav", "file3.wav"]
+        os.makedirs(temp_dir, exist_ok=True)
+
+        for filename in filenames:
+            with open(f"{temp_dir}/{filename}", "w") as f:
+                f.write("test content")
+
+        ULCADataset(self.data_processor).remove_rejected_files(temp_dir, data)
+
+        listOfFiles = os.listdir(temp_dir)
+
+        self.assertEqual(listOfFiles, ["file1.wav", "file2.wav"])
