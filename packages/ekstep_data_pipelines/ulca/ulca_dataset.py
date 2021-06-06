@@ -21,7 +21,7 @@ class ULCADataset(BaseProcessor):
     Class to identify speaker for each utterance in a source
     """
 
-    DEFAULT_DOWNLOAD_PATH = "./"
+    DEFAULT_DOWNLOAD_PATH = "."
     ULCA_CONFIG = "ulca_config"
     SOURCE = "source"
     ULCA_PARAMS = "params"
@@ -71,6 +71,7 @@ class ULCADataset(BaseProcessor):
         self.write_json(local_audio_download_path, "params.json", params)
         self.remove_txt_file(local_audio_download_path)
         self.remove_rejected_files(local_audio_download_path, data)
+
         self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
 
         self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{source}.tar.gz")
@@ -163,7 +164,7 @@ class ULCADataset(BaseProcessor):
         listOfFiles = os.listdir(local_source_path)
         pattern = "*.txt"
         text_dict = {}
-        print("listOfFiles", listOfFiles)
+        print("listOfFiles[:10]", listOfFiles[:10])
         for entry in listOfFiles:
             if fnmatch.fnmatch(entry, pattern):
                 print(entry)
@@ -174,6 +175,8 @@ class ULCADataset(BaseProcessor):
         return text_dict
 
     def make_tarfile(self, output_filename, source_dir):
+        listOfFiles = os.listdir(source_dir)
+        LOGGER.info(f"Creating tar for files:{listOfFiles[3]}...")
         subprocess.call(["tar", "-czvf", output_filename, source_dir])
 
     def publish_artifact(self, tar_file, publish_path):
@@ -194,4 +197,5 @@ class ULCADataset(BaseProcessor):
         pattern = "*.wav"
         for entry in listOfFiles:
             if (fnmatch.fnmatch(entry, pattern)) and (entry not in valid_files):
+                LOGGER.info(f"Removing {entry}...")
                 os.remove(f"{local_path}/{entry}")
