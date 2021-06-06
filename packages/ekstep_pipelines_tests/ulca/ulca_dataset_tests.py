@@ -154,4 +154,6 @@ class ULCADatasetTests(unittest.TestCase):
 
         listOfFiles = os.listdir(temp_dir)
 
-        self.assertEqual(listOfFiles, ["file1.wav", "file2.wav"])
+        self.assertTrue("file1.wav" in listOfFiles)
+        self.assertTrue("file1.wav" in listOfFiles)
+        self.assertEqual(len(listOfFiles), 2)
