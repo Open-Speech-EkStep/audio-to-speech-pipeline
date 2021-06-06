@@ -314,7 +314,7 @@ class CatalogueTests(unittest.TestCase):
                     on msp.audio_id = mms.audio_id
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
-            where mms.source = :source and mms.language=:language and msp.status =:status'
+            where mms.source = :source and mms.language=:language and msp.status =:status
             """
         )
         call_with_params = {"source": source, "status": "Clean", "language": language}
