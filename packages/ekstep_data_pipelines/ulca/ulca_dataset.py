@@ -21,7 +21,7 @@ class ULCADataset(BaseProcessor):
     Class to identify speaker for each utterance in a source
     """
 
-    DEFAULT_DOWNLOAD_PATH = "./ulca"
+    DEFAULT_DOWNLOAD_PATH = "./"
     ULCA_CONFIG = "ulca_config"
     SOURCE = "source"
     ULCA_PARAMS = "params"
