@@ -191,6 +191,7 @@ class ULCADataset(BaseProcessor):
         LOGGER.info('Remove files not in catalogue not clean based on data.json')
         listOfFiles = os.listdir(local_path)
         valid_files = list(map(lambda d: d['audioFilename'], data))
+        pattern = "*.wav"
         for entry in listOfFiles:
-            if entry not in valid_files:
+            if (fnmatch.fnmatch(entry, pattern)) and (entry not in valid_files):
                 os.remove(f"{local_path}/{entry}")
