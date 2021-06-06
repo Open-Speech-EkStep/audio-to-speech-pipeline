@@ -89,7 +89,7 @@ class ULCADataset(BaseProcessor):
 
     def get_config(self, **kwargs):
         source = kwargs.get(ULCADataset.SOURCE)
-        ulca_config = json.load(kwargs.get(ULCADataset.ULCA_CONFIG))
+        ulca_config = json.loads(kwargs.get(ULCADataset.ULCA_CONFIG))
         LOGGER.info('ulca_config:', str(ulca_config))
         language = ulca_config.get(ULCADataset.LANGUAGE)
         source_path = ulca_config.get(ULCADataset.SOURCE_PATH)
