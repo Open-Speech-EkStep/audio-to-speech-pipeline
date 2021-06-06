@@ -124,7 +124,7 @@ class ULCADataset(BaseProcessor):
     def create_data_json(self, text_dict, source, language, catalogue_dao):
         LOGGER.info(f"Creating json for source:{source}, language={language}")
         utterances = catalogue_dao.get_utterance_details_by_source(source, language)
-        LOGGER.info("total utterances:", len(utterances))
+        LOGGER.info(f"total utterances: {str(len(utterances))}")
         data = [
             self.to_data_element(utterance, source, text_dict)
             for utterance in utterances
@@ -176,7 +176,6 @@ class ULCADataset(BaseProcessor):
 
     def make_tarfile(self, output_filename, source_dir):
         listOfFiles = os.listdir(source_dir)
-        LOGGER.info(f"Creating tar for files:{listOfFiles[3]}...")
         subprocess.call(["tar", "-czvf", output_filename, source_dir])
 
     def publish_artifact(self, tar_file, publish_path):
@@ -194,8 +193,11 @@ class ULCADataset(BaseProcessor):
         LOGGER.info('Remove files not in catalogue not clean based on data.json')
         listOfFiles = os.listdir(local_path)
         valid_files = list(map(lambda d: d['audioFilename'], data))
+        LOGGER.info(f"valid_files:{valid_files}")
         pattern = "*.wav"
         for entry in listOfFiles:
             if (fnmatch.fnmatch(entry, pattern)) and (entry not in valid_files):
                 LOGGER.info(f"Removing {entry}...")
-                os.remove(f"{local_path}/{entry}")
+                # os.remove(f"{local_path}/{entry}")
+            else:
+                LOGGER.info(f"Keeping {entry}...")
