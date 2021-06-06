@@ -21,7 +21,7 @@ class ULCADataset(BaseProcessor):
     Class to identify speaker for each utterance in a source
     """
 
-    DEFAULT_DOWNLOAD_PATH = "."
+    DEFAULT_DOWNLOAD_PATH = "./ulca"
     ULCA_CONFIG = "ulca_config"
     SOURCE = "source"
     ULCA_PARAMS = "params"
@@ -92,7 +92,7 @@ class ULCADataset(BaseProcessor):
     def get_config(self, **kwargs):
         source = kwargs.get(ULCADataset.SOURCE)
         ulca_config = json.loads(kwargs.get(ULCADataset.ULCA_CONFIG))
-        LOGGER.info('ulca_config:', str(ulca_config))
+        LOGGER.info(f"ulca_config:{str(ulca_config)}")
         language = ulca_config.get(ULCADataset.LANGUAGE)
         source_path = ulca_config.get(ULCADataset.SOURCE_PATH)
         publish_path = ulca_config.get(ULCADataset.PUBLISH_PATH)
@@ -124,7 +124,7 @@ class ULCADataset(BaseProcessor):
     def create_data_json(self, text_dict, source, language, catalogue_dao):
         LOGGER.info(f"Creating json for source:{source}, language={language}")
         utterances = catalogue_dao.get_utterance_details_by_source(source, language)
-        LOGGER.info("utterances", type(utterances))
+        LOGGER.info("total utterances:", len(utterances))
         data = [
             self.to_data_element(utterance, source, text_dict)
             for utterance in utterances
