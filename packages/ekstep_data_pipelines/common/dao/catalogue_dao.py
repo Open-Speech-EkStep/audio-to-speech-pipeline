@@ -190,7 +190,7 @@ class CatalogueDao:
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
             where mms.source = :source and mms.language=:language and msp.status =:status'
-            """
-            **parm_dict,
+            """,
+            **parm_dict
         )
         return data

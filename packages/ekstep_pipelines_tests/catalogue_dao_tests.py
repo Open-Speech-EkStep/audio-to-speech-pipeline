@@ -278,3 +278,51 @@ class CatalogueTests(unittest.TestCase):
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(called_with_query, args[0][0])
         self.assertEqual(called_with_args, args[1])
+
+    @mock.patch("ekstep_data_pipelines.common.postgres_db_client.PostgresClient")
+    def test_get_utterance_details_by_source(self, mock_postgres_client):
+        source = "test_source"
+        language = "Hindi"
+        # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
+        expected_utterances = [
+            (
+                "sample1.wav",
+                13.38,
+                38.432806,
+                "dummy_speaker_name",
+                "dummy_main_source",
+                "dummy_collection_source",
+                "m"
+            ),
+            (
+                "sample2.wav",
+                15.38,
+                40.432806,
+                "dummy_speaker_name_2",
+                "dummy_main_source_2",
+                "dummy_collection_source_2",
+                "f"
+            )
+        ]
+        called_with_sql = (
+            """
+            select msp.clipped_utterance_file_name as audio_file_name, 
+            msp.clipped_utterance_duration as duration, msp.snr , s.speaker_name, 
+            mms.source_url as collection_source , mms.source_website as main_source
+            from media_speaker_mapping msp 
+                inner join media_metadata_staging mms 
+                    on msp.audio_id = mms.audio_id
+            left outer join speaker s 
+                    on s.speaker_id = msp.speaker_id 
+            where mms.source = :source and mms.language=:language and msp.status =:status'
+            """
+        )
+        call_with_params = {"source": source, "status": "Clean", "language": language}
+
+        mock_postgres_client.execute_query.return_value = expected_utterances
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        args = mock_postgres_client.execute_query.call_args_list
+        utterances = catalogueDao.get_utterance_details_by_source(source, language)
+        self.assertEqual(utterances, expected_utterances)
+        self.assertEqual(called_with_sql, args[0][0][0])
+        self.assertEqual(call_with_params, args[0][1])

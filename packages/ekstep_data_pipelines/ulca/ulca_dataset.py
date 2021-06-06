@@ -120,7 +120,7 @@ class ULCADataset(BaseProcessor):
         return self.ulca_config.get(ULCADataset.ULCA_PARAMS)
 
     def create_data_json(self, text_dict, source, language, catalogue_dao):
-        LOGGER.info("Creating json")
+        LOGGER.info(f"Creating json for source:{source}, language={language}")
         utterances = catalogue_dao.get_utterance_details_by_source(source, language)
         LOGGER.info("utterances", type(utterances))
         data = [
