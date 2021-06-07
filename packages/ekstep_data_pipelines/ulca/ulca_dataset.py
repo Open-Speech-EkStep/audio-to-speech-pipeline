@@ -21,7 +21,7 @@ class ULCADataset(BaseProcessor):
     Class to identify speaker for each utterance in a source
     """
 
-    DEFAULT_DOWNLOAD_PATH = "./ulca"
+    DEFAULT_DOWNLOAD_PATH = "."
     ULCA_CONFIG = "ulca_config"
     SOURCE = "source"
     ULCA_PARAMS = "params"
@@ -190,7 +190,7 @@ class ULCADataset(BaseProcessor):
                 os.remove(f"{local_path}/{entry}")
 
     def remove_rejected_files(self, local_path, data):
-        LOGGER.info('Remove files not in catalogue not clean based on data.json')
+        LOGGER.info('Remove files not in catalogue or not clean based on data.json')
         listOfFiles = os.listdir(local_path)
         valid_files = list(map(lambda d: d['audioFilename'], data))
         LOGGER.info(f"valid_files:{valid_files}")

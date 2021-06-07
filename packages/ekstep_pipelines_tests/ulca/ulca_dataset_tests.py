@@ -143,7 +143,7 @@ class ULCADatasetTests(unittest.TestCase):
             }
         ]
         temp_dir = "ekstep_pipelines_tests/resources/ulca/temp2"
-        filenames = ["file2.wav", "file1.wav", "file3.wav", "data.json"]
+        filenames = ["file2.wav", "file1.wav", "file3.wav", "data.json" , "params.json"]
         os.makedirs(temp_dir, exist_ok=True)
 
         for filename in filenames:
@@ -157,4 +157,5 @@ class ULCADatasetTests(unittest.TestCase):
         self.assertTrue("file1.wav" in listOfFiles)
         self.assertTrue("file1.wav" in listOfFiles)
         self.assertTrue("data.json" in listOfFiles)
-        self.assertEqual(len(listOfFiles), 3)
+        self.assertTrue("params.json" in listOfFiles)
+        self.assertEqual(len(listOfFiles), 4)
