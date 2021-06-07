@@ -21,7 +21,7 @@ class ULCADataset(BaseProcessor):
     Class to identify speaker for each utterance in a source
     """
 
-    DEFAULT_DOWNLOAD_PATH = "./ulca"
+    DEFAULT_DOWNLOAD_PATH = "."
     ULCA_CONFIG = "ulca_config"
     SOURCE = "source"
     ULCA_PARAMS = "params"
@@ -125,6 +125,8 @@ class ULCADataset(BaseProcessor):
         LOGGER.info(f"Creating json for source:{source}, language={language}")
         utterances = catalogue_dao.get_utterance_details_by_source(source, language)
         LOGGER.info(f"total utterances: {str(len(utterances))}")
+        if len(utterances) <= 0:
+            raise LookupError(f"No data found in catalogue for language={language}, source={source}")
         data = [
             self.to_data_element(utterance, source, text_dict)
             for utterance in utterances
@@ -197,6 +199,6 @@ class ULCADataset(BaseProcessor):
         for entry in listOfFiles:
             if (fnmatch.fnmatch(entry, pattern)) and (entry not in valid_files):
                 LOGGER.info(f"Removing {entry}...")
-                # os.remove(f"{local_path}/{entry}")
+                os.remove(f"{local_path}/{entry}")
             else:
                 LOGGER.info(f"Keeping {entry}...")

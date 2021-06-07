@@ -111,7 +111,7 @@ class ULCADatasetTests(unittest.TestCase):
 
         self.assertEqual(listOfFiles, ["file2.wav"])
 
-    @unittest.skip
+    # @unittest.skip
     def test_remove_rejected_files(self):
 
         data = [
