@@ -21,7 +21,7 @@ class ULCADataset(BaseProcessor):
     Class to identify speaker for each utterance in a source
     """
 
-    DEFAULT_DOWNLOAD_PATH = "."
+    DEFAULT_DOWNLOAD_PATH = "./ulca"
     ULCA_CONFIG = "ulca_config"
     SOURCE = "source"
     ULCA_PARAMS = "params"
@@ -175,7 +175,6 @@ class ULCADataset(BaseProcessor):
         return text_dict
 
     def make_tarfile(self, output_filename, source_dir):
-        listOfFiles = os.listdir(source_dir)
         subprocess.call(["tar", "-czvf", output_filename, source_dir])
 
     def publish_artifact(self, tar_file, publish_path):
