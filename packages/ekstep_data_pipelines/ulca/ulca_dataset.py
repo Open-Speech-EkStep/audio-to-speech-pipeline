@@ -78,13 +78,15 @@ class ULCADataset(BaseProcessor):
 
         self.write_json(local_audio_download_path, "params.json", params)
 
-        self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
-
-        current_time_formatted = self.get_timestamp(datetime.now())
-        artifact_name = f"{source}_{current_time_formatted}.tar.gz"
-        self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{artifact_name}")
-
-        self.update_artifact_name(data, artifact_name)
+        if len(data) > 0:
+            self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
+            current_time_formatted = self.get_timestamp(datetime.now())
+            artifact_name = f"{source}_{current_time_formatted}.tar.gz"
+            self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{artifact_name}")
+            self.update_artifact_name(data, artifact_name)
+        else:
+            LOGGER.info('No data to create artifact')
+            raise RuntimeError('No data exists to create artifact')
 
     def download_utterances(self,local_audio_download_path, source_path, utterances):
 
@@ -100,11 +102,13 @@ class ULCADataset(BaseProcessor):
             source_path_utterance = f"{source_path}/{audio_id}/clean/{file_name}"
             text_file_name = f"{source_path_utterance.split('.')[0]}.txt"
             source_path_utterance_text = f"{source_path}/{audio_id}/clean/{text_file_name}"
+            LOGGER.info(f"Downloading {source_path_utterance_text} and {source_path_utterance}")
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance,
                                  local_audio_download_path)
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance_text,
                                  local_audio_download_path)
         curr_executor.shutdown(wait=True)
+        LOGGER.info('Download complete...')
 
     def write_json(self, local_audio_download_path, filename, data):
         data_json = json.dumps(data, indent=4)
@@ -237,8 +241,6 @@ class ULCADataset(BaseProcessor):
             utteranceFileNames = audioIdToUtteranceName.get(element['audioId'], [])
             utteranceFileNames.append(element['audioFilename'])
             audioIdToUtteranceName[audio_id] = utteranceFileNames
-
-        LOGGER.info('audioIdToUtteranceName', audioIdToUtteranceName)
 
         for audio_id, utteranceFileNames in audioIdToUtteranceName.items():
             LOGGER.info(f"Updating artifact_name={artifact_name} for audio_id:{audio_id}")
