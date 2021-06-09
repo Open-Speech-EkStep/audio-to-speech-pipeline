@@ -4,9 +4,9 @@ import os, fnmatch
 import json
 import subprocess
 
-from ekstep_data_pipelines.audio_analysis.constants import (
-    REMOTE_PROCESSED_FILE_PATH,
-)
+from concurrent.futures import ThreadPoolExecutor
+from tqdm import tqdm
+
 from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
 from datetime import datetime
@@ -59,19 +59,14 @@ class ULCADataset(BaseProcessor):
 
         source, ulca_config, language, source_path, publish_path, params, export_count = self.get_config(**kwargs)
 
+        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, export_count)
+
         local_audio_download_path = f"{ULCADataset.DEFAULT_DOWNLOAD_PATH}/{source}/"
         self.ensure_path(local_audio_download_path)
 
-        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, export_count)
-
         LOGGER.info(f"Ensured {local_audio_download_path} exists")
 
-        LOGGER.info(f"Downloading source to:{local_audio_download_path}")
-
-        max_workers = multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE
-        self.fs_interface.download_folder_to_location(
-            source_path, local_audio_download_path, max_workers=max_workers
-        )
+        self.download_utterances(local_audio_download_path, source_path, utterances)
 
         text_dict = self.read_transcriptions(local_audio_download_path)
         self.remove_txt_file(local_audio_download_path)
@@ -91,15 +86,31 @@ class ULCADataset(BaseProcessor):
 
         self.update_artifact_name(data, artifact_name)
 
+    def download_utterances(self,local_audio_download_path, source_path, utterances):
+
+        LOGGER.info(f"Downloading source to:{local_audio_download_path}")
+
+        max_workers = multiprocessing.cpu_count() / ESTIMATED_CPU_SHARE
+
+        curr_executor = ThreadPoolExecutor(max_workers)
+
+        for utterance in tqdm(utterances):
+            file_name = utterance[0]
+            audio_id = utterance[7]
+            source_path_utterance = f"{source_path}/{audio_id}/clean/{file_name}"
+            text_file_name = f"{source_path_utterance.split('.')[0]}.txt"
+            source_path_utterance_text = f"{source_path}/{audio_id}/clean/{text_file_name}"
+            curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance,
+                                 local_audio_download_path)
+            curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance_text,
+                                 local_audio_download_path)
+        curr_executor.shutdown(wait=True)
+
     def write_json(self, local_audio_download_path, filename, data):
         data_json = json.dumps(data, indent=4)
         with open(f"{local_audio_download_path}/{filename}", "w") as f:
             f.write(data_json)
 
-    def get_full_path(self, source):
-        remote_file_path = self.audio_analysis_config.get(REMOTE_PROCESSED_FILE_PATH)
-        remote_download_path = f"{remote_file_path}/{source}"
-        return remote_download_path
 
     def ensure_path(self, path):
         os.makedirs(path, exist_ok=True)
