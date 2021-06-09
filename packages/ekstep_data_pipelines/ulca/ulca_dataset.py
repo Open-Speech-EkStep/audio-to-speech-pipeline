@@ -69,20 +69,21 @@ class ULCADataset(BaseProcessor):
         self.download_utterances(local_audio_download_path, source_path, utterances)
 
         text_dict = self.read_transcriptions(local_audio_download_path)
-        self.remove_txt_file(local_audio_download_path)
 
         data = self.create_data_json(text_dict, source, utterances)
 
-        self.write_json(local_audio_download_path, "data.json", data)
-        self.remove_rejected_files(local_audio_download_path, data)
-
-        self.write_json(local_audio_download_path, "params.json", params)
-
         if len(data) > 0:
+            self.write_json(local_audio_download_path, "data.json", data)
+            self.write_json(local_audio_download_path, "params.json", params)
+
+            self.remove_txt_file(local_audio_download_path)
+            self.remove_rejected_files(local_audio_download_path, data)
+
             self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
             current_time_formatted = self.get_timestamp(datetime.now())
             artifact_name = f"{source}_{current_time_formatted}.tar.gz"
             self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{artifact_name}")
+
             self.update_artifact_name(data, artifact_name)
         else:
             LOGGER.info('No data to create artifact')
@@ -102,7 +103,6 @@ class ULCADataset(BaseProcessor):
             source_path_utterance = f"{source_path}/{audio_id}/clean/{file_name}"
             text_file_name = f"{file_name.split('.')[0]}.txt"
             source_path_utterance_text = f"{source_path}/{audio_id}/clean/{text_file_name}"
-            LOGGER.info(f"Downloading {source_path_utterance_text} and {source_path_utterance}")
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance,
                                  local_audio_download_path)
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance_text,
@@ -165,8 +165,10 @@ class ULCADataset(BaseProcessor):
             self.to_data_element(utterance, source, text_dict)
             for utterance in utterances
         ]
-        data = filter(lambda d: d != {}, data)
-        return list(data)
+        data = list(filter(lambda d: d != {}, data))
+
+        LOGGER.info(f"Created data json object with len:{len(data)}")
+        return data
 
     def to_data_element(self, utterance, source, text_dict):
         file_name = utterance[0]
@@ -196,8 +198,11 @@ class ULCADataset(BaseProcessor):
 
     def read_transcriptions(self, local_source_path):
         listOfFiles = os.listdir(local_source_path)
+        LOGGER.info(f'all files downloaded:{len(listOfFiles)}')
+
         pattern = "*.txt"
         text_dict = {}
+
         for entry in listOfFiles:
             if fnmatch.fnmatch(entry, pattern):
                 print(entry)
@@ -205,6 +210,8 @@ class ULCADataset(BaseProcessor):
                     transcription = reader.read()
                     file_name = entry.split(".")[0]
                     text_dict[file_name] = transcription
+
+        LOGGER.info(f"text filed read :{len(text_dict.keys())}")
         return text_dict
 
     def make_tarfile(self, output_filename, source_dir):
