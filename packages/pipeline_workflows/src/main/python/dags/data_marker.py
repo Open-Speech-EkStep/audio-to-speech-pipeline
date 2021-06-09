@@ -44,7 +44,7 @@ def create_dag(data_marker_config, default_args):
             language = filter_by_config.get("language").lower()
             print(f"Language for source is {language}")
             data_marker_task = kubernetes_pod_operator.KubernetesPodOperator(
-                task_id=f"data-marker-{source}",
+                task_id=f"data-marker-{source}-{language}",
                 name="data-marker",
                 cmds=[
                     "python",
