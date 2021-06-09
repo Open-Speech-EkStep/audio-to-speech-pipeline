@@ -308,13 +308,14 @@ class CatalogueTests(unittest.TestCase):
             """
             select msp.clipped_utterance_file_name as audio_file_name, 
             msp.clipped_utterance_duration as duration, msp.snr , s.speaker_name, 
-            mms.source_url as collection_source , mms.source_website as main_source, msp.speaker_gender as gender
+            mms.source_url as collection_source , mms.source_website as main_source, msp.speaker_gender as gender,
+            msp.audio_id
             from media_speaker_mapping msp 
                 inner join media_metadata_staging mms 
                     on msp.audio_id = mms.audio_id
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
-            where mms.source = :source and mms.language=:language and msp.status =:status
+            where mms.source = :source and mms.language=:language and msp.status =:status and artifact_name is null
             limit :count
             """
         )
@@ -327,3 +328,21 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(utterances, expected_utterances)
         self.assertEqual(called_with_sql, args[0][0][0])
         self.assertEqual(call_with_params, args[0][1])
+
+    @mock.patch("ekstep_data_pipelines.common.postgres_db_client.PostgresClient")
+    def test__should_update_utterance_artifact_name(self, mock_postgres_client):
+        mock_postgres_client.execute_update.return_value = 2
+        utterances = ["file_1.wav", "file_2.wav"]
+        artifact_name = "xyz"
+        audio_id = "123"
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        catalogueDao.update_utterance_artifact(utterances, artifact_name, audio_id)
+        called_with_query = (
+            "update media_speaker_mapping "
+            "set artifact_name=:artifact_name "
+            " where audio_id=:audio_id and clipped_utterance_file_name in ('file_1.wav','file_2.wav')"
+        )
+        called_with_args = {"artifact_name": artifact_name, "audio_id": audio_id}
+        args = mock_postgres_client.execute_update.call_args
+        self.assertEqual(called_with_query, args[0][0])
+        self.assertEqual(called_with_args, args[1])

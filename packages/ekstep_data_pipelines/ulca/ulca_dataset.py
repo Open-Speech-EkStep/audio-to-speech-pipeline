@@ -86,7 +86,10 @@ class ULCADataset(BaseProcessor):
         self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
 
         current_time_formatted = self.get_timestamp(datetime.now())
-        self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{source}_{current_time_formatted}.tar.gz")
+        artifact_name = f"{source}_{current_time_formatted}.tar.gz"
+        self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{artifact_name}")
+
+        self.update_artifact_name(data, artifact_name)
 
     def write_json(self, local_audio_download_path, filename, data):
         data_json = json.dumps(data, indent=4)
@@ -158,6 +161,7 @@ class ULCADataset(BaseProcessor):
         main_source_url = utterance[4]
         source_url = utterance[5]
         gender = utterance[6]
+        audio_id = utterance[7]
         snr = {"methodType": "WadaSnr", "methodDetails": {"snr": snr}}
         file_name_key = file_name.split(".")[0]
         if file_name_key in text_dict:
@@ -169,7 +173,8 @@ class ULCADataset(BaseProcessor):
                 "snr": snr,
                 "duration": duration,
                 "speaker": speaker,
-                "gender": ULCADataset.GENDER_MAP.get(gender, "non-specified")
+                "gender": ULCADataset.GENDER_MAP.get(gender, "non-specified"),
+                "audioId": audio_id
             }
         else:
             return {}
@@ -212,5 +217,19 @@ class ULCADataset(BaseProcessor):
                 os.remove(f"{local_path}/{entry}")
 
     def get_timestamp(self, date_time):
-        # return f"{date_time.day}-{date_time.month}-{date_time.year}_{date_time.hour}-{date_time.minute}"
         return date_time.strftime("%d-%m-%Y_%H-%M")
+
+    def update_artifact_name(self, data, artifact_name):
+        audioIdToUtteranceName = {}
+        for element in data:
+            audio_id = element['audioId']
+            utteranceFileNames = audioIdToUtteranceName.get(element['audioId'], [])
+            utteranceFileNames.append(element['audioFilename'])
+            audioIdToUtteranceName[audio_id] = utteranceFileNames
+
+        LOGGER.info('audioIdToUtteranceName', audioIdToUtteranceName)
+
+        for audio_id, utteranceFileNames in audioIdToUtteranceName.items():
+            LOGGER.info(f"Updating artifact_name={artifact_name} for audio_id:{audio_id}")
+            updated = self.catalogue_dao.update_utterance_artifact(utteranceFileNames, artifact_name, audio_id)
+            LOGGER.info(f"updated....{updated}")

@@ -1,6 +1,6 @@
 import os
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 from ekstep_data_pipelines.ulca.ulca_dataset import ULCADataset
 from datetime import datetime
@@ -63,7 +63,8 @@ class ULCADatasetTests(unittest.TestCase):
                 "dummy_speaker_name",
                 "dummy_main_source",
                 "dummy_collection_source",
-                "m"
+                "m",
+                1
             ),
             (
                 "sample2.wav",
@@ -72,7 +73,8 @@ class ULCADatasetTests(unittest.TestCase):
                 "dummy_speaker_name_2",
                 "dummy_main_source_2",
                 "dummy_collection_source_2",
-                "f"
+                "f",
+                2
             ),
             (
                 "sample3.wav",
@@ -81,7 +83,8 @@ class ULCADatasetTests(unittest.TestCase):
                 "dummy_speaker_name_2",
                 "dummy_main_source_2",
                 "dummy_collection_source_2",
-                "f"
+                "f",
+                3
             )
         ]
 
@@ -97,7 +100,8 @@ class ULCADatasetTests(unittest.TestCase):
                 "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 38.432806}},
                 "duration": 13.38,
                 "speaker": "dummy_speaker_name",
-                "gender": "male"
+                "gender": "male",
+                "audioId": 1
             },
             {
                 "audioFilename": "sample2.wav",
@@ -110,7 +114,8 @@ class ULCADatasetTests(unittest.TestCase):
                 "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 40.432806}},
                 "duration": 15.38,
                 "speaker": "dummy_speaker_name_2",
-                "gender": "female"
+                "gender": "female",
+                "audioId": 2
             }
         ]
         text_dict = {"sample1": "sample text", "sample2": "sample text"}
@@ -147,8 +152,66 @@ class ULCADatasetTests(unittest.TestCase):
         self.assertEqual(listOfFiles, ["file2.wav"])
 
 
-    def test__should_get_timestamp_in_specified_format(self):
+    def test_should_get_timestamp_in_specified_format(self):
         date_time = datetime.strptime('12/02/2021', '%d/%m/%Y')
         print('date:', date_time)
         formatted = ULCADataset(self.data_processor).get_timestamp(date_time)
         self.assertEqual('12-02-2021_00-00', formatted)
+
+
+    def test_should_update_artifact_name(self):
+        data = [
+            {
+                "audioFilename": "sample1.wav",
+                "text": "sample text",
+                "collectionSource": [
+                    "test_source",
+                    "dummy_main_source",
+                    "dummy_collection_source",
+                ],
+                "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 38.432806}},
+                "duration": 13.38,
+                "speaker": "dummy_speaker_name",
+                "gender": "male",
+                "audioId": 1
+            },
+            {
+                "audioFilename": "sample2.wav",
+                "text": "sample text",
+                "collectionSource": [
+                    "test_source",
+                    "dummy_main_source_2",
+                    "dummy_collection_source_2",
+                ],
+                "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 40.432806}},
+                "duration": 15.38,
+                "speaker": "dummy_speaker_name_2",
+                "gender": "female",
+                "audioId": 2
+            },
+            {
+                "audioFilename": "sample3.wav",
+                "text": "sample text",
+                "collectionSource": [
+                    "test_source",
+                    "dummy_main_source_2",
+                    "dummy_collection_source_2",
+                ],
+                "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 40.432806}},
+                "duration": 15.38,
+                "speaker": "dummy_speaker_name_2",
+                "gender": "female",
+                "audioId": 2
+            }
+        ]
+
+        self.catalogue_dao.update_utterance_artifact.return_value = True
+
+        ULCADataset(self.data_processor).update_artifact_name(data, 'test_name')
+
+        calls = [call.update_utterance_artifact(['sample1.wav'], 'test_name', 1), call.update_utterance_artifact(['sample2.wav', 'sample3.wav'], 'test_name', 2)]
+
+        call_args = self.catalogue_dao.update_utterance_artifact.call_args
+        print('call_args', call_args)
+        # self.assertEqual(2, self.catalogue_dao.call_count)
+        # self.catalogue_dao.assert_has_calls(calls, any_order=True)
