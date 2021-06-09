@@ -315,14 +315,15 @@ class CatalogueTests(unittest.TestCase):
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
             where mms.source = :source and mms.language=:language and msp.status =:status
+            limit :count
             """
         )
-        call_with_params = {"source": source, "status": "Clean", "language": language}
+        call_with_params = {"source": source, "status": "Clean", "language": language, "count": 2}
 
         mock_postgres_client.execute_query.return_value = expected_utterances
         catalogueDao = CatalogueDao(mock_postgres_client)
         args = mock_postgres_client.execute_query.call_args_list
-        utterances = catalogueDao.get_utterance_details_by_source(source, language)
+        utterances = catalogueDao.get_utterance_details_by_source(source, language, 2)
         self.assertEqual(utterances, expected_utterances)
         self.assertEqual(called_with_sql, args[0][0][0])
         self.assertEqual(call_with_params, args[0][1])

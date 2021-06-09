@@ -9,9 +9,11 @@ from ekstep_data_pipelines.audio_analysis.constants import (
 )
 from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
+from datetime import datetime
 
 
 ESTIMATED_CPU_SHARE = 0.1
+DEFAULT_COUNT = 10000
 
 LOGGER = get_logger("ULCADataset")
 
@@ -28,7 +30,11 @@ class ULCADataset(BaseProcessor):
     LANGUAGE = "language"
     SOURCE_PATH = "source_path"
     PUBLISH_PATH = "publish_path"
-
+    EXPORT_COUNT = "export_count"
+    GENDER_MAP = {
+        "m": "male",
+        "f": "female"
+    }
     @staticmethod
     def get_instance(data_processor, **kwargs):
         return ULCADataset(data_processor, **kwargs)
@@ -51,10 +57,12 @@ class ULCADataset(BaseProcessor):
         """
         LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
-        source, ulca_config, language, source_path, publish_path, params = self.get_config(**kwargs)
+        source, ulca_config, language, source_path, publish_path, params, export_count = self.get_config(**kwargs)
 
         local_audio_download_path = f"{ULCADataset.DEFAULT_DOWNLOAD_PATH}/{source}/"
         self.ensure_path(local_audio_download_path)
+
+        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, export_count)
 
         LOGGER.info(f"Ensured {local_audio_download_path} exists")
 
@@ -66,15 +74,19 @@ class ULCADataset(BaseProcessor):
         )
 
         text_dict = self.read_transcriptions(local_audio_download_path)
-        data = self.create_data_json(text_dict, source, language, self.catalogue_dao)
-        self.write_json(local_audio_download_path, "data.json", data)
-        self.write_json(local_audio_download_path, "params.json", params)
         self.remove_txt_file(local_audio_download_path)
+
+        data = self.create_data_json(text_dict, source, utterances)
+
+        self.write_json(local_audio_download_path, "data.json", data)
         self.remove_rejected_files(local_audio_download_path, data)
+
+        self.write_json(local_audio_download_path, "params.json", params)
 
         self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
 
-        self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{source}.tar.gz")
+        current_time_formatted = self.get_timestamp(datetime.now())
+        self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{source}_{current_time_formatted}.tar.gz")
 
     def write_json(self, local_audio_download_path, filename, data):
         data_json = json.dumps(data, indent=4)
@@ -96,6 +108,7 @@ class ULCADataset(BaseProcessor):
         language = ulca_config.get(ULCADataset.LANGUAGE)
         source_path = ulca_config.get(ULCADataset.SOURCE_PATH)
         publish_path = ulca_config.get(ULCADataset.PUBLISH_PATH)
+        export_count = ulca_config.get(ULCADataset.EXPORT_COUNT)
         params = ulca_config.get(ULCADataset.ULCA_PARAMS)
 
         if source is None:
@@ -116,17 +129,20 @@ class ULCADataset(BaseProcessor):
         if params is None:
             raise Exception("params is mandatory")
 
-        return source, ulca_config, language, source_path, publish_path, params
+        return source, ulca_config, language, source_path, publish_path, params, export_count
 
     def get_params(self):
         return self.ulca_config.get(ULCADataset.ULCA_PARAMS)
 
-    def create_data_json(self, text_dict, source, language, catalogue_dao):
+    def get_clean_utterances(self, source, language, catalogue_dao, count=DEFAULT_COUNT):
         LOGGER.info(f"Creating json for source:{source}, language={language}")
-        utterances = catalogue_dao.get_utterance_details_by_source(source, language)
+        utterances = catalogue_dao.get_utterance_details_by_source(source, language, count)
         LOGGER.info(f"total utterances: {str(len(utterances))}")
         if len(utterances) <= 0:
             raise LookupError(f"No data found in catalogue for language={language}, source={source}")
+        return utterances
+
+    def create_data_json(self, text_dict, source, utterances):
         data = [
             self.to_data_element(utterance, source, text_dict)
             for utterance in utterances
@@ -144,10 +160,6 @@ class ULCADataset(BaseProcessor):
         gender = utterance[6]
         snr = {"methodType": "WadaSnr", "methodDetails": {"snr": snr}}
         file_name_key = file_name.split(".")[0]
-        gender_map = {
-            "m": "male",
-            "f": "female"
-        }
         if file_name_key in text_dict:
             text = text_dict.get(file_name_key, "")
             return {
@@ -157,7 +169,7 @@ class ULCADataset(BaseProcessor):
                 "snr": snr,
                 "duration": duration,
                 "speaker": speaker,
-                "gender": gender_map.get(gender, "non-specified")
+                "gender": ULCADataset.GENDER_MAP.get(gender, "non-specified")
             }
         else:
             return {}
@@ -166,7 +178,6 @@ class ULCADataset(BaseProcessor):
         listOfFiles = os.listdir(local_source_path)
         pattern = "*.txt"
         text_dict = {}
-        print("listOfFiles[:10]", listOfFiles[:10])
         for entry in listOfFiles:
             if fnmatch.fnmatch(entry, pattern):
                 print(entry)
@@ -194,11 +205,12 @@ class ULCADataset(BaseProcessor):
         LOGGER.info('Remove files not in catalogue or not clean based on data.json')
         listOfFiles = os.listdir(local_path)
         valid_files = list(map(lambda d: d['audioFilename'], data))
-        LOGGER.info(f"valid_files:{valid_files}")
         pattern = "*.wav"
         for entry in listOfFiles:
             if (fnmatch.fnmatch(entry, pattern)) and (entry not in valid_files):
                 LOGGER.info(f"Removing {entry}...")
                 os.remove(f"{local_path}/{entry}")
-            else:
-                LOGGER.info(f"Keeping {entry}...")
+
+    def get_timestamp(self, date_time):
+        # return f"{date_time.day}-{date_time.month}-{date_time.year}_{date_time.hour}-{date_time.minute}"
+        return date_time.strftime("%d-%m-%Y_%H-%M")
