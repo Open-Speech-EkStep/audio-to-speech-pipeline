@@ -103,10 +103,12 @@ class ULCADataset(BaseProcessor):
             source_path_utterance = f"{source_path}/{audio_id}/clean/{file_name}"
             text_file_name = f"{file_name.split('.')[0]}.txt"
             source_path_utterance_text = f"{source_path}/{audio_id}/clean/{text_file_name}"
+
+            local_file_path_sans_extention = f"{local_audio_download_path}/{file_name.split('.')[0]}"
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance,
-                                 local_audio_download_path)
+                                 f"{local_file_path_sans_extention}.wav")
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance_text,
-                                 local_audio_download_path)
+                                 f"{local_file_path_sans_extention}.txt")
         curr_executor.shutdown(wait=True)
         LOGGER.info('Download complete...')
 
