@@ -100,7 +100,7 @@ class ULCADataset(BaseProcessor):
             file_name = utterance[0]
             audio_id = utterance[7]
             source_path_utterance = f"{source_path}/{audio_id}/clean/{file_name}"
-            text_file_name = f"{source_path_utterance.split('.')[0]}.txt"
+            text_file_name = f"{file_name.split('.')[0]}.txt"
             source_path_utterance_text = f"{source_path}/{audio_id}/clean/{text_file_name}"
             LOGGER.info(f"Downloading {source_path_utterance_text} and {source_path_utterance}")
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance,
