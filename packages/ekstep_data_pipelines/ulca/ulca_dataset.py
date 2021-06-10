@@ -70,7 +70,7 @@ class ULCADataset(BaseProcessor):
 
         LOGGER.info(f"Ensured {local_audio_download_path} exists")
 
-        self.download_utterances(local_audio_download_path, source_path, utterances)
+        self.download_utterances(local_audio_download_path, source_path, utterances, is_labelled)
 
         text_dict = self.read_transcriptions(local_audio_download_path)
 
@@ -92,7 +92,7 @@ class ULCADataset(BaseProcessor):
             LOGGER.info('No data to create artifact')
             raise RuntimeError('No data exists to create artifact')
 
-    def download_utterances(self,local_audio_download_path, source_path, utterances):
+    def download_utterances(self,local_audio_download_path, source_path, utterances, is_labelled):
 
         LOGGER.info(f"Downloading source to:{local_audio_download_path}")
 
@@ -110,8 +110,9 @@ class ULCADataset(BaseProcessor):
             local_file_path_sans_extention = f"{local_audio_download_path}/{file_name.split('.')[0]}"
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance,
                                  f"{local_file_path_sans_extention}.wav")
-            curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance_text,
-                                 f"{local_file_path_sans_extention}.txt")
+            if is_labelled == 'True':
+                curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance_text,
+                                     f"{local_file_path_sans_extention}.txt")
         curr_executor.shutdown(wait=True)
         LOGGER.info('Download complete...')
 
