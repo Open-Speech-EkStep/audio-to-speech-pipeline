@@ -215,3 +215,64 @@ class ULCADatasetTests(unittest.TestCase):
         print('call_args', call_args)
         # self.assertEqual(2, self.catalogue_dao.call_count)
         # self.catalogue_dao.assert_has_calls(calls, any_order=True)
+
+
+    def test_should_create_data_json_for_non_labelled_corpus(
+        self,
+    ):
+        utterances = [
+            (
+                "sample1.wav",
+                13.38,
+                38.432806,
+                "dummy_speaker_name",
+                "dummy_main_source",
+                "dummy_collection_source",
+                "m",
+                1
+            ),
+            (
+                "sample2.wav",
+                15.38,
+                40.432806,
+                "dummy_speaker_name_2",
+                "dummy_main_source_2",
+                "dummy_collection_source_2",
+                "f",
+                2
+            )
+        ]
+
+        expected_data = [
+            {
+                "audioFilename": "sample1.wav",
+                "collectionSource": [
+                    "test_source",
+                    "dummy_main_source",
+                    "dummy_collection_source",
+                ],
+                "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 38.432806}},
+                "duration": 13.38,
+                "speaker": "dummy_speaker_name",
+                "gender": "male",
+                "audioId": 1
+            },
+            {
+                "audioFilename": "sample2.wav",
+                "collectionSource": [
+                    "test_source",
+                    "dummy_main_source_2",
+                    "dummy_collection_source_2",
+                ],
+                "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 40.432806}},
+                "duration": 15.38,
+                "speaker": "dummy_speaker_name_2",
+                "gender": "female",
+                "audioId": 2
+            }
+        ]
+        text_dict = {}
+        data = ULCADataset(self.data_processor).create_data_json(
+            text_dict, "test_source", utterances, False
+        )
+        self.assertEqual(expected_data, data)

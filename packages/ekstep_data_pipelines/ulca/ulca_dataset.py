@@ -57,11 +57,13 @@ class ULCADataset(BaseProcessor):
         """
         LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
-        source, ulca_config, language, source_path, publish_path, params, export_count = self.get_config(**kwargs)
+        source, ulca_config, language, source_path, publish_path, params, export_count, is_labelled = self.get_config(**kwargs)
 
         utterances = self.get_clean_utterances(source, language, self.catalogue_dao, export_count)
 
-        local_audio_download_path = f"{ULCADataset.DEFAULT_DOWNLOAD_PATH}/{source}/"
+        current_time_formatted = self.get_timestamp(datetime.now())
+
+        local_audio_download_path = f"{ULCADataset.DEFAULT_DOWNLOAD_PATH}/{source}_{current_time_formatted}/"
         self.ensure_path(local_audio_download_path)
 
         LOGGER.info(f"Ensured {local_audio_download_path} exists")
@@ -70,7 +72,7 @@ class ULCADataset(BaseProcessor):
 
         text_dict = self.read_transcriptions(local_audio_download_path)
 
-        data = self.create_data_json(text_dict, source, utterances)
+        data = self.create_data_json(text_dict, source, utterances, is_labelled)
 
         if len(data) > 0:
             self.write_json(local_audio_download_path, "data.json", data)
@@ -80,7 +82,6 @@ class ULCADataset(BaseProcessor):
             self.remove_rejected_files(local_audio_download_path, data)
 
             self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
-            current_time_formatted = self.get_timestamp(datetime.now())
             artifact_name = f"{source}_{current_time_formatted}.tar.gz"
             self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{artifact_name}")
 
@@ -130,6 +131,7 @@ class ULCADataset(BaseProcessor):
         publish_path = ulca_config.get(ULCADataset.PUBLISH_PATH)
         export_count = ulca_config.get(ULCADataset.EXPORT_COUNT)
         params = ulca_config.get(ULCADataset.ULCA_PARAMS)
+        is_labelled = ulca_config.get(ULCADataset.LABELLED)
 
         if source is None:
             raise Exception("source is mandatory")
@@ -149,7 +151,7 @@ class ULCADataset(BaseProcessor):
         if params is None:
             raise Exception("params is mandatory")
 
-        return source, ulca_config, language, source_path, publish_path, params, export_count
+        return source, ulca_config, language, source_path, publish_path, params, export_count, is_labelled
 
     def get_params(self):
         return self.ulca_config.get(ULCADataset.ULCA_PARAMS)
@@ -162,9 +164,9 @@ class ULCADataset(BaseProcessor):
             raise LookupError(f"No data found in catalogue for language={language}, source={source}")
         return utterances
 
-    def create_data_json(self, text_dict, source, utterances):
+    def create_data_json(self, text_dict, source, utterances, is_labelled=True):
         data = [
-            self.to_data_element(utterance, source, text_dict)
+            self.to_data_element(utterance, source, text_dict, is_labelled)
             for utterance in utterances
         ]
         data = list(filter(lambda d: d != {}, data))
@@ -172,7 +174,7 @@ class ULCADataset(BaseProcessor):
         LOGGER.info(f"Created data json object with len:{len(data)}")
         return data
 
-    def to_data_element(self, utterance, source, text_dict):
+    def to_data_element(self, utterance, source, text_dict, is_labelled):
         file_name = utterance[0]
         duration = utterance[1]
         snr = utterance[2]
@@ -183,11 +185,9 @@ class ULCADataset(BaseProcessor):
         audio_id = utterance[7]
         snr = {"methodType": "WadaSnr", "methodDetails": {"snr": snr}}
         file_name_key = file_name.split(".")[0]
-        if file_name_key in text_dict:
-            text = text_dict.get(file_name_key, "")
-            return {
+
+        data = {
                 "audioFilename": file_name,
-                "text": text,
                 "collectionSource": [source, main_source_url, source_url],
                 "snr": snr,
                 "duration": duration,
@@ -195,6 +195,14 @@ class ULCADataset(BaseProcessor):
                 "gender": ULCADataset.GENDER_MAP.get(gender, "non-specified"),
                 "audioId": audio_id
             }
+
+        if not is_labelled:
+            return data
+
+        if is_labelled and file_name_key in text_dict:
+            text = text_dict.get(file_name_key, "")
+            data['text'] = text
+            return data
         else:
             return {}
 
