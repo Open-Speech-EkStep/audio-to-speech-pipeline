@@ -316,6 +316,7 @@ class CatalogueTests(unittest.TestCase):
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
             where mms.source = :source and mms.language=:language and msp.status =:status and artifact_name is null
+            and msp.staged_for_transcription=true
             limit :count
             """
         )

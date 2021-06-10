@@ -273,6 +273,6 @@ class ULCADatasetTests(unittest.TestCase):
         ]
         text_dict = {}
         data = ULCADataset(self.data_processor).create_data_json(
-            text_dict, "test_source", utterances, False
+            text_dict, "test_source", utterances, "False"
         )
         self.assertEqual(expected_data, data)

@@ -133,7 +133,7 @@ class ULCADataset(BaseProcessor):
         publish_path = ulca_config.get(ULCADataset.PUBLISH_PATH)
         export_count = ulca_config.get(ULCADataset.EXPORT_COUNT)
         params = ulca_config.get(ULCADataset.ULCA_PARAMS)
-        is_labelled = ulca_config.get(ULCADataset.LABELLED)
+        is_labelled = ulca_config.get(ULCADataset.LABELLED, "True")
 
         if source is None:
             raise Exception("source is mandatory")
@@ -166,7 +166,7 @@ class ULCADataset(BaseProcessor):
             raise LookupError(f"No data found in catalogue for language={language}, source={source}")
         return utterances
 
-    def create_data_json(self, text_dict, source, utterances, is_labelled=True):
+    def create_data_json(self, text_dict, source, utterances, is_labelled="True"):
         data = [
             self.to_data_element(utterance, source, text_dict, is_labelled)
             for utterance in utterances
@@ -198,10 +198,10 @@ class ULCADataset(BaseProcessor):
                 "audioId": audio_id
             }
 
-        if not is_labelled:
+        if is_labelled == "False":
             return data
 
-        if is_labelled and file_name_key in text_dict:
+        if is_labelled == "True" and file_name_key in text_dict:
             text = text_dict.get(file_name_key, "")
             data['text'] = text
             return data
