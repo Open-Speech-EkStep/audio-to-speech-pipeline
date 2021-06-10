@@ -35,6 +35,8 @@ class ULCADataset(BaseProcessor):
         "m": "male",
         "f": "female"
     }
+    LABELLED = 'labelled'
+
     @staticmethod
     def get_instance(data_processor, **kwargs):
         return ULCADataset(data_processor, **kwargs)
