@@ -165,7 +165,7 @@ class DataMarker(BaseProcessor):
         filter_spec = kwargs.get(FILTER_SPEC, {})
         filters = filter_spec.get(FILTER_CRITERIA, {})
         source = kwargs.get("source")
-        file_mode = filter_spec.get(FILE_MODE)
+        file_mode = filter_spec.get(FILE_MODE, 'n')
         file_path = filter_spec.get(FILE_PATH)
         data_set = filter_spec.get(DATA_SET)
 
