@@ -36,6 +36,7 @@ class ULCADataset(BaseProcessor):
         "f": "female"
     }
     LABELLED = 'labelled'
+    IS_TRANSCRIBED = 'is_transcribed'
 
     @staticmethod
     def get_instance(data_processor, **kwargs):
