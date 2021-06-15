@@ -59,9 +59,9 @@ class ULCADataset(BaseProcessor):
         """
         LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
-        source, ulca_config, language, source_path, publish_path, params, export_count, is_labelled = self.get_config(**kwargs)
+        source, ulca_config, language, source_path, publish_path, params, export_count, is_labelled, is_transcribed = self.get_config(**kwargs)
 
-        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, is_labelled, export_count)
+        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, is_transcribed, export_count)
 
         current_time_formatted = self.get_timestamp(datetime.now())
 
@@ -135,6 +135,7 @@ class ULCADataset(BaseProcessor):
         export_count = ulca_config.get(ULCADataset.EXPORT_COUNT)
         params = ulca_config.get(ULCADataset.ULCA_PARAMS)
         is_labelled = ulca_config.get(ULCADataset.LABELLED, "True")
+        is_transcribed = ulca_config.get(ULCADataset.IS_TRANSCRIBED, "True")
 
         if source is None:
             raise Exception("source is mandatory")
@@ -154,7 +155,7 @@ class ULCADataset(BaseProcessor):
         if params is None:
             raise Exception("params is mandatory")
 
-        return source, ulca_config, language, source_path, publish_path, params, export_count, is_labelled
+        return source, ulca_config, language, source_path, publish_path, params, export_count, is_labelled, is_transcribed
 
     def get_params(self):
         return self.ulca_config.get(ULCADataset.ULCA_PARAMS)
