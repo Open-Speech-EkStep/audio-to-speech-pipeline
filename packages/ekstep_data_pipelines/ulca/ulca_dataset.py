@@ -61,7 +61,7 @@ class ULCADataset(BaseProcessor):
 
         source, ulca_config, language, source_path, publish_path, params, export_count, is_labelled = self.get_config(**kwargs)
 
-        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, export_count)
+        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, is_labelled, export_count)
 
         current_time_formatted = self.get_timestamp(datetime.now())
 
@@ -159,9 +159,10 @@ class ULCADataset(BaseProcessor):
     def get_params(self):
         return self.ulca_config.get(ULCADataset.ULCA_PARAMS)
 
-    def get_clean_utterances(self, source, language, catalogue_dao, count=DEFAULT_COUNT):
+    def get_clean_utterances(self, source, language, catalogue_dao, is_labelled, count=DEFAULT_COUNT):
+        is_transcribed = True if is_labelled == "True" else False
         LOGGER.info(f"Creating json for source:{source}, language={language}")
-        utterances = catalogue_dao.get_utterance_details_by_source(source, language, count)
+        utterances = catalogue_dao.get_utterance_details_by_source(source, language, count, is_transcribed)
         LOGGER.info(f"total utterances: {str(len(utterances))}")
         if len(utterances) <= 0:
             raise LookupError(f"No data found in catalogue for language={language}, source={source}")
