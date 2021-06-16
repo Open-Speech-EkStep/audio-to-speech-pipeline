@@ -199,7 +199,7 @@ class CatalogueDao:
         parm_dict = {"source": source, "status": status, "language": language, "count": count,
                      "is_transcribed": is_transcribed}
         data = self.postgres_client.execute_query(
-            """
+            f"""
             select msp.clipped_utterance_file_name as audio_file_name, 
             msp.clipped_utterance_duration as duration, msp.snr , s.speaker_name, 
             mms.source_url as collection_source , mms.source_website as main_source, msp.speaker_gender as gender,
@@ -209,7 +209,7 @@ class CatalogueDao:
                     on msp.audio_id = mms.audio_id
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
-            where mms.source = :source and mms.language=:language and msp.status in :status and artifact_name is null
+            where mms.source = :source and mms.language=:language and msp.status in {status} and artifact_name is null
             and msp.staged_for_transcription=true and msp.is_transcribed = :is_transcribed
             limit :count
             """,

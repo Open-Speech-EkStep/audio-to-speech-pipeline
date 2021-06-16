@@ -318,7 +318,7 @@ class CatalogueTests(unittest.TestCase):
                     on msp.audio_id = mms.audio_id
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
-            where mms.source = :source and mms.language=:language and msp.status in :status and artifact_name is null
+            where mms.source = :source and mms.language=:language and msp.status in ('Clean','Rejected') and artifact_name is null
             and msp.staged_for_transcription=true and msp.is_transcribed = :is_transcribed
             limit :count
             """
