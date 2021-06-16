@@ -2,9 +2,9 @@ import wave
 
 import grpc
 from ekstep_data_pipelines.common.utils import get_logger
-from stub.speech_recognition_open_api_pb2 import Language, RecognitionConfig, RecognitionAudio, \
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.stub.speech_recognition_open_api_pb2 import Language, RecognitionConfig, RecognitionAudio, \
     SpeechRecognitionRequest
-from stub.speech_recognition_open_api_pb2_grpc import SpeechRecognizerStub
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.stub.speech_recognition_open_api_pb2_grpc import SpeechRecognizerStub
 
 
 LOGGER = get_logger("EkstepTranscriptionClient")
