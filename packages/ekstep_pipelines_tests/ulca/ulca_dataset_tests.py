@@ -44,12 +44,12 @@ class ULCADatasetTests(unittest.TestCase):
         ]
         self.catalogue_dao.get_utterance_details_by_source.return_value = utterances
 
-        actual_utterances = ULCADataset(self.data_processor).get_clean_utterances("test_source", "Hindi", self.catalogue_dao, "True", 2)
+        actual_utterances = ULCADataset(self.data_processor).get_clean_utterances("test_source", "Hindi", self.catalogue_dao, "true", "false", 2)
         print("actual_utterances", actual_utterances)
         select_args = self.catalogue_dao.get_utterance_details_by_source.call_args
         print(select_args)
         self.assertEqual(actual_utterances, utterances)
-        self.assertEqual(('test_source', 'Hindi', 2, True), select_args[0])
+        self.assertEqual(('test_source', 'Hindi', 2, True, False), select_args[0])
 
 
     def test_should_create_data_json(

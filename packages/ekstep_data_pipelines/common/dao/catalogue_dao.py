@@ -192,8 +192,11 @@ class CatalogueDao:
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
 
-    def get_utterance_details_by_source(self, source, language, count, is_transcribed):
-        parm_dict = {"source": source, "status": "Clean", "language": language, "count": count,
+    def get_utterance_details_by_source(self, source, language, count, is_transcribed, include_rejected):
+
+        status = "('Clean','Rejected')" if include_rejected else "('Clean')"
+
+        parm_dict = {"source": source, "status": status, "language": language, "count": count,
                      "is_transcribed": is_transcribed}
         data = self.postgres_client.execute_query(
             """
@@ -206,7 +209,7 @@ class CatalogueDao:
                     on msp.audio_id = mms.audio_id
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
-            where mms.source = :source and mms.language=:language and msp.status =:status and artifact_name is null
+            where mms.source = :source and mms.language=:language and msp.status in :status and artifact_name is null
             and msp.staged_for_transcription=true and msp.is_transcribed = :is_transcribed
             limit :count
             """,
