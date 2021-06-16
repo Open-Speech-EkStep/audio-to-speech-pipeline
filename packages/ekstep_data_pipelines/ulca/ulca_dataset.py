@@ -37,6 +37,7 @@ class ULCADataset(BaseProcessor):
     }
     LABELLED = 'labelled'
     IS_TRANSCRIBED = 'is_transcribed'
+    INCLUDE_REJECTED = 'include_rejected'
 
     @staticmethod
     def get_instance(data_processor, **kwargs):
@@ -60,9 +61,10 @@ class ULCADataset(BaseProcessor):
         """
         LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
-        source, ulca_config, language, source_path, publish_path, params, export_count, is_labelled, is_transcribed = self.get_config(**kwargs)
+        source, ulca_config, language, source_path, publish_path,\
+        params, export_count, is_labelled, is_transcribed, include_rejected = self.get_config(**kwargs)
 
-        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, is_transcribed, export_count)
+        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, is_transcribed, include_rejected, export_count)
 
         current_time_formatted = self.get_timestamp(datetime.now())
 
@@ -104,9 +106,10 @@ class ULCADataset(BaseProcessor):
         for utterance in tqdm(utterances):
             file_name = utterance[0]
             audio_id = utterance[7]
-            source_path_utterance = f"{source_path}/{audio_id}/clean/{file_name}"
+            status = utterance[8].lower()
+            source_path_utterance = f"{source_path}/{audio_id}/{status}/{file_name}"
             text_file_name = f"{file_name.split('.')[0]}.txt"
-            source_path_utterance_text = f"{source_path}/{audio_id}/clean/{text_file_name}"
+            source_path_utterance_text = f"{source_path}/{audio_id}/{status}/{text_file_name}"
 
             local_file_path_sans_extention = f"{local_audio_download_path}/{file_name.split('.')[0]}"
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance,
@@ -137,6 +140,7 @@ class ULCADataset(BaseProcessor):
         params = ulca_config.get(ULCADataset.ULCA_PARAMS)
         is_labelled = ulca_config.get(ULCADataset.LABELLED, "True")
         is_transcribed = ulca_config.get(ULCADataset.IS_TRANSCRIBED, "True")
+        include_rejected = ulca_config.get(ULCADataset.INCLUDE_REJECTED, "False")
 
         if source is None:
             raise Exception("source is mandatory")
@@ -156,15 +160,17 @@ class ULCADataset(BaseProcessor):
         if params is None:
             raise Exception("params is mandatory")
 
-        return source, ulca_config, language, source_path, publish_path, params, export_count, is_labelled, is_transcribed
+        return source, ulca_config, language, source_path, publish_path, params, export_count, \
+               is_labelled, is_transcribed, include_rejected
 
     def get_params(self):
         return self.ulca_config.get(ULCADataset.ULCA_PARAMS)
 
-    def get_clean_utterances(self, source, language, catalogue_dao, is_labelled, count=DEFAULT_COUNT):
-        is_transcribed = True if is_labelled == "True" else False
+    def get_clean_utterances(self, source, language, catalogue_dao, is_transcribed, include_rejected ,count=DEFAULT_COUNT):
+        is_transcribed = True if is_transcribed.lower() == "true" else False
+        include_rejected = True if include_rejected.lower() == "true" else False
         LOGGER.info(f"Creating json for source:{source}, language={language}")
-        utterances = catalogue_dao.get_utterance_details_by_source(source, language, count, is_transcribed)
+        utterances = catalogue_dao.get_utterance_details_by_source(source, language, count, is_transcribed, include_rejected)
         LOGGER.info(f"total utterances: {str(len(utterances))}")
         if len(utterances) <= 0:
             raise LookupError(f"No data found in catalogue for language={language}, source={source}")

@@ -292,7 +292,9 @@ class CatalogueTests(unittest.TestCase):
                 "dummy_speaker_name",
                 "dummy_main_source",
                 "dummy_collection_source",
-                "m"
+                "m",
+                'Clean'
+
             ),
             (
                 "sample2.wav",
@@ -301,7 +303,8 @@ class CatalogueTests(unittest.TestCase):
                 "dummy_speaker_name_2",
                 "dummy_main_source_2",
                 "dummy_collection_source_2",
-                "f"
+                "f",
+                'Rejected'
             )
         ]
         called_with_sql = (
@@ -315,18 +318,18 @@ class CatalogueTests(unittest.TestCase):
                     on msp.audio_id = mms.audio_id
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
-            where mms.source = :source and mms.language=:language and msp.status =:status and artifact_name is null
+            where mms.source = :source and mms.language=:language and msp.status in :status and artifact_name is null
             and msp.staged_for_transcription=true and msp.is_transcribed = :is_transcribed
             limit :count
             """
         )
-        call_with_params = {"source": source, "status": "Clean",
+        call_with_params = {"source": source, "status": "('Clean','Rejected')",
                             "language": language, "count": 2, "is_transcribed": True}
 
         mock_postgres_client.execute_query.return_value = expected_utterances
         catalogueDao = CatalogueDao(mock_postgres_client)
         args = mock_postgres_client.execute_query.call_args_list
-        utterances = catalogueDao.get_utterance_details_by_source(source, language, 2, True)
+        utterances = catalogueDao.get_utterance_details_by_source(source, language, 2, True, True)
         self.assertEqual(utterances, expected_utterances)
         self.assertEqual(called_with_sql, args[0][0][0])
         self.assertEqual(call_with_params, args[0][1])
