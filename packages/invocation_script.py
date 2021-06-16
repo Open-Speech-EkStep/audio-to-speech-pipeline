@@ -16,7 +16,7 @@ from ekstep_data_pipelines.audio_embedding.audio_embedding import AudioEmbedding
 from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common import get_periperhals
 
-STT_CLIENT = ["google", "azure"]
+STT_CLIENT = ["google", "azure", "ekstep"]
 
 
 class ACTIONS:
@@ -269,6 +269,7 @@ def validate_data_filter_config(arguments):
 
     return {"filter_spec": filter_spec_dict,
             "source": arguments.audio_source}
+
 
 def validate_ulca_dataset_config(arguments):
     LOGGER.info("validating input for ulca dataset")
