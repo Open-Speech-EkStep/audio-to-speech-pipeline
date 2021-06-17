@@ -150,6 +150,7 @@ class CatalogueTests(unittest.TestCase):
     def test_get_utterances_by_source(self, mock_postgres_client):
         source = "test_source"
         status = "Clean"
+        language = "hindi"
         data_set = "test"
         # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
         expected_utterances = [
@@ -164,7 +165,7 @@ class CatalogueTests(unittest.TestCase):
             "from media_speaker_mapping "
             "where audio_id in "
             "(select audio_id from media_metadata_staging "
-            'where "source" = :source and data_set_used_for IS NULL or data_set_used_for = :data_set) '
+            'where "source" = :source and "language" = :language and data_set_used_for IS NULL or data_set_used_for = :data_set) '
             "and status = :status "
             "and staged_for_transcription = false "
             "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15"
@@ -172,7 +173,7 @@ class CatalogueTests(unittest.TestCase):
         mock_postgres_client.execute_query.return_value = expected_utterances
         catalogueDao = CatalogueDao(mock_postgres_client)
         args = mock_postgres_client.execute_query.call_args_list
-        utterances = catalogueDao.get_utterances_by_source(source, status, data_set)
+        utterances = catalogueDao.get_utterances_by_source(source, status, language, data_set)
         self.assertEqual(utterances, expected_utterances)
         self.assertEqual(called_with_sql, args[0][0][0])
 
@@ -187,17 +188,17 @@ class CatalogueTests(unittest.TestCase):
         ]
         catalogueDao = CatalogueDao(mock_postgres_client)
         catalogueDao.update_utterances_staged_for_transcription(
-            utterances, "test_source", "test"
+            utterances, "test_source", "hindi", "test"
         )
         called_with_query = (
             "update media_speaker_mapping set staged_for_transcription = true,"
             "data_type = :data_set "
             "where audio_id in (select audio_id from media_metadata_staging "
-            "where \"source\" = :source) and clipped_utterance_file_name in ('file_1.wav',"
+            "where \"source\" = :source and \"language\" = :language) and clipped_utterance_file_name in ('file_1.wav',"
             "'file_2.wav')"
         )
 
-        called_with_args = {"source": "test_source", "data_set": "test"}
+        called_with_args = {"source": "test_source", "language": "hindi", "data_set": "test"}
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(called_with_query, args[0][0])
         self.assertEqual(called_with_args, args[1])
@@ -210,7 +211,7 @@ class CatalogueTests(unittest.TestCase):
         utterances = []
         catalogueDao = CatalogueDao(mock_postgres_client)
         catalogueDao.update_utterances_staged_for_transcription(
-            utterances, "test_source", "test"
+            utterances, "test_source", "hindi", "test"
         )
         args = mock_postgres_client.execute_update.call_args
         self.assertEqual(None, args)

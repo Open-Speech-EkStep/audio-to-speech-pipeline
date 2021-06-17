@@ -54,7 +54,7 @@ class DataMarkerTests(unittest.TestCase):
 
     def test__should_parse_config(self):
         data_marker_config = (
-            '{ "swayamprabha_chapter_4": { "file_mode" : "y", "data_set" : "test", "file_path" : "../test.csv","filter": { "then_by_snr": { '
+            '{ "swayamprabha_chapter_4": { "language": "hindi","file_mode" : "y", "data_set" : "test", "file_path" : "../test.csv","filter": { "then_by_snr": { '
             '"lte": 100, "gte": 15 }, "then_by_duration": 1, "with_randomness":'
             ' "true" } } }'
         )
@@ -62,9 +62,10 @@ class DataMarkerTests(unittest.TestCase):
         filteg_config = json.loads(data_marker_config)
         key = list(filteg_config.keys())[0]
         kwargs = {"filter_spec": filteg_config.get(key), "source": key}
-        source, data_set, filter_criteria, file_mode, file_path = self.data_stager.get_config(**kwargs)
+        source, language ,data_set, filter_criteria, file_mode, file_path = self.data_stager.get_config(**kwargs)
         self.assertEqual(source, "swayamprabha_chapter_4")
         self.assertEqual(data_set, "test")
+        self.assertEqual(language, "hindi")
         self.assertEqual(file_mode, "y")
         self.assertEqual(file_path, "../test.csv")
         self.assertEqual(
