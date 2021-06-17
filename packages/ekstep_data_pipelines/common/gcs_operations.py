@@ -7,10 +7,10 @@ from concurrent.futures import ThreadPoolExecutor
 from os import listdir
 from os.path import isfile, join
 
+# from ekstep_data_pipelines.common.utils import get_logger
 from google.cloud import storage
-from ekstep_data_pipelines.common.utils import get_logger
 
-Logger = get_logger("GCS Operations")
+# Logger = get_logger("GCS Operations")
 
 
 class CloudStorageOperations:
@@ -42,8 +42,8 @@ class CloudStorageOperations:
 
         self._bucket = (
             self.config_dict.get("common", {})
-            .get("gcs_config", {})
-            .get("master_bucket")
+                .get("gcs_config", {})
+                .get("master_bucket")
         )
         return self._bucket
 
@@ -57,10 +57,10 @@ class CloudStorageOperations:
         print("*******src_files***", src, src_files, audio_extn)
         for file_name in src_files:
             meta_file_name = (
-                "/".join(file_name.split("/")[:-1])
-                + "/"
-                + file_name.split("/")[-1].split(".")[0]
-                + ".csv"
+                    "/".join(file_name.split("/")[:-1])
+                    + "/"
+                    + file_name.split("/")[-1].split(".")[0]
+                    + ".csv"
             )
             full_meta_file_name = os.path.join(src, meta_file_name)
             full_file_name = os.path.join(src, file_name)
@@ -342,9 +342,26 @@ class CloudStorageOperations:
         source_blob.delete()
         print("Blob {} deleted.".format(source_blob))
 
+    def copy_blob_file(self, blob_name, destination_blob_name, destination_bucket_name=None):
+
+        if not destination_bucket_name:
+            destination_bucket_name = self.bucket
+        is_path_exists = self.check_path_exists(blob_name)
+        if is_path_exists:
+            source_blob = self.copy_blob_for_move(
+                self.bucket, blob_name, destination_bucket_name, destination_blob_name
+            )
+            print("***Copy Success***Blob {} copied.".format(source_blob))
+        else:
+            print(
+                "***Copy Failed***.Blob {} in bucket {} does not exist.".format(
+                    blob_name,
+                    self.bucket)
+            )
+
     @staticmethod
     def copy_blob_for_move(
-        bucket_name, blob_name, destination_bucket_name, destination_blob_name
+            bucket_name, blob_name, destination_bucket_name, destination_blob_name
     ):
         """Copies a blob from one bucket to another with a new name."""
         # bucket_name = "your-bucket-name"

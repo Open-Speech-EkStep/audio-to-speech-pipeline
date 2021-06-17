@@ -255,6 +255,8 @@ def validate_data_filter_config(arguments):
 
     if arguments.filter_spec is not None:
         filter_spec_dict = json.loads(arguments.filter_spec)
+        if filter_spec_dict.get("language", None) is None:
+            raise argparse.ArgumentTypeError("Language for the source is not specified")
         if filter_spec_dict.get("data_set", None) not in ('train', 'test'):
             raise argparse.ArgumentTypeError("Filter spec has no proper data set type")
         if filter_spec_dict.get("file_mode", None) in (None, 'n', 'N') and filter_spec_dict.get("filter", None) is None:

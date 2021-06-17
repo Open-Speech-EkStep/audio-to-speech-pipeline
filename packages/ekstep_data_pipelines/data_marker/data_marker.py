@@ -1,10 +1,12 @@
 import multiprocessing
 import os
+
+import pandas as pd
 from ekstep_data_pipelines.common import BaseProcessor
 from ekstep_data_pipelines.common import CatalogueDao
 from ekstep_data_pipelines.common.file_system.gcp_file_systen import GCPFileSystem
-from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common.file_utils import *
+from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.data_marker.constants import (
     CONFIG_NAME,
     COMMON_CONFIG_NAME,
@@ -17,11 +19,11 @@ from ekstep_data_pipelines.data_marker.constants import (
     FILE_PATH,
     FILE_COLUMN_LIST,
     FILTER_SPEC,
-    DATA_SET
+    DATA_SET,
+    LANGUAGE
 )
 from ekstep_data_pipelines.data_marker.data_filter import DataFilter
 from ekstep_data_pipelines.data_marker.data_mover import MediaFilesMover
-import pandas as pd
 
 ESTIMATED_CPU_SHARE = 0.02
 
@@ -63,7 +65,7 @@ class DataMarker(BaseProcessor):
         self.data_tagger_config = self.postgres_client.config_dict.get(CONFIG_NAME)
         self.bucket = self.postgres_client.config_dict.get(COMMON_CONFIG_NAME).get(COMMON_GCS_CONFIG_NAME).get(
             COMMON_GCS_BUCKET_CONFIG)
-        source, data_set, filter_criteria, file_mode, file_path = self.get_config(**kwargs)
+        source, language, data_set, filter_criteria, file_mode, file_path = self.get_config(**kwargs)
         if file_mode.lower() == 'y':
             Logger.info("Fetching already filtered utterances from a file for source: %s", source)
             ensure_path(self.local_input_path)
@@ -76,7 +78,7 @@ class DataMarker(BaseProcessor):
                 raise Exception("File Download failed")
         else:
             Logger.info("Fetching utterances for source: %s", source)
-            utterances = self.catalogue_dao.get_utterances_by_source(source, "Clean", data_set)
+            utterances = self.catalogue_dao.get_utterances_by_source(source, language, "Clean", data_set)
             Logger.info("Applying filters on %d utterances for source: %s", len(utterances), source)
             filtered_utterances = self.data_filter.apply_filters(
                 filter_criteria, utterances
@@ -95,18 +97,18 @@ class DataMarker(BaseProcessor):
         )
         files = self.to_files(filtered_utterances, source_path_with_source)
         Logger.info("Staging utterances to dir: %s", landing_path_with_source)
-        self.data_mover.move_media_files(files, landing_path_with_source)
+        self.data_mover.copy_media_files(files, landing_path_with_source)
 
         if len(filtered_utterances) > 0:
             rows_updated = (
                 self.catalogue_dao.update_utterances_staged_for_transcription(
-                    filtered_utterances, source, data_set
+                    filtered_utterances, source, language, data_set
                 )
             )
             Logger.info("Rows updated: %s", str(rows_updated))
             dictinct_audio_ids = self.fetch_distinct_audio_ids(filtered_utterances)
             Logger.info("Updating audio_ids with data set type used for tags")
-            self.catalogue_dao.update_audio_ids_with_data_type(source, dictinct_audio_ids, data_set)
+            self.catalogue_dao.update_audio_ids_with_data_type(source, language, dictinct_audio_ids, data_set)
             Logger.info("All audio_ids updated with data set type tags")
             # Data archival
             # paths = self.to_paths(dictinct_audio_ids, source_path_with_source)
@@ -165,11 +167,12 @@ class DataMarker(BaseProcessor):
         filter_spec = kwargs.get(FILTER_SPEC, {})
         filters = filter_spec.get(FILTER_CRITERIA, {})
         source = kwargs.get("source")
+        language = filter_spec.get(LANGUAGE, 'n')
         file_mode = filter_spec.get(FILE_MODE, 'n')
         file_path = filter_spec.get(FILE_PATH)
         data_set = filter_spec.get(DATA_SET)
 
-        return source, data_set, filters, file_mode, file_path
+        return source, language, data_set, filters, file_mode, file_path
 
     def download_filtered_utterances_file(self, bucket, input_file_path, local_path):
         """Download the filtered utterance file from input_file_path to local_path

@@ -25,14 +25,14 @@ class CatalogueDao:
         )
         return json.loads(utterances[0][0]) if len(utterances) > 0 else []
 
-    def get_utterances_by_source(self, source, status, data_set):
-        parm_dict = {"source": source, "status": status, "data_set": data_set}
+    def get_utterances_by_source(self, source, language, status, data_set):
+        parm_dict = {"source": source, "language": language, "status": status, "data_set": data_set}
         data = self.postgres_client.execute_query(
             "select speaker_id, clipped_utterance_file_name, clipped_utterance_duration, "
             "audio_id, snr "
             "from media_speaker_mapping "
             "where audio_id "
-            'in (select audio_id from media_metadata_staging where "source" = :source and data_set_used_for IS NULL or data_set_used_for = :data_set) '
+            'in (select audio_id from media_metadata_staging where "source" = :source and "language" = :language and data_set_used_for IS NULL or data_set_used_for = :data_set) '
             "and status = :status "
             "and staged_for_transcription = false "
             "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15",
@@ -77,21 +77,21 @@ class CatalogueDao:
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
 
-    def update_audio_ids_with_data_type(self, source, audio_ids, data_set):
+    def update_audio_ids_with_data_type(self, source, language, audio_ids, data_set):
         if len(audio_ids) <= 0:
             return True
 
         update_query = (
             "update media_metadata_staging set data_set_used_for = :data_set "
-            'where "source" = :source and audio_id in '
+            'where "source" = :source and "language" = :language and audio_id in '
         )
         audio_ids = list(map(str, audio_ids))
         update_query = update_query + "(" + ",".join(audio_ids) + ")"
-        param_dict = {"source": source, "data_set": data_set}
+        param_dict = {"source": source, "language": language, "data_set": data_set}
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
 
-    def update_utterances_staged_for_transcription(self, utterances, source, data_set):
+    def update_utterances_staged_for_transcription(self, utterances, source, language, data_set):
         if len(utterances) <= 0:
             return True
 
@@ -99,11 +99,11 @@ class CatalogueDao:
             "update media_speaker_mapping set staged_for_transcription = true,"
             "data_type = :data_set "
             "where audio_id in (select audio_id from media_metadata_staging "
-            'where "source" = :source) and clipped_utterance_file_name in '
+            'where "source" = :source and "language" = :language) and clipped_utterance_file_name in '
         )
         utterance_names = list(map(lambda u: f"'{u[1]}'", utterances))
         update_query = update_query + "(" + ",".join(utterance_names) + ")"
-        param_dict = {"source": source, "data_set": data_set}
+        param_dict = {"source": source, "language": language, "data_set": data_set}
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
 

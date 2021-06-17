@@ -27,3 +27,11 @@ class GCPFileSystem:
         destination_blob_name = file.replace(source_dir, target_dir)
         Logger.info("Moving file %s --> %s", file, destination_blob_name)
         self.gcp_operations.move_blob(file, destination_blob_name)
+
+    def copy_file(self, file, target_dir):
+        paths = file.split("/")
+        paths.pop()
+        source_dir = "/".join(paths)
+        destination_blob_name = file.replace(source_dir, target_dir)
+        Logger.info("Copying file %s --> %s", file, destination_blob_name)
+        self.gcp_operations.copy_blob_file(file, destination_blob_name)
