@@ -1,11 +1,11 @@
-import json
 import datetime
+import json
 import math
 
 from airflow import DAG
-from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
+from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 from helper_dag import get_require_audio_id
 
@@ -131,4 +131,4 @@ for source in sourceinfo.keys():
 
     dag_number = dag_id + str(batch_count)
 
-    globals()[dag_id] = create_dag(dag_id, dag_number, dag_args, args, batch_count)
+    globals()[dag_id] = create_dag(dag_id + '_' + language, dag_number, dag_args, args, batch_count)
