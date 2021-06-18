@@ -194,12 +194,15 @@ class CatalogueDao:
 
     def get_utterance_details_by_source(self, source, language, count, is_transcribed, include_rejected):
 
+        is_transcribed_check = "msp.is_transcribed = :is_transcribed" if is_transcribed \
+            else "msp.is_transcribed = :is_transcribed or msp.is_transcribed is null"
+
         status = "('Clean','Rejected')" if include_rejected else "('Clean')"
 
         parm_dict = {"source": source, "status": status, "language": language, "count": count,
                      "is_transcribed": is_transcribed}
-        data = self.postgres_client.execute_query(
-            f"""
+
+        query = f"""
             select msp.clipped_utterance_file_name as audio_file_name, 
             msp.clipped_utterance_duration as duration, msp.snr , s.speaker_name, 
             mms.source_url as collection_source , mms.source_website as main_source, msp.speaker_gender as gender,
@@ -210,11 +213,11 @@ class CatalogueDao:
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
             where mms.source = :source and mms.language=:language and msp.status in {status} and artifact_name is null
-            and msp.staged_for_transcription=true and msp.is_transcribed = :is_transcribed
+            and msp.staged_for_transcription=true and {is_transcribed_check}
             limit :count
-            """,
-            **parm_dict
-        )
+            """
+        print("query:", query)
+        data = self.postgres_client.execute_query(query, **parm_dict)
         return data
 
     def update_utterance_artifact(self, utterance_file_names, artifact_name, audio_id):
