@@ -348,7 +348,7 @@ def validate_audio_transcription_input(arguments):
     audio_ids = [i.strip() for i in list(filter(None, arguments.audio_ids.split(",")))]
 
     if arguments.speech_to_text_client not in STT_CLIENT:
-        raise argparse.ArgumentTypeError("Stt client must be google or azure")
+        raise argparse.ArgumentTypeError("Stt client must be google or azure or ekstep")
 
     speech_to_text_client = arguments.speech_to_text_client
 

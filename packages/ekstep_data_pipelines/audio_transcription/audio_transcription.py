@@ -254,20 +254,20 @@ class AudioTranscription(BaseProcessor):
             )
             original_transcript = transcript
 
-            curr_language = self.audio_transcription_config.get(AUDIO_LANGUAGE)
+            # curr_language = self.audio_transcription_config.get(AUDIO_LANGUAGE)
 
             LOGGER.info(
-                "Getting transacription sanitizer for the language %s", curr_language
+                "Getting transacription sanitizer for the language %s", stt_language
             )
 
             all_transcription_sanitizers = get_transcription_sanitizers()
-            transcription_sanitizer = all_transcription_sanitizers.get(curr_language)
+            transcription_sanitizer = all_transcription_sanitizers.get(stt_language)
 
             if not transcription_sanitizer:
                 LOGGER.info(
                     "No transacription sanitizer found for the language %s, "
                     "hence falling back to the default sanitizer.",
-                    curr_language,
+                    stt_language,
                 )
                 transcription_sanitizer = all_transcription_sanitizers.get("default")
 
