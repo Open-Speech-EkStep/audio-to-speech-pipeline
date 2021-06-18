@@ -6,6 +6,10 @@ from ekstep_data_pipelines.common.dao.catalogue_dao import CatalogueDao
 
 
 class CatalogueTests(unittest.TestCase):
+
+    def setUp(self):
+        self.maxDiff = None
+
     @mock.patch("ekstep_data_pipelines.common.postgres_db_client.PostgresClient")
     def test_get_utterances(self, mock_postgres_client):
         mock_postgres_client.execute_query.return_value = [
@@ -331,6 +335,61 @@ class CatalogueTests(unittest.TestCase):
         catalogueDao = CatalogueDao(mock_postgres_client)
         args = mock_postgres_client.execute_query.call_args_list
         utterances = catalogueDao.get_utterance_details_by_source(source, language, 2, True, True)
+        self.assertEqual(utterances, expected_utterances)
+        self.assertEqual(called_with_sql, args[0][0][0])
+        self.assertEqual(call_with_params, args[0][1])
+
+    # @unittest.skip
+    @mock.patch("ekstep_data_pipelines.common.postgres_db_client.PostgresClient")
+    def test_get_utterance_details_by_source_with_is_transcriped_false(self, mock_postgres_client):
+        source = "test_source"
+        language = "Hindi"
+        # speaker_id, clipped_utterance_file_name, clipped_utterance_duration, audio_id, snr
+        expected_utterances = [
+            (
+                "sample1.wav",
+                13.38,
+                38.432806,
+                "dummy_speaker_name",
+                "dummy_main_source",
+                "dummy_collection_source",
+                "m",
+                'Clean'
+
+            ),
+            (
+                "sample2.wav",
+                15.38,
+                40.432806,
+                "dummy_speaker_name_2",
+                "dummy_main_source_2",
+                "dummy_collection_source_2",
+                "f",
+                'Rejected'
+            )
+        ]
+        called_with_sql = (
+            """
+            select msp.clipped_utterance_file_name as audio_file_name, 
+            msp.clipped_utterance_duration as duration, msp.snr , s.speaker_name, 
+            mms.source_url as collection_source , mms.source_website as main_source, msp.speaker_gender as gender,
+            msp.audio_id, msp.status
+            from media_speaker_mapping msp 
+                inner join media_metadata_staging mms 
+                    on msp.audio_id = mms.audio_id
+            left outer join speaker s 
+                    on s.speaker_id = msp.speaker_id 
+            where mms.source = :source and mms.language=:language and msp.status in ('Clean','Rejected') and artifact_name is null
+            and msp.staged_for_transcription=true and (msp.is_transcribed = :is_transcribed or msp.is_transcribed is null)
+            limit :count
+            """
+        )
+        call_with_params = {"source": source, "status": "('Clean','Rejected')",
+                            "language": language, "count": 2, "is_transcribed": False}
+        mock_postgres_client.execute_query.return_value = expected_utterances
+        catalogueDao = CatalogueDao(mock_postgres_client)
+        args = mock_postgres_client.execute_query.call_args_list
+        utterances = catalogueDao.get_utterance_details_by_source(source, language, 2, False, True)
         self.assertEqual(utterances, expected_utterances)
         self.assertEqual(called_with_sql, args[0][0][0])
         self.assertEqual(call_with_params, args[0][1])
