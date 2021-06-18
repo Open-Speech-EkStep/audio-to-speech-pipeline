@@ -65,7 +65,7 @@ class DataMarkerTests(unittest.TestCase):
         source, language ,data_set, filter_criteria, file_mode, file_path = self.data_stager.get_config(**kwargs)
         self.assertEqual(source, "swayamprabha_chapter_4")
         self.assertEqual(data_set, "test")
-        self.assertEqual(language, "hindi")
+        self.assertEqual(language, "Hindi")
         self.assertEqual(file_mode, "y")
         self.assertEqual(file_path, "../test.csv")
         self.assertEqual(

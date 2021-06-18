@@ -1,3 +1,4 @@
+import os
 import traceback
 
 from ekstep_data_pipelines.audio_transcription.constants import (
@@ -13,14 +14,14 @@ from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers.audio_transcription_errors import (
     TranscriptionSanitizationError,
 )
+from ekstep_data_pipelines.common import BaseProcessor
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
     AzureTranscriptionClientError,
     GoogleTranscriptionClientError,
+    EkstepTranscriptionClientError,
 )
 from ekstep_data_pipelines.common.file_utils import get_file_name
 from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.common import BaseProcessor
-import os
 
 LOGGER = get_logger("audio_transcription")
 
@@ -102,6 +103,7 @@ class AudioTranscription(BaseProcessor):
                     utterances,
                     should_skip_rejected,
                     remote_dir_path_for_given_audio_id,
+                    stt_api
                 )
                 LOGGER.info("updating catalogue with updated utterances")
                 self.catalogue_dao.update_utterances(audio_id, utterances)
@@ -130,7 +132,7 @@ class AudioTranscription(BaseProcessor):
                 else:
                     LOGGER.info("No rejected files found")
 
-                self.delete_audio_id(f"{remote_path_of_dir}/{source}/{data_set}/{audio_id}")
+                # self.delete_audio_id(f"{remote_path_of_dir}/{source}/{data_set}/{audio_id}")
             except Exception as exception:
                 # TODO: This should be a specific exception, will need
                 #       to throw and handle this accordingly.
@@ -164,6 +166,7 @@ class AudioTranscription(BaseProcessor):
             utterances,
             should_skip_rejected,
             remote_path,
+            stt_api
     ):
         LOGGER.info("*** generate_transcription_for_all_utterenaces **")
 
@@ -221,6 +224,7 @@ class AudioTranscription(BaseProcessor):
                 stt_language,
                 transcription_client,
                 utterance_metadata,
+                stt_api
             )
 
         return local_clean_folder, local_rejected_path
@@ -234,6 +238,7 @@ class AudioTranscription(BaseProcessor):
             stt_language,
             transcription_client,
             utterance_metadata,
+            stt_api
     ):
         if ".wav" not in remote_file_path:
             return
@@ -288,7 +293,7 @@ class AudioTranscription(BaseProcessor):
             LOGGER.error("Transcription not valid: %s", str(tse))
             reason = "sanitization error:" + str(tse.args)
 
-        except (AzureTranscriptionClientError, GoogleTranscriptionClientError) as error:
+        except (AzureTranscriptionClientError, GoogleTranscriptionClientError, EkstepTranscriptionClientError) as error:
             LOGGER.error("STT API call failed: %s", str(error))
             reason = "STT API error:" + str(error.args)
 
@@ -304,6 +309,17 @@ class AudioTranscription(BaseProcessor):
                 utterance_metadata,
                 reason,
             )
+        else:
+            self.handle_success(audio_id, utterance_metadata, stt_api)
+
+    def handle_success(
+            self,
+            audio_id,
+            utterance_metadata,
+            stt_api,
+    ):
+        # TODO: This should be used to updated is_transcribed and log the stt api used in db
+        pass
 
     def handle_error(
             self,

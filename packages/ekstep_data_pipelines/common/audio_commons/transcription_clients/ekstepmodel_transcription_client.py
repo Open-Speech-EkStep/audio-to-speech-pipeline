@@ -35,11 +35,10 @@ class EkstepTranscriptionClient(object):
     def generate_transcription(self, language, source_file_path):
         try:
             result = self.speech_to_text(source_file_path)
-            return result.transcript
         except RuntimeError as error:
             print(str(error))
-            return ''
-            # raise EkstepTranscriptionClient()
+            raise EkstepTranscriptionClient()
+        return result.transcript
 
     def speech_to_text(self, audio_file_path):
         audio_input = RecognitionAudio(audioContent=self.read_audio(audio_file_path))

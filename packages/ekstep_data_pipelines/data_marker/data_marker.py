@@ -97,7 +97,7 @@ class DataMarker(BaseProcessor):
         )
         files = self.to_files(filtered_utterances, source_path_with_source)
         Logger.info("Staging utterances to dir: %s", landing_path_with_source)
-        self.data_mover.copy_media_files(files, landing_path_with_source)
+        self.data_mover.move_media_files(files, landing_path_with_source)
 
         if len(filtered_utterances) > 0:
             rows_updated = (
@@ -167,7 +167,7 @@ class DataMarker(BaseProcessor):
         filter_spec = kwargs.get(FILTER_SPEC, {})
         filters = filter_spec.get(FILTER_CRITERIA, {})
         source = kwargs.get("source")
-        language = filter_spec.get(LANGUAGE, 'n')
+        language = filter_spec.get(LANGUAGE).title()
         file_mode = filter_spec.get(FILE_MODE, 'n')
         file_path = filter_spec.get(FILE_PATH)
         data_set = filter_spec.get(DATA_SET)

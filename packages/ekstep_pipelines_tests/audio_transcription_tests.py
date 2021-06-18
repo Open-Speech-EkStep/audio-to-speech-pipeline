@@ -7,7 +7,7 @@ from ekstep_data_pipelines.audio_transcription.audio_transcription import (
 )
 from ekstep_data_pipelines.audio_transcription.constants import AUDIO_LANGUAGE
 from ekstep_data_pipelines.common.audio_commons.transcription_clients.transcription_client_errors import (
-    GoogleTranscriptionClientError,
+    GoogleTranscriptionClientError,AzureTranscriptionClientError,EkstepTranscriptionClientError
 )
 
 
@@ -75,6 +75,7 @@ class AudioTranscriptionTests(unittest.TestCase):
             "language",
             transcription_client,
             metadata,
+            'google'
         )
 
         self.assertEqual(transcription_client.generate_transcription.call_count, 0)
@@ -98,6 +99,7 @@ class AudioTranscriptionTests(unittest.TestCase):
             "language",
             transcription_client,
             metadata,
+            'google'
         )
 
         self.assertEqual(
@@ -137,6 +139,7 @@ class AudioTranscriptionTests(unittest.TestCase):
             "language",
             transcription_client,
             metadata,
+            'google'
         )
 
         self.assertEqual(
@@ -180,6 +183,7 @@ class AudioTranscriptionTests(unittest.TestCase):
             "utterenaces",
             False,
             "remote_path",
+            'google'
         )
 
         self.assertEqual(self.catalogue_dao.find_utterance_by_name.call_count, 3)
@@ -211,6 +215,7 @@ class AudioTranscriptionTests(unittest.TestCase):
             "utterenaces",
             True,
             "remote_path",
+            'google'
         )
 
         self.assertEqual(self.catalogue_dao.find_utterance_by_name.call_count, 3)
@@ -249,6 +254,7 @@ class AudioTranscriptionTests(unittest.TestCase):
             "utterenaces",
             True,
             "remote_path",
+            'google'
         )
 
         self.assertEqual(self.catalogue_dao.find_utterance_by_name.call_count, 4)

@@ -335,12 +335,20 @@ class CloudStorageOperations:
 
         if not destination_bucket_name:
             destination_bucket_name = self.bucket
-
-        source_blob = self.copy_blob_for_move(
-            self.bucket, blob_name, destination_bucket_name, destination_blob_name
-        )
-        source_blob.delete()
-        print("Blob {} deleted.".format(source_blob))
+        is_path_exists = self.check_path_exists(blob_name)
+        if is_path_exists:
+            source_blob = self.copy_blob_for_move(
+                self.bucket, blob_name, destination_bucket_name, destination_blob_name
+            )
+            source_blob.delete()
+            print("Blob {} deleted.".format(source_blob))
+            print("***Move Success***Blob {} copied.".format(source_blob))
+        else:
+            print(
+                "***Move Failed***.Blob {} in bucket {} does not exist.".format(
+                    blob_name,
+                    self.bucket)
+            )
 
     def copy_blob_file(self, blob_name, destination_blob_name, destination_bucket_name=None):
 
