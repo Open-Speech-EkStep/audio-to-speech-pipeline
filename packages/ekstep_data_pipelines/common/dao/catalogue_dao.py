@@ -195,7 +195,7 @@ class CatalogueDao:
     def get_utterance_details_by_source(self, source, language, count, is_transcribed, include_rejected):
 
         is_transcribed_check = "msp.is_transcribed = :is_transcribed" if is_transcribed \
-            else "msp.is_transcribed = :is_transcribed or msp.is_transcribed is null"
+            else "(msp.is_transcribed = :is_transcribed or msp.is_transcribed is null)"
 
         status = "('Clean','Rejected')" if include_rejected else "('Clean')"
 
