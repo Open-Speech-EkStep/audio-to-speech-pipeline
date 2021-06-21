@@ -1,11 +1,13 @@
 import wave
 
-import grpc
-from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.stub.speech_recognition_open_api_pb2 import Language, RecognitionConfig, RecognitionAudio, \
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.stub.speech_recognition_connection import \
+    SpeechRecognizerConStub
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.stub.speech_recognition_open_api_pb2 import \
+    Language, RecognitionConfig, RecognitionAudio, \
     SpeechRecognitionRequest
-from ekstep_data_pipelines.common.audio_commons.transcription_clients.stub.speech_recognition_open_api_pb2_grpc import SpeechRecognizerStub
-
+from ekstep_data_pipelines.common.audio_commons.transcription_clients.stub.speech_recognition_open_api_pb2_grpc import \
+    SpeechRecognizerStub
+from ekstep_data_pipelines.common.utils import get_logger
 
 LOGGER = get_logger("EkstepTranscriptionClient")
 
@@ -22,13 +24,13 @@ class EkstepTranscriptionClient(object):
         self.server_host = kwargs.get("server_host")
         self.port = kwargs.get("port")
         self.language = kwargs.get("language", "hi")
-        self.channel = grpc.insecure_channel(self.server_host + ':' + self.port)
-        self.stub = SpeechRecognizerStub(self.channel)
+        self.channel = SpeechRecognizerConStub(self.server_host, self.port).set_channel()
+        self.client = SpeechRecognizerStub(self.channel)
         self.language_config = Language(value=self.language)
-        self.speech_config = RecognitionConfig(language=self.language_config, enableAutomaticPunctuation=True)
+        self.speech_config = RecognitionConfig(language=self.language_config)
         self.audio_config = None
 
-    def read_audio(self, audio_file_path):
+    def read_wav_audio(self, audio_file_path):
         with wave.open(audio_file_path, 'rb') as f:
             return f.readframes(f.getnframes())
 
@@ -41,30 +43,29 @@ class EkstepTranscriptionClient(object):
         return result.transcript
 
     def speech_to_text(self, audio_file_path):
-        audio_input = RecognitionAudio(audioContent=self.read_audio(audio_file_path))
+        audio_input = RecognitionAudio(audioContent=self.read_wav_audio(audio_file_path))
 
         LOGGER.info("Calling ekstep stt API for file: %s", audio_file_path)
-        LOGGER.info("Recognizing first result...")
+        LOGGER.info("Recognizing first result for ekstep stt API...")
         request = SpeechRecognitionRequest(audio=audio_input, config=self.speech_config)
         try:
-            result = self.stub.recognize(request)
+            result = self.client.recognize(request)
             return result
-        except grpc.RpcError as e:
+        except Exception as e:
             raise RuntimeError(e)
 
 
-if __name__ == '__main__':
-    # import yaml
-    #
-    # with open('real_test_config.yaml', "r") as file:
-    #     parent_config_dict = yaml.load(file)
-    #     initialization_dict = parent_config_dict.get("config")
-    #
-    #
-    # ekstep_transcription_client = EkstepTranscriptionClient.get_instance(
-    #     initialization_dict
-    # )
-    #
-    # res = ekstep_transcription_client.generate_transcription('hi', 'download.wav')
-    # print(res)
-    pass
+# if __name__ == '__main__':
+#     import yaml
+#
+#     with open('real_test_config.yaml', "r") as file:
+#         parent_config_dict = yaml.load(file)
+#         initialization_dict = parent_config_dict.get("config")
+#
+#     ekstep_transcription_client = EkstepTranscriptionClient.get_instance(
+#         initialization_dict
+#     )
+#
+#     res = ekstep_transcription_client.generate_transcription('hi', 'download.wav')
+#     print(res)
+
