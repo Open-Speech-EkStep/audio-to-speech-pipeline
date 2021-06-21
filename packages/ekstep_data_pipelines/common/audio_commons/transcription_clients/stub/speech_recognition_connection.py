@@ -14,10 +14,10 @@ class SpeechRecognizerConStub(object):
         self.port = port
         if self.server is None or self.port is None:
             raise ValueError('Ekstep speech recognize service host or port not provided in config file')
-        self.set_channel()
+        self.channel = self.set_channel()
 
-    def set_channel(self):
+    def get_channel(self):
         return self.channel
 
     def set_channel(self):
-        self.channel = grpc.insecure_channel(self.server_host + ':' + self.port)
+        return grpc.insecure_channel(self.server + ':' + self.port)
