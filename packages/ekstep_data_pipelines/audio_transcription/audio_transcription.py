@@ -6,7 +6,6 @@ from ekstep_data_pipelines.audio_transcription.constants import (
     CLEAN_AUDIO_PATH,
     LANGUAGE,
     SHOULD_SKIP_REJECTED,
-    AUDIO_LANGUAGE,
 )
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
     get_transcription_sanitizers,
@@ -69,8 +68,8 @@ class AudioTranscription(BaseProcessor):
         for audio_id in audio_ids:
             try:
                 LOGGER.info("Generating transcription for audio_id:%s", str(audio_id))
-                utterances = self.catalogue_dao.get_utterances(audio_id)
-
+                # utterances = self.catalogue_dao.get_utterances(audio_id)
+                utterances = self.catalogue_dao.get_valid_utterances_for_audio_id_and_stt(audio_id, stt_api, data_set)
                 if len(utterances) <= 0:
                     LOGGER.info("No utterances found for audio_id:%s", audio_id)
                     continue
@@ -105,8 +104,8 @@ class AudioTranscription(BaseProcessor):
                     remote_dir_path_for_given_audio_id,
                     stt_api
                 )
-                LOGGER.info("updating catalogue with updated utterances")
-                self.catalogue_dao.update_utterances(audio_id, utterances)
+                # LOGGER.info("updating catalogue with updated utterances")
+                # self.catalogue_dao.update_utterances(audio_id, utterances)
 
                 LOGGER.info(
                     "Uploading local generated files from %s to %s",
@@ -172,6 +171,7 @@ class AudioTranscription(BaseProcessor):
 
         local_clean_path = ""
         local_rejected_path = ""
+        local_clean_folder = ""
 
         for curr_file_name in all_files:
             file_name = f"{remote_path}/{curr_file_name}"
@@ -216,6 +216,8 @@ class AudioTranscription(BaseProcessor):
 
             local_rejected_path = local_clean_folder.replace("clean", "rejected")
 
+            utterance_metadata['stt_api'] = stt_api
+
             self.generate_transcription_and_sanitize(
                 audio_id,
                 local_clean_path,
@@ -223,8 +225,8 @@ class AudioTranscription(BaseProcessor):
                 file_name,
                 stt_language,
                 transcription_client,
-                utterance_metadata,
-                stt_api
+                utterance_metadata
+
             )
 
         return local_clean_folder, local_rejected_path
@@ -237,8 +239,8 @@ class AudioTranscription(BaseProcessor):
             remote_file_path,
             stt_language,
             transcription_client,
-            utterance_metadata,
-            stt_api
+            utterance_metadata
+
     ):
         if ".wav" not in remote_file_path:
             return
@@ -307,19 +309,24 @@ class AudioTranscription(BaseProcessor):
                 local_clean_path,
                 local_rejected_path,
                 utterance_metadata,
-                reason,
+                reason
+
             )
         else:
-            self.handle_success(audio_id, utterance_metadata, stt_api)
+            self.handle_success(audio_id, utterance_metadata, reason)
 
     def handle_success(
             self,
             audio_id,
             utterance_metadata,
-            stt_api,
+            reason
+
     ):
         # TODO: This should be used to updated is_transcribed and log the stt api used in db
-        pass
+        utterance_metadata["status"] = "Clean"
+        utterance_metadata["reason"] = reason
+        utterance_metadata["is_transcribed"] = True
+        self.catalogue_dao.update_utterance_status(audio_id, utterance_metadata)
 
     def handle_error(
             self,
@@ -331,6 +338,7 @@ class AudioTranscription(BaseProcessor):
     ):
         utterance_metadata["status"] = "Rejected"
         utterance_metadata["reason"] = reason
+        utterance_metadata["is_transcribed"] = False
         self.catalogue_dao.update_utterance_status(audio_id, utterance_metadata)
         if not os.path.exists(local_rejected_path):
             os.makedirs(local_rejected_path)

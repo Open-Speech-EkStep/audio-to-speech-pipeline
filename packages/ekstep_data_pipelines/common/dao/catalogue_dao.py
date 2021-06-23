@@ -25,6 +25,14 @@ class CatalogueDao:
         )
         return json.loads(utterances[0][0]) if len(utterances) > 0 else []
 
+    def get_valid_utterances_for_audio_id_and_stt(self, audio_id, stt_api, data_type):
+        parm_dict = {"audio_id": audio_id, "stt_api": stt_api, "data_type": data_type}
+        utterances = self.postgres_client.execute_query(
+            "select array_to_json(array_agg(r)) from (SELECT clipped_utterance_file_name as name,clipped_utterance_duration as duration,snr as snr_value,status as status from media_speaker_mapping where audio_id = :audio_id and  staged_for_transcription = true and :stt_api != ALL(stt_api_used) and (data_type = :data_type))r",
+            **parm_dict,
+        )[0][0]
+        return utterances if utterances is not None else []
+
     def get_utterances_by_source(self, source, language, status, data_set):
         parm_dict = {"source": source, "language": language, "status": status, "data_set": data_set}
         data = self.postgres_client.execute_query(
@@ -62,14 +70,18 @@ class CatalogueDao:
     def update_utterance_status(self, audio_id, utterance):
         update_query = (
             "update media_speaker_mapping set status = :status, "
-            "fail_reason = :reason where audio_id = :audio_id "
+            "fail_reason = :reason,is_transcribed = :is_transcribed,stt_api_used =(select array_agg(distinct e) from unnest(stt_api_used || ARRAY[:stt_api_used]) e) where audio_id = :audio_id "
             "and clipped_utterance_file_name = :name"
         )
         name = utterance["name"]
         reason = utterance["reason"]
         status = utterance["status"]
+        is_transcribed = utterance["is_transcribed"]
+        stt_api_used = utterance["stt_api"]
         param_dict = {
             "status": status,
+            "is_transcribed": is_transcribed,
+            "stt_api_used": stt_api_used,
             "reason": reason,
             "audio_id": audio_id,
             "name": name,
