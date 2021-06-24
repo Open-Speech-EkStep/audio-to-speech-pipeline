@@ -57,13 +57,16 @@ class AudioTranscription(BaseProcessor):
         audio_ids = kwargs.get("audio_ids", [])
         stt_api = kwargs.get("speech_to_text_client")
         data_set = kwargs.get("data_set")
+        source_path_stt = kwargs.get("source_path_stt")
 
-        stt_language = self.audio_transcription_config.get(LANGUAGE)
+        stt_source_language = kwargs.get("language")
         remote_path_of_dir = self.audio_transcription_config.get(CLEAN_AUDIO_PATH)
         should_skip_rejected = self.audio_transcription_config.get(SHOULD_SKIP_REJECTED)
 
         LOGGER.info("Generating transcriptions for audio_ids:%s", str(audio_ids))
         failed_audio_ids = []
+        if source_path_stt is not None:
+            remote_path_of_dir = source_path_stt
 
         for audio_id in audio_ids:
             try:
@@ -73,15 +76,23 @@ class AudioTranscription(BaseProcessor):
                 if len(utterances) <= 0:
                     LOGGER.info("No utterances found for audio_id:%s", audio_id)
                     continue
+                if data_set == '':  # To handle when no dataset type is present
+                    data_set_target = 'train'
+                    remote_dir_path_for_given_audio_id = (
+                        f"{remote_path_of_dir}/{source}/{audio_id}/clean"
+                    )
+                else:
+                    data_set_target = data_set
+                    remote_dir_path_for_given_audio_id = (
+                        f"{remote_path_of_dir}/{source}/{data_set}/{audio_id}/clean"
+                    )
 
-                remote_dir_path_for_given_audio_id = (
-                    f"{remote_path_of_dir}/{source}/{data_set}/{audio_id}/clean"
-                )
-
+                LOGGER.info("The remote path to look for utterances is :%s", str(remote_dir_path_for_given_audio_id))
                 remote_stt_output_path = self.audio_transcription_config.get(
                     "remote_stt_audio_file_path"
                 )
-                remote_stt_output_path = f"{remote_stt_output_path}/{source}/{data_set}/{audio_id}"
+
+                remote_stt_output_path = f"{remote_stt_output_path}/{stt_api}/{source}/{data_set_target}/{audio_id}"
 
                 transcription_client = self.transcription_clients[stt_api]
                 LOGGER.info("Using transcription client:%s", str(transcription_client))
@@ -97,7 +108,7 @@ class AudioTranscription(BaseProcessor):
                 ) = self.generate_transcription_for_all_utterenaces(
                     audio_id,
                     all_files,
-                    stt_language,
+                    stt_source_language,
                     transcription_client,
                     utterances,
                     should_skip_rejected,

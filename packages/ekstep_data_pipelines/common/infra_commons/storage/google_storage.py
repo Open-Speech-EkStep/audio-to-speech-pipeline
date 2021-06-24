@@ -57,25 +57,26 @@ class GoogleStorage(BaseStorageInterface):
         blob_name_set = set()
         is_folder = False
         for blob in self.client.list_blobs(bucket_name, prefix=actual_path):
-            content = blob.name.replace(actual_path, "")
+            if ".wav" in blob.name:
+                content = blob.name.replace(actual_path, "")
 
-            if not content:
-                continue
-
-            if "/" in content[:-1]:
-                if include_folders:
-                    content = content.split("/")[0] + "/"
-                    is_folder = True
-                else:
+                if not content:
                     continue
 
-            if not is_folder:
-                content = content.replace("/", "")
+                if "/" in content[:-1]:
+                    if include_folders:
+                        content = content.split("/")[0] + "/"
+                        is_folder = True
+                    else:
+                        continue
 
-            if content.replace("/", "") in blob_name_set:
-                blob_name_set.remove(content.replace("/", ""))
+                if not is_folder:
+                    content = content.replace("/", "")
 
-            blob_name_set.add(content)
+                if content.replace("/", "") in blob_name_set:
+                    blob_name_set.remove(content.replace("/", ""))
+
+                blob_name_set.add(content)
 
         return list(blob_name_set)
 

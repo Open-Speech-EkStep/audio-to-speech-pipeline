@@ -1,20 +1,20 @@
+import argparse
 import json
 import os
 import uuid
-import argparse
-from google.cloud import storage
 
 from ekstep_data_pipelines.audio_analysis.audio_analysis import AudioAnalysis
 from ekstep_data_pipelines.audio_cataloguer.cataloguer import AudioCataloguer
-from ekstep_data_pipelines.data_marker.data_marker import DataMarker
-from ekstep_data_pipelines.ulca.ulca_dataset import ULCADataset
+from ekstep_data_pipelines.audio_embedding.audio_embedding import AudioEmbedding
 from ekstep_data_pipelines.audio_processing.audio_processer import AudioProcessor
 from ekstep_data_pipelines.audio_transcription.audio_transcription import (
     AudioTranscription,
 )
-from ekstep_data_pipelines.audio_embedding.audio_embedding import AudioEmbedding
-from ekstep_data_pipelines.common.utils import get_logger
 from ekstep_data_pipelines.common import get_periperhals
+from ekstep_data_pipelines.common.utils import get_logger
+from ekstep_data_pipelines.data_marker.data_marker import DataMarker
+from ekstep_data_pipelines.ulca.ulca_dataset import ULCADataset
+from google.cloud import storage
 
 STT_CLIENT = ["google", "azure", "ekstep"]
 
@@ -148,6 +148,14 @@ parser.add_argument(
     dest="file_path",
     default=None,
     help="The parameters that need to be used in audio embedding and data marking",
+)
+
+parser.add_argument(
+    "-sp",
+    "--source-path-stt",
+    dest="source_path_stt",
+    default=None,
+    help="The parameters that need to be used in audio stt for non default path",
 )
 
 parser.add_argument(
@@ -367,7 +375,9 @@ def validate_audio_transcription_input(arguments):
         "audio_ids": audio_ids,
         "speech_to_text_client": speech_to_text_client,
         "audio_source": audio_source,
-        "data_set": data_set
+        "data_set": data_set,
+        "language": arguments.language,
+        "source_path_stt": arguments.source_path_stt
     }
 
 

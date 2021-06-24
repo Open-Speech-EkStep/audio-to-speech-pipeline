@@ -1,15 +1,16 @@
 import collections
 import json
-from operator import itemgetter
 import os
+from operator import itemgetter
 
+import pandas as pd
 import yaml
 from airflow.models import Variable
-
 from gcs_utils import (
     list_blobs_in_a_path,
-    check_blob,upload_blob
+    check_blob, upload_blob, download_blob
 )
+from sqlalchemy import create_engine
 
 
 class MyDict(dict):
@@ -119,15 +120,69 @@ def get_require_audio_id(source, stt_source_path, data_set, batch_count, bucket_
     Variable.set("audioidsforstt", MyDict(audio_ids))
 
 
-def __load_yaml_file(path):
+def parse_config_file():
+    config_file = __load_yaml_file()["config"]['common']
+    db_configuration = config_file["db_configuration"]
+    db_name = db_configuration["db_name"]
+    db_user = db_configuration["db_user"]
+    db_pass = db_configuration["db_pass"]
+    cloud_sql_connection_name = db_configuration["cloud_sql_connection_name"]
+    return db_name, db_user, db_pass, cloud_sql_connection_name
+
+
+def create_db_engine():
+    db_name, db_user, db_pass, cloud_sql_connection_name = parse_config_file()
+
+    db = create_engine(
+        f"postgresql://{db_user}:{db_pass}@{cloud_sql_connection_name}/{db_name}"
+    )
+    return db
+
+
+def __load_yaml_file():
     read_dict = {}
-    with open(path, "r") as file:
+    with open(config_path, "r") as file:
         read_dict = yaml.safe_load(file)
     return read_dict
 
 
-if __name__ == "__main__":
-    pass
+def get_db_connection_object():
+    return create_db_engine()
+
+
+def download_config_file(bucket_name):
+    global config_path
+    config_path = f"./config.yaml"
+    print("Downloading config file")
+    download_blob(
+        bucket_name,
+        f"data/audiotospeech/config/config.yaml",
+        config_path, )
+
+
+def fetch_require_audio_ids_for_stt(source, language, stt, data_set, bucket_name):
+    audio_ids = json.loads(Variable.get("audioidsforstt"))
+    download_config_file(bucket_name)
+    data_catalog_raw = fetch_data_catalog(source, language.title(), data_set, stt,
+                                          get_db_connection_object())
+    audio_ids[source] = list(data_catalog_raw.audio_id)
+    print(audio_ids[source])
+    Variable.set("audioidsforstt", MyDict(audio_ids))
+
+
+def cleanse_catalog(data_catalog_raw):
+    data_catalog_raw = data_catalog_raw[~data_catalog_raw.audio_id.isna()]
+    data_catalog_raw["audio_id"] = data_catalog_raw["audio_id"].astype("int")
+    return data_catalog_raw
+
+
+def fetch_data_catalog(source, language, data_set, stt, db_conn_obj):
+    filter_string = f"audio_id in (select audio_id from media_metadata_staging where source = '{source}' and language = '{language}' and data_set_used_for IS NULL or data_set_used_for = '{data_set}') and '{stt}'!= ALL(stt_api_used) and staged_for_transcription = true"
+    data_catalog_raw = pd.read_sql(
+        f"SELECT distinct audio_id FROM media_speaker_mapping where {filter_string}", db_conn_obj
+    )
+    data_catalog_raw = cleanse_catalog(data_catalog_raw)
+    return data_catalog_raw
 
 
 def data_marking_start():
@@ -284,7 +339,15 @@ def generate_splitted_batches_for_audio_analysis(
     batch_file_path_dict[source] = list_of_batches
     batch_file_path_dict = MyDict(batch_file_path_dict)
     Variable.set("embedding_batch_file_list", batch_file_path_dict)
+
+
 # generate_splitted_batches_for_audio_analysis("Smart_money_with_Sonia_Shenoy",
 #                                              "data/audiotospeech/raw/download/catalogued/indian_english/audio/",
 #                                              "data/audiotospeech/raw/download/catalogued/indian_english/embeddings/", 500, "wav",
 #                                              "ekstepspeechrecognition-dev")
+
+
+# if __name__ == "__main__":
+#     fetch_require_audio_ids_for_stt('247_tamil', 'tamil', 'ekstep', 'test',
+#                                                        'ekstepspeechrecognition-test')
+#

@@ -7,7 +7,7 @@ from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
-from helper_dag import get_require_audio_id
+from helper_dag import fetch_require_audio_ids_for_stt
 
 sourceinfo = json.loads(Variable.get("sourceinfo"))
 stt_source_path = Variable.get("sttsourcepath")
@@ -33,7 +33,7 @@ def interpolate_language_paths(language):
 
 def create_dag(dag_id, dag_number, default_args, args, batch_count):
     dag = DAG(
-        f"{dag_id}_stt",
+        f"{dag_id}_stt_" + args.get("stt") + '_' + args.get("language"),
         schedule_interval=datetime.timedelta(days=1),
         default_args=default_args,
         start_date=YESTERDAY,
@@ -43,18 +43,20 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
 
         language = args.get("language")
         data_set = args.get("data_set")
+        source_path = args.get("source_path")
+        stt = args.get("stt")
         print(args)
         print(f"Language for source is {language}")
         stt_source_path_set = interpolate_language_paths(language)
 
         fetch_audio_ids = PythonOperator(
             task_id=dag_id + "_fetch_audio_ids",
-            python_callable=get_require_audio_id,
+            python_callable=fetch_require_audio_ids_for_stt,
             op_kwargs={
                 "source": dag_id,
-                "stt_source_path": stt_source_path_set,
+                "language": language,
+                "api": stt,
                 "data_set": data_set,
-                "batch_count": batch_count,
                 "bucket_name": bucket_name,
             },
             dag_number=dag_number,
@@ -63,7 +65,6 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
         fetch_audio_ids
 
         parallelism = args.get("parallelism")
-        stt = args.get("stt")
 
         audio_file_ids = json.loads(Variable.get("audioidsforstt"))[dag_id]
 
@@ -93,6 +94,8 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
                     ",".join(batch_audio_file_ids),
                     "-ds",
                     data_set,
+                    "-sp",
+                    source_path,
                     "-as",
                     dag_id,
                     "-stt",
@@ -119,16 +122,18 @@ for source in sourceinfo.keys():
     batch_count = source_info.get("count")
     parallelism = source_info.get("parallelism", batch_count)
     api = source_info.get("stt")
+    source_path = source_info.get("source_path", None)
     language = source_info.get("language").lower()
     data_set = source_info.get("data_set", '').lower()
     dag_id = source
 
     dag_args = {
-        "email": ["gaurav.gupta@thoughtworks.com"],
+        "email": ["ekstep@thoughtworks.com"],
     }
 
-    args = {"parallelism": parallelism, "stt": api, "language": language, "data_set": data_set}
+    args = {"parallelism": parallelism, "stt": api, "language": language, "data_set": data_set,
+            "source_path": source_path}
 
     dag_number = dag_id + str(batch_count)
 
-    globals()[dag_id] = create_dag(dag_id + '_' + language, dag_number, dag_args, args, batch_count)
+    globals()[dag_id] = create_dag(dag_id, dag_number, dag_args, args, batch_count)
