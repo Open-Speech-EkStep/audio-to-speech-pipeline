@@ -1,2 +1,0 @@
-ALTER TABLE public.media_speaker_mapping
-DROP COLUMN IF EXISTS IS_TRANSCRIBED

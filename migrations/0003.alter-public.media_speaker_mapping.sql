@@ -1,2 +1,0 @@
-ALTER TABLE public.media_speaker_mapping
-ADD COLUMN IS_TRANSCRIBED BOOLEAN
