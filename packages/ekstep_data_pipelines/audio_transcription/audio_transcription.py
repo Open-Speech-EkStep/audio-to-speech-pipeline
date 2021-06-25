@@ -65,7 +65,7 @@ class AudioTranscription(BaseProcessor):
 
         LOGGER.info("Generating transcriptions for audio_ids:%s", str(audio_ids))
         failed_audio_ids = []
-        if source_path_stt is not None:
+        if source_path_stt != 'dummy':
             remote_path_of_dir = source_path_stt
 
         for audio_id in audio_ids:

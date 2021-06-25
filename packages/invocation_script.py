@@ -154,7 +154,7 @@ parser.add_argument(
     "-sp",
     "--source-path-stt",
     dest="source_path_stt",
-    default=None,
+    default='dummy',
     help="The parameters that need to be used in audio stt for non default path",
 )
 

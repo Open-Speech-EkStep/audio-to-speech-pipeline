@@ -172,12 +172,12 @@ def fetch_require_audio_ids_for_stt(source, language, stt, data_set, bucket_name
 
 def cleanse_catalog(data_catalog_raw):
     data_catalog_raw = data_catalog_raw[~data_catalog_raw.audio_id.isna()]
-    data_catalog_raw["audio_id"] = data_catalog_raw["audio_id"].astype("int")
+    data_catalog_raw["audio_id"] = data_catalog_raw["audio_id"].astype("str")
     return data_catalog_raw
 
 
 def fetch_data_catalog(source, language, data_set, stt, db_conn_obj):
-    filter_string = f"audio_id in (select audio_id from media_metadata_staging where source = '{source}' and language = '{language}' and data_set_used_for IS NULL or data_set_used_for = '{data_set}') and '{stt}'!= ALL(stt_api_used) and staged_for_transcription = true"
+    filter_string = f"audio_id in (select audio_id from media_metadata_staging where source = '{source}' and language = '{language}' and (data_set_used_for IS NULL or data_set_used_for = '{data_set}')) and '{stt}'!= ALL(stt_api_used) and staged_for_transcription = true"
     data_catalog_raw = pd.read_sql(
         f"SELECT distinct audio_id FROM media_speaker_mapping where {filter_string}", db_conn_obj
     )

@@ -54,8 +54,8 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
             python_callable=fetch_require_audio_ids_for_stt,
             op_kwargs={
                 "source": dag_id,
-                "language": language,
-                "api": stt,
+                "language": language.title(),
+                "stt": stt,
                 "data_set": data_set,
                 "bucket_name": bucket_name,
             },
@@ -94,14 +94,14 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
                     ",".join(batch_audio_file_ids),
                     "-ds",
                     data_set,
-                    "-sp",
-                    source_path,
                     "-as",
                     dag_id,
                     "-stt",
                     stt,
                     "-l",
                     language,
+                    "-sp",
+                    source_path
                 ],
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
@@ -122,7 +122,7 @@ for source in sourceinfo.keys():
     batch_count = source_info.get("count")
     parallelism = source_info.get("parallelism", batch_count)
     api = source_info.get("stt")
-    source_path = source_info.get("source_path", None)
+    source_path = source_info.get("source_path", 'dummy')
     language = source_info.get("language").lower()
     data_set = source_info.get("data_set", '').lower()
     dag_id = source
