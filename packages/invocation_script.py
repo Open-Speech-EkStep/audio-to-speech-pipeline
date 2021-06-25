@@ -367,8 +367,8 @@ def validate_audio_transcription_input(arguments):
 
     audio_source = arguments.audio_source
 
-    if arguments.data_set is None:
-        raise argparse.ArgumentTypeError(f"data set type is missing")
+    if arguments.data_set is None or (arguments.data_set not in ('train', 'test', '')):
+        raise argparse.ArgumentTypeError(f"data set type is missing or incorrect")
 
     data_set = arguments.data_set
     return {
