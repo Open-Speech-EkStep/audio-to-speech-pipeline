@@ -75,7 +75,6 @@ class AudioTranscriptionTests(unittest.TestCase):
             "language",
             transcription_client,
             metadata,
-            'google'
         )
 
         self.assertEqual(transcription_client.generate_transcription.call_count, 0)
@@ -99,7 +98,6 @@ class AudioTranscriptionTests(unittest.TestCase):
             "language",
             transcription_client,
             metadata,
-            'google'
         )
 
         self.assertEqual(
@@ -139,7 +137,6 @@ class AudioTranscriptionTests(unittest.TestCase):
             "language",
             transcription_client,
             metadata,
-            'google'
         )
 
         self.assertEqual(

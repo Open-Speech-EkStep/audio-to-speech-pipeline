@@ -126,6 +126,8 @@ class CatalogueTests(unittest.TestCase):
         utterance = {
             "name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav",
             "duration": "13.38",
+            "is_transcribed": True,
+            "stt_api": 'google',
             "snr_value": 38.432806,
             "status": "Clean",
             "reason": "stt error",
@@ -135,17 +137,13 @@ class CatalogueTests(unittest.TestCase):
 
         args = mock_postgres_client.execute_update.call_args_list
         called_with_query = (
-            "update media_speaker_mapping set status = :status, "
-            "fail_reason = :reason where audio_id = :audio_id "
-            "and clipped_utterance_file_name = :name"
+            "update media_speaker_mapping set status = :status, fail_reason = :reason,is_transcribed = (SELECT case when is_transcribed = TRUE then true else :is_transcribed end as e from unnest(ARRAY[is_transcribed])),stt_api_used =(select array_agg(distinct e) from unnest(stt_api_used || ARRAY[:stt_api_used]) e) where audio_id = :audio_id and clipped_utterance_file_name = :name"
         )
 
-        called_with_args = {
-            "status": "Clean",
-            "reason": "stt error",
-            "audio_id": audio_id,
-            "name": "190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav",
-        }
+        called_with_args = {'status': 'Clean', 'is_transcribed': True, 'stt_api_used': 'google', 'reason': 'stt error',
+                            'audio_id': '2020', 'name': '190_Bani_Rahengi_Kitaabe_dr__sunita_rani_ghosh.wav'}
+        print("**********************", called_with_args)
+        print("*********************", args[0][1])
         self.assertEqual(True, rows_updated)
         self.assertEqual(called_with_query, args[0][0][0])
         self.assertEqual(called_with_args, args[0][1])
