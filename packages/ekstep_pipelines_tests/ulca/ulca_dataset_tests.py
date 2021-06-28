@@ -131,10 +131,10 @@ class ULCADatasetTests(unittest.TestCase):
         )
         self.assertEqual(expected_text_dict, text_dict)
 
-    def test_should_create_tar(self):
-        tar_file_name = "ulca.tar.gz"
+    def test_should_create_zip(self):
+        zip_file_name = "ulca.zip"
         source_dir = "ekstep_pipelines_tests/resources/ulca/"
-        ULCADataset(self.data_processor).make_tarfile(tar_file_name, source_dir)
+        ULCADataset(self.data_processor).make_zipfile(zip_file_name, source_dir)
 
     def test_should_remove_txt_files(self):
         temp_dir = "ekstep_pipelines_tests/resources/ulca/temp"

@@ -86,9 +86,9 @@ class ULCADataset(BaseProcessor):
             self.remove_txt_file(local_audio_download_path)
             self.remove_rejected_files(local_audio_download_path, data)
 
-            self.make_tarfile(f"{source}.tar.gz", local_audio_download_path)
-            artifact_name = f"{source}_{current_time_formatted}.tar.gz"
-            self.publish_artifact(f"{source}.tar.gz", f"{publish_path}/{artifact_name}")
+            self.make_zipfile(f"{source}.zip", local_audio_download_path)
+            artifact_name = f"{source}_{current_time_formatted}.zip"
+            self.publish_artifact(f"{source}.zip", f"{publish_path}/{artifact_name}")
 
             self.update_artifact_name(data, artifact_name)
         else:
@@ -236,8 +236,8 @@ class ULCADataset(BaseProcessor):
         LOGGER.info(f"text filed read :{len(text_dict.keys())}")
         return text_dict
 
-    def make_tarfile(self, output_filename, source_dir):
-        subprocess.call(["tar", "-czvf", output_filename, source_dir])
+    def make_zipfile(self, output_filename, source_dir):
+        subprocess.call(["zip", "-r", output_filename, source_dir])
 
     def publish_artifact(self, tar_file, publish_path):
         self.fs_interface.upload_to_location(tar_file, publish_path)
