@@ -41,7 +41,7 @@ class CatalogueDao:
             "audio_id, snr "
             "from media_speaker_mapping "
             "where audio_id "
-            'in (select audio_id from media_metadata_staging where "source" = :source and "language" = :language and data_set_used_for IS NULL or data_set_used_for = :data_set) '
+            'in (select audio_id from media_metadata_staging where "source" = :source and "language" = :language and (data_set_used_for IS NULL or data_set_used_for = :data_set)) '
             "and status = :status "
             "and staged_for_transcription = false "
             "and clipped_utterance_duration >= 0.5 and clipped_utterance_duration <= 15",
