@@ -70,6 +70,7 @@ class AudioTranscription(BaseProcessor):
             remote_path_of_dir = source_path_stt
 
 
+
         for audio_id in audio_ids:
             try:
                 LOGGER.info("Generating transcription for audio_id:%s", str(audio_id))
