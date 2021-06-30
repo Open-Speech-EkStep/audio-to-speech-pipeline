@@ -1,16 +1,16 @@
-import sys
-import multiprocessing
-import os, fnmatch
+import copy
+import fnmatch
 import json
+import multiprocessing
+import os
 import subprocess
-
+import sys
 from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
-
-from ekstep_data_pipelines.common.utils import get_logger
-from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
 from datetime import datetime
 
+from ekstep_data_pipelines.common import BaseProcessor, CatalogueDao
+from ekstep_data_pipelines.common.utils import get_logger
+from tqdm import tqdm
 
 ESTIMATED_CPU_SHARE = 0.1
 DEFAULT_COUNT = 10000
@@ -129,8 +129,10 @@ class ULCADataset(BaseProcessor):
         return data
 
     def write_json(self, local_audio_download_path, filename, data):
-        data = list(map(self.exclude_attributes, data))
-        data_json = json.dumps(data, indent=4)
+        data_cleaned = copy.deepcopy(data)
+        if 'data' in filename:
+            data_cleaned = list(map(self.exclude_attributes, data_cleaned))
+        data_json = json.dumps(data_cleaned, indent=4)
         with open(f"{local_audio_download_path}/{filename}", "w") as f:
             f.write(data_json)
 
