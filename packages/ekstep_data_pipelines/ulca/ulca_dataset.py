@@ -18,6 +18,9 @@ DEFAULT_COUNT = 10000
 LOGGER = get_logger("ULCADataset")
 
 
+
+
+
 class ULCADataset(BaseProcessor):
     """
     Class to identify speaker for each utterance in a source
@@ -120,7 +123,13 @@ class ULCADataset(BaseProcessor):
         curr_executor.shutdown(wait=True)
         LOGGER.info('Download complete...')
 
+    def exclude_attributes(self,data):
+        del data['audioId']
+        del data['speaker']
+        return data
+
     def write_json(self, local_audio_download_path, filename, data):
+        data = list(map(self.exclude_attributes, data))
         data_json = json.dumps(data, indent=4)
         with open(f"{local_audio_download_path}/{filename}", "w") as f:
             f.write(data_json)
@@ -203,9 +212,9 @@ class ULCADataset(BaseProcessor):
                 "collectionSource": [source, main_source_url, source_url],
                 "snr": snr,
                 "duration": duration,
-                # "speaker": speaker,
+                "speaker": speaker,
                 "gender": ULCADataset.GENDER_MAP.get(gender, "non-specified"),
-                # "audioId": audio_id
+                "audioId": audio_id
             }
 
         if is_labelled == "False":

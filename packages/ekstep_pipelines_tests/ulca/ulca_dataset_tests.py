@@ -99,9 +99,9 @@ class ULCADatasetTests(unittest.TestCase):
                 ],
                 "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 38.432806}},
                 "duration": 13.38,
-                # "speaker": "dummy_speaker_name",
+                "speaker": "dummy_speaker_name",
                 "gender": "male",
-                # "audioId": 1
+                "audioId": 1
             },
             {
                 "audioFilename": "sample2.wav",
@@ -113,9 +113,9 @@ class ULCADatasetTests(unittest.TestCase):
                 ],
                 "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 40.432806}},
                 "duration": 15.38,
-                # "speaker": "dummy_speaker_name_2",
+                "speaker": "dummy_speaker_name_2",
                 "gender": "female",
-                # "audioId": 2
+                "audioId": 2
             }
         ]
         text_dict = {"sample1": "sample text", "sample2": "sample text"}
@@ -253,9 +253,9 @@ class ULCADatasetTests(unittest.TestCase):
                 ],
                 "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 38.432806}},
                 "duration": 13.38,
-                # "speaker": "dummy_speaker_name",
+                "speaker": "dummy_speaker_name",
                 "gender": "male",
-                # "audioId": 1
+                "audioId": 1
             },
             {
                 "audioFilename": "sample2.wav",
@@ -266,9 +266,9 @@ class ULCADatasetTests(unittest.TestCase):
                 ],
                 "snr": {"methodType": "WadaSnr", "methodDetails": {"snr": 40.432806}},
                 "duration": 15.38,
-                # "speaker": "dummy_speaker_name_2",
+                "speaker": "dummy_speaker_name_2",
                 "gender": "female",
-                # "audioId": 2
+                "audioId": 2
             }
         ]
         text_dict = {}
