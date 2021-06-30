@@ -371,6 +371,8 @@ def validate_audio_transcription_input(arguments):
         raise argparse.ArgumentTypeError(f"data set type is missing or incorrect")
 
     data_set = arguments.data_set
+
+    LOGGER.info(f"Source path is {arguments.source_path_stt}")
     return {
         "audio_ids": audio_ids,
         "speech_to_text_client": speech_to_text_client,

@@ -10,7 +10,7 @@ from airflow.operators.python_operator import PythonOperator
 from helper_dag import fetch_require_audio_ids_for_stt
 
 sourceinfo = json.loads(Variable.get("sourceinfo"))
-stt_source_path = Variable.get("sttsourcepath")
+# stt_source_path = Variable.get("sttsourcepath")
 bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
@@ -26,9 +26,9 @@ secret_file = secret.Secret(
 )
 
 
-def interpolate_language_paths(language):
-    stt_source_path_set = stt_source_path.replace(LANGUAGE_CONSTANT, language)
-    return stt_source_path_set
+# def interpolate_language_paths(language):
+#     stt_source_path_set = stt_source_path.replace(LANGUAGE_CONSTANT, language)
+#     return stt_source_path_set
 
 
 def create_dag(dag_id, dag_number, default_args, args, batch_count):
@@ -47,7 +47,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
         stt = args.get("stt")
         print(args)
         print(f"Language for source is {language}")
-        stt_source_path_set = interpolate_language_paths(language)
+        # stt_source_path_set = interpolate_language_paths(language)
 
         fetch_audio_ids = PythonOperator(
             task_id=dag_id + "_fetch_audio_ids",

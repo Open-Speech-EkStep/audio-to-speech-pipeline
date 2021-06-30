@@ -63,6 +63,7 @@ class AudioTranscription(BaseProcessor):
         should_skip_rejected = self.audio_transcription_config.get(SHOULD_SKIP_REJECTED)
 
         LOGGER.info("Generating transcriptions for audio_ids:%s", str(audio_ids))
+        LOGGER.info("The source path is %s", str(source_path_stt))
         failed_audio_ids = []
         if source_path_stt != 'dummy':
             print(f"Overriding path from {remote_path_of_dir} to {source_path_stt}")

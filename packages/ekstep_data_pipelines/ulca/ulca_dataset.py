@@ -203,9 +203,9 @@ class ULCADataset(BaseProcessor):
                 "collectionSource": [source, main_source_url, source_url],
                 "snr": snr,
                 "duration": duration,
-                "speaker": speaker,
+                # "speaker": speaker,
                 "gender": ULCADataset.GENDER_MAP.get(gender, "non-specified"),
-                "audioId": audio_id
+                # "audioId": audio_id
             }
 
         if is_labelled == "False":
