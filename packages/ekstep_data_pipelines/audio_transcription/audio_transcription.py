@@ -4,7 +4,6 @@ import traceback
 from ekstep_data_pipelines.audio_transcription.constants import (
     CONFIG_NAME,
     CLEAN_AUDIO_PATH,
-    LANGUAGE,
     SHOULD_SKIP_REJECTED,
 )
 from ekstep_data_pipelines.audio_transcription.transcription_sanitizers import (
@@ -66,7 +65,9 @@ class AudioTranscription(BaseProcessor):
         LOGGER.info("Generating transcriptions for audio_ids:%s", str(audio_ids))
         failed_audio_ids = []
         if source_path_stt != 'dummy':
+            print(f"Overriding path from {remote_path_of_dir} to {source_path_stt}")
             remote_path_of_dir = source_path_stt
+
 
         for audio_id in audio_ids:
             try:

@@ -163,6 +163,9 @@ def download_config_file(bucket_name):
 def fetch_require_audio_ids_for_stt(source, language, stt, data_set, bucket_name):
     audio_ids = json.loads(Variable.get("audioidsforstt"))
     download_config_file(bucket_name)
+    if data_set not in ('train', 'test', ''):
+        print("Enter a valid data set type and rerun")
+        exit(1)
     data_catalog_raw = fetch_data_catalog(source, language.title(), data_set, stt,
                                           get_db_connection_object())
     audio_ids[source] = list(data_catalog_raw.audio_id)
