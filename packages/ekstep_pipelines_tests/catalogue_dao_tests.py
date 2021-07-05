@@ -322,7 +322,7 @@ class CatalogueTests(unittest.TestCase):
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
             where mms.source = :source and mms.language=:language and msp.status in ('Clean','Rejected') and artifact_name is null
-            and msp.staged_for_transcription=true and msp.is_transcribed = :is_transcribed
+            and msp.is_transcribed = :is_transcribed
             limit :count
             """
         )
@@ -378,7 +378,7 @@ class CatalogueTests(unittest.TestCase):
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
             where mms.source = :source and mms.language=:language and msp.status in ('Clean','Rejected') and artifact_name is null
-            and msp.staged_for_transcription=true and (msp.is_transcribed = :is_transcribed or msp.is_transcribed is null)
+            and (msp.is_transcribed = :is_transcribed or msp.is_transcribed is null)
             limit :count
             """
         )
