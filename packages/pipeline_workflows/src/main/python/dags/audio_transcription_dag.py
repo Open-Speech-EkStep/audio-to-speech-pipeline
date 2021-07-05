@@ -101,7 +101,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
                     "-l",
                     language,
                     "-sp",
-                    source_path
+                    source_path,
                 ],
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,

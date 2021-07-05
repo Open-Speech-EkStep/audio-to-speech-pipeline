@@ -251,6 +251,7 @@ class ULCADataset(BaseProcessor):
         subprocess.call(["zip", "-r", output_filename, source_dir])
 
     def publish_artifact(self, tar_file, publish_path):
+        LOGGER.info('publishing artifact')
         self.fs_interface.upload_to_location(tar_file, publish_path)
 
     def remove_txt_file(self, local_path):
