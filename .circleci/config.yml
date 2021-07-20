@@ -260,7 +260,7 @@ jobs:
             then
               export env_name=''
             fi
-            yoyo << parameters.mode >> --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/{POSTGRES_DB} --all -b ./migrations
+            yoyo << parameters.mode >> --database postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/${POSTGRES_DB} --all -b ./migrations
 
 workflows:
   version: 2
