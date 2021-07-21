@@ -140,7 +140,8 @@
         },
         "by_duration": 2
       }
-    },
+    }
+  },
     "ulca_dataset_config": {
       "test_source1": {
         "language": "Hindi",
@@ -186,5 +187,4 @@
       "CEC_English": []
     }
   }
-}
 
