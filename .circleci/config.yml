@@ -245,7 +245,7 @@ jobs:
             echo $GOOGLE_APPLICATION_CREDENTIALS
             wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
             chmod +x cloud_sql_proxy
-            nohup ./cloud_sql_proxy -dir=./cloudsql -instances=${GCP_PROJECT}:us-central1:${POSTGRES_DB}=tcp:5432 &
+            nohup ./cloud_sql_proxy -dir=./cloudsql -instances=${GCP_PROJECT}:us-central1:${DB_INSTANCE}=tcp:5432 &
             sleep 25s
             cat nohup.out
             pip install yoyo-migrations
