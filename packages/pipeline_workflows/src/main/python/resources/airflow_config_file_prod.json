@@ -1,5 +1,6 @@
 {
   "env": "prod",
+  "project": "ekstepspeechrecognition",
   "table": "texttospeechpipeline",
   "bucket": "ekstepspeechrecognition-dev",
   "inputbasepath": "/data/integration/curation/processed/{language}/",

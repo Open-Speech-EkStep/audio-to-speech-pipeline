@@ -1,5 +1,6 @@
 {
   "env": "test",
+  "project": "asriitdh",
   "table": "texttospeechpipeline",
   "bucket": "group1-data-test",
   "inputbasepath": "/data/integration/curation/processed/{language}/",
@@ -168,5 +169,5 @@
       "Smart_money_with_Sonia_Shenoy": [],
       "CEC_English": []
     }
-  }
+}
 
