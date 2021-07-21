@@ -126,7 +126,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image=f"us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}_1.0.0",
+                image=f"us.gcr.io/{project}/ekstep_data_pipelines:{env_name}_1.0.0",
                 image_pull_policy="Always",
                 resources=resource_limits,
             )
