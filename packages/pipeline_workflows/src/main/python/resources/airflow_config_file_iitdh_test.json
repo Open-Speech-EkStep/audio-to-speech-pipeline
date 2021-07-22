@@ -1,8 +1,8 @@
 {
-  "env": "prod",
-  "project": "ekstepspeechrecognition",
+  "env": "test",
+  "project": "asriitdh",
   "table": "texttospeechpipeline",
-  "bucket": "ekstepspeechrecognition-dev",
+  "bucket": "group1-data-test",
   "inputbasepath": "/data/integration/curation/processed/{language}/",
   "inputtobeprocesspath": "/data/integration/ttsapi/tobeprocessed/{language}/",
   "batchsize": "10800",
@@ -14,33 +14,20 @@
   "sourceinfo": {
     "1tEdx_Talk_Indian_speaker": {
       "count": 5,
-      "language": "english"
+      "language": "english",
+      "data_set": "test"
     }
   },
   "snrcatalogue": {
-    "Telugu_test": {
-      "count": 5,
-      "format": "mp3",
-      "language": "telugu"
-    },
-    "Lets_talk_in_Telugu": {
-      "count": 5,
+    "KANNADA_NEW": {
+      "count": 2,
       "format": "mp4",
-      "language": "telugu"
-    },
-    "Telugu_Audio_BIBLE": {
-      "count": 1,
-      "format": "mp4",
-      "language": "telugu"
-    },
-    "Telugu_Bible_Audio_mp3": {
-      "count": 1,
-      "format": "mp4",
-      "language": "telugu"
+      "language": "kannada"
     }
   },
   "sourcepathforsnr": "data/audiotospeech/raw/download/downloaded/{language}/audio/",
   "sttsourcepath": "data/audiotospeech/raw/landing/{language}/audio/",
+  "errorlandingpath": "data/audiotospeech/raw/landing/{language}/audio/error/",
   "integrationprocessedpath": "data/audiotospeech/integration/processed/{language}/audio/",
   "experimentoutput": "data/experiments/output/",
   "metafileextension": ".csv",
@@ -62,10 +49,7 @@
   },
   "archiveutterancespath": "data/experiments/archive/",
   "audiofilelist": {
-    "Telugu_test": [],
-    "Lets_talk_in_Telugu": [],
-    "Telugu_Audio_BIBLE": [],
-    "Telugu_Bible_Audio_mp3": []
+    "KANNADA_NEW": []
   },
   "audioidsforstt": {
     "1tEdx_Talk_Indian_speaker": []
@@ -86,13 +70,13 @@
   },
   "validation_report_source_post-transcription": {
     "CEC": {
-      "language"
-    : "hindi"}
+      "language": "hindi"
+    }
   },
   "validation_report_source_pre-transcription": {
     "CEC": {
-      "language"
-    : "hindi"}
+      "language": "hindi"
+    }
   },
   "snr_resource_limits": {
     "request_memory": "200Mi",
@@ -115,9 +99,9 @@
   "data_filter_config": {
     "test_source1": {
       "language": "hindi",
-      "file_mode" : "y",
-      "data_set" : "test",
-      "file_path" : "ekstepspeechrecognition-test/data/audiotospeech/raw/download/duplicate/test_source1.csv",
+      "file_mode": "y",
+      "data_set": "test",
+      "file_path": "data/audiotospeech/raw/download/duplicate/test_source1.csv",
       "filter": {
         "by_snr": {
           "lte": 75,
@@ -129,8 +113,8 @@
     },
     "test_source2": {
       "language": "hindi",
-      "file_mode" : "n",
-      "data_set" : "test",
+      "file_mode": "n",
+      "data_set": "test",
       "filter": {
         "by_speaker": {
           "lte_per_speaker_duration": 60,
@@ -141,25 +125,49 @@
       }
     }
   },
-  "destinationpathforaudioanalysis": "data/audiotospeech/raw/download/catalogued/{language}/embeddings/",
-  "sourcepathforaudioanalysis": "data/audiotospeech/raw/download/catalogued/{language}/audio/",
-  "audio_analysis_config": {
-    "CEC_English": {
-      "language": "indian_english",
-      "format": "wav",
-      "parallelism": 5,
-      "batch_size": 5000
+    "ulca_dataset_config": {
+      "test_source1": {
+        "language": "Hindi",
+        "source_path": "data/audiotospeech/integration/processed/hindi/audio/testamulya2",
+        "publish_path": "data/audiotospeech/integration/publish/hindi",
+        "params": {
+          "datasetType": "asr-corpus",
+          "languages": {
+            "sourceLanguage": "hi",
+            "targetLanguage": null
+          },
+          "collectionSource": [
+            "Krishi_Darshan_2"
+          ],
+          "domain": [
+            "general"
+          ],
+          "collectionMethod": [
+            "web-scrapping-audio"
+          ],
+          "license": "cc-by-4.0"
+        }
+      }
     },
-    "Smart_money_with_Sonia_Shenoy": {
-      "language": "indian_english",
-      "format": "wav",
-      "parallelism": 4,
-      "batch_size": 100
+    "destinationpathforaudioanalysis": "data/audiotospeech/raw/download/catalogued/{language}/embeddings/",
+    "sourcepathforaudioanalysis": "data/audiotospeech/raw/download/catalogued/{language}/audio/",
+    "audio_analysis_config": {
+      "CEC_English": {
+        "language": "indian_english",
+        "format": "wav",
+        "parallelism": 5,
+        "batch_size": 5000
+      },
+      "Smart_money_with_Sonia_Shenoy": {
+        "language": "indian_english",
+        "format": "wav",
+        "parallelism": 4,
+        "batch_size": 100
+      }
+    },
+    "embedding_batch_file_list": {
+      "Smart_money_with_Sonia_Shenoy": [],
+      "CEC_English": []
     }
-  },
-  "embedding_batch_file_list": {
-    "Smart_money_with_Sonia_Shenoy": [],
-    "CEC_English": []
-  }
 }
 

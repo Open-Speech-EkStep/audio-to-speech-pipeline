@@ -12,6 +12,7 @@ bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
+project = Variable.get("project")
 
 secret_file = secret.Secret(
     deploy_type="volume",
@@ -57,7 +58,7 @@ def create_dag(ulca_dataset_config, default_args):
                 namespace=composer_namespace,
                 startup_timeout_seconds=300,
                 secrets=[secret_file],
-                image=f"us.gcr.io/ekstepspeechrecognition/ekstep_data_pipelines:{env_name}_1.0.0",
+                image=f"us.gcr.io/{project}/ekstep_data_pipelines:{env_name}_1.0.0",
                 image_pull_policy="Always",
                 )
 

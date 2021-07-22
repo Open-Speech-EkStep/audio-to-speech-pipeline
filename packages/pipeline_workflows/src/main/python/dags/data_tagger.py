@@ -14,6 +14,7 @@ composer_namespace = Variable.get("composer_namespace")
 bucket_name = Variable.get("bucket")
 env_name = Variable.get("env")
 default_args = {"email": ["gaurav.gupta@thoughtworks.com"]}
+project = Variable.get("project")
 
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
@@ -48,7 +49,7 @@ with dag:
         namespace=composer_namespace,
         startup_timeout_seconds=300,
         secrets=[secret_file],
-        image=f"us.gcr.io/ekstepspeechrecognition/data_tagger:{env_name}_1.0.0",
+        image=f"us.gcr.io/{project}/data_tagger:{env_name}_1.0.0",
         image_pull_policy="Always",
     )
 
