@@ -168,7 +168,8 @@ def fetch_require_audio_ids_for_stt(source, language, stt, data_set, bucket_name
         exit(1)
     data_catalog_raw = fetch_data_catalog(source, language.title(), data_set, stt,
                                           get_db_connection_object())
-    audio_ids[source] = list(data_catalog_raw.audio_id)
+    # audio_ids[source] = list(data_catalog_raw.audio_id)
+    audio_ids[source] = data_catalog_raw
     print(audio_ids[source])
     Variable.set("audioidsforstt", MyDict(audio_ids))
 
@@ -180,12 +181,13 @@ def cleanse_catalog(data_catalog_raw):
 
 
 def fetch_data_catalog(source, language, data_set, stt, db_conn_obj):
-    filter_string = f"audio_id in (select audio_id from media_metadata_staging where source = '{source}' and language = '{language}' and (data_set_used_for IS NULL or data_set_used_for = '{data_set}')) and '{stt}'!= ALL(stt_api_used) and staged_for_transcription = true"
+    filter_string = f"audio_id in (select audio_id from media_metadata_staging where source = '{source}' and language = '{language}' and (data_set_used_for IS NULL or data_set_used_for = '{data_set}')) and status= 'Clean' and '{stt}'!= ALL(stt_api_used) and staged_for_transcription = true"
     data_catalog_raw = pd.read_sql(
-        f"SELECT distinct audio_id FROM media_speaker_mapping where {filter_string}", db_conn_obj
+        f"SELECT distinct audio_id,COUNT(*) OVER (PARTITION BY audio_id) as utterance_count FROM media_speaker_mapping where {filter_string} order by utterance_count desc",
+        db_conn_obj
     )
     data_catalog_raw = cleanse_catalog(data_catalog_raw)
-    return data_catalog_raw
+    return dict(data_catalog_raw.values)
 
 
 def data_marking_start():

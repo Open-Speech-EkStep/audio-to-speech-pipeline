@@ -64,18 +64,51 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
 
         fetch_audio_ids
 
+        def batch_audio_ids(d, each_pod_batch_size):
+            each_pod_batch_size = min(each_pod_batch_size, sum(d.values()))
+            d = d.copy()
+            temp = {}
+            c = list(d.keys())
+            e = list(d.values())
+
+            i = 0
+            while each_pod_batch_size > 0:
+                diff = each_pod_batch_size - e[i]
+
+                if diff > 0:
+                    temp[c[i]] = e[i]
+                    each_pod_batch_size = diff
+                    del d[c[i]]
+                else:
+                    temp[c[i]] = each_pod_batch_size
+                    if diff == 0:
+                        del d[c[i]]
+                    else:
+                        d[c[i]] = abs(diff)
+                    # each_pod_batch_size = diff
+                    break
+                c = list(d.keys())
+                e = list(d.values())
+
+            return d, list(temp.keys())
+
         parallelism = args.get("parallelism")
 
         audio_file_ids = json.loads(Variable.get("audioidsforstt"))[dag_id]
-
+        if audio_file_ids:
+            each_pod_batch_size = math.ceil(sum(audio_file_ids.values()) / parallelism)
         batches = []
-
-        if len(audio_file_ids) > 0:
-            chunk_size = math.ceil(len(audio_file_ids) / parallelism)
-            batches = [
-                audio_file_ids[i: i + chunk_size]
-                for i in range(0, len(audio_file_ids), chunk_size)
-            ]
+        while audio_file_ids:
+            audio_file_ids, batch = batch_audio_ids(audio_file_ids, each_pod_batch_size)
+            batches.append(batch)
+        # batches = []
+        #
+        # if len(audio_file_ids) > 0:
+        #     chunk_size = math.ceil(len(audio_file_ids) / parallelism)
+        #     batches = [
+        #         audio_file_ids[i: i + chunk_size]
+        #         for i in range(0, len(audio_file_ids), chunk_size)
+        #     ]
 
         for batch_audio_file_ids in batches:
             data_prep_task = kubernetes_pod_operator.KubernetesPodOperator(
@@ -119,9 +152,9 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
 for source in sourceinfo.keys():
     source_info = sourceinfo.get(source)
 
-    batch_count = source_info.get("count")
+    batch_count = source_info.get("count", 5)
     parallelism = source_info.get("parallelism", batch_count)
-    api = source_info.get("stt")
+    api = source_info.get("stt", 'google')
     source_path = source_info.get("source_path", 'dummy')
     language = source_info.get("language").lower()
     data_set = source_info.get("data_set", '').lower()
