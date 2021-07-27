@@ -41,6 +41,7 @@ class ULCADataset(BaseProcessor):
     LABELLED = 'labelled'
     IS_TRANSCRIBED = 'is_transcribed'
     INCLUDE_REJECTED = 'include_rejected'
+    IS_EXTERNAL = 'is_external'
 
     @staticmethod
     def get_instance(data_processor, **kwargs):
@@ -64,10 +65,12 @@ class ULCADataset(BaseProcessor):
         """
         LOGGER.info("Total available cpu count:" + str(multiprocessing.cpu_count()))
 
-        source, ulca_config, language, source_path, publish_path,\
-        params, export_count, is_labelled, is_transcribed, include_rejected = self.get_config(**kwargs)
+        source, ulca_config, language, source_path, publish_path, \
+        params, export_count, is_labelled, is_transcribed, include_rejected, is_external = self.get_config(**kwargs)
+        is_external = True if is_external.lower() == "true" else False
 
-        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, is_transcribed, include_rejected, export_count)
+        utterances = self.get_clean_utterances(source, language, self.catalogue_dao, is_transcribed, include_rejected,
+                                               is_external, source_path, export_count)
 
         current_time_formatted = self.get_timestamp(datetime.now())
 
@@ -92,8 +95,8 @@ class ULCADataset(BaseProcessor):
             self.make_zipfile(f"{source}.zip", local_audio_download_path)
             artifact_name = f"{source}_{current_time_formatted}.zip"
             self.publish_artifact(f"{source}.zip", f"{publish_path}/{artifact_name}")
-
-            self.update_artifact_name(data, artifact_name)
+            if not is_external:
+                self.update_artifact_name(data, artifact_name)
         else:
             LOGGER.info('No data to create artifact')
             raise RuntimeError('No data exists to create artifact')
@@ -152,6 +155,7 @@ class ULCADataset(BaseProcessor):
         is_labelled = ulca_config.get(ULCADataset.LABELLED, "True")
         is_transcribed = ulca_config.get(ULCADataset.IS_TRANSCRIBED, "True")
         include_rejected = ulca_config.get(ULCADataset.INCLUDE_REJECTED, "False")
+        is_external = ulca_config.get(ULCADataset.IS_EXTERNAL, "False")
 
         if source is None:
             raise Exception("source is mandatory")
@@ -172,17 +176,26 @@ class ULCADataset(BaseProcessor):
             raise Exception("params is mandatory")
 
         return source, ulca_config, language, source_path, publish_path, params, export_count, \
-               is_labelled, is_transcribed, include_rejected
+               is_labelled, is_transcribed, include_rejected, is_external
 
     def get_params(self):
         return self.ulca_config.get(ULCADataset.ULCA_PARAMS)
 
-    def get_clean_utterances(self, source, language, catalogue_dao, is_transcribed, include_rejected ,count=DEFAULT_COUNT):
+    def get_clean_utterances(self, source, language, catalogue_dao, is_transcribed, include_rejected, is_external,
+                             source_path,
+                             count=DEFAULT_COUNT):
         is_transcribed = True if is_transcribed.lower() == "true" else False
         include_rejected = True if include_rejected.lower() == "true" else False
         LOGGER.info(f"Creating json for source:{source}, language={language}")
-        utterances = catalogue_dao.get_utterance_details_by_source(source, language, count, is_transcribed, include_rejected)
-        LOGGER.info(f"total utterances: {str(len(utterances))}")
+        if is_external:
+            all_files = self.fs_interface.list_blobs_in_a_path(source_path)
+            utterances = [[file.name.split('/')[-1], '5', 15, 1, 'unknown', 'unknown', 'unknown', 1234, 'Clean'] for file in
+                          all_files if
+                          'wav' in file.name]
+        else:
+            utterances = catalogue_dao.get_utterance_details_by_source(source, language, count, is_transcribed,
+                                                                       include_rejected)
+            LOGGER.info(f"total utterances: {str(len(utterances))}")
         if len(utterances) <= 0:
             raise LookupError(f"No data found in catalogue for language={language}, source={source}")
         return utterances
