@@ -79,7 +79,7 @@ class ULCADataset(BaseProcessor):
 
         LOGGER.info(f"Ensured {local_audio_download_path} exists")
 
-        self.download_utterances(local_audio_download_path, source_path, utterances, is_labelled)
+        self.download_utterances(local_audio_download_path, source_path, utterances, is_labelled, is_external)
 
         text_dict = self.read_transcriptions(local_audio_download_path)
 
@@ -101,7 +101,7 @@ class ULCADataset(BaseProcessor):
             LOGGER.info('No data to create artifact')
             raise RuntimeError('No data exists to create artifact')
 
-    def download_utterances(self,local_audio_download_path, source_path, utterances, is_labelled):
+    def download_utterances(self, local_audio_download_path, source_path, utterances, is_labelled, is_external):
 
         LOGGER.info(f"Downloading source to:{local_audio_download_path}")
 
@@ -113,9 +113,13 @@ class ULCADataset(BaseProcessor):
             file_name = utterance[0]
             audio_id = utterance[7]
             status = utterance[8].lower()
-            source_path_utterance = f"{source_path}/{audio_id}/{status}/{file_name}"
             text_file_name = f"{file_name.split('.')[0]}.txt"
-            source_path_utterance_text = f"{source_path}/{audio_id}/{status}/{text_file_name}"
+            if is_external:
+                source_path_utterance = f"{source_path}/{file_name}"
+                source_path_utterance_text = f"{source_path}/{text_file_name}"
+            else:
+                source_path_utterance = f"{source_path}/{audio_id}/{status}/{file_name}"
+                source_path_utterance_text = f"{source_path}/{audio_id}/{status}/{text_file_name}"
 
             local_file_path_sans_extention = f"{local_audio_download_path}/{file_name.split('.')[0]}"
             curr_executor.submit(self.fs_interface.download_to_location, source_path_utterance,
@@ -189,7 +193,9 @@ class ULCADataset(BaseProcessor):
         LOGGER.info(f"Creating json for source:{source}, language={language}")
         if is_external:
             all_files = self.fs_interface.list_blobs_in_a_path(source_path)
-            utterances = [[file.name.split('/')[-1], '5', 15, 1, 'unknown', 'unknown', 'unknown', 1234, 'Clean'] for file in
+            utterances = [[file.name.split('/')[-1], '5', 15, 1, 'unknown', 'unknown', 'non-specified', 123, 'Clean']
+                          for
+                          file in
                           all_files if
                           'wav' in file.name]
         else:
