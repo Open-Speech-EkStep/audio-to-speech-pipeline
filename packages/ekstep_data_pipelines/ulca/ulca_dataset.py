@@ -193,7 +193,7 @@ class ULCADataset(BaseProcessor):
         LOGGER.info(f"Creating json for source:{source}, language={language}")
         if is_external:
             all_files = self.fs_interface.list_blobs_in_a_path(source_path)
-            utterances = [[file.name.split('/')[-1], '5', 15, 1, 'unknown', 'unknown', 'non-specified', 123, 'Clean']
+            utterances = [[file.name.split('/')[-1], 5, 15, 1, 'unknown', 'unknown', 'non-specified', 123, 'Clean']
                           for
                           file in
                           all_files if
