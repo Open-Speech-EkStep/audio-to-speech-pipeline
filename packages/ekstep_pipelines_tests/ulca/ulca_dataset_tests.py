@@ -46,13 +46,13 @@ class ULCADatasetTests(unittest.TestCase):
 
         actual_utterances = ULCADataset(self.data_processor).get_clean_utterances("test_source", "Hindi",
                                                                                   self.catalogue_dao, "true", "false",
-                                                                                  False,
-                                                                                  'source_path', 2)
+                                                                                  False, "true"
+                                                                                         'source_path', 2)
         print("actual_utterances", actual_utterances)
         select_args = self.catalogue_dao.get_utterance_details_by_source.call_args
         print(select_args)
         self.assertEqual(actual_utterances, utterances)
-        self.assertEqual(('test_source', 'Hindi', 2, True, False), select_args[0])
+        self.assertEqual(('test_source', 'Hindi', 10000, True, False, False), select_args[0])
 
 
     def test_should_create_data_json(
@@ -210,7 +210,7 @@ class ULCADatasetTests(unittest.TestCase):
 
         self.catalogue_dao.update_utterance_artifact.return_value = True
 
-        ULCADataset(self.data_processor).update_artifact_name(data, 'test_name')
+        ULCADataset(self.data_processor).update_artifact_name(data, 'test_name', 'True')
 
         calls = [call.update_utterance_artifact(['sample1.wav'], 'test_name', 1), call.update_utterance_artifact(['sample2.wav', 'sample3.wav'], 'test_name', 2)]
 

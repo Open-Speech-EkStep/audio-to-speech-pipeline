@@ -70,7 +70,7 @@ class ULCADataset(BaseProcessor):
         is_external = True if is_external.lower() == "true" else False
 
         utterances = self.get_clean_utterances(source, language, self.catalogue_dao, is_transcribed, include_rejected,
-                                               is_external, source_path, export_count)
+                                               is_external, is_labelled, source_path, export_count)
 
         current_time_formatted = self.get_timestamp(datetime.now())
 
@@ -96,7 +96,7 @@ class ULCADataset(BaseProcessor):
             artifact_name = f"{source}_{current_time_formatted}.zip"
             self.publish_artifact(f"{source}.zip", f"{publish_path}/{artifact_name}")
             if not is_external:
-                self.update_artifact_name(data, artifact_name)
+                self.update_artifact_name(data, artifact_name, is_labelled)
         else:
             LOGGER.info('No data to create artifact')
             raise RuntimeError('No data exists to create artifact')
@@ -186,10 +186,12 @@ class ULCADataset(BaseProcessor):
         return self.ulca_config.get(ULCADataset.ULCA_PARAMS)
 
     def get_clean_utterances(self, source, language, catalogue_dao, is_transcribed, include_rejected, is_external,
+                             is_labelled,
                              source_path,
                              count=DEFAULT_COUNT):
         is_transcribed = True if is_transcribed.lower() == "true" else False
         include_rejected = True if include_rejected.lower() == "true" else False
+        is_labelled = True if is_labelled.lower() == "true" else False
         LOGGER.info(f"Creating json for source:{source}, language={language}")
         if is_external:
             all_files = self.fs_interface.list_blobs_in_a_path(source_path)
@@ -200,6 +202,7 @@ class ULCADataset(BaseProcessor):
                           'wav' in file.name]
         else:
             utterances = catalogue_dao.get_utterance_details_by_source(source, language, count, is_transcribed,
+                                                                       is_labelled,
                                                                        include_rejected)
             LOGGER.info(f"total utterances: {str(len(utterances))}")
         if len(utterances) <= 0:
@@ -294,7 +297,8 @@ class ULCADataset(BaseProcessor):
     def get_timestamp(self, date_time):
         return date_time.strftime("%d-%m-%Y_%H-%M")
 
-    def update_artifact_name(self, data, artifact_name):
+    def update_artifact_name(self, data, artifact_name, is_labelled):
+        is_labelled = True if is_labelled.lower() == "true" else False
         audioIdToUtteranceName = {}
         for element in data:
             audio_id = element['audioId']
@@ -304,5 +308,6 @@ class ULCADataset(BaseProcessor):
 
         for audio_id, utteranceFileNames in audioIdToUtteranceName.items():
             LOGGER.info(f"Updating artifact_name={artifact_name} for audio_id:{audio_id}")
-            updated = self.catalogue_dao.update_utterance_artifact(utteranceFileNames, artifact_name, audio_id)
+            updated = self.catalogue_dao.update_utterance_artifact(utteranceFileNames, artifact_name, is_labelled,
+                                                                   audio_id)
             LOGGER.info(f"updated....{updated}")

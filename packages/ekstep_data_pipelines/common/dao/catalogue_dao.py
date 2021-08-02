@@ -205,10 +205,13 @@ class CatalogueDao:
         self.postgres_client.execute_update(update_query, **param_dict)
         return True
 
-    def get_utterance_details_by_source(self, source, language, count, is_transcribed, include_rejected):
+    def get_utterance_details_by_source(self, source, language, count, is_transcribed, is_labelled, include_rejected):
 
         is_transcribed_check = "msp.is_transcribed = :is_transcribed" if is_transcribed \
             else "(msp.is_transcribed = :is_transcribed or msp.is_transcribed is null)"
+
+        is_labelled_artifact_check = "msp.labelled_artifact_name is null" if is_labelled \
+            else "msp.unlabelled_artifact_name is null"
 
         status = "('Clean','Rejected')" if include_rejected else "('Clean')"
 
@@ -226,18 +229,20 @@ class CatalogueDao:
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
             where mms.source = :source and mms.language=:language and msp.status in {status} and artifact_name is null
-            and {is_transcribed_check}
+            and {is_transcribed_check} and {is_labelled_artifact_check}
             limit :count
             """
         print("query:", query)
         data = self.postgres_client.execute_query(query, **parm_dict)
         return data
 
-    def update_utterance_artifact(self, utterance_file_names, artifact_name, audio_id):
+    def update_utterance_artifact(self, utterance_file_names, artifact_name, is_labelled, audio_id):
+        set_artifact = "labelled_artifact_name=:artifact_name" if is_labelled \
+            else "labelled_artifact_name=:artifact_name"
         update_query = (
-            "update media_speaker_mapping "
-            "set artifact_name=:artifact_name "
-            " where audio_id=:audio_id and clipped_utterance_file_name in "
+            f"""update media_speaker_mapping
+            set {set_artifact}
+            where audio_id=:audio_id and clipped_utterance_file_name in """
         )
 
         utterance_names = list(map(lambda u: f"'{u}'", utterance_file_names))
