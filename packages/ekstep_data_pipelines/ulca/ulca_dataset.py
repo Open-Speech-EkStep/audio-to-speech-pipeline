@@ -93,7 +93,7 @@ class ULCADataset(BaseProcessor):
             self.remove_rejected_files(local_audio_download_path, data)
 
             self.make_zipfile(f"{source}.zip", local_audio_download_path)
-            artifact_name = f"{source}_{current_time_formatted}.zip"
+            artifact_name = f"{language}_{source}_{current_time_formatted}.zip"
             self.publish_artifact(f"{source}.zip", f"{publish_path}/{artifact_name}")
             if not is_external:
                 self.update_artifact_name(data, artifact_name, is_labelled)

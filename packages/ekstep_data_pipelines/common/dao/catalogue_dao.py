@@ -238,7 +238,7 @@ class CatalogueDao:
 
     def update_utterance_artifact(self, utterance_file_names, artifact_name, is_labelled, audio_id):
         set_artifact = "labelled_artifact_name=:artifact_name" if is_labelled \
-            else "labelled_artifact_name=:artifact_name"
+            else "unlabelled_artifact_name=:artifact_name"
         update_query = (
             f"""update media_speaker_mapping
             set {set_artifact}
