@@ -228,7 +228,7 @@ class CatalogueDao:
                     on msp.audio_id = mms.audio_id
             left outer join speaker s 
                     on s.speaker_id = msp.speaker_id 
-            where mms.source = :source and mms.language=:language and msp.status in {status} and artifact_name is null
+            where mms.source = :source and mms.language=:language and msp.status in {status} 
             and {is_transcribed_check} and {is_labelled_artifact_check}
             limit :count
             """
@@ -247,6 +247,7 @@ class CatalogueDao:
 
         utterance_names = list(map(lambda u: f"'{u}'", utterance_file_names))
         update_query = update_query + "(" + ",".join(utterance_names) + ")"
+        print("query:", update_query)
 
         param_dict = {"artifact_name": artifact_name, "audio_id": audio_id}
 
