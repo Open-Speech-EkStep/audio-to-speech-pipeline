@@ -80,6 +80,13 @@ class ULCADataset(BaseProcessor):
         LOGGER.info(f"Ensured {local_audio_download_path} exists")
 
         self.download_utterances(local_audio_download_path, source_path, utterances, is_labelled, is_external)
+        LOGGER.info(
+            f"Total {len(utterances)} utterances found in catalog")
+
+        utterances = self.update_only_valid_utterances(local_audio_download_path, utterances)
+
+        LOGGER.info(
+            f"Total {len(utterances)} utterances found in bucket")
 
         text_dict = self.read_transcriptions(local_audio_download_path)
 
@@ -100,6 +107,10 @@ class ULCADataset(BaseProcessor):
         else:
             LOGGER.info('No data to create artifact')
             raise RuntimeError('No data exists to create artifact')
+
+    def update_only_valid_utterances(self, local_audio_download_path, utterances):
+        list_of_files = os.listdir(local_audio_download_path)
+        return [utterance for utterance in tqdm(utterances) if utterance[0] in list_of_files]
 
     def download_utterances(self, local_audio_download_path, source_path, utterances, is_labelled, is_external):
 

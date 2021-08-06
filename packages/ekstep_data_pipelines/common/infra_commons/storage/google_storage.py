@@ -1,9 +1,8 @@
+import os
 from concurrent.futures import ThreadPoolExecutor
 from os import listdir
 from os.path import isfile, join
 
-from google.cloud import storage
-from tqdm import tqdm
 from ekstep_data_pipelines.common.infra_commons.storage import BaseStorageInterface
 from ekstep_data_pipelines.common.infra_commons.storage.exceptions import (
     FileNotFoundException,
@@ -143,7 +142,8 @@ class GoogleStorage(BaseStorageInterface):
         bucket = self.client.bucket(self.get_bucket_from_path(source_path))
         file_path = self.get_path_without_bucket(source_path)
         source_blob = bucket.blob(file_path)
-        source_blob.download_to_filename(download_location)
+        if self.path_exists(source_path):
+            source_blob.download_to_filename(download_location)
 
     def move(self, source_path: str, destination_path: str) -> bool:
         copied = self.copy(source_path, destination_path)
