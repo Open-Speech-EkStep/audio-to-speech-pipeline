@@ -2,7 +2,8 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from os import listdir
 from os.path import isfile, join
-
+from google.cloud import storage
+from tqdm import tqdm
 from ekstep_data_pipelines.common.infra_commons.storage import BaseStorageInterface
 from ekstep_data_pipelines.common.infra_commons.storage.exceptions import (
     FileNotFoundException,

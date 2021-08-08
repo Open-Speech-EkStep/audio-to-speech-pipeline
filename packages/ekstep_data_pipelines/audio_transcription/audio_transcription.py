@@ -1,7 +1,5 @@
 import os
 import traceback
-from google.cloud import storage
-from tqdm import tqdm
 from ekstep_data_pipelines.audio_transcription.constants import (
     CONFIG_NAME,
     CLEAN_AUDIO_PATH,
