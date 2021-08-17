@@ -1,5 +1,6 @@
 import os
 import traceback
+
 from ekstep_data_pipelines.audio_transcription.constants import (
     CONFIG_NAME,
     CLEAN_AUDIO_PATH,
@@ -254,7 +255,7 @@ class AudioTranscription(BaseProcessor):
             stt_language,
             transcription_client,
             utterance_metadata,
-            stt_api
+            stt_api='ekstep'
 
     ):
         if ".wav" not in remote_file_path:
