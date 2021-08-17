@@ -238,7 +238,8 @@ class AudioTranscription(BaseProcessor):
                 file_name,
                 stt_language,
                 transcription_client,
-                utterance_metadata
+                utterance_metadata,
+                stt_api
 
             )
 
@@ -252,7 +253,8 @@ class AudioTranscription(BaseProcessor):
             remote_file_path,
             stt_language,
             transcription_client,
-            utterance_metadata
+            utterance_metadata,
+            stt_api
 
     ):
         if ".wav" not in remote_file_path:
@@ -268,25 +270,25 @@ class AudioTranscription(BaseProcessor):
                 stt_language, local_clean_path
             )
             original_transcript = transcript
+            if stt_api != 'ekstep':
+                # curr_language = self.audio_transcription_config.get(AUDIO_LANGUAGE)
 
-            # curr_language = self.audio_transcription_config.get(AUDIO_LANGUAGE)
-
-            LOGGER.info(
-                "Getting transacription sanitizer for the language %s", stt_language
-            )
-
-            all_transcription_sanitizers = get_transcription_sanitizers()
-            transcription_sanitizer = all_transcription_sanitizers.get(stt_language)
-
-            if not transcription_sanitizer:
                 LOGGER.info(
-                    "No transacription sanitizer found for the language %s, "
-                    "hence falling back to the default sanitizer.",
-                    stt_language,
+                    "Getting transacription sanitizer for the language %s", stt_language
                 )
-                transcription_sanitizer = all_transcription_sanitizers.get("default")
 
-            transcript = transcription_sanitizer.sanitize(transcript)
+                all_transcription_sanitizers = get_transcription_sanitizers()
+                transcription_sanitizer = all_transcription_sanitizers.get(stt_language)
+
+                if not transcription_sanitizer:
+                    LOGGER.info(
+                        "No transacription sanitizer found for the language %s, "
+                        "hence falling back to the default sanitizer.",
+                        stt_language,
+                    )
+                    transcription_sanitizer = all_transcription_sanitizers.get("default")
+
+                transcript = transcription_sanitizer.sanitize(transcript)
 
             if original_transcript != transcript:
                 old_file_name = get_file_name(transcription_file_name)
