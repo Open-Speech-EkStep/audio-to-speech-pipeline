@@ -33,7 +33,7 @@ SoundFile==0.10.3.post1
 srt==3.0.0
 tqdm==4.46.0
 typing-extensions==3.7.4.2
-urllib3==1.25.9
+urllib3==1.26.5
 pytube3
 uuid~=1.30
 yaml~=0.1.7
