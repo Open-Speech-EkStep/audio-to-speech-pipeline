@@ -1,11 +1,11 @@
-import json
 import datetime
+import json
 import math
 
 from airflow import DAG
-from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
+from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
 from helper_dag import generate_splitted_batches_for_audio_analysis
 
@@ -154,7 +154,7 @@ for source in audio_analysis_config.keys():
     audio_format = source_info.get("format")
     language = source_info.get("language").lower()
 
-    dag_id = source + '_' + 'audio_embedding_analysis'
+    dag_id = source + '_' + language + '_' + 'audio_embedding_analysis'
 
     dag_args = {
         "email": ["soujyo.sen@thoughtworks.com"],

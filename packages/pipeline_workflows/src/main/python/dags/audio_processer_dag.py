@@ -1,11 +1,12 @@
-import json
 import datetime
+import json
 import math
 
 from airflow import DAG
-from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
+from airflow.models import Variable
+from airflow.operators import TriggerDagRunOperator
 from airflow.operators.python_operator import PythonOperator
 from helper_dag import get_file_path_from_bucket
 
@@ -34,12 +35,22 @@ def interpolate_language_paths(language):
     return source_path_for_snr_set
 
 
+def trigger_next_dag(context):
+    next_dag_id = source + '_' + language + '_' + 'audio_embedding_analysis'
+    TriggerDagRunOperator(
+        task_id=next_dag_id + "_generate_batches",
+        trigger_dag_id=next_dag_id,
+        wait_for_completion=True
+    ).execute(context)
+
+
 def create_dag(dag_id, dag_number, default_args, args, batch_count):
     dag = DAG(
         dag_id,
         schedule_interval=datetime.timedelta(days=1),
         default_args=default_args,
         start_date=YESTERDAY,
+        catchup=True,
     )
 
     with dag:
@@ -49,6 +60,12 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
         print(args)
         print(f"Language for source is {language}")
         source_path_for_snr_set = interpolate_language_paths(language)
+
+        next_dag_id = source + '_' + language + '_' + 'audio_embedding_analysis'
+        trigger_dependent_dag = TriggerDagRunOperator(
+            task_id="trigger_dependent_dag_" + next_dag_id,
+            trigger_dag_id=next_dag_id,
+        )
 
         get_file_path_from_gcp_bucket = PythonOperator(
             task_id=dag_id + "_get_file_path",
@@ -131,7 +148,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
                 resources=resource_limits,
             )
 
-            get_file_path_from_gcp_bucket >> data_prep_task >> data_prep_cataloguer
+            get_file_path_from_gcp_bucket >> data_prep_task >> data_prep_cataloguer >> trigger_dependent_dag
 
     return dag
 
