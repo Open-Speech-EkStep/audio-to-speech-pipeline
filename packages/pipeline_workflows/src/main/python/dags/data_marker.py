@@ -6,6 +6,7 @@ from airflow.models import Variable
 from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.operators.python_operator import PythonOperator
+from airflow.operators import TriggerDagRunOperator
 from helper_dag import data_marking_start
 
 data_marker_config = json.loads(Variable.get("data_filter_config"))
@@ -14,6 +15,7 @@ env_name = Variable.get("env")
 composer_namespace = Variable.get("composer_namespace")
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 project = Variable.get("project")
+sourceinfo = json.loads(Variable.get("sourceinfo"))
 
 secret_file = secret.Secret(
     deploy_type="volume",
@@ -41,9 +43,20 @@ def create_dag(data_marker_config, default_args):
         before_start
 
         for source in data_marker_config.keys():
+
             filter_by_config = data_marker_config.get(source)
             language = filter_by_config.get("language").lower()
             print(f"Language for source is {language}")
+
+            sourceinfo_dict = sourceinfo.get(source)
+
+            api = sourceinfo_dict.get("stt", 'azure')
+
+            next_dag_id = source + '_stt_' + api + '_' + language
+            trigger_dependent_dag = TriggerDagRunOperator(
+                task_id="trigger_dependent_dag_" + next_dag_id,
+                trigger_dag_id=next_dag_id,
+            )
             data_marker_task = kubernetes_pod_operator.KubernetesPodOperator(
                 task_id=f"data-marker-{source}-{language}",
                 name="data-marker",
@@ -70,7 +83,7 @@ def create_dag(data_marker_config, default_args):
                 image_pull_policy="Always",
             )
 
-            before_start >> data_marker_task
+            before_start >> data_marker_task >> trigger_dependent_dag
 
     return dag
 
