@@ -7,6 +7,7 @@ from airflow.contrib.kubernetes import secret
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
+from airflow.operators import TriggerDagRunOperator
 from helper_dag import generate_splitted_batches_for_audio_analysis
 
 audio_analysis_config = json.loads(Variable.get("audio_analysis_config"))
@@ -52,6 +53,12 @@ def create_dag(dag_id, dag_number, default_args, args, max_records_threshold_per
         print(f"Language for source is {language}")
         source_path_set = interpolate_language_paths(source_path, language)
         destination_path_set = interpolate_language_paths(destination_path, language)
+
+        next_dag_id = 'data_marker_pipeline'
+        trigger_dependent_dag = TriggerDagRunOperator(
+            task_id="trigger_dependent_dag_" + next_dag_id,
+            trigger_dag_id=next_dag_id,
+        )
         generate_batch_files = PythonOperator(
             task_id=dag_id + "_generate_batches",
             python_callable=generate_splitted_batches_for_audio_analysis,
@@ -131,17 +138,17 @@ def create_dag(dag_id, dag_number, default_args, args, max_records_threshold_per
                         )
                         if phase == 0:
                             generate_batch_files >> task_dict[
-                                f"create_embedding_task_{pod}_{phase}"] >> data_audio_analysis_task
+                                f"create_embedding_task_{pod}_{phase}"] >> data_audio_analysis_task >> trigger_dependent_dag
                         # elif phase == total_phases - 1:
                         #     task_dict[f"create_embedding_task_{pod}_{phase - 1}"] >> task_dict[
                         #         f"create_embedding_task_{pod}_{phase}"] >> data_audio_analysis_task
                         else:
                             task_dict[f"create_embedding_task_{pod}_{phase - 1}"] >> task_dict[
-                                f"create_embedding_task_{pod}_{phase}"] >> data_audio_analysis_task
+                                f"create_embedding_task_{pod}_{phase}"] >> data_audio_analysis_task >> trigger_dependent_dag
             # if phase == total_phases - 1:
             #     task_dict[f"create_embedding_task_{last_pod_no}_{phase}"] >> data_audio_analysis_task
         else:
-            generate_batch_files >> data_audio_analysis_task
+            generate_batch_files >> data_audio_analysis_task >> trigger_dependent_dag
 
     return dag
 

@@ -4,6 +4,7 @@ import math
 
 from airflow import DAG
 from airflow.contrib.kubernetes import secret
+from airflow.operators import TriggerDagRunOperator
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
@@ -49,6 +50,11 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
         print(args)
         print(f"Language for source is {language}")
         # stt_source_path_set = interpolate_language_paths(language)
+        next_dag_id = 'trigger_training'
+        trigger_dependent_dag = TriggerDagRunOperator(
+            task_id="trigger_dependent_dag_" + next_dag_id,
+            trigger_dag_id=next_dag_id,
+        )
 
         fetch_audio_ids = PythonOperator(
             task_id=dag_id + "_fetch_audio_ids",
@@ -145,7 +151,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
                 resources=resource_limits,
             )
 
-            fetch_audio_ids >> data_prep_task
+            fetch_audio_ids >> data_prep_task >> trigger_dependent_dag
 
     return dag
 
