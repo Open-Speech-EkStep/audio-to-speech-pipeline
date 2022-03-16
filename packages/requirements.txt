@@ -102,7 +102,7 @@ tenacity
 threadpoolctl
 thrift
 typed-ast
-# urllib3==1.26.5
+urllib3
 virtualenv
 wget==3.2
 wrapt
