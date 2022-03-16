@@ -1,5 +1,5 @@
 numba==0.48.0
-numpy==1.21.2
+numpy==1.20.1
 pandas==1.1.1
 scikit-learn==0.23.1
 scipy==1.4.1
@@ -26,22 +26,22 @@ cffi==1.14.1
 chardet==3.0.4
 coverage==5.1
 crcmod==1.7
-databricks-cli
+databricks-cli==0.11.0
 decorator==4.4.2
 distlib==0.3.0
-dnspython
+dnspython==1.16.0
 flake8==3.8.3
-# Flask
-# Flask-Admin==1.5.4
-# Flask-AppBuilder
-# Flask-Babel==1.0.0
-# Flask-Caching==1.3.3
-# Flask-JWT-Extended==3.24.1
-# Flask-Login==0.4.1
-# Flask-OpenID==1.2.5
-# Flask-SQLAlchemy==2.4.3
-# flask-swagger==0.2.13
-# Flask-WTF==0.14.3
+Flask==1.1.2
+Flask-Admin==1.5.4
+Flask-AppBuilder==3.3.0
+Flask-Babel==1.0.0
+Flask-Caching==1.3.3
+Flask-JWT-Extended==3.24.1
+Flask-Login==0.4.1
+Flask-OpenID==1.2.5
+Flask-SQLAlchemy==2.4.3
+flask-swagger==0.2.13
+Flask-WTF==0.14.3
 future==0.18.2
 google-api-core==1.22.0
 google-auth==1.20.1
@@ -80,33 +80,33 @@ SQLAlchemy-JSONField==0.9.0
 SQLAlchemy-Utils==0.36.7
 ptyprocess==0.6.0
 py4j==0.10.9
-pyasn1
-pyasn1-modules
-pycodestyle
-pycparser
+pyasn1==0.4.8
+pyasn1-modules==0.2.8
+pycodestyle==2.6.0
+pycparser==2.20
 typing
 sounddevice
 pysoundfile
 uuid==1.30
-pydub
-pyflakes
+pydub==0.24.1
+pyflakes==2.2.0
 pylint
-pyrsistent
+pyrsistent==0.16.0
 PyYAML==5.4
-requests
-resampy
-rsa
-six
-srt
-tenacity
-threadpoolctl
-thrift
-typed-ast
+requests==2.24.0
+resampy==0.2.2
+rsa==4.7
+six==1.15.0
+srt==3.0.0
+tenacity==4.12.0
+threadpoolctl==2.1.0
+thrift==0.13.0
+typed-ast==1.4.1
 urllib3
-virtualenv
-wget
-wrapt
-WTForms
-yapf
+virtualenv==20.0.21
+wget==3.2
+wrapt==1.12.1
+WTForms==2.3.1
+yapf==0.30.0
 zipp==3.1.0
 black
