@@ -90,7 +90,7 @@ pysoundfile
 uuid==1.30
 pydub==0.24.1
 pyflakes==2.2.0
-pylint==2.5.2
+pylint
 pyrsistent==0.16.0
 PyYAML==5.4
 requests==2.24.0
