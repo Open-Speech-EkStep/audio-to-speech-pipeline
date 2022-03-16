@@ -47,4 +47,4 @@ grpc-interceptor==0.13.0
 pytest==6.2.3
 pytest-grpc==0.8.0
 wave
-protobuf==3.15.8
+protobuf==3.15.0
