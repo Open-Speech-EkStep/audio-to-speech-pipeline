@@ -12,7 +12,7 @@ WORKDIR /opt/ekstep_data_pipelines/
 
 
 COPY requirements.txt .
-RUN pip install -r requirements.txt --no-cache-dir --no-binary :all:
+RUN pip install -r requirements.txt
 COPY ekstep_data_pipelines /opt/ekstep_data_pipelines/ekstep_data_pipelines
 COPY invocation_script.py /opt/ekstep_data_pipelines
 
