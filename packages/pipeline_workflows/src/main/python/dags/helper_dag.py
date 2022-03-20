@@ -1,15 +1,16 @@
 import collections
 import json
 import os
+from datetime import datetime
 from operator import itemgetter
 
 import pandas as pd
 import yaml
 from airflow.models import Variable
 from gcs_utils import (
-    list_blobs_in_a_path,
-    check_blob, upload_blob, download_blob
+    check_blob
 )
+from gcs_utils import list_blobs_in_a_path, upload_blob, download_blob
 from sqlalchemy import create_engine
 
 
@@ -172,6 +173,45 @@ def fetch_require_audio_ids_for_stt(source, language, stt, data_set, bucket_name
     audio_ids[source] = data_catalog_raw
     print(audio_ids[source])
     Variable.set("audioidsforstt", MyDict(audio_ids))
+
+
+def upload_report_to_bucket(bucket_name, language, source, report_file_name):
+    # get_variables()
+    print("Uploading report to bucket ...")
+    if os.path.exists(report_file_name):
+        upload_blob(
+            bucket_name,
+            report_file_name,
+            os.path.join(f'data/data_snapshots/{language}/{source}/', report_file_name),
+        )
+        os.remove(report_file_name)
+        print(f"Uploaded report {report_file_name} to bucket ...")
+
+
+def fetch_db_data_dump(source, language, db_conn_obj):
+    filter_string = f"audio_id in (select audio_id from media_metadata_staging where source = '{source}' and language = '{language}') and status= 'Clean' and staged_for_transcription = true"
+    data_catalog_raw = pd.read_sql(
+        f"SELECT * FROM media_speaker_mapping where {filter_string}",
+        db_conn_obj
+    )
+    data_catalog_raw = cleanse_catalog(data_catalog_raw)
+    return data_catalog_raw
+
+
+def fetch_upload_db_data_dump(bucket_name, source, language):
+    now = datetime.now()
+    date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
+    report_file_name = f"Data_dump_snapshot_{date_time}_{source}_{language}.xlsx"
+    download_config_file(bucket_name)
+    data_catalog_raw = fetch_db_data_dump(source, language, get_db_connection_object())
+    writer = pd.ExcelWriter(report_file_name, engine="xlsxwriter")
+    data_catalog_raw.astype({"audio_id": "str"}).to_excel(
+        writer, sheet_name="data_dump_snapshot_catalog", index=False
+    )
+    writer.save()
+    print(f"{report_file_name} has been generated....")
+    upload_report_to_bucket(bucket_name, language, source, report_file_name)
+    print(f"Finished data dump....")
 
 
 def cleanse_catalog(data_catalog_raw):

@@ -4,11 +4,11 @@ import math
 
 from airflow import DAG
 from airflow.contrib.kubernetes import secret
-from airflow.operators import TriggerDagRunOperator
 from airflow.contrib.operators import kubernetes_pod_operator
 from airflow.models import Variable
+from airflow.operators import TriggerDagRunOperator
 from airflow.operators.python_operator import PythonOperator
-from helper_dag import fetch_require_audio_ids_for_stt
+from helper_dag import fetch_require_audio_ids_for_stt, fetch_upload_db_data_dump
 
 sourceinfo = json.loads(Variable.get("sourceinfo"))
 # stt_source_path = Variable.get("sttsourcepath")
@@ -69,7 +69,18 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
             dag_number=dag_number,
         )
 
-        fetch_audio_ids
+        fetch_data_snapshot = PythonOperator(
+            task_id=dag_id + "_generate_data_snapshot",
+            python_callable=fetch_upload_db_data_dump,
+            op_kwargs={
+                "source": dag_id,
+                "language": language.title(),
+                "bucket_name": bucket_name
+            },
+            dag_number=dag_number,
+        )
+
+        [fetch_audio_ids, fetch_data_snapshot]
 
         def batch_audio_ids(d, each_pod_batch_size):
             each_pod_batch_size = min(each_pod_batch_size, sum(d.values()))
@@ -151,7 +162,7 @@ def create_dag(dag_id, dag_number, default_args, args, batch_count):
                 resources=resource_limits,
             )
 
-            fetch_audio_ids >> data_prep_task >> trigger_dependent_dag
+            [fetch_audio_ids, fetch_data_snapshot] >> data_prep_task >> trigger_dependent_dag
 
     return dag
 
