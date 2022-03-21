@@ -75,6 +75,9 @@ def get_file_path_from_bucket(
         print("*********The file size is {} bytes *********".format(blob.size))
         file_size = blob.size
         file_name = get_file_name(blob.name, delimiter)
+        print(file_name,"*********filename*********")
+        if file_name is None or len(file_name.strip())==0:
+            raise ValueError('file not found')
 
         file_extension = get_file_extension(file_name)
         expected_file_extension = audio_format
