@@ -194,7 +194,7 @@ def upload_report_to_bucket(bucket_name, language, source, report_file_name):
 def fetch_db_data_dump(source, language, db_conn_obj):
     filter_string = f"audio_id in (select audio_id from media_metadata_staging where source = '{source}' and language = '{language}') and status= 'Clean' and staged_for_transcription = true"
     data_catalog_raw = pd.read_sql(
-        f"SELECT 'speaker_id', 'clipped_utterance_duration', 'snr', 'speaker_gender' FROM media_speaker_mapping where {filter_string}",
+        f"SELECT speaker_id, clipped_utterance_duration, snr, speaker_gender FROM media_speaker_mapping where {filter_string}",
         db_conn_obj
     )
     data_catalog_raw = cleanse_catalog(data_catalog_raw)
