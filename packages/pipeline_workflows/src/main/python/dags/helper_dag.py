@@ -76,8 +76,7 @@ def get_file_path_from_bucket(
         file_size = blob.size
         file_name = get_file_name(blob.name, delimiter)
         print(file_name,"*********filename*********")
-        if file_name is None or len(file_name.strip())==0:
-            raise ValueError('file not found')
+
 
         file_extension = get_file_extension(file_name)
         expected_file_extension = audio_format
@@ -95,9 +94,13 @@ def get_file_path_from_bucket(
             ):
                 file_name_dict[file_name] = file_size
 
+
     file_path_dict[source] = get_sorted_file_list_after_batch(
         file_name_dict, batch_count
     )
+    if file_path_dict[source] is None or len(file_path_dict[source])==0:
+        raise ValueError('file not found')
+        
     file_path_dict = MyDict(file_path_dict)
     Variable.set("audiofilelist", file_path_dict)
 
@@ -174,6 +177,12 @@ def fetch_require_audio_ids_for_stt(source, language, stt, data_set, bucket_name
                                           get_db_connection_object())
     # audio_ids[source] = list(data_catalog_raw.audio_id)
     audio_ids[source] = data_catalog_raw
+
+    print('fjhadklhfjka',audio_ids[source] , data_catalog_raw,audio_ids)
+
+    if data_catalog_raw is None or len(data_catalog_raw)==0:
+        raise ValueError('audio id not found')
+
     print(audio_ids[source])
     Variable.set("audioidsforstt", MyDict(audio_ids))
 
@@ -197,7 +206,7 @@ def fetch_db_data_dump(source, language, db_conn_obj):
         f"SELECT speaker_id, clipped_utterance_duration, snr, speaker_gender FROM media_speaker_mapping where {filter_string}",
         db_conn_obj
     )
-    data_catalog_raw = cleanse_catalog(data_catalog_raw)
+    # data_catalog_raw = cleanse_catalog(data_catalog_raw)
     return data_catalog_raw
 
 
@@ -208,7 +217,7 @@ def fetch_upload_db_data_dump(bucket_name, source, language):
     download_config_file(bucket_name)
     data_catalog_raw = fetch_db_data_dump(source, language, get_db_connection_object())
     writer = pd.ExcelWriter(report_file_name, engine="xlsxwriter")
-    data_catalog_raw.astype({"audio_id": "str"}).to_excel(
+    data_catalog_raw.to_excel(
         writer, sheet_name="data_dump_snapshot_catalog", index=False
     )
     writer.save()
