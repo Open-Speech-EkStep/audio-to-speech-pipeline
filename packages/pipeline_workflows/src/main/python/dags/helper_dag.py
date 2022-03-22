@@ -212,8 +212,8 @@ def fetch_db_data_dump(source, language, db_conn_obj):
 
 def fetch_upload_db_data_dump(bucket_name, source, language):
     now = datetime.now()
-    date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
-    report_file_name = f"Data_dump_snapshot_{date_time}_{source}_{language}.xlsx"
+    # date_time = now.strftime("%m_%d_%Y_%H_%M_%S")
+    report_file_name = f"Data_dump_snapshot.xlsx"
     download_config_file(bucket_name)
     data_catalog_raw = fetch_db_data_dump(source, language, get_db_connection_object())
     writer = pd.ExcelWriter(report_file_name, engine="xlsxwriter")
