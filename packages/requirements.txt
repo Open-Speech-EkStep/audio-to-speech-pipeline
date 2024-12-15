@@ -14,7 +14,7 @@ resemblyzer~=0.1.1.dev0
 Cython==0.29.21
 hdbscan==0.8.26
 azure-cognitiveservices-speech==1.13.0
-Babel==2.8.0
+Babel==2.9.1
 cached-property==1.5.1
 cachetools==4.1.1
 attrs==19.3.0
